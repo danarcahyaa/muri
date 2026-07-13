@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -9,7 +10,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "MURI - Waste Management & Sustainability Platform",
+  title: "MURIs",
   description: "MURI combines enterprise waste tracking with sustainable solutions. Circular economy platform powered by AI.",
 };
 
@@ -29,13 +30,18 @@ export default function RootLayout({
         <link
           href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
           rel="stylesheet"
+          precedence="default"
         />
         <link
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/@fontsource-variable/mona-sans/index.css"
+          precedence="default"
         />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <Toaster position="top-right" />
+      </body>
     </html>
   );
 }
