@@ -63,7 +63,7 @@ export async function signUpWithEmail(input: RegisterInput): Promise<AuthRespons
       console.error("Error inserting user profile:", dbError);
       return {
         success: false,
-        error: `Pendaftaran berhasil di sistem autentikasi, tetapi gagal menyimpan profil ke database: ${translateSupabaseError(dbError)}`,
+        error: `${translateSupabaseError(dbError)}`,
       };
     }
 

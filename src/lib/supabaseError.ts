@@ -22,7 +22,7 @@ export function translateSupabaseError(error: any): string {
   if (code && typeof code === "string" && !isNaN(Number(code))) {
     switch (code) {
       case "23505": // unique_violation
-        return "Data sudah terdaftar di dalam sistem (duplikasi data).";
+        return "Data sudah terdaftar di dalam sistem.";
       case "23503": // foreign_key_violation
         return "Data referensi tidak ditemukan atau tidak valid.";
       case "23502": // not_null_violation
