@@ -97,7 +97,7 @@ function FooterBrand() {
           className="size-10 object-contain"
         />
 
-        <span className="font-display text-2xl font-medium tracking-tight text-white">
+        <span className="font-display text-2xl font-normal tracking-tight text-white">
           Muri
         </span>
       </Link>
