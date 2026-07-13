@@ -10,7 +10,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "MURI - Waste Management & Sustainability Platform",
+  title: "MURIs",
   description: "MURI combines enterprise waste tracking with sustainable solutions. Circular economy platform powered by AI.",
 };
 
@@ -40,7 +40,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         {children}
-        <Toaster />
+        <Toaster position="top-right" />
       </body>
     </html>
   );

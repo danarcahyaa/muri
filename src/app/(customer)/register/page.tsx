@@ -10,9 +10,10 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { signUpWithEmail, signInWithGoogle } from "@/services/customer/auth/authService"
-import Router from "next/router"
+import { useRouter } from "next/navigation"
 
 export default function RegisterPage() {
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
@@ -32,7 +33,7 @@ export default function RegisterPage() {
         toast.success(response.message || "Pendaftaran berhasil!")
         
         setTimeout(() => {
-          Router.replace('/login')
+          router.replace('/login')
         }, 500);
       }
     } catch (err: any) {

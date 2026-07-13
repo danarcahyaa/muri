@@ -69,7 +69,7 @@ export async function signUpWithEmail(input: RegisterInput): Promise<AuthRespons
 
     return {
       success: true,
-      message: "Pendaftaran berhasil! Silakan periksa email Anda untuk konfirmasi atau langsung masuk.",
+      message: "Pendaftaran akun berhasil.",
       data: {
         user: {
           id: authUser.id,
