@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
+import { Spinner } from "@/components/ui/spinner"
 import { syncGoogleUser } from "@/services/common/userService"
 import { translateSupabaseError } from "@/lib/supabaseError"
-import { Button } from "@/components/ui/Button"
 
 export default function AuthCallbackPage() {
   const router = useRouter()
@@ -97,7 +97,7 @@ export default function AuthCallbackPage() {
             </div>
           ) : (
             <div className="relative flex items-center justify-center">
-              <div className="animate-spin rounded-full size-16 border-4 border-brand-emerald/10 border-t-brand-emerald"></div>
+              <Spinner className="size-16 text-brand-emerald" />
             </div>
           )}
         </div>

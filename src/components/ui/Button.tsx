@@ -1,6 +1,6 @@
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
-import { Loader2 } from "lucide-react"
+import { Spinner } from "@/components/ui/spinner"
 
 import { cn } from "@/lib/utils"
 
@@ -70,7 +70,7 @@ function Button({
     >
       {loading ? (
         <>
-          <Loader2 className="animate-spin size-4" />
+          <Spinner />
           {size !== "icon" && children}
         </>
       ) : (

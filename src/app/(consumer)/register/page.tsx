@@ -4,11 +4,13 @@ import * as React from "react"
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Leaf, AlertCircle, CheckCircle2 } from "lucide-react"
+import { Leaf, AlertCircle } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { signUpWithEmail, signInWithGoogle } from "@/services/customer/auth/authService"
+import Router from "next/router"
 
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false)
@@ -16,24 +18,22 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
-    setSuccessMessage(null)
 
     try {
       const response = await signUpWithEmail({ name, email, password })
       if (!response.success) {
         setError(response.error || "Gagal melakukan pendaftaran.")
       } else {
-        setSuccessMessage(response.message || "Pendaftaran berhasil!")
-        // Reset form
-        setName("")
-        setEmail("")
-        setPassword("")
+        toast.success(response.message || "Pendaftaran berhasil!")
+        
+        setTimeout(() => {
+          Router.replace('/login')
+        }, 500);
       }
     } catch (err: any) {
       setError(err.message || "Terjadi kesalahan yang tidak terduga.")
@@ -45,7 +45,6 @@ export default function RegisterPage() {
   const handleGoogleRegister = async () => {
     setIsLoading(true)
     setError(null)
-    setSuccessMessage(null)
     try {
       await signInWithGoogle("register")
     } catch (err: any) {
@@ -81,13 +80,7 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {/* Alert Success */}
-          {successMessage && (
-            <div className="mb-6 p-4 rounded-lg bg-brand-lime/10 border border-brand-lime/20 text-brand-emerald flex items-start gap-2.5 text-sm font-body">
-              <CheckCircle2 className="size-5 shrink-0 mt-0.5" />
-              <span>{successMessage}</span>
-            </div>
-          )}
+
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
