@@ -6,17 +6,17 @@ import Image from "next/image"
 import Link from "next/link"
 import { Leaf, AlertCircle } from "lucide-react"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { signUpWithEmail, signInWithGoogle } from "@/services/customer/auth/authService"
-import { useRouter } from "next/navigation"
+import { signInWithEmail, signInWithGoogle } from "@/services/customer/auth/authService"
+import { translateSupabaseError } from "@/lib/supabaseError"
 
-export default function RegisterPage() {
+export default function LoginPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
@@ -27,52 +27,53 @@ export default function RegisterPage() {
     setError(null)
 
     try {
-      const response = await signUpWithEmail({ name, email, password })
+      const response = await signInWithEmail({ email, password })
       if (!response.success) {
-        setError(response.error || "Gagal melakukan pendaftaran.")
+        setError(response.error || "Gagal masuk ke akun.")
       } else {
-        toast.success(response.message || "Pendaftaran berhasil!")
+        toast.success(response.message || "Berhasil masuk!")
         
         setTimeout(() => {
-          router.replace('/login')
-        }, 500);
+          router.replace('/')
+        }, 500)
       }
     } catch (err: any) {
-      setError(err.message || "Terjadi kesalahan yang tidak terduga.")
+      setError(translateSupabaseError(err))
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleGoogleRegister = async () => {
+  const handleGoogleLogin = async () => {
     setIsLoading(true)
     setError(null)
     try {
-      await signInWithGoogle("register")
+      await signInWithGoogle("login")
     } catch (err: any) {
-      setError(err.message || "Gagal memulai pendaftaran dengan Google.")
+      setError(translateSupabaseError(err))
       setIsLoading(false)
     }
   }
 
   return (
     <div className="min-h-screen grid grid-cols-1 md:grid-cols-2 bg-canvas-warm">
-      {/* Left Column - Form & Auth */}
+      {/* Left Column Form & Auth */}
       <div className="flex flex-col justify-between p-8 md:p-12 lg:p-16 min-h-screen bg-canvas-pure">
         {/* Form Container */}
         <div className="w-full max-w-sm mx-auto my-auto py-8">
           {/* Header with Logo */}
-          <div className="flex justify-start items-center mb-6">
+          <div className="flex justify-start items-center mb-8">
             <Image src="/logo.svg" alt="MURI Logo" width={32} height={32} className="h-8 w-auto" />
           </div>
 
-          {/* Heading */}
-          <h1 className="text-3xl font-extrabold tracking-[-0.03em] text-brand-black mb-2 font-display">
-            Buat Akun Muri Anda
-          </h1>
-          <p className="text-sm text-muted-moss mb-8 font-body">
-            Bergabunglah dengan gerakan sirkular tekstil untuk masa depan bumi yang lebih hijau.
-          </p>
+          <div className="mb-6">
+            <h1 className="text-3xl font-extrabold tracking-tight text-brand-black mb-1 font-display leading-tight">
+              Masuk ke Akun Muri Anda
+            </h1>
+            <span className="text-sm text-muted-moss font-body">
+              Mulai coba ekosistem sirkulasi Muri
+            </span>
+          </div>
 
           {/* Alert Error */}
           {error && (
@@ -82,23 +83,10 @@ export default function RegisterPage() {
             </Alert>
           )}
 
-
-
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-brand-black/80 font-body">Nama Lengkap</label>
-              <Input 
-                type="text" 
-                placeholder="Masukkan nama lengkap Anda..." 
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required 
-                disabled={isLoading}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-brand-black/80 font-body">Alamat Email</label>
+              <label className="text-xs font-semibold text-brand-black/80 font-body">Email</label>
               <Input 
                 type="email" 
                 placeholder="Masukkan email Anda..." 
@@ -109,10 +97,10 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-brand-black/80 font-body">Kata Sandi</label>
+              <label className="text-xs font-semibold text-brand-black/80 font-body">Password</label>
               <Input 
                 type="password" 
-                placeholder="Kata sandi minimal 8 karakter..." 
+                placeholder="Masukkan kata sandi Anda..." 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required 
@@ -120,8 +108,13 @@ export default function RegisterPage() {
               />
             </div>
 
-            <Button variant="solid-black" className="w-full mt-2" type="submit" loading={isLoading}>
-              Daftar
+            <Button 
+              variant="solid-black" 
+              type="submit" 
+              className={"w-full"}
+              loading={isLoading}
+            >
+              Masuk
             </Button>
           </form>
 
@@ -135,15 +128,15 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Google Register */}
+          {/* Google Login */}
           <Button 
-            variant="outline" 
-            className="w-full text-brand-black border-line-trace hover:bg-canvas-warm/50" 
+            variant="outline"  
             type="button"
-            onClick={handleGoogleRegister}
+            className={"w-full"}
+            onClick={handleGoogleLogin}
             disabled={isLoading}
           >
-            <svg className="size-4 mr-2 inline" viewBox="0 0 24 24">
+            <svg className="size-4 mr-2 inline animate-none" viewBox="0 0 24 24">
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                 fill="#4285F4"
@@ -164,38 +157,41 @@ export default function RegisterPage() {
             <span>Lanjut dengan Google</span>
           </Button>
 
-          {/* Secondary Link */}
+          {/* Register Link */}
           <p className="text-center text-sm text-muted-moss mt-6 font-body">
-            Sudah punya akun?{" "}
-            <Link href="/login" className="font-semibold text-brand-emerald hover:text-brand-forest hover:underline transition-colors">
-              Masuk
+            Belum punya akun?{" "}
+            <Link href="/register" className="font-semibold text-brand-emerald hover:text-brand-forest hover:underline transition-colors">
+              Daftar
             </Link>
           </p>
         </div>
       </div>
 
-      {/* Right Column Image & Manifesto */}
+      {/* Right Col Visual & Copywriting */}
       <div className="relative hidden md:block overflow-hidden min-h-screen bg-brand-forest">
         <Image 
-          src="/leaf-hand-bg.png" 
-          alt="Manifesto Background" 
+          src="/tree-bg.png" 
+          alt="Tree Background" 
           fill 
           priority
           className="object-cover" 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-brand-forest/90 via-brand-forest/40 to-brand-forest/60 flex flex-col justify-center p-12 lg:p-16 text-canvas-pure">
-          <div>{/* Spacing */}</div>
           <div className="max-w-md">
             {/* Welcome Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-lime/10 border border-brand-lime/20 text-brand-lime text-xs font-semibold mb-6 font-body">
-            <Leaf className="size-3.5 fill-current text-brand-lime" />
-            <span className="text-brand-lime">Mari Memulai Langkah Baru</span>
-          </div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-lime/10 border border-brand-lime/20 text-brand-lime text-xs font-semibold mb-6 font-body">
+              <Leaf className="size-3.5 fill-current text-brand-lime" />
+              <span className="text-brand-lime tracking-wider">Kembali ke alam</span>
+            </div>
+            
+            {/* Headline Utama */}
             <h2 className="text-3xl lg:text-5xl font-bold font-display tracking-tight leading-tight mb-4 text-canvas-pure">
-              Saatnya Mengubah Cara Kita Berpakaian.
+              Setiap Langkah Kecilmu, Menyelamatkan Bumi Kita.
             </h2>
+            
+            {/* Sub-headline body */}
             <p className="text-sm lg:text-base text-canvas-pure/90 font-body leading-relaxed">
-              Melalui MURI, Anda bukan sekadar pembeli, melainkan bagian dari gerakan sirkular.
+              Masuk kembali ke ekosistem Muri dan lanjutkan kontribusimu dalam menekan emisi karbon, menghemat air bersih, serta memberi napas baru bagi material yang terbuang.
             </p>
           </div>
         </div>

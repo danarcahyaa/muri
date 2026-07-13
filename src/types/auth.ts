@@ -7,7 +7,7 @@ export interface UserProfile {
   created_at?: string;
 }
 
-export interface RegisterInput {
+export interface AuthInput {
   email: string;
   password?: string;
   name?: string;

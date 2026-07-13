@@ -28,4 +28,5 @@ Untuk mengubah style UI dari MURI, selalu ikuti style guide yang ada pada file `
 ## 4. Panduan Gaya Penulisan
 * Selalu gunakan bahasa Inggris dalam penulisan kode (termasuk komentar), terkecuali pada string yang langsung berhubungan dengan pengguna akhir (misal: error message yang akan ditampilkan ke pengguna).
 * Selalu menggunakan komentar untuk menjelaskan suatu kode yang kompleks. Komentar diharuskan menggunakan bahasa Inggris dan bersifat padat agar mudah dibaca.
-*Selalu menggunakan type assertion yang eksplisit saat melakukan konversi type, contohnya: `as string`, `as number`, `as boolean`, `as string[]`, `as Record<string, any>`, dll. Hindari penggunaan type assertion yang implisit.
+* Selalu menggunakan type assertion yang eksplisit saat melakukan konversi type, contohnya: `as string`, `as number`, `as boolean`, `as string[]`, `as Record<string, any>`, dll. Hindari penggunaan type assertion yang implisit.
+* Selalu gunakan fungsi `translateSupabaseError` dari `@/lib/supabaseError` untuk menerjemahkan error dari Supabase. Hindari penggunaan `err.message` secara langsung.

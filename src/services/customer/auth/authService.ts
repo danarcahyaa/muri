@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabaseClient";
-import { RegisterInput, AuthResponse } from "@/types/auth";
+import { AuthInput, AuthResponse } from "@/types/auth";
 import { translateSupabaseError } from "@/lib/supabaseError";
 
 /**
@@ -9,7 +9,7 @@ import { translateSupabaseError } from "@/lib/supabaseError";
  * @param input Registration input data (email, password, name)
  * @returns AuthResponse containing the status of the registration
  */
-export async function signUpWithEmail(input: RegisterInput): Promise<AuthResponse> {
+export async function signUpWithEmail(input: AuthInput): Promise<AuthResponse> {
   const { email, password, name } = input;
 
   if (!email || !password || !name) {
@@ -29,7 +29,7 @@ export async function signUpWithEmail(input: RegisterInput): Promise<AuthRespons
   try {
     // Sign up using Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: email.trim().toLowerCase(),
+      email: email.trim(),
       password: password,
       options: {
         data: {
@@ -80,6 +80,77 @@ export async function signUpWithEmail(input: RegisterInput): Promise<AuthRespons
     };
   } catch (err: any) {
     console.error("Error during signUpWithEmail:", err);
+    return {
+      success: false,
+      error: translateSupabaseError(err),
+    };
+  }
+}
+
+/**
+ * Signs in a user with email and password.
+ * 
+ * @param input Login input data (email, password)
+ * @returns AuthResponse containing the status of the sign in
+ */
+export async function signInWithEmail(input: Omit<AuthInput, "name">): Promise<AuthResponse> {
+  const { email, password } = input;
+
+  if (!email || !password) {
+    return {
+      success: false,
+      error: "Email dan kata sandi wajib diisi.",
+    };
+  }
+
+  try {
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password: password,
+    });
+
+    if (authError) {
+      return {
+        success: false,
+        error: translateSupabaseError(authError),
+      };
+    }
+
+    const authUser = authData.user;
+    if (!authUser) {
+      return {
+        success: false,
+        error: "Gagal memuat informasi pengguna setelah masuk.",
+      };
+    }
+
+    // Get name from user_metadata or public `users` table
+    let name = authUser.user_metadata?.name || "";
+    
+    if (!name) {
+      const { data: profile } = await supabase
+        .from("users")
+        .select("full_name")
+        .eq("id", authUser.id)
+        .single();
+      if (profile && profile.full_name) {
+        name = profile.full_name;
+      }
+    }
+
+    return {
+      success: true,
+      message: "Berhasil masuk ke akun Anda.",
+      data: {
+        user: {
+          id: authUser.id,
+          email: authUser.email as string,
+          name: name || "Pengguna",
+        },
+      },
+    };
+  } catch (err: any) {
+    console.error("Error during signInWithEmail:", err);
     return {
       success: false,
       error: translateSupabaseError(err),

@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabaseClient"
 import { Spinner } from "@/components/ui/spinner"
 import { syncGoogleUser } from "@/services/common/userService"
 import { translateSupabaseError } from "@/lib/supabaseError"
+import Image from "next/image"
 
 export default function AuthCallbackPage() {
   const router = useRouter()
@@ -85,7 +86,10 @@ export default function AuthCallbackPage() {
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-canvas-warm p-6 selection:bg-brand-lime/30">
       <div className="w-full max-w-md p-8 rounded-lg bg-canvas-pure border border-line-trace text-center">
-        
+        {/* Logo */}
+        <div className="flex justify-center mb-4">
+          <Image src="/logo.svg" alt="MURI Logo" width={52} height={52} className="h-13 w-auto" />
+        </div>
 
         {/* Loading Spinner or Error Icon */}
         <div className="my-8 flex justify-center">
@@ -97,7 +101,7 @@ export default function AuthCallbackPage() {
             </div>
           ) : (
             <div className="relative flex items-center justify-center">
-              <Spinner className="size-16 text-brand-emerald" />
+              <Spinner className="size-13 text-brand-emerald" />
             </div>
           )}
         </div>
