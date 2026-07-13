@@ -1,7 +1,6 @@
 import { supabase } from "@/lib/supabaseClient";
 import { RegisterInput, AuthResponse } from "@/types/auth";
 import { translateSupabaseError } from "@/lib/supabaseError";
-import { BaseResponse } from "@/types/common";
 
 /**
  * Registers a new user with email, password, and name.
@@ -70,7 +69,7 @@ export async function signUpWithEmail(input: RegisterInput): Promise<AuthRespons
 
     return {
       success: true,
-      message: "Pendaftaran berhasil! Silakan periksa email Anda untuk konfirmasi (jika diaktifkan) atau langsung masuk.",
+      message: "Pendaftaran berhasil! Silakan periksa email Anda untuk konfirmasi atau langsung masuk.",
       data: {
         user: {
           id: authUser.id,
