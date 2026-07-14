@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
-import { registerBrand } from "@/services/brand-fashion/authService";
+import { registerBrand } from "@/services/brand-fashion/auth/authService";
 import { BrandLink } from "@/types/brandLink";
 
 function BrandRegisterForm() {
