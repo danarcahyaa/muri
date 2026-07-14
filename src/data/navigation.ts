@@ -1,7 +1,23 @@
-export const navigationItems = [
-  { label: "AI Material", href: "#ai-material" },
-  { label: "Traceability", href: "#traceability" },
-  { label: "Ekosistem", href: "#ekosistem" },
-  { label: "Edukasi", href: "/edukasi" },
-  { label: "Dampak", href: "#dampak" },
+export interface NavigationItem {
+  label: string;
+  href: string;
+}
+
+export const navigationItems: NavigationItem[] = [
+  {
+    label: "Ekosistem",
+    href: "/#ekosistem",
+  },
+  {
+    label: "Material",
+    href: "/material",
+  },
+  {
+    label: "Produk",
+    href: "/produk",
+  },
+  {
+    label: "Edukasi",
+    href: "/edukasi",
+  },
 ];
