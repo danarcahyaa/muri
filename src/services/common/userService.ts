@@ -1,8 +1,6 @@
 import { supabase } from "@/lib/supabaseClient";
-import { Database } from "@/types/database";
+import { UserRow } from "@/types/user";
 import { User } from "@supabase/supabase-js";
-
-type UserRow = Database["public"]["Tables"]["users"]["Row"];
 
 /**
  * Retrieves a user profile by user ID.

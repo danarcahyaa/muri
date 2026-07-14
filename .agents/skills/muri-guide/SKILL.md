@@ -17,6 +17,7 @@ Untuk mengubah style UI dari MURI, selalu ikuti style guide yang ada pada file `
 - Letakkan di `src/components/` jika merupakan komponen fungsional gabungan.
 - Gunakan type safe props dan import `cn` dari `@/lib/utils` untuk merge Tailwind class.
 - Pada saat pembuatan halaman, dan jika terdapat element yang seharusnya reusable maka buatlah komponen tersendiri dan letakkan di `src/components`.
+- Jika menggunakan komponen dari `src/components/ui/` (misalnya `Button`, `Input`, dll.), hindari mengubah gaya dasarnya secara langsung melalui properti `className` pada pemanggilannya. Gunakan varian (`variant`) atau properti bawaan komponen untuk mempertahankan konsistensi gaya visual.
 
 ## 2. Integrasi Supabase
 

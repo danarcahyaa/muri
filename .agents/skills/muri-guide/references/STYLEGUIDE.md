@@ -12,7 +12,7 @@ Sistem visual ini dibagi menjadi dua zona kontras yang dramatis:
 - Headline display monumental berbobot *Bold/Extra Bold* menggunakan font Plus Jakarta Sans dengan *line-height* rapat dan *negative tracking* agar tetap ringkas dan kokoh.
 - Kontras ekstrem antara heroband gelap pekat dan area konten bawah yang terang beralaskan warna bumi hangat.
 - Sudut lengkungan (*border-radius*) komponen kartu yang bervariasi tegas antara 8px (untuk kartu alur mikro) hingga 16px (untuk kartu grid ekosistem).
-- Tombol aksi utama berbentuk kapsul penuh (*pill-shaped*) berwarna hijau limau neon yang mencolok, dipadukan dengan tombol sekunder berbingkai transparan (*outline pill*).
+- Tombol aksi utama berbentuk persegi dengan sudut melengkung halus (*rounded-sm*) berwarna hijau limau neon yang mencolok, dipadukan dengan tombol sekunder berbingkai transparan.
 - Komponen visualisasi rantai pasok interaktif menggunakan diagram jalur linier minimalis di atas pola matriks titik-titik (*dot grid matrix*).
 
 ## Colors
@@ -61,7 +61,7 @@ MURI melarang penggunaan gradien warna cerah buatan sebagai pengisi UI standar. 
 | Sub-Header | Plus Jakarta Sans | 14px | 600 | 1.20 | 0.05em | Teks kapital kecil di atas judul (e.g., SOLUSI SIRKULAR BERBASIS AI). |
 | Card Title | Plus Jakarta Sans | 28px - 32px | 600 | 1.20 | -0.01em | Judul utama di dalam komponen kartu ekosistem. |
 | Body Default | Mona Sans | 16px | 400 | 1.50 | 0 | Default teks deskripsi, teks paragraf, dan salinan info. |
-| Button Label | Mona Sans | 14px | 600 | 1.00 | 0 | Teks label di dalam tombol kapsul. |
+| Button Label | Mona Sans | 14px | 600 | 1.00 | 0 | Teks label di dalam tombol. |
 
 ### Principles for Plus Jakarta Sans Headings:
 - Karena karakter huruf Plus Jakarta Sans cenderung melebar (*wide*) secara natural, pastikan untuk **selalu mengunci nilai *letter-spacing* ke `tracking-tight` (`-0.03em` hingga `-0.04em`)** pada teks berskala besar agar barisan kata tidak terlihat terlalu renggang.
@@ -72,11 +72,11 @@ MURI melarang penggunaan gradien warna cerah buatan sebagai pengisi UI standar. 
 ### **`navigation-bar`**
 Batang navigasi atas yang melayang transparan di atas seksi hero atau berlatar `#FBFAF6` di seksi terang. Layout terbagi tiga: Logo MURI di kiri, menu teks minimalis di tengah menggunakan font Mona Sans (`text-[#FBFAF6]` / `text-[#081D17]`), serta tombol aksi "Masuk" (Outline) dan "Mulai Bergabung" (Filled) di ujung kanan.
 
-### **`button-lime-pill`**
-Tombol aksi utama berbentuk kapsul penuh (`rounded-full`) dengan warna latar `#C8F169` dan teks pekat `#081D17`. Dilengkapi dengan teks tebal (*font-semibold* dari Mona Sans) dan ikon panah kecil (`→`) di sisi kanan label teks.
+### **`button-solid-lime`**
+Tombol aksi utama dengan sudut melengkung halus (`rounded-sm`) dengan warna latar `#C8F169` dan teks pekat `#081D17`. Dilengkapi dengan teks tebal (*font-semibold* dari Mona Sans) dan ikon panah kecil (`→`) di sisi kanan label teks.
 
-### **`button-outline-pill`**
-Tombol sekunder dengan latar belakang transparan, dikelilingi oleh garis pembatas tipis 1px (`border-[#FBFAF6]` pada mode gelap atau `border-[#081D17]` pada mode terang). Memiliki teks putih hangat atau pekat dengan ikon panah kecil di kanan.
+### **`button-outline-black` / `button-outline-white`**
+Tombol sekunder dengan sudut melengkung halus (`rounded-sm`) dan latar belakang transparan, dikelilingi oleh garis pembatas tipis 1px (`border-[#FBFAF6]` pada mode gelap atau `border-[#081D17]` pada mode terang). Memiliki teks putih hangat atau pekat dengan ikon panah kecil di kanan.
 
 ### **Supply Chain Network Widget (`supply-chain-network-widget`)**
 Komponen visualisasi diagram di sisi kanan seksi hero. Menggunakan latar belakang pola titik-titik (*dot grid matrix*) abu-abu transparan. Menghubungkan tiga kartu mikro (`01 Produsen Limbah`, `02 Aggregator MURI`, `03 Brand Fashion`) menggunakan garis diagonal tipis berwarna hijau limau neon `#C8F169` yang merepresentasikan alur material terintegrasi.
