@@ -121,43 +121,40 @@ export type Database = {
       }
       brands: {
         Row: {
+          active_number: string
           address: string | null
           brand_name: string
           created_at: string | null
-          email: string
           id: string
-          password: string
           short_story: string | null
           social_media_links: Json | null
           updated_at: string | null
           warehouse_address: string | null
-          whatsapp_number: string
+          warehouse_maps_url: string | null
         }
         Insert: {
+          active_number: string
           address?: string | null
           brand_name: string
           created_at?: string | null
-          email: string
           id: string
-          password: string
           short_story?: string | null
           social_media_links?: Json | null
           updated_at?: string | null
           warehouse_address?: string | null
-          whatsapp_number: string
+          warehouse_maps_url?: string | null
         }
         Update: {
+          active_number?: string
           address?: string | null
           brand_name?: string
           created_at?: string | null
-          email?: string
           id?: string
-          password?: string
           short_story?: string | null
           social_media_links?: Json | null
           updated_at?: string | null
           warehouse_address?: string | null
-          whatsapp_number?: string
+          warehouse_maps_url?: string | null
         }
         Relationships: []
       }
@@ -752,31 +749,34 @@ export type Database = {
       }
       waste_providers: {
         Row: {
+          active_number: string
+          address: string | null
           company_name: string
           created_at: string | null
           id: string
-          maps_url: string | null
-          pickup_address: string
+          pickup_address: string | null
+          pickup_maps_url: string | null
           updated_at: string | null
-          whatsapp_number: string
         }
         Insert: {
+          active_number: string
+          address?: string | null
           company_name: string
           created_at?: string | null
           id: string
-          maps_url?: string | null
-          pickup_address: string
+          pickup_address?: string | null
+          pickup_maps_url?: string | null
           updated_at?: string | null
-          whatsapp_number: string
         }
         Update: {
+          active_number?: string
+          address?: string | null
           company_name?: string
           created_at?: string | null
           id?: string
-          maps_url?: string | null
-          pickup_address?: string
+          pickup_address?: string | null
+          pickup_maps_url?: string | null
           updated_at?: string | null
-          whatsapp_number?: string
         }
         Relationships: []
       }

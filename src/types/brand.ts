@@ -5,6 +5,7 @@ export interface BrandRegisterInput {
   brandName: string;
   email: string;
   password?: string;
+  activeNumber: string;
   socialMediaLinks: BrandLink[];
   shortStory?: string;
 }

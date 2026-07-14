@@ -9,18 +9,19 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { loginBrand } from "@/services/brand-fashion/auth/authService";
-import { translateSupabaseError } from "@/lib/supabaseError";
+import { registerWasteProvider } from "@/services/waste-providers/authService";
 import { BackLink } from "@/components/ui/BackLink";
 import { AuthFooterLink } from "@/components/ui/AuthFooterLink";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-export default function BrandLoginPage() {
+export default function WasteProviderRegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const fromPath = searchParams.get("from") || "/";
 
+  const [companyName, setCompanyName] = useState("");
   const [email, setEmail] = useState("");
+  const [activeNumber, setActiveNumber] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,21 +32,25 @@ export default function BrandLoginPage() {
     }
   }, [error]);
 
-  const getLoginDestination = (): string => {
-    const nextPath = searchParams.get("next");
-    if (nextPath && nextPath.startsWith("/") && !nextPath.startsWith("//")) {
-      return nextPath;
-    }
-    return "/dashboard";
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
 
+    if (!companyName.trim()) {
+      setError("Nama pabrik/garmen wajib diisi.");
+      setIsLoading(false);
+      return;
+    }
+
     if (!email.trim()) {
       setError("Email bisnis wajib diisi.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!activeNumber.trim()) {
+      setError("Nomor aktif wajib diisi.");
       setIsLoading(false);
       return;
     }
@@ -56,21 +61,35 @@ export default function BrandLoginPage() {
       return;
     }
 
+    if (password.length < 8) {
+      setError("Kata sandi harus minimal 8 karakter.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const response = await loginBrand({
+      const response = await registerWasteProvider({
+        companyName: companyName.trim(),
         email: email.trim(),
+        activeNumber: activeNumber.trim(),
         password,
       });
 
       if (!response.success) {
-        setError(response.error || "Gagal masuk ke akun brand.");
+        setError(response.error || "Gagal melakukan pendaftaran.");
         return;
       }
 
-      toast.success(response.message || "Berhasil masuk!");
-      router.replace(getLoginDestination());
-    } catch (err: unknown) {
-      setError(translateSupabaseError(err));
+      toast.success(response.message || "Pendaftaran pabrik berhasil!");
+
+      setCompanyName("");
+      setEmail("");
+      setActiveNumber("");
+      setPassword("");
+
+      router.push("/waste-providers/login");
+    } catch {
+      setError("Terjadi kesalahan. Silakan coba kembali beberapa saat lagi.");
     } finally {
       setIsLoading(false);
     }
@@ -100,19 +119,16 @@ export default function BrandLoginPage() {
               className="mb-4 size-12 object-contain"
             />
             <h1 className="font-display text-2xl font-bold tracking-tight text-brand-black sm:text-3xl">
-              Masuk ke Akun Brand
+              Daftarkan Pabrik / Garmen
             </h1>
             <p className="mt-2 font-body text-sm text-muted-moss/90 leading-relaxed">
-              Masuk kembali untuk mengelola rantai pasok sirkular, memantau dampak lingkungan, dan mengembangkan bisnis berkelanjutan Anda.
+              Ubah sisa produksi tekstil Anda menjadi bahan baku bernilai bagi industri sirkular MURI.
             </p>
           </div>
 
           {/* Error Alert */}
           {error && (
-            <Alert
-              variant="destructive"
-              className="mb-6"
-            >
+            <Alert variant="destructive" className="mb-6">
               <AlertCircle className="size-4" />
               <AlertDescription className="text-sm leading-relaxed">
                 {error}
@@ -122,18 +138,37 @@ export default function BrandLoginPage() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email */}
+            {/* Nama Pabrik / Garmen */}
             <div className="space-y-2">
               <label
-                htmlFor="brand-email"
+                htmlFor="company-name"
                 className="text-xs font-bold text-brand-black"
               >
-                Email Bisnis/Brand
+                Nama Pabrik / Garmen
               </label>
               <Input
-                id="brand-email"
+                id="company-name"
+                type="text"
+                placeholder="Masukkan nama pabrik atau garmen..."
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </div>
+
+            {/* Email Bisnis */}
+            <div className="space-y-2">
+              <label
+                htmlFor="provider-email"
+                className="text-xs font-bold text-brand-black"
+              >
+                Email Bisnis/Pabrik
+              </label>
+              <Input
+                id="provider-email"
                 type="email"
-                placeholder="Masukkan email brand..."
+                placeholder="Masukkan email bisnis..."
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -141,23 +176,41 @@ export default function BrandLoginPage() {
               />
             </div>
 
+            {/* Nomor Aktif */}
+            <div className="space-y-2">
+              <label
+                htmlFor="active-number"
+                className="text-xs font-bold text-brand-black"
+              >
+                Nomor Aktif
+              </label>
+              <Input
+                id="active-number"
+                type="tel"
+                placeholder="Contoh: 081234567890"
+                value={activeNumber}
+                onChange={(e) => setActiveNumber(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </div>
+
             {/* Password */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="brand-password"
-                  className="text-xs font-bold text-brand-black"
-                >
-                  Kata Sandi
-                </label>
-              </div>
+              <label
+                htmlFor="provider-password"
+                className="text-xs font-bold text-brand-black"
+              >
+                Kata Sandi
+              </label>
               <Input
-                id="brand-password"
+                id="provider-password"
                 type="password"
-                placeholder="Masukkan kata sandi..."
+                placeholder="Minimal 8 karakter"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                minLength={8}
                 disabled={isLoading}
               />
             </div>
@@ -171,16 +224,16 @@ export default function BrandLoginPage() {
                 disabled={isLoading}
                 className="flex w-full items-center justify-center gap-2"
               >
-                <span>Masuk</span>
+                <span>Daftar</span>
               </Button>
             </div>
           </form>
 
           {/* Footer Secondary Link */}
           <AuthFooterLink
-            text="Belum memiliki akun brand?"
-            linkText="Daftar di sini"
-            href="/brand/register"
+            text="Sudah memiliki akun penyedia limbah?"
+            linkText="Masuk di sini"
+            href="/waste-providers/login"
           />
         </div>
       </div>

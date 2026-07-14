@@ -1,11 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { useState, Suspense } from "react";
+import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/Button";
@@ -13,18 +12,29 @@ import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { registerBrand } from "@/services/brand-fashion/auth/authService";
 import { BrandLink } from "@/types/brandLink";
+import { BackLink } from "@/components/ui/BackLink";
+import { AuthFooterLink } from "@/components/ui/AuthFooterLink";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-function BrandRegisterForm() {
+export default function BrandRegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const fromPath = searchParams.get("from") || "/";
 
   const [brandName, setBrandName] = useState("");
   const [email, setEmail] = useState("");
+  const [activeNumber, setActiveNumber] = useState("");
   const [password, setPassword] = useState("");
   const [links, setLinks] = useState<BrandLink[]>([{ label: "", url: "" }]);
   const [description, setDescription] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  React.useEffect(() => {
+    if (error) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [error]);
 
   const handleLinkChange = (
     index: number,
@@ -49,28 +59,35 @@ function BrandRegisterForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
     // Basic Validation
     if (!brandName.trim()) {
-      toast.error("Nama brand wajib diisi.");
+      setError("Nama brand wajib diisi.");
       setIsLoading(false);
       return;
     }
 
     if (!email.trim()) {
-      toast.error("Email bisnis wajib diisi.");
+      setError("Email bisnis wajib diisi.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!activeNumber.trim()) {
+      setError("Nomor aktif wajib diisi.");
       setIsLoading(false);
       return;
     }
 
     if (!password) {
-      toast.error("Kata sandi wajib diisi.");
+      setError("Kata sandi wajib diisi.");
       setIsLoading(false);
       return;
     }
 
     if (password.length < 8) {
-      toast.error("Kata sandi harus minimal 8 karakter.");
+      setError("Kata sandi harus minimal 8 karakter.");
       setIsLoading(false);
       return;
     }
@@ -80,7 +97,7 @@ function BrandRegisterForm() {
       (link) => !link.label.trim() || !link.url.trim()
     );
     if (hasEmptyLink) {
-      toast.error("Harap lengkapi semua label dan URL link pendukung.");
+      setError("Harap lengkapi semua label dan URL link pendukung.");
       setIsLoading(false);
       return;
     }
@@ -89,13 +106,14 @@ function BrandRegisterForm() {
       const response = await registerBrand({
         brandName: brandName.trim(),
         email: email.trim(),
+        activeNumber: activeNumber.trim(),
         password: password,
         socialMediaLinks: links,
         shortStory: description.trim() || undefined,
       });
 
       if (!response.success) {
-        toast.error(response.error || "Gagal melakukan pendaftaran.");
+        setError(response.error || "Gagal melakukan pendaftaran.");
         return;
       }
 
@@ -106,16 +124,15 @@ function BrandRegisterForm() {
       // Reset form fields
       setBrandName("");
       setEmail("");
+      setActiveNumber("");
       setPassword("");
       setLinks([{ label: "", url: "" }]);
       setDescription("");
 
       // Redirect to brand login page
-      setTimeout(() => {
-        router.push("/brand/login");
-      }, 1500);
+      router.push("/brand/login");
     } catch (error) {
-      toast.error("Terjadi kesalahan. Silakan coba kembali beberapa saat lagi.");
+      setError("Terjadi kesalahan. Silakan coba kembali beberapa saat lagi.");
     } finally {
       setIsLoading(false);
     }
@@ -126,15 +143,10 @@ function BrandRegisterForm() {
       <div className="w-full max-w-lg space-y-6">
         {/* Back Link */}
         <div className="flex justify-start">
-          <Link
+          <BackLink
             href={fromPath}
-            className="group inline-flex items-center gap-2 text-xs font-bold text-brand-emerald transition-colors hover:text-brand-forest"
-          >
-            <ArrowLeft className="size-3.5 transition-transform duration-300 group-hover:-translate-x-0.5" />
-            <span>
-              {searchParams.get("from") ? "Kembali" : "Kembali ke Beranda"}
-            </span>
-          </Link>
+            label={searchParams.get("from") ? "Kembali" : "Kembali ke Beranda"}
+          />
         </div>
 
         {/* Form Container (No Card) */}
@@ -157,6 +169,16 @@ function BrandRegisterForm() {
               mahakarya bersama ekosistem MURI.
             </p>
           </div>
+
+          {/* Error Alert */}
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="size-4" />
+              <AlertDescription className="text-sm leading-relaxed">
+                {error}
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -193,6 +215,25 @@ function BrandRegisterForm() {
                 placeholder="Masukkan email brand..."
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </div>
+
+            {/* Nomor Aktif */}
+            <div className="space-y-2">
+              <label
+                htmlFor="brand-active-number"
+                className="text-xs font-bold text-brand-black"
+              >
+                Nomor Aktif
+              </label>
+              <Input
+                id="brand-active-number"
+                type="tel"
+                placeholder="Contoh: 081234567890"
+                value={activeNumber}
+                onChange={(e) => setActiveNumber(e.target.value)}
                 required
                 disabled={isLoading}
               />
@@ -283,7 +324,7 @@ function BrandRegisterForm() {
               </Button>
             </div>
 
-            {/* Brand Description (using Textarea) */}
+            {/* Brand Description  */}
             <div className="space-y-2">
               <label
                 htmlFor="brand-description"
@@ -319,33 +360,13 @@ function BrandRegisterForm() {
           </form>
 
           {/* Footer Secondary Link */}
-          <div className="mt-8 border-t border-line-trace/40 pt-6 text-center text-xs text-muted-moss">
-            <span>Sudah memiliki akun brand? </span>
-            <Link
-              href="/brand/login"
-              className="font-bold text-brand-emerald transition-colors hover:text-brand-forest"
-            >
-              Masuk di sini
-            </Link>
-          </div>
+          <AuthFooterLink
+            text="Sudah memiliki akun brand?"
+            linkText="Masuk di sini"
+            href="/brand/login"
+          />
         </div>
       </div>
     </div>
-  );
-}
-
-export default function BrandRegisterPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center bg-white">
-          <div className="text-center text-sm font-body text-muted-moss">
-            Memuat halaman...
-          </div>
-        </div>
-      }
-    >
-      <BrandRegisterForm />
-    </Suspense>
   );
 }

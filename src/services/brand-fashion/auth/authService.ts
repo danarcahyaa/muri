@@ -2,7 +2,6 @@ import { supabase } from "@/lib/supabaseClient";
 import { translateSupabaseError } from "@/lib/supabaseError";
 import { Json } from "@/types/database";
 import { BrandRegisterInput, BrandRegisterResponse } from "@/types/brand";
-import { hashPassword } from "@/lib/crypto";
 import { AuthInput, AuthResponse } from "@/types/auth";
 
 /**
@@ -16,34 +15,16 @@ import { AuthInput, AuthResponse } from "@/types/auth";
 export async function registerBrand(
   input: BrandRegisterInput
 ): Promise<BrandRegisterResponse> {
-  const { brandName, email, password, socialMediaLinks, shortStory } = input;
+  const { brandName, email, password, activeNumber, socialMediaLinks, shortStory } = input;
 
-  if (!brandName.trim() || !email.trim() || !password) {
+  if (!brandName.trim() || !email.trim() || !password || !activeNumber.trim()) {
     return {
       success: false,
-      error: "Nama brand, email bisnis, dan kata sandi wajib diisi.",
+      error: "Nama brand, email bisnis, nomor aktif, dan kata sandi wajib diisi.",
     };
   }
 
   try {
-    // Verify email is unique in the brands table
-    const { data: existingBrand, error: checkError } = await supabase
-      .from("brands")
-      .select("id")
-      .eq("email", email.trim())
-      .maybeSingle();
-
-    if (checkError) {
-      console.error("Error checking brand email uniqueness:", checkError);
-    }
-
-    if (existingBrand) {
-      return {
-        success: false,
-        error: "Email sudah terdaftar. Silakan gunakan email lain.",
-      };
-    }
-
     // Sign up the user in Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: email.trim(),
@@ -71,20 +52,16 @@ export async function registerBrand(
       };
     }
 
-    // Hash the password before inserting into the public database
-    const hashedPassword = await hashPassword(password);
-
-    // Insert the brand profile into the public `brands` table
+    // Insert the brand profile into the public `brands` table (email and password columns have been removed)
     const { error: dbError } = await supabase.from("brands").insert({
       id: authUser.id,
       brand_name: brandName.trim(),
-      email: email.trim(),
-      password: hashedPassword,
       short_story: shortStory?.trim() || null,
       social_media_links: socialMediaLinks as unknown as Json,
-      whatsapp_number: "", // default value
-      warehouse_address: null, // nullable now in database.ts
-      address: null, // nullable now in database.ts
+      active_number: activeNumber.trim(),
+      warehouse_address: null,
+      warehouse_maps_url: null,
+      address: null,
     });
 
     if (dbError) {
