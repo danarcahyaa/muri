@@ -66,3 +66,21 @@ export async function syncGoogleUser(user: User): Promise<void> {
     throw error;
   }
 }
+
+/**
+ * Retrieves the email of the currently authenticated brand/user from the session.
+ * 
+ * @returns The email of the authenticated brand, or null if not authenticated.
+ */
+export async function getBrandEmail(): Promise<string | null> {
+  try {
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) {
+      return null;
+    }
+    return data.user.email || null;
+  } catch (err) {
+    console.error("Error in getBrandEmail:", err);
+    return null;
+  }
+}

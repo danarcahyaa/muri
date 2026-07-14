@@ -121,33 +121,42 @@ export type Database = {
       }
       brands: {
         Row: {
+          address: string | null
           brand_name: string
           created_at: string | null
+          email: string
           id: string
+          password: string
           short_story: string | null
           social_media_links: Json | null
           updated_at: string | null
-          warehouse_address: string
+          warehouse_address: string | null
           whatsapp_number: string
         }
         Insert: {
+          address?: string | null
           brand_name: string
           created_at?: string | null
+          email: string
           id: string
+          password: string
           short_story?: string | null
           social_media_links?: Json | null
           updated_at?: string | null
-          warehouse_address: string
+          warehouse_address?: string | null
           whatsapp_number: string
         }
         Update: {
+          address?: string | null
           brand_name?: string
           created_at?: string | null
+          email?: string
           id?: string
+          password?: string
           short_story?: string | null
           social_media_links?: Json | null
           updated_at?: string | null
-          warehouse_address?: string
+          warehouse_address?: string | null
           whatsapp_number?: string
         }
         Relationships: []
@@ -216,6 +225,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "carts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      entity_environmental_impacts: {
+        Row: {
+          carbon_saved_kg: number
+          entity_type: Database["public"]["Enums"]["entity_role"]
+          id: string
+          material_saved_grams: number
+          updated_at: string
+          user_id: string
+          water_saved_liters: number
+        }
+        Insert: {
+          carbon_saved_kg?: number
+          entity_type: Database["public"]["Enums"]["entity_role"]
+          id?: string
+          material_saved_grams?: number
+          updated_at?: string
+          user_id: string
+          water_saved_liters?: number
+        }
+        Update: {
+          carbon_saved_kg?: number
+          entity_type?: Database["public"]["Enums"]["entity_role"]
+          id?: string
+          material_saved_grams?: number
+          updated_at?: string
+          user_id?: string
+          water_saved_liters?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_environmental_impacts_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "users"
@@ -899,7 +946,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      entity_role: "consumer" | "brand" | "waste_provider"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1026,6 +1073,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      entity_role: ["consumer", "brand", "waste_provider"],
+    },
   },
 } as const
