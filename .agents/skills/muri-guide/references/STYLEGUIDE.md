@@ -1,7 +1,4 @@
----
-name: "MuriGuide_UI_Style"
-description: "Panduan gaya visual komprehensif berdasarkan aset desain landing page resmi MURI dengan tipografi Plus Jakarta Sans"
----
+# Panduan Gaya Visual MURI
 
 ## Overview
 
@@ -81,15 +78,15 @@ Tombol aksi utama berbentuk kapsul penuh (`rounded-full`) dengan warna latar `#C
 ### **`button-outline-pill`**
 Tombol sekunder dengan latar belakang transparan, dikelilingi oleh garis pembatas tipis 1px (`border-[#FBFAF6]` pada mode gelap atau `border-[#081D17]` pada mode terang). Memiliki teks putih hangat atau pekat dengan ikon panah kecil di kanan.
 
-### **`supply-chain-network-widget`**
+### **Supply Chain Network Widget (`supply-chain-network-widget`)**
 Komponen visualisasi diagram di sisi kanan seksi hero. Menggunakan latar belakang pola titik-titik (*dot grid matrix*) abu-abu transparan. Menghubungkan tiga kartu mikro (`01 Produsen Limbah`, `02 Aggregator MURI`, `03 Brand Fashion`) menggunakan garis diagonal tipis berwarna hijau limau neon `#C8F169` yang merepresentasikan alur material terintegrasi.
 
-### **`ecosystem-card-grid`**
+### **Ecosystem Card Grid (`ecosystem-card-grid`)**
 Komposisi tata letak 3 kolom kartu untuk memetakan alur kerja multi-sektor MURI:
 - **Kartu 01 (Produsen Limbah):** Menggunakan warna blok pekat `bg-[#0C382C]` dengan ikon ilustrasi garis tipis pabrik/rumah berwarna neon `#C8F169`. Teks judul `Plus Jakarta Sans` berwarna putih hangat dan deskripsi berwarna hijau lumut redup.
 - **Kartu 02 & 03 (Aggregator & Brand):** Menggunakan warna dasar putih bersih `bg-[#FBFAF6]` dengan border tipis 1px `border-[#C2C9C6]`. Teks dan ikon ilustrasi (Folder & Berlian) menggunakan warna hijau gelap `#0C382C`.
 
-### **`floating-action-chat`**
+### **Floating Action Chat (`floating-action-chat`)**
 Tombol melayang melingkar sempurna (`rounded-full`) di sisi kanan layar berwarna dasar `#C8F169` (Lime) dengan ikon chat murni hitam pekat di tengahnya, berfungsi sebagai pusat bantuan atau edukasi interaktif sirkular.
 
 ## Do's and Don'ts
