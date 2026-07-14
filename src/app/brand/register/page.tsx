@@ -216,7 +216,7 @@ export default function BrandRegisterPage() {
           {/* Logo */}
           <div className="mb-12 flex items-center gap-2">
             <Image
-              src="/logo.svg"
+              src="/logo.png"
               alt="Muri Logo"
               width={40}
               height={40}
