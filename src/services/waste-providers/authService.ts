@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabaseClient";
 import { translateSupabaseError } from "@/lib/supabaseError";
 import { WasteProviderRegisterInput, WasteProviderRegisterResponse } from "@/types/wasteProvider";
+import { AuthInput, AuthResponse } from "@/types/auth";
 
 /**
  * Registers a new waste provider account.
@@ -81,6 +82,86 @@ export async function registerWasteProvider(
     };
   } catch (err: unknown) {
     console.error("Error in registerWasteProvider service:", err);
+    return {
+      success: false,
+      error: translateSupabaseError(err),
+    };
+  }
+}
+
+/**
+ * Signs in a waste provider account using email and password.
+ * Also verifies if the authenticated user has a record in the public waste_providers table.
+ * 
+ * @param input Waste provider login credentials (email, password)
+ * @returns AuthResponse with session data or error message
+ */
+export async function loginWasteProvider(
+  input: Omit<AuthInput, "name">
+): Promise<AuthResponse> {
+  const { email, password } = input;
+
+  if (!email || !password) {
+    return {
+      success: false,
+      error: "Email bisnis dan kata sandi wajib diisi.",
+    };
+  }
+
+  try {
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password: password,
+    });
+
+    if (authError) {
+      return {
+        success: false,
+        error: translateSupabaseError(authError),
+      };
+    }
+
+    const authUser = authData.user;
+    if (!authUser) {
+      return {
+        success: false,
+        error: "Gagal memuat sesi autentikasi penyedia limbah.",
+      };
+    }
+
+    // Verify if the user profile exists in the waste_providers table
+    const { data: providerProfile, error: providerError } = await supabase
+      .from("waste_providers")
+      .select("company_name")
+      .eq("id", authUser.id)
+      .maybeSingle();
+
+    if (providerError) {
+      console.error("Error retrieving waste provider profile:", providerError);
+    }
+
+    if (!providerProfile) {
+      // Sign out to clean up the invalid session
+      await supabase.auth.signOut();
+      return {
+        success: false,
+        error: "Akun ini tidak terdaftar sebagai penyedia limbah.",
+      };
+    }
+
+    return {
+      success: true,
+      message: "Berhasil masuk ke akun penyedia limbah.",
+      data: {
+        user: {
+          id: authUser.id,
+          email: authUser.email as string,
+          name: providerProfile.company_name,
+        },
+      },
+    };
+  } catch (err: unknown) {
+    console.error("Error in loginWasteProvider service:", err);
     return {
       success: false,
       error: translateSupabaseError(err),
