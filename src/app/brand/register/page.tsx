@@ -4,77 +4,123 @@ import * as React from "react";
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Plus, Trash2, AlertCircle } from "lucide-react";
+import {
+  AlertCircle,
+  Building2,
+  Globe2,
+  KeyRound,
+  Leaf,
+  Link2,
+  Mail,
+  Phone,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
-import { registerBrand } from "@/services/brand-fashion/auth/authService";
-import { BrandLink } from "@/types/brandLink";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { BackLink } from "@/components/ui/BackLink";
 import { AuthFooterLink } from "@/components/ui/AuthFooterLink";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+
+import { registerBrand } from "@/services/brand-fashion/auth/authService";
+import { BrandLink } from "@/types/brandLink";
 
 export default function BrandRegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
   const fromPath = searchParams.get("from") || "/";
 
   const [brandName, setBrandName] = useState("");
   const [email, setEmail] = useState("");
   const [activeNumber, setActiveNumber] = useState("");
   const [password, setPassword] = useState("");
-  const [links, setLinks] = useState<BrandLink[]>([{ label: "", url: "" }]);
+  const [links, setLinks] = useState<BrandLink[]>([
+    {
+      label: "",
+      url: "",
+    },
+  ]);
   const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   React.useEffect(() => {
     if (error) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
     }
   }, [error]);
 
   const handleLinkChange = (
     index: number,
     field: keyof BrandLink,
-    value: string
+    value: string,
   ) => {
-    const updatedLinks = [...links];
-    updatedLinks[index][field] = value;
-    setLinks(updatedLinks);
+    setLinks((currentLinks) =>
+      currentLinks.map((link, currentIndex) =>
+        currentIndex === index
+          ? {
+              ...link,
+              [field]: value,
+            }
+          : link,
+      ),
+    );
   };
 
   const handleAddLink = () => {
-    setLinks([...links, { label: "", url: "" }]);
+    setLinks((currentLinks) => [
+      ...currentLinks,
+      {
+        label: "",
+        url: "",
+      },
+    ]);
   };
 
   const handleRemoveLink = (index: number) => {
-    if (links.length > 1) {
-      setLinks(links.filter((_, i) => i !== index));
-    }
+    setLinks((currentLinks) => {
+      if (currentLinks.length <= 1) {
+        return currentLinks;
+      }
+
+      return currentLinks.filter(
+        (_, currentIndex) => currentIndex !== index,
+      );
+    });
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+
     setIsLoading(true);
     setError(null);
 
-    // Basic Validation
-    if (!brandName.trim()) {
+    const normalizedBrandName = brandName.trim();
+    const normalizedEmail = email.trim();
+    const normalizedActiveNumber = activeNumber.trim();
+
+    if (!normalizedBrandName) {
       setError("Nama brand wajib diisi.");
       setIsLoading(false);
       return;
     }
 
-    if (!email.trim()) {
+    if (!normalizedEmail) {
       setError("Email bisnis wajib diisi.");
       setIsLoading(false);
       return;
     }
 
-    if (!activeNumber.trim()) {
+    if (!normalizedActiveNumber) {
       setError("Nomor aktif wajib diisi.");
       setIsLoading(false);
       return;
@@ -92,88 +138,135 @@ export default function BrandRegisterPage() {
       return;
     }
 
-    // Validate social/portfolio links
     const hasEmptyLink = links.some(
-      (link) => !link.label.trim() || !link.url.trim()
+      (link) => !link.label.trim() || !link.url.trim(),
     );
+
     if (hasEmptyLink) {
-      setError("Harap lengkapi semua label dan URL link pendukung.");
+      setError(
+        "Harap lengkapi semua label dan URL link pendukung.",
+      );
       setIsLoading(false);
       return;
     }
 
     try {
       const response = await registerBrand({
-        brandName: brandName.trim(),
-        email: email.trim(),
-        activeNumber: activeNumber.trim(),
-        password: password,
-        socialMediaLinks: links,
+        brandName: normalizedBrandName,
+        email: normalizedEmail,
+        activeNumber: normalizedActiveNumber,
+        password,
+        socialMediaLinks: links.map((link) => ({
+          label: link.label.trim(),
+          url: link.url.trim(),
+        })),
         shortStory: description.trim() || undefined,
       });
 
       if (!response.success) {
-        setError(response.error || "Gagal melakukan pendaftaran.");
+        setError(
+          response.error || "Gagal melakukan pendaftaran.",
+        );
         return;
       }
 
       toast.success(
-        response.message || "Pendaftaran brand berhasil!"
+        response.message || "Pendaftaran brand berhasil!",
       );
 
-      // Reset form fields
       setBrandName("");
       setEmail("");
       setActiveNumber("");
       setPassword("");
-      setLinks([{ label: "", url: "" }]);
+      setLinks([
+        {
+          label: "",
+          url: "",
+        },
+      ]);
       setDescription("");
 
-      // Redirect to brand login page
       router.push("/brand/login");
-    } catch (error) {
-      setError("Terjadi kesalahan. Silakan coba kembali beberapa saat lagi.");
+    } catch {
+      setError(
+        "Terjadi kesalahan. Silakan coba kembali beberapa saat lagi.",
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-lg space-y-6">
-        {/* Back Link */}
+    <div className="flex min-h-screen flex-col items-center justify-center bg-canvas-pure px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-lg space-y-8">
+        {/* Back link */}
         <div className="flex justify-start">
           <BackLink
             href={fromPath}
-            label={searchParams.get("from") ? "Kembali" : "Kembali ke Beranda"}
+            label={
+              searchParams.get("from")
+                ? "Kembali"
+                : "Kembali ke Beranda"
+            }
           />
         </div>
 
-        {/* Form Container (No Card) */}
-        <div className="w-full">
-          {/* Header */}
-          <div className="mb-8 flex flex-col items-center text-center">
+        {/* Main content */}
+        <div className="mx-auto w-full max-w-sm">
+          {/* Logo */}
+          <div className="mb-12 flex items-center gap-2">
             <Image
               src="/logo.svg"
               alt="Muri Logo"
-              width={48}
-              height={48}
+              width={40}
+              height={40}
               priority
-              className="mb-4 size-12 object-contain"
+              className="size-10 object-contain"
             />
-            <h1 className="font-display text-2xl font-bold tracking-tight text-brand-black sm:text-3xl">
-              Daftarkan Brand Anda
+
+            <span className="font-display text-2xl font-medium tracking-tight text-brand-black">
+              Muri
+            </span>
+          </div>
+
+          {/* Header */}
+          <div className="mb-10">
+            <div className="mb-4 flex items-center gap-3 text-brand-emerald">
+              <Leaf
+                className="size-4"
+                strokeWidth={2}
+              />
+
+              <span className="text-xs font-bold uppercase tracking-tight">
+                Bergabung sebagai Brand
+              </span>
+            </div>
+
+            <h1 className="font-display text-5xl font-medium leading-[1.08] tracking-[-0.045em] text-brand-black">
+              <span className="block">
+                Daftarkan
+              </span>
+
+              <span className="block">
+                Brand Anda.
+              </span>
             </h1>
-            <p className="mt-2 font-body text-sm text-muted-moss/90 leading-relaxed">
-              Jadilah pelopor fesyen sirkular dan ubah sisa produksi menjadi
-              mahakarya bersama ekosistem MURI.
+
+            <p className="mt-7 font-body text-sm leading-relaxed text-muted-moss">
+              Jadilah bagian dari ekosistem fesyen sirkular
+              dan ubah sisa produksi menjadi karya bernilai
+              bersama Muri.
             </p>
           </div>
 
-          {/* Error Alert */}
+          {/* Error alert */}
           {error && (
-            <Alert variant="destructive" className="mb-6">
+            <Alert
+              variant="destructive"
+              className="mb-6 rounded-xl border-error-rust/20 bg-error-rust/[0.05]"
+            >
               <AlertCircle className="size-4" />
+
               <AlertDescription className="text-sm leading-relaxed">
                 {error}
               </AlertDescription>
@@ -181,8 +274,11 @@ export default function BrandRegisterPage() {
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Nama Brand */}
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-5"
+          >
+            {/* Brand name */}
             <div className="space-y-2">
               <label
                 htmlFor="brand-name"
@@ -190,18 +286,27 @@ export default function BrandRegisterPage() {
               >
                 Nama Brand
               </label>
+
               <Input
                 id="brand-name"
                 type="text"
-                placeholder="Masukkan nama brand..."
+                variant="auth"
+                size="auth"
+                autoComplete="organization"
+                placeholder="Masukkan nama brand Anda"
                 value={brandName}
-                onChange={(e) => setBrandName(e.target.value)}
+                onChange={(event) =>
+                  setBrandName(event.target.value)
+                }
                 required
                 disabled={isLoading}
+                endIcon={
+                  <Building2 strokeWidth={1.7} />
+                }
               />
             </div>
 
-            {/* Email Bisnis */}
+            {/* Email */}
             <div className="space-y-2">
               <label
                 htmlFor="brand-email"
@@ -209,18 +314,27 @@ export default function BrandRegisterPage() {
               >
                 Email Bisnis/Brand
               </label>
+
               <Input
                 id="brand-email"
                 type="email"
-                placeholder="Masukkan email brand..."
+                variant="auth"
+                size="auth"
+                autoComplete="email"
+                placeholder="Masukkan email bisnis Anda"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(event) =>
+                  setEmail(event.target.value)
+                }
                 required
                 disabled={isLoading}
+                endIcon={
+                  <Mail strokeWidth={1.7} />
+                }
               />
             </div>
 
-            {/* Nomor Aktif */}
+            {/* Phone */}
             <div className="space-y-2">
               <label
                 htmlFor="brand-active-number"
@@ -228,14 +342,24 @@ export default function BrandRegisterPage() {
               >
                 Nomor Aktif
               </label>
+
               <Input
                 id="brand-active-number"
                 type="tel"
+                variant="auth"
+                size="auth"
+                autoComplete="tel"
+                inputMode="tel"
                 placeholder="Contoh: 081234567890"
                 value={activeNumber}
-                onChange={(e) => setActiveNumber(e.target.value)}
+                onChange={(event) =>
+                  setActiveNumber(event.target.value)
+                }
                 required
                 disabled={isLoading}
+                endIcon={
+                  <Phone strokeWidth={1.7} />
+                }
               />
             </div>
 
@@ -247,119 +371,178 @@ export default function BrandRegisterPage() {
               >
                 Kata Sandi
               </label>
+
               <Input
                 id="brand-password"
                 type="password"
+                variant="auth"
+                size="auth"
+                autoComplete="new-password"
                 placeholder="Minimal 8 karakter"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(event) =>
+                  setPassword(event.target.value)
+                }
                 required
                 minLength={8}
                 disabled={isLoading}
+                endIcon={
+                  <KeyRound strokeWidth={1.7} />
+                }
               />
             </div>
 
-            {/* Links Section */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-brand-black">
+            {/* Links */}
+            <div className="space-y-4 pt-1">
+              <div>
+                <p className="text-xs font-bold text-brand-black">
                   Link Media Sosial / Portofolio / Web
-                </span>
+                </p>
+
+                <p className="mt-1 text-[11px] leading-relaxed text-muted-moss">
+                  Tambahkan website atau media sosial utama
+                  brand Anda.
+                </p>
               </div>
 
               <div className="space-y-3">
                 {links.map((link, index) => (
                   <div
                     key={index}
-                    className="flex flex-col gap-2 rounded-lg border border-line-trace/40 p-3 sm:flex-row sm:items-center sm:p-0 sm:border-0"
+                    className="space-y-2 rounded-sm border border-line-trace bg-canvas-warm/30 p-3"
                   >
-                    <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-2">
-                      <Input
-                        placeholder="Platform (contoh: Instagram)"
-                        value={link.label}
-                        onChange={(e) =>
-                          handleLinkChange(index, "label", e.target.value)
-                        }
-                        required
-                        disabled={isLoading}
-                      />
+                    <Input
+                      type="text"
+                      variant="auth"
+                      size="auth"
+                      placeholder="Platform, contoh: Instagram"
+                      value={link.label}
+                      onChange={(event) =>
+                        handleLinkChange(
+                          index,
+                          "label",
+                          event.target.value,
+                        )
+                      }
+                      required
+                      disabled={isLoading}
+                      endIcon={
+                        <Globe2 strokeWidth={1.7} />
+                      }
+                    />
+
+                    <div className="flex items-center gap-2">
                       <Input
                         type="url"
-                        placeholder="URL (https://...)"
+                        variant="auth"
+                        size="auth"
+                        inputMode="url"
+                        placeholder="https://..."
                         value={link.url}
-                        onChange={(e) =>
-                          handleLinkChange(index, "url", e.target.value)
+                        onChange={(event) =>
+                          handleLinkChange(
+                            index,
+                            "url",
+                            event.target.value,
+                          )
                         }
                         required
                         disabled={isLoading}
+                        endIcon={
+                          <Link2 strokeWidth={1.7} />
+                        }
                       />
+
+                      {links.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() =>
+                            handleRemoveLink(index)
+                          }
+                          disabled={isLoading}
+                          aria-label={`Hapus link ${index + 1}`}
+                          title="Hapus link"
+                          className="
+                            size-12 shrink-0 rounded-sm
+                            text-error-rust
+                            hover:bg-error-rust/5
+                            hover:text-error-rust
+                          "
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      )}
                     </div>
-                    {links.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemoveLink(index)}
-                        disabled={isLoading}
-                        className="self-end text-error-rust hover:bg-error-rust/5 hover:text-error-rust sm:self-auto"
-                        title="Hapus Link"
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    )}
                   </div>
                 ))}
               </div>
 
               <Button
                 type="button"
-                variant="outline"
-                size="sm"
+                variant="auth-outline"
+                size="auth"
                 onClick={handleAddLink}
                 disabled={isLoading}
-                className="flex w-full items-center justify-center gap-1.5 border-dashed border-line-trace text-muted-moss hover:border-brand-emerald hover:text-brand-emerald"
+                className="w-full border-dashed text-muted-moss hover:text-brand-emerald"
               >
                 <Plus className="size-4" />
                 <span>Tambah Link</span>
               </Button>
             </div>
 
-            {/* Brand Description  */}
+            {/* Description */}
             <div className="space-y-2">
               <label
                 htmlFor="brand-description"
                 className="text-xs font-bold text-brand-black"
               >
                 Cerita Brand{" "}
-                <span className="font-normal text-muted-moss/70">(Opsional)</span>
+                <span className="font-normal text-muted-moss/70">
+                  (Opsional)
+                </span>
               </label>
+
               <Textarea
                 id="brand-description"
-                placeholder="Ceritakan visi brand Anda..."
+                placeholder="Ceritakan visi dan perjalanan brand Anda"
                 value={description}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                  setDescription(e.target.value)
-                }
+                onChange={(
+                  event: React.ChangeEvent<HTMLTextAreaElement>,
+                ) => setDescription(event.target.value)}
                 disabled={isLoading}
-                className="min-h-[90px] resize-none"
+                className="
+                  min-h-32 resize-y rounded-sm
+                  border-line-trace bg-transparent
+                  px-5 py-4
+                  font-body text-xs text-brand-black
+                  shadow-none
+                  placeholder:text-xs
+                  placeholder:font-normal
+                  placeholder:tracking-normal
+                  placeholder:text-muted-moss/60
+                  focus-visible:border-brand-emerald
+                  focus-visible:ring-2
+                  focus-visible:ring-brand-emerald/10
+                "
               />
             </div>
 
-            {/* Action Buttons */}
-            <div className="pt-2">
-              <Button
-                variant={"solid-black"}
-                type="submit"
-                loading={isLoading}
-                disabled={isLoading}
-                className="flex w-full items-center justify-center gap-2"
-              >
-                <span>Daftar</span>
-              </Button>
-            </div>
+            {/* Submit */}
+            <Button
+              type="submit"
+              variant="auth-primary"
+              size="auth"
+              loading={isLoading}
+              disabled={isLoading}
+              className="w-full"
+            >
+              Daftar Sekarang
+            </Button>
           </form>
 
-          {/* Footer Secondary Link */}
+          {/* Footer link */}
           <AuthFooterLink
             text="Sudah memiliki akun brand?"
             linkText="Masuk di sini"

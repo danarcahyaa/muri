@@ -4,20 +4,52 @@ import * as React from "react";
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle } from "lucide-react";
+import {
+  AlertCircle,
+  Factory,
+  KeyRound,
+  Leaf,
+  Mail,
+  Phone,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { registerWasteProvider } from "@/services/waste-providers/authService";
 import { BackLink } from "@/components/ui/BackLink";
 import { AuthFooterLink } from "@/components/ui/AuthFooterLink";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+import { registerWasteProvider } from "@/services/waste-providers/authService";
+
+function getSafeInternalPath(
+  value: string | null,
+  fallback: string,
+) {
+  if (
+    value &&
+    value.startsWith("/") &&
+    !value.startsWith("//")
+  ) {
+    return value;
+  }
+
+  return fallback;
+}
+
 export default function WasteProviderRegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const fromPath = searchParams.get("from") || "/";
+
+  const fromPath = getSafeInternalPath(
+    searchParams.get("from"),
+    "/auth/register",
+  );
+
+  const nextPath = getSafeInternalPath(
+    searchParams.get("next"),
+    "/dashboard",
+  );
 
   const [companyName, setCompanyName] = useState("");
   const [email, setEmail] = useState("");
@@ -28,28 +60,38 @@ export default function WasteProviderRegisterPage() {
 
   React.useEffect(() => {
     if (error) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
     }
   }, [error]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+
     setIsLoading(true);
     setError(null);
 
-    if (!companyName.trim()) {
+    const normalizedCompanyName = companyName.trim();
+    const normalizedEmail = email.trim();
+    const normalizedActiveNumber = activeNumber.trim();
+
+    if (!normalizedCompanyName) {
       setError("Nama pabrik/garmen wajib diisi.");
       setIsLoading(false);
       return;
     }
 
-    if (!email.trim()) {
+    if (!normalizedEmail) {
       setError("Email bisnis wajib diisi.");
       setIsLoading(false);
       return;
     }
 
-    if (!activeNumber.trim()) {
+    if (!normalizedActiveNumber) {
       setError("Nomor aktif wajib diisi.");
       setIsLoading(false);
       return;
@@ -69,67 +111,113 @@ export default function WasteProviderRegisterPage() {
 
     try {
       const response = await registerWasteProvider({
-        companyName: companyName.trim(),
-        email: email.trim(),
-        activeNumber: activeNumber.trim(),
+        companyName: normalizedCompanyName,
+        email: normalizedEmail,
+        activeNumber: normalizedActiveNumber,
         password,
       });
 
       if (!response.success) {
-        setError(response.error || "Gagal melakukan pendaftaran.");
+        setError(
+          response.error || "Gagal melakukan pendaftaran.",
+        );
         return;
       }
 
-      toast.success(response.message || "Pendaftaran pabrik berhasil!");
+      toast.success(
+        response.message ||
+          "Pendaftaran waste provider berhasil!",
+      );
 
       setCompanyName("");
       setEmail("");
       setActiveNumber("");
       setPassword("");
 
-      router.push("/waste-providers/login");
+      const loginParams = new URLSearchParams({
+        from: "/waste-providers/register",
+        next: nextPath,
+      });
+
+      router.push(
+        `/waste-providers/login?${loginParams.toString()}`,
+      );
     } catch {
-      setError("Terjadi kesalahan. Silakan coba kembali beberapa saat lagi.");
+      setError(
+        "Terjadi kesalahan. Silakan coba kembali beberapa saat lagi.",
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-lg space-y-6">
-        {/* Back Link */}
+    <div className="flex min-h-screen flex-col items-center justify-center bg-canvas-pure px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-lg space-y-8">
+        {/* Back link */}
         <div className="flex justify-start">
           <BackLink
             href={fromPath}
-            label={searchParams.get("from") ? "Kembali" : "Kembali ke Beranda"}
+            label="Kembali"
           />
         </div>
 
-        {/* Form Container */}
-        <div className="w-full">
-          {/* Header */}
-          <div className="mb-8 flex flex-col items-center text-center">
+        {/* Main content */}
+        <div className="mx-auto w-full max-w-sm">
+          {/* Logo */}
+          <div className="mb-12 flex items-center gap-2">
             <Image
-              src="/logo.svg"
+              src="/logo.png"
               alt="Muri Logo"
-              width={48}
-              height={48}
+              width={40}
+              height={40}
               priority
-              className="mb-4 size-12 object-contain"
+              className="size-10 object-contain"
             />
-            <h1 className="font-display text-2xl font-bold tracking-tight text-brand-black sm:text-3xl">
-              Daftarkan Pabrik / Garmen
+
+            <span className="font-display text-2xl font-medium tracking-tight text-brand-black">
+              Muri
+            </span>
+          </div>
+
+          {/* Header */}
+          <div className="mb-10">
+            <div className="mb-4 flex items-center gap-3 text-brand-emerald">
+              <Leaf
+                className="size-4"
+                strokeWidth={2}
+              />
+
+              <span className="text-xs font-bold uppercase tracking-tight">
+                Bergabung sebagai Waste Provider
+              </span>
+            </div>
+
+            <h1 className="font-display text-5xl font-medium leading-[1.08] tracking-[-0.045em] text-brand-black">
+              <span className="block">
+                Daftarkan Pabrik
+              </span>
+
+              <span className="block">
+                atau Garmen Anda.
+              </span>
             </h1>
-            <p className="mt-2 font-body text-sm text-muted-moss/90 leading-relaxed">
-              Ubah sisa produksi tekstil Anda menjadi bahan baku bernilai bagi industri sirkular MURI.
+
+            <p className="mt-7 font-body text-sm leading-relaxed text-muted-moss">
+              Ubah sisa produksi tekstil Anda menjadi material
+              bernilai dan hubungkan bisnis Anda dengan
+              ekosistem sirkular Muri.
             </p>
           </div>
 
-          {/* Error Alert */}
+          {/* Error alert */}
           {error && (
-            <Alert variant="destructive" className="mb-6">
+            <Alert
+              variant="destructive"
+              className="mb-6 rounded-xl border-error-rust/20 bg-error-rust/[0.05]"
+            >
               <AlertCircle className="size-4" />
+
               <AlertDescription className="text-sm leading-relaxed">
                 {error}
               </AlertDescription>
@@ -137,8 +225,11 @@ export default function WasteProviderRegisterPage() {
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Nama Pabrik / Garmen */}
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-5"
+          >
+            {/* Company name */}
             <div className="space-y-2">
               <label
                 htmlFor="company-name"
@@ -146,18 +237,27 @@ export default function WasteProviderRegisterPage() {
               >
                 Nama Pabrik / Garmen
               </label>
+
               <Input
                 id="company-name"
                 type="text"
-                placeholder="Masukkan nama pabrik atau garmen..."
+                variant="auth"
+                size="auth"
+                autoComplete="organization"
+                placeholder="Masukkan nama pabrik atau garmen"
                 value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
+                onChange={(event) =>
+                  setCompanyName(event.target.value)
+                }
                 required
                 disabled={isLoading}
+                endIcon={
+                  <Factory strokeWidth={1.7} />
+                }
               />
             </div>
 
-            {/* Email Bisnis */}
+            {/* Email */}
             <div className="space-y-2">
               <label
                 htmlFor="provider-email"
@@ -165,18 +265,27 @@ export default function WasteProviderRegisterPage() {
               >
                 Email Bisnis/Pabrik
               </label>
+
               <Input
                 id="provider-email"
                 type="email"
-                placeholder="Masukkan email bisnis..."
+                variant="auth"
+                size="auth"
+                autoComplete="email"
+                placeholder="Masukkan email bisnis Anda"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(event) =>
+                  setEmail(event.target.value)
+                }
                 required
                 disabled={isLoading}
+                endIcon={
+                  <Mail strokeWidth={1.7} />
+                }
               />
             </div>
 
-            {/* Nomor Aktif */}
+            {/* Phone */}
             <div className="space-y-2">
               <label
                 htmlFor="active-number"
@@ -184,14 +293,24 @@ export default function WasteProviderRegisterPage() {
               >
                 Nomor Aktif
               </label>
+
               <Input
                 id="active-number"
                 type="tel"
+                variant="auth"
+                size="auth"
+                autoComplete="tel"
+                inputMode="tel"
                 placeholder="Contoh: 081234567890"
                 value={activeNumber}
-                onChange={(e) => setActiveNumber(e.target.value)}
+                onChange={(event) =>
+                  setActiveNumber(event.target.value)
+                }
                 required
                 disabled={isLoading}
+                endIcon={
+                  <Phone strokeWidth={1.7} />
+                }
               />
             </div>
 
@@ -203,37 +322,51 @@ export default function WasteProviderRegisterPage() {
               >
                 Kata Sandi
               </label>
+
               <Input
                 id="provider-password"
                 type="password"
+                variant="auth"
+                size="auth"
+                autoComplete="new-password"
                 placeholder="Minimal 8 karakter"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(event) =>
+                  setPassword(event.target.value)
+                }
                 required
                 minLength={8}
                 disabled={isLoading}
+                endIcon={
+                  <KeyRound strokeWidth={1.7} />
+                }
               />
             </div>
 
-            {/* Action Button */}
-            <div className="pt-2">
-              <Button
-                variant="solid-black"
-                type="submit"
-                loading={isLoading}
-                disabled={isLoading}
-                className="flex w-full items-center justify-center gap-2"
-              >
-                <span>Daftar</span>
-              </Button>
-            </div>
+            {/* Submit */}
+            <Button
+              type="submit"
+              variant="auth-primary"
+              size="auth"
+              loading={isLoading}
+              disabled={isLoading}
+              className="w-full"
+            >
+              Daftar Sekarang
+            </Button>
           </form>
 
-          {/* Footer Secondary Link */}
+          {/* Footer */}
           <AuthFooterLink
-            text="Sudah memiliki akun penyedia limbah?"
+            text="Sudah memiliki akun waste provider?"
             linkText="Masuk di sini"
-            href="/waste-providers/login"
+            href={{
+              pathname: "/waste-providers/login",
+              query: {
+                from: "/waste-providers/register",
+                next: nextPath,
+              },
+            }}
           />
         </div>
       </div>

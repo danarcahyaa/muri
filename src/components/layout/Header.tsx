@@ -3,14 +3,32 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LogOut, Menu, X } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { navigationItems } from "@/data/navigation";
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const nextPath = pathname === "/" ? "/dashboard" : pathname;
+
+  const loginHref = {
+    pathname: "/auth/login",
+    query: {
+      from: pathname,
+      next: nextPath,
+    },
+  };
+
+  const registerHref = {
+    pathname: "/auth/register",
+    query: {
+      from: pathname,
+      next: nextPath,
+    },
+  };
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
@@ -147,15 +165,27 @@ export default function Header() {
           ) : (
             <div className="flex items-center gap-3">
               <Link
-                href="/login"
-                className="inline-flex items-center justify-center rounded-md border border-brand-black px-6 py-4 text-xs font-bold transition-colors hover:bg-brand-black hover:text-white"
+                href={loginHref}
+                className="
+      inline-flex items-center justify-center
+      rounded-md border border-brand-black
+      px-6 py-4 text-xs font-bold
+      transition-colors
+      hover:bg-brand-black hover:text-white
+    "
               >
                 Masuk
               </Link>
 
               <Link
-                href="/register"
-                className="inline-flex items-center justify-center rounded-md bg-brand-black px-6 py-4 text-xs font-bold text-white transition-colors hover:bg-brand-forest"
+                href={registerHref}
+                className="
+      inline-flex items-center justify-center
+      rounded-md bg-brand-black
+      px-6 py-4 text-xs font-bold text-white
+      transition-colors
+      hover:bg-brand-forest
+    "
               >
                 Mulai Bergabung
               </Link>
@@ -246,17 +276,26 @@ export default function Header() {
           ) : !isLoading ? (
             <div className="grid grid-cols-2 gap-3 pt-5">
               <Link
-                href="/login"
+                href={loginHref}
                 onClick={() => setMobileMenuOpen(false)}
-                className="inline-flex items-center justify-center rounded-md border border-brand-black px-4 py-4 text-xs font-bold"
+                className="
+      inline-flex items-center justify-center
+      rounded-md border border-brand-black
+      px-4 py-4 text-xs font-bold
+    "
               >
                 Masuk
               </Link>
 
               <Link
-                href="/register"
+                href={registerHref}
                 onClick={() => setMobileMenuOpen(false)}
-                className="inline-flex items-center justify-center rounded-md bg-brand-black px-4 py-4 text-center text-xs font-bold text-white"
+                className="
+      inline-flex items-center justify-center
+      rounded-md bg-brand-black
+      px-4 py-4 text-center text-xs
+      font-bold text-white
+    "
               >
                 Mulai Bergabung
               </Link>
