@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   AlertCircle,
+  ArrowLeft,
   KeyRound,
   Leaf,
   Mail,
@@ -31,9 +32,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (
-    event: React.FormEvent<HTMLFormElement>,
-  ) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     setIsLoading(true);
@@ -73,7 +72,7 @@ export default function RegisterPage() {
     setError(null);
 
     try {
-      await signInWithGoogle("register");
+      await signInWithGoogle("register", "/dashboard");
     } catch (err: unknown) {
       const message =
         err instanceof Error
@@ -91,24 +90,42 @@ export default function RegisterPage() {
       <div className="flex min-h-screen flex-col justify-between bg-canvas-pure p-8 md:p-12 lg:p-16">
         <div className="mx-auto my-auto w-full max-w-sm py-8">
           {/* Logo */}
-          <Link
-            href="/"
-            aria-label="Kembali ke halaman utama Muri"
-            className="mb-12 inline-flex items-center gap-2"
-          >
-            <Image
-              src="/logo.png"
-              alt="Logo Muri"
-              width={40}
-              height={40}
-              priority
-              className="size-10 object-contain"
-            />
+          <div className="mb-12 flex items-center justify-between gap-6">
+            <Link
+              href="/"
+              aria-label="Muri"
+              className="inline-flex shrink-0 items-center gap-2"
+            >
+              <Image
+                src="/logo.png"
+                alt="Logo Muri"
+                width={40}
+                height={40}
+                priority
+                className="size-10 object-contain"
+              />
 
-            <span className="font-display text-2xl font-medium tracking-tight text-brand-black">
-              Muri
-            </span>
-          </Link>
+              <span className="font-display text-2xl font-medium tracking-tight text-brand-black">
+                Muri
+              </span>
+            </Link>
+
+            <Link
+              href="/"
+              className="
+      group inline-flex items-center gap-2 whitespace-nowrap
+      text-[11px] font-bold text-brand-emerald
+      transition-colors hover:text-brand-forest
+    "
+            >
+              <ArrowLeft
+                className="size-3.5 transition-transform duration-300 group-hover:-translate-x-1"
+                strokeWidth={2}
+              />
+
+              <span>Kembali ke beranda</span>
+            </Link>
+          </div>
 
           {/* Heading */}
           <div className="mb-10">
@@ -332,9 +349,7 @@ export default function RegisterPage() {
           >
             <GoogleIcon />
 
-            <span className="font-bold">
-              Lanjut dengan Google
-            </span>
+            <span className="font-bold">Lanjut dengan Google</span>
           </Button>
         </div>
       </div>
@@ -378,11 +393,7 @@ export default function RegisterPage() {
 
 function GoogleIcon() {
   return (
-    <svg
-      aria-hidden="true"
-      className="mr-2 inline size-4"
-      viewBox="0 0 24 24"
-    >
+    <svg aria-hidden="true" className="mr-2 inline size-4" viewBox="0 0 24 24">
       <path
         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
         fill="#4285F4"

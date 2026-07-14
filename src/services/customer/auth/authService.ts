@@ -5,7 +5,7 @@ import { translateSupabaseError } from "@/lib/supabaseError";
 /**
  * Registers a new user with email, password, and name.
  * Performs registration through Supabase Auth, then saves profile.
- * 
+ *
  * @param input Registration input data (email, password, name)
  * @returns AuthResponse containing the status of the registration
  */
@@ -89,11 +89,13 @@ export async function signUpWithEmail(input: AuthInput): Promise<AuthResponse> {
 
 /**
  * Signs in a user with email and password.
- * 
+ *
  * @param input Login input data (email, password)
  * @returns AuthResponse containing the status of the sign in
  */
-export async function signInWithEmail(input: Omit<AuthInput, "name">): Promise<AuthResponse> {
+export async function signInWithEmail(
+  input: Omit<AuthInput, "name">,
+): Promise<AuthResponse> {
   const { email, password } = input;
 
   if (!email || !password) {
@@ -104,10 +106,11 @@ export async function signInWithEmail(input: Omit<AuthInput, "name">): Promise<A
   }
 
   try {
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password: password,
-    });
+    const { data: authData, error: authError } =
+      await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password,
+      });
 
     if (authError) {
       return {
@@ -126,7 +129,7 @@ export async function signInWithEmail(input: Omit<AuthInput, "name">): Promise<A
 
     // Get name from user_metadata or public `users` table
     let name = authUser.user_metadata?.name || "";
-    
+
     if (!name) {
       const { data: profile } = await supabase
         .from("users")
@@ -161,23 +164,34 @@ export async function signInWithEmail(input: Omit<AuthInput, "name">): Promise<A
 /**
  * Initiates the login/register flow using Google OAuth.
  */
-export async function signInWithGoogle(from: "login" | "register" = "login"): Promise<void> {
-  const baseUrl = process.env.NEXT_PUBLIC_REDIRECT_URL || 
-                  (typeof window !== "undefined" 
-                    ? `${window.location.origin}/google/auth/callback` 
-                    : "http://localhost:3000/google/auth/callback");
+export async function signInWithGoogle(
+  from: "login" | "register" = "login",
+  nextPath = "/dashboard",
+): Promise<void> {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_REDIRECT_URL ||
+    (typeof window !== "undefined"
+      ? `${window.location.origin}/google/auth/callback`
+      : "http://localhost:3000/google/auth/callback");
 
-  const redirectUrl = `${baseUrl}?from=${from}`;
+  const callbackUrl = new URL(baseUrl);
+
+  callbackUrl.searchParams.set("from", from);
+
+  if (nextPath.startsWith("/") && !nextPath.startsWith("//")) {
+    callbackUrl.searchParams.set("next", nextPath);
+  }
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: redirectUrl,
+      redirectTo: callbackUrl.toString(),
     },
   });
 
   if (error) {
     console.error("Error initiating Google sign in:", error);
+
     throw new Error(`Gagal masuk menggunakan Google: ${error.message}`);
   }
 }

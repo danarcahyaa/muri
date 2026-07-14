@@ -4,7 +4,7 @@ import * as React from "react";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { AlertCircle, Leaf, Mail, KeyRound } from "lucide-react";
+import { AlertCircle, Leaf, Mail, KeyRound, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -45,7 +45,7 @@ export default function LoginPage() {
       toast.success(response.message || "Berhasil masuk!");
 
       setTimeout(() => {
-        router.replace("/");
+        router.replace(getLoginDestination());
       }, 500);
     } catch (err: unknown) {
       setError(translateSupabaseError(err));
@@ -59,7 +59,7 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      await signInWithGoogle("login");
+      await signInWithGoogle("login", getLoginDestination());
     } catch (err: unknown) {
       setError(translateSupabaseError(err));
       setIsLoading(false);
@@ -72,24 +72,42 @@ export default function LoginPage() {
       <div className="flex min-h-screen flex-col justify-between bg-canvas-pure p-8 md:p-12 lg:p-16">
         <div className="mx-auto my-auto w-full max-w-sm py-8">
           {/* Logo */}
-          <Link
-            href="/"
-            aria-label="Kembali ke halaman utama Muri"
-            className="mb-12 inline-flex items-center gap-2"
-          >
-            <Image
-              src="/logo.png"
-              alt="Logo Muri"
-              width={40}
-              height={40}
-              priority
-              className="size-10 object-contain"
-            />
+          <div className="mb-12 flex items-center justify-between gap-6">
+            <Link
+              href="/"
+              aria-label="Muri"
+              className="inline-flex shrink-0 items-center gap-2"
+            >
+              <Image
+                src="/logo.png"
+                alt="Logo Muri"
+                width={40}
+                height={40}
+                priority
+                className="size-10 object-contain"
+              />
 
-            <span className="font-display text-2xl font-medium tracking-tight text-brand-black">
-              Muri
-            </span>
-          </Link>
+              <span className="font-display text-2xl font-medium tracking-tight text-brand-black">
+                Muri
+              </span>
+            </Link>
+
+            <Link
+              href="/"
+              className="
+      group inline-flex items-center gap-2 whitespace-nowrap
+      text-[11px] font-bold text-brand-emerald
+      transition-colors hover:text-brand-forest
+    "
+            >
+              <ArrowLeft
+                className="size-3.5 transition-transform duration-300 group-hover:-translate-x-1"
+                strokeWidth={2}
+              />
+
+              <span>Kembali ke beranda</span>
+            </Link>
+          </div>
 
           {/* Heading */}
           <div className="mb-10">
@@ -341,4 +359,15 @@ function GoogleIcon() {
       />
     </svg>
   );
+}
+
+function getLoginDestination() {
+  const params = new URLSearchParams(window.location.search);
+  const nextPath = params.get("next");
+
+  if (nextPath && nextPath.startsWith("/") && !nextPath.startsWith("//")) {
+    return nextPath;
+  }
+
+  return "/dashboard";
 }
