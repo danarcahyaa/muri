@@ -17,7 +17,7 @@ export default function EcosystemSection() {
               </span>
             </div>
 
-            <h2 className="font-display text-5xl font-normal leading-18 tracking-tighter sm:text-6xl lg:text-7xl">
+            <h2 className="font-display text-5xl font-normal leading-none md:leading-18 tracking-tighter sm:text-6xl lg:text-7xl">
               <span className="block">Nikmati Ekosistem</span>
               <span className="block">Sirkular Muri.</span>
             </h2>

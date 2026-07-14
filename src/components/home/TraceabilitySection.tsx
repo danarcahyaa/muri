@@ -1,40 +1,79 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowRight, Leaf, Loader2, Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { traceTimeline } from "@/data/traceability";
+import {
+  ArrowRight,
+  Leaf,
+  Loader2,
+  PackageSearch,
+  PackageX,
+  Search,
+} from "lucide-react";
 
-type TraceStatus = "idle" | "processing" | "done";
+import {
+  findTraceabilityRecord,
+  normalizeBatchId,
+  type TraceabilityRecord,
+} from "@/data/traceability";
+
+type TraceStatus = "idle" | "processing" | "success" | "not-found";
 
 export default function TraceabilitySection() {
-  const [batchId, setBatchId] = useState("BATCH-4356");
-  const [trackedBatch, setTrackedBatch] = useState("");
+  const [batchId, setBatchId] = useState("PRD-4356");
+  const [trackedRecord, setTrackedRecord] = useState<TraceabilityRecord | null>(
+    null,
+  );
+
   const [status, setStatus] = useState<TraceStatus>("idle");
+
+  const normalizedBatch = normalizeBatchId(batchId);
+  const previewRecord = findTraceabilityRecord(batchId);
+
+  const hasCompleteBatchFormat = /^BATCH-[A-Z0-9-]{4,}$/.test(normalizedBatch);
+
+  const showProductNotFound = hasCompleteBatchFormat && !previewRecord;
 
   const processingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
 
   function handleBatchChange(value: string) {
+    if (processingTimeoutRef.current) {
+      clearTimeout(processingTimeoutRef.current);
+      processingTimeoutRef.current = null;
+    }
+
     setBatchId(value);
+    setTrackedRecord(null);
     setStatus("idle");
   }
 
   function handleTrace() {
-    const normalizedBatch = batchId.trim().replace(/^#/, "").toUpperCase();
-    if (!normalizedBatch || status === "processing") return;
+    const normalizedBatch = normalizeBatchId(batchId);
+
+    if (!normalizedBatch || status === "processing") {
+      return;
+    }
 
     if (processingTimeoutRef.current) {
       clearTimeout(processingTimeoutRef.current);
     }
 
+    const record = findTraceabilityRecord(normalizedBatch);
+
     setBatchId(normalizedBatch);
+    setTrackedRecord(null);
     setStatus("processing");
 
     processingTimeoutRef.current = setTimeout(() => {
-      setTrackedBatch(normalizedBatch);
-      setStatus("done");
+      if (!record) {
+        setStatus("not-found");
+        return;
+      }
+
+      setTrackedRecord(record);
+      setStatus("success");
     }, 1400);
   }
 
@@ -61,7 +100,7 @@ export default function TraceabilitySection() {
               </span>
             </div>
 
-            <h2 className="font-display text-5xl font-normal leading-18 tracking-tighter sm:text-6xl lg:text-7xl">
+            <h2 className="font-display text-5xl font-normal leading-none md:leading-18 tracking-tighter sm:text-6xl lg:text-7xl">
               <span className="block">Coba Tracing, Tuk</span>
               <span className="block">Cegah Greenwashing.</span>
             </h2>
@@ -80,11 +119,17 @@ export default function TraceabilitySection() {
           <TracingInput
             batchId={batchId}
             status={status}
+            previewRecord={previewRecord}
+            showProductNotFound={showProductNotFound}
             onBatchChange={handleBatchChange}
             onTrace={handleTrace}
           />
 
-          <TracingResult batchId={trackedBatch} status={status} />
+          <TracingResult
+            batchId={normalizedBatch}
+            status={status}
+            record={trackedRecord}
+          />
         </div>
       </div>
     </section>
@@ -94,6 +139,8 @@ export default function TraceabilitySection() {
 type TracingInputProps = {
   batchId: string;
   status: TraceStatus;
+  previewRecord: TraceabilityRecord | null;
+  showProductNotFound: boolean;
   onBatchChange: (value: string) => void;
   onTrace: () => void;
 };
@@ -101,6 +148,8 @@ type TracingInputProps = {
 function TracingInput({
   batchId,
   status,
+  previewRecord,
+  showProductNotFound,
   onBatchChange,
   onTrace,
 }: TracingInputProps) {
@@ -110,11 +159,12 @@ function TracingInput({
     <div className="flex flex-col p-6 sm:p-8 lg:col-span-2 lg:p-10">
       <div className="flex items-center gap-3 text-brand-emerald">
         <Leaf className="size-4" strokeWidth={2} />
+
         <span className="text-sm font-bold uppercase">Input Cepat</span>
       </div>
 
       <h3 className="mt-3 font-display text-3xl font-medium leading-tight tracking-tight sm:text-4xl">
-        Produk apa yang ingin Anda lacak?
+        Masukkan Batch ID produk Anda.
       </h3>
 
       <div className="mt-10">
@@ -142,26 +192,15 @@ function TracingInput({
             autoComplete="off"
             disabled={isProcessing}
             className="min-w-0 flex-1 bg-transparent font-display text-3xl text-brand-black outline-none placeholder:text-muted-moss/50 disabled:opacity-50"
-            placeholder="BATCH-4356"
+            placeholder="PRD-4356"
           />
         </div>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-lg bg-canvas-warm">
-        <div className="aspect-video overflow-hidden">
-          <Image
-            src="/product.png"
-            alt="Kemeja kasual upcycled denim"
-            width={800}
-            height={500}
-            className="size-full object-cover object-center"
-          />
-        </div>
-      </div>
-
-      <h4 className="mt-6 font-display text-3xl font-medium leading-tight tracking-tight">
-        Kemeja Casual Upcycled Denim
-      </h4>
+      <ProductPreview
+        record={previewRecord}
+        showNotFound={showProductNotFound}
+      />
 
       <div className="mt-8">
         <button
@@ -185,8 +224,8 @@ function TracingInput({
       </div>
 
       <p className="mt-4 text-xs leading-relaxed text-muted-moss">
-        *Masukkan Batch ID untuk melihat rekam jejak digital material dari hulu
-        ke hilir.
+        *Masukkan Batch ID untuk melihat produk dan rekam jejak digital material
+        dari hulu ke hilir.
       </p>
     </div>
   );
@@ -195,13 +234,15 @@ function TracingInput({
 type TracingResultProps = {
   batchId: string;
   status: TraceStatus;
+  record: TraceabilityRecord | null;
 };
 
-function TracingResult({ batchId, status }: TracingResultProps) {
+function TracingResult({ batchId, status, record }: TracingResultProps) {
   return (
     <div className="flex min-h-full flex-col bg-brand-forest p-6 text-white sm:p-8 lg:col-span-3 lg:p-10">
       <div className="flex items-center gap-3 text-brand-lime">
         <Leaf className="size-4" strokeWidth={2} />
+
         <span className="text-sm font-bold uppercase">Output Kilat</span>
       </div>
 
@@ -210,17 +251,20 @@ function TracingResult({ batchId, status }: TracingResultProps) {
       </h3>
 
       {status === "idle" && <TracingEmptyState />}
+
       {status === "processing" && <TracingProcessingState />}
-      {status === "done" && <TracingDoneState batchId={batchId} />}
+
+      {status === "not-found" && <TracingNotFoundState batchId={batchId} />}
+
+      {status === "success" && record && <TracingDoneState record={record} />}
     </div>
   );
 }
-
 function TracingEmptyState() {
   return (
     <div className="flex flex-1 items-center justify-center py-16">
       <div className="max-w-md text-center">
-        <div className="mx-auto flex size-16 items-center justify-center rounded-full border border-white/15 bg-white/5 text-brand-lime">
+        <div className="mx-auto flex size-16 items-center justify-center rounded-full border border-white/15 bg-white/[0.025] text-brand-lime">
           <Search className="size-7" strokeWidth={1.5} />
         </div>
 
@@ -300,25 +344,24 @@ function TracingProcessingState() {
   );
 }
 
-function TracingDoneState({ batchId }: { batchId: string }) {
+function TracingDoneState({ record }: { record: TraceabilityRecord }) {
   return (
     <div className="mt-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <div className="rounded-2xl border border-white/15 bg-white/5 p-5 sm:p-6">
-        <h4 className="font-display text-2xl font-medium tracking-tight sm:text-2xl">
-          Perjalanan Kain Denim Bekas menjadi nilai guna.
+      <div className="rounded-2xl border border-white/15 bg-white/[0.025] backdrop-blur-[2px] p-5 sm:p-6">
+        <h4 className="font-display text-2xl font-medium tracking-tight">
+          {record.resultTitle}
         </h4>
 
         <p className="mt-2 text-xs leading-relaxed text-white/50">
-          Hasil kalkulasi konversi material sirkular yang sah dan akurat secara
-          kuantitatif.
+          {record.resultDescription}
         </p>
 
         <p className="mt-3 text-xs font-bold uppercase text-brand-lime">
-          Batch #{batchId}
+          Batch #{record.batchId}
         </p>
 
         <div className="mt-6 space-y-3">
-          {traceTimeline.map((item, index) => (
+          {record.timeline.map((item, index) => (
             <div
               key={item.number}
               style={{ animationDelay: `${index * 180}ms` }}
@@ -346,29 +389,18 @@ function TracingDoneState({ batchId }: { batchId: string }) {
             Realtime Impact
           </h4>
 
-          <div className="grid gap-6 sm:grid-cols-2 mt-2">
-            <ImpactMetric
-              target={426}
-              suffix=" Kg"
-              label="Emisi Dicegah"
-              active
-            />
-            <ImpactMetric
-              target={12450}
-              suffix=" L"
-              label="Air yang Dihemat"
-              active
-              delayMs={200}
-            />
+          <div className="mt-2 grid gap-6 sm:grid-cols-2">
+            {record.impacts.map((impact, index) => (
+              <ImpactMetric
+                key={impact.label}
+                target={impact.target}
+                suffix={impact.suffix}
+                label={impact.label}
+                active
+                delayMs={index * 200}
+              />
+            ))}
           </div>
-
-          <button
-            type="button"
-            className="group mt-8 inline-flex items-center justify-center gap-2 rounded-md bg-brand-lime px-6 py-4 text-xs font-bold text-brand-black transition hover:-translate-y-0.5 hover:bg-white"
-          >
-            Telusuri Tracing
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-          </button>
         </div>
       </div>
     </div>
@@ -429,6 +461,95 @@ function ImpactMetric({
       <p className="mt-4 text-sm font-medium uppercase text-white/50">
         {label}
       </p>
+    </div>
+  );
+}
+
+type ProductPreviewProps = {
+  record: TraceabilityRecord | null;
+  showNotFound: boolean;
+};
+
+function ProductPreview({ record, showNotFound }: ProductPreviewProps) {
+  if (record) {
+    return (
+      <div className="animate-in fade-in duration-300">
+        <div className="mt-6 overflow-hidden rounded-lg bg-canvas-warm">
+          <div className="aspect-video overflow-hidden">
+            <Image
+              src={record.product.image}
+              alt={record.product.alt}
+              width={800}
+              height={500}
+              className="size-full object-cover object-center"
+            />
+          </div>
+        </div>
+
+        <h4 className="mt-6 font-display text-3xl font-medium leading-tight tracking-tight">
+          {record.product.name}
+        </h4>
+
+        <p className="mt-2 text-xs font-bold uppercase text-brand-emerald">
+          Batch #{record.batchId}
+        </p>
+      </div>
+    );
+  }
+
+  if (showNotFound) {
+    return (
+      <div className="mt-6 flex min-h-[230px] flex-col items-center justify-center rounded-lg border border-error-rust/20 bg-error-rust/[0.04] p-6 text-center">
+        <div className="flex size-12 items-center justify-center rounded-full bg-error-rust/10 text-error-rust">
+          <PackageX className="size-5" strokeWidth={1.7} />
+        </div>
+
+        <h4 className="mt-4 font-display text-lg font-medium text-brand-black">
+          Produk tidak ditemukan
+        </h4>
+
+        <p className="mt-2 max-w-xs text-xs leading-relaxed text-muted-moss">
+          Batch ID tersebut belum terhubung dengan produk yang terdaftar di
+          sistem Muri.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-6 flex min-h-[230px] flex-col items-center justify-center rounded-lg border border-dashed border-line-trace bg-canvas-warm/50 p-6 text-center">
+      <div className="flex size-12 items-center justify-center rounded-full bg-brand-emerald/[0.07] text-brand-emerald">
+        <PackageSearch className="size-5" strokeWidth={1.7} />
+      </div>
+
+      <p className="mt-4 text-xs leading-relaxed text-muted-moss">
+        Produk akan muncul ketika Batch ID berhasil dikenali.
+      </p>
+    </div>
+  );
+}
+
+function TracingNotFoundState({ batchId }: { batchId: string }) {
+  return (
+    <div className="flex flex-1 items-center justify-center py-16">
+      <div className="max-w-md text-center">
+        <div className="mx-auto flex size-16 items-center justify-center rounded-full border border-error-rust/30 bg-error-rust/10 text-[#FF9A92]">
+          <PackageX className="size-7" strokeWidth={1.5} />
+        </div>
+
+        <h4 className="mt-6 font-display text-xl font-medium">
+          Batch tidak ditemukan
+        </h4>
+
+        <p className="mt-3 text-xs leading-relaxed text-white/50">
+          Batch <span className="font-bold text-brand-lime">#{batchId}</span>{" "}
+          belum terdaftar atau belum memiliki produk yang dapat dilacak.
+        </p>
+
+        <p className="mt-3 text-xs leading-relaxed text-white/35">
+          Periksa kembali penulisan Batch ID dan coba lagi.
+        </p>
+      </div>
     </div>
   );
 }

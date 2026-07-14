@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabaseClient";
-import { AuthInput, AuthResponse } from "@/types/auth";
+import { AuthInput, AuthResponse, PasswordResetResponse } from "@/types/auth";
 import { translateSupabaseError } from "@/lib/supabaseError";
 
 /**
@@ -154,6 +154,156 @@ export async function signInWithEmail(
     };
   } catch (err: any) {
     console.error("Error during signInWithEmail:", err);
+    return {
+      success: false,
+      error: translateSupabaseError(err),
+    };
+  }
+}
+/**
+ * Mengirim email pemulihan password.
+ *
+ * @param email Email pengguna
+ */
+export async function requestPasswordReset(
+  email: string,
+): Promise<PasswordResetResponse> {
+  const normalizedEmail = email.trim().toLowerCase();
+
+  if (!normalizedEmail) {
+    return {
+      success: false,
+      error: "Email wajib diisi.",
+    };
+  }
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailPattern.test(normalizedEmail)) {
+    return {
+      success: false,
+      error: "Format email tidak valid.",
+    };
+  }
+
+  try {
+    const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(
+      /\/$/,
+      "",
+    );
+
+    const siteUrl =
+      configuredSiteUrl ||
+      (typeof window !== "undefined"
+        ? window.location.origin
+        : "http://localhost:3000");
+
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      normalizedEmail,
+      {
+        redirectTo: `${siteUrl}/reset-password`,
+      },
+    );
+
+    if (error) {
+      return {
+        success: false,
+        error: translateSupabaseError(error),
+      };
+    }
+
+    /*
+     * Pesan dibuat generik agar aplikasi tidak memberitahukan
+     * apakah suatu email terdaftar atau tidak.
+     */
+    return {
+      success: true,
+      message:
+        "Jika email tersebut terdaftar, tautan untuk mengatur ulang password akan segera dikirim.",
+      data: null,
+    };
+  } catch (err: unknown) {
+    console.error("Error requesting password reset:", err);
+
+    return {
+      success: false,
+      error: translateSupabaseError(err),
+    };
+  }
+}
+
+/**
+ * Memperbarui password setelah pengguna membuka link recovery.
+ *
+ * @param newPassword Password baru pengguna
+ */
+export async function updatePassword(
+  newPassword: string,
+): Promise<PasswordResetResponse> {
+  if (!newPassword) {
+    return {
+      success: false,
+      error: "Password baru wajib diisi.",
+    };
+  }
+
+  if (newPassword.length < 8) {
+    return {
+      success: false,
+      error: "Password baru harus minimal 8 karakter.",
+    };
+  }
+
+  try {
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+
+    if (sessionError) {
+      return {
+        success: false,
+        error: translateSupabaseError(sessionError),
+      };
+    }
+
+    if (!session) {
+      return {
+        success: false,
+        error:
+          "Tautan reset password tidak valid atau sudah kedaluwarsa. Silakan minta tautan baru.",
+      };
+    }
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (updateError) {
+      return {
+        success: false,
+        error: translateSupabaseError(updateError),
+      };
+    }
+
+    // Meminta pengguna login kembali menggunakan password baru.
+    const { error: signOutError } = await supabase.auth.signOut();
+
+    if (signOutError) {
+      console.error(
+        "Password berhasil diperbarui, tetapi gagal logout:",
+        signOutError,
+      );
+    }
+
+    return {
+      success: true,
+      message: "Password berhasil diperbarui. Silakan masuk kembali.",
+      data: null,
+    };
+  } catch (err: unknown) {
+    console.error("Error updating password:", err);
+
     return {
       success: false,
       error: translateSupabaseError(err),

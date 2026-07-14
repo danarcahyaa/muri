@@ -19,3 +19,4 @@ export interface AuthData {
 
 export type AuthResponse = BaseResponse<AuthData>;
 
+export type PasswordResetResponse = BaseResponse<null>;

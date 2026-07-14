@@ -7,7 +7,9 @@ export default function HeroSection() {
     <section className="relative isolate min-h-screen overflow-hidden bg-brand-black text-white">
       <HeroBackground />
 
-<div className="relative z-10 mx-auto grid min-h-[calc(100svh-4rem)] w-[min(1320px,calc(100%_-_48px))] items-center gap-12 py-[clamp(78px,9vw,135px)] lg:grid-cols-5">        <HeroContent />
+      <div className="relative z-10 mx-auto grid min-h-[calc(100svh-4rem)] w-[min(1320px,calc(100%_-_48px))] items-center gap-12 py-[clamp(78px,9vw,135px)] lg:grid-cols-5">
+        {" "}
+        <HeroContent />
         <HeroDiagram />
       </div>
     </section>
@@ -71,7 +73,7 @@ function HeroContent() {
         </span>
       </div>
 
-      <h1 className="font-display text-5xl font-normal leading-18 tracking-tighter text-white sm:text-6xl lg:text-7xl xl:text-[5.5rem]/[6rem]">
+      <h1 className="font-display text-5xl font-normal leading-none md:leading-18 tracking-tighter text-white sm:text-6xl lg:text-7xl xl:text-[5.5rem]/[6rem]">
         <span className="block lg:whitespace-nowrap">Jangan Biarkan</span>
         <span className="block lg:whitespace-nowrap">
           Sisa Produksi <span className="text-brand-lime">Kain</span>

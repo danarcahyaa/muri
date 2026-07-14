@@ -75,7 +75,7 @@ function ImpactHeader() {
           </span>
         </div>
 
-        <h2 className="font-display text-5xl font-light leading-18 tracking-tighter text-white sm:text-6xl lg:text-7xl">
+        <h2 className="font-display text-5xl font-light leading-none md:leading-18 tracking-tighter text-white sm:text-6xl lg:text-7xl">
           <span className="block">Dampak Nyata, Kita</span>
           <span className="block">Ciptakan Bersama.</span>
         </h2>

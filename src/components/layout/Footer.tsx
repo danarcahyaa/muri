@@ -9,14 +9,13 @@ const ecosystemLinks = [
 ];
 
 const platformLinks = [
-  { label: "AI Tracing", href: "#traceability" },
+  { label: "Tracing Produk", href: "#traceability" },
   { label: "Pasar Material", href: "#pasar-material" },
   { label: "Produk Upcycle", href: "#produk-upcycle" },
-  { label: "Dampak", href: "#dampak" },
 ];
 
 const muriLinks = [
-  { label: "Mitra", href: "#mitra" },
+  { label: "Dampak", href: "#dampak" },
   { label: "Edukasi", href: "#edukasi" },
   { label: "Tentang", href: "#tentang" },
 ];

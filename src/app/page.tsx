@@ -4,11 +4,13 @@ import { useState } from "react";
 import Header from "@/components/layout/Header";
 import HeroSection from "@/components/home/HeroSection";
 import EcosystemSection from "@/components/home/EcosystemSection";
+import HowItWorksSection from "@/components/home/HowItWorksSection";
 import TraceabilitySection from "@/components/home/TraceabilitySection";
+import ImpactSection from "@/components/home/ImpactSection";
+import AIMaterialSection from "@/components/home/AIMaterialSection";
+import Footer from "@/components/layout/Footer";
 import FloatingChatbotButton from "@/components/chatbot/FloatingChatbotButton";
 import ChatbotModal from "@/components/chatbot/ChatbotModal";
-import ImpactSection from "@/components/home/ImpactSection";
-import Footer from "@/components/layout/Footer";
 
 export default function Home() {
   const [chatOpen, setChatOpen] = useState(false);
@@ -22,7 +24,10 @@ export default function Home() {
         <EcosystemSection />
         <TraceabilitySection />
         <ImpactSection />
+        <HowItWorksSection />
+        <AIMaterialSection />
       </main>
+
       <Footer />
 
       <FloatingChatbotButton
