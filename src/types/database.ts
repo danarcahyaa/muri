@@ -508,6 +508,7 @@ export type Database = {
           production_id: string
           qr_code_url: string | null
           sku: string
+          status: Database["public"]["Enums"]["product_status"]
           stock: number
           updated_at: string | null
           water_saved_liter: number
@@ -528,6 +529,7 @@ export type Database = {
           production_id: string
           qr_code_url?: string | null
           sku: string
+          status?: Database["public"]["Enums"]["product_status"]
           stock?: number
           updated_at?: string | null
           water_saved_liter?: number
@@ -548,6 +550,7 @@ export type Database = {
           production_id?: string
           qr_code_url?: string | null
           sku?: string
+          status?: Database["public"]["Enums"]["product_status"]
           stock?: number
           updated_at?: string | null
           water_saved_liter?: number
@@ -690,6 +693,38 @@ export type Database = {
           },
         ]
       }
+      waste_post_media: {
+        Row: {
+          created_at: string | null
+          id: string
+          media_type: Database["public"]["Enums"]["media_type"]
+          media_url: string
+          waste_post_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          media_type: Database["public"]["Enums"]["media_type"]
+          media_url: string
+          waste_post_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          media_type?: Database["public"]["Enums"]["media_type"]
+          media_url?: string
+          waste_post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waste_post_media_waste_post_id_fkey"
+            columns: ["waste_post_id"]
+            isOneToOne: false
+            referencedRelation: "waste_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       waste_posts: {
         Row: {
           created_at: string | null
@@ -700,7 +735,7 @@ export type Database = {
           minimum_order_kg: number
           price_per_kg: number
           provider_id: string
-          status: string
+          status: Database["public"]["Enums"]["waste_post_status"]
           updated_at: string | null
           weight_kg: number
         }
@@ -713,7 +748,7 @@ export type Database = {
           minimum_order_kg?: number
           price_per_kg?: number
           provider_id: string
-          status?: string
+          status: Database["public"]["Enums"]["waste_post_status"]
           updated_at?: string | null
           weight_kg: number
         }
@@ -726,7 +761,7 @@ export type Database = {
           minimum_order_kg?: number
           price_per_kg?: number
           provider_id?: string
-          status?: string
+          status?: Database["public"]["Enums"]["waste_post_status"]
           updated_at?: string | null
           weight_kg?: number
         }
@@ -756,6 +791,9 @@ export type Database = {
           id: string
           pickup_address: string | null
           pickup_maps_url: string | null
+          total_distributed_waste: number
+          total_income: number
+          total_transaction: number
           updated_at: string | null
         }
         Insert: {
@@ -766,6 +804,9 @@ export type Database = {
           id: string
           pickup_address?: string | null
           pickup_maps_url?: string | null
+          total_distributed_waste?: number
+          total_income?: number
+          total_transaction?: number
           updated_at?: string | null
         }
         Update: {
@@ -776,6 +817,9 @@ export type Database = {
           id?: string
           pickup_address?: string | null
           pickup_maps_url?: string | null
+          total_distributed_waste?: number
+          total_income?: number
+          total_transaction?: number
           updated_at?: string | null
         }
         Relationships: []
@@ -790,7 +834,7 @@ export type Database = {
           id: string
           media_urls_snapshot: Json
           original_price_per_kg: number
-          purchase_status: string
+          purchase_status: Database["public"]["Enums"]["purchase_status"] | null
           updated_at: string | null
           waste_post_id: string
           weight_bought_kg: number
@@ -804,7 +848,9 @@ export type Database = {
           id?: string
           media_urls_snapshot: Json
           original_price_per_kg: number
-          purchase_status?: string
+          purchase_status?:
+            | Database["public"]["Enums"]["purchase_status"]
+            | null
           updated_at?: string | null
           waste_post_id: string
           weight_bought_kg: number
@@ -818,7 +864,9 @@ export type Database = {
           id?: string
           media_urls_snapshot?: Json
           original_price_per_kg?: number
-          purchase_status?: string
+          purchase_status?:
+            | Database["public"]["Enums"]["purchase_status"]
+            | null
           updated_at?: string | null
           waste_post_id?: string
           weight_bought_kg?: number
@@ -947,6 +995,14 @@ export type Database = {
     }
     Enums: {
       entity_role: "consumer" | "brand" | "waste_provider"
+      media_type: "image" | "video"
+      product_status: "draft" | "published" | "archived"
+      purchase_status:
+        | "waiting_confirmation"
+        | "paid"
+        | "completed"
+        | "cancelled"
+      waste_post_status: "active" | "inactive" | "sold_out"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1075,6 +1131,15 @@ export const Constants = {
   public: {
     Enums: {
       entity_role: ["consumer", "brand", "waste_provider"],
+      media_type: ["image", "video"],
+      product_status: ["draft", "published", "archived"],
+      purchase_status: [
+        "waiting_confirmation",
+        "paid",
+        "completed",
+        "cancelled",
+      ],
+      waste_post_status: ["active", "inactive", "sold_out"],
     },
   },
 } as const
