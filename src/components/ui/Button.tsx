@@ -13,7 +13,7 @@ const buttonVariants = cva(
     outline-none select-none
     cursor-pointer
 
-    transition-[background-color,border-color,color,transform,box-shadow]
+    transition-[background-color,border-color,color,box-shadow]
     duration-300
 
     focus-visible:ring-2
@@ -44,7 +44,6 @@ const buttonVariants = cva(
           text-canvas-pure
           shadow-none
 
-          hover:-translate-y-0.5
           hover:bg-brand-forest
 
           focus-visible:border-brand-emerald
@@ -61,7 +60,6 @@ const buttonVariants = cva(
           text-brand-black
           shadow-none
 
-          hover:-translate-y-0.5
           hover:border-brand-emerald
           hover:bg-canvas-warm
 
@@ -73,7 +71,6 @@ const buttonVariants = cva(
           bg-secondary
           text-secondary-foreground
 
-          hover:-translate-y-0.5
           hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)]
 
           focus-visible:border-ring
@@ -95,7 +92,6 @@ const buttonVariants = cva(
           bg-destructive/10
           text-destructive
 
-          hover:-translate-y-0.5
           hover:bg-destructive/20
 
           focus-visible:border-destructive/40
@@ -117,7 +113,6 @@ const buttonVariants = cva(
           text-canvas-pure
           shadow-none
 
-          hover:-translate-y-0.5
           hover:bg-brand-forest
 
           focus-visible:border-brand-emerald
@@ -129,7 +124,6 @@ const buttonVariants = cva(
           bg-transparent
           text-brand-black
 
-          hover:-translate-y-0.5
           hover:bg-brand-black/10
 
           focus-visible:border-brand-black
@@ -141,7 +135,6 @@ const buttonVariants = cva(
           bg-transparent
           text-canvas-pure
 
-          hover:-translate-y-0.5
           hover:bg-canvas-pure/15
 
           focus-visible:border-canvas-pure
@@ -152,7 +145,6 @@ const buttonVariants = cva(
           bg-brand-lime
           text-brand-black
 
-          hover:-translate-y-0.5
           hover:bg-brand-lime/90
 
           focus-visible:border-brand-lime
@@ -167,7 +159,6 @@ const buttonVariants = cva(
           text-canvas-pure
           shadow-none
 
-          hover:-translate-y-0.5
           hover:bg-brand-forest
 
           focus-visible:border-brand-emerald
@@ -180,7 +171,6 @@ const buttonVariants = cva(
           text-brand-black
           shadow-none
 
-          hover:-translate-y-0.5
           hover:border-brand-emerald
           hover:bg-canvas-warm
 
@@ -214,8 +204,7 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends ButtonPrimitive.Props,
-    VariantProps<typeof buttonVariants> {
+  extends ButtonPrimitive.Props, VariantProps<typeof buttonVariants> {
   loading?: boolean;
   fullWidth?: boolean;
 }
@@ -233,8 +222,7 @@ function Button({
   const currentSize = size ?? "default";
 
   const isIconButton =
-    typeof currentSize === "string" &&
-    currentSize.startsWith("icon");
+    typeof currentSize === "string" && currentSize.startsWith("icon");
 
   return (
     <ButtonPrimitive
