@@ -53,7 +53,9 @@ function isNavigationItemActive(
 
   return (
     pathname === itemPath ||
-    pathname.startsWith(`${itemPath}/`)
+    pathname.startsWith(
+      `${itemPath}/`,
+    )
   );
 }
 
@@ -64,21 +66,30 @@ export default function Header() {
   const accountMenuRef =
     useRef<HTMLDivElement>(null);
 
-  const [mobileMenuOpen, setMobileMenuOpen] =
-    useState(false);
+  const [
+    mobileMenuOpen,
+    setMobileMenuOpen,
+  ] = useState(false);
 
-  const [accountMenuOpen, setAccountMenuOpen] =
-    useState(false);
+  const [
+    accountMenuOpen,
+    setAccountMenuOpen,
+  ] = useState(false);
 
-  const [isSigningOut, setIsSigningOut] =
-    useState(false);
+  const [
+    isSigningOut,
+    setIsSigningOut,
+  ] = useState(false);
 
-  const [currentHash, setCurrentHash] =
-    useState("");
+  const [
+    currentHash,
+    setCurrentHash,
+  ] = useState("");
 
   const {
     user,
     fullName,
+    dashboardHref,
     isLoading,
     signOut,
   } = useAuth();
@@ -88,6 +99,10 @@ export default function Header() {
       ? `${pathname}${currentHash}`
       : pathname;
 
+  /*
+   * Login/navbar publik diarahkan ke login customer.
+   * Login brand dan waste provider memiliki halaman sendiri.
+   */
   const nextPath =
     pathname === "/"
       ? "/dashboard"
@@ -111,7 +126,8 @@ export default function Header() {
 
   const displayName =
     fullName ||
-    (typeof user?.user_metadata?.name === "string"
+    (typeof user?.user_metadata?.name ===
+    "string"
       ? user.user_metadata.name
       : "") ||
     user?.email ||
@@ -124,12 +140,13 @@ export default function Header() {
       .toUpperCase() || "M";
 
   /*
-   * Membaca hash seperti #ekosistem agar menu aktif
-   * hanya ketika section tersebut benar-benar dibuka.
+   * Membaca hash seperti #ekosistem.
    */
   useEffect(() => {
     const updateHash = () => {
-      setCurrentHash(window.location.hash);
+      setCurrentHash(
+        window.location.hash,
+      );
     };
 
     updateHash();
@@ -151,23 +168,26 @@ export default function Header() {
    * Tutup menu ketika berpindah halaman.
    */
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileMenuOpen(false);
     setAccountMenuOpen(false);
   }, [pathname]);
 
   /*
-   * Tutup account menu ketika klik di luar atau menekan Escape.
+   * Tutup account menu saat klik di luar
+   * atau menekan Escape.
    */
   useEffect(() => {
     function handleOutsideClick(
       event: MouseEvent,
     ) {
-      const target = event.target as Node;
+      const target =
+        event.target as Node;
 
       if (
         accountMenuRef.current &&
-        !accountMenuRef.current.contains(target)
+        !accountMenuRef.current.contains(
+          target,
+        )
       ) {
         setAccountMenuOpen(false);
       }
@@ -217,6 +237,7 @@ export default function Header() {
       setMobileMenuOpen(false);
 
       router.replace("/");
+      router.refresh();
     } catch (error) {
       console.error(
         "Gagal keluar:",
@@ -276,44 +297,45 @@ export default function Header() {
             lg:flex
           "
         >
-          {navigationItems.map((item) => {
-            const isActive =
-              isNavigationItemActive(
-                item.href,
-                pathname,
-                currentHash,
-              );
+          {navigationItems.map(
+            (item) => {
+              const isActive =
+                isNavigationItemActive(
+                  item.href,
+                  pathname,
+                  currentHash,
+                );
 
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                aria-current={
-                  isActive
-                    ? "page"
-                    : undefined
-                }
-                className={`
-                  group relative inline-flex
-                  items-center whitespace-nowrap
-                  py-3 text-xs font-semibold
-                  transition-colors
-
-                  ${
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  aria-current={
                     isActive
-                      ? "text-brand-emerald"
-                      : `
-                        text-brand-black
-                        hover:text-brand-emerald
-                      `
+                      ? "page"
+                      : undefined
                   }
-                `}
-              >
-                {item.label}
+                  className={`
+                    group relative inline-flex
+                    items-center whitespace-nowrap
+                    py-3 text-xs font-semibold
+                    transition-colors
 
-              </Link>
-            );
-          })}
+                    ${
+                      isActive
+                        ? "text-brand-emerald"
+                        : `
+                          text-brand-black
+                          hover:text-brand-emerald
+                        `
+                    }
+                  `}
+                >
+                  {item.label}
+                </Link>
+              );
+            },
+          )}
         </nav>
 
         {/* Desktop authentication */}
@@ -333,19 +355,21 @@ export default function Header() {
                   bg-canvas-pure p-1
                 "
               >
-                <Link
-                  href="/dashboard"
-                  className="
-                    inline-flex items-center
-                    justify-center px-5 py-3
-                    text-xs font-bold
-                    text-brand-black
-                    transition-colors
-                    hover:text-brand-emerald
-                  "
-                >
-                  Dashboard
-                </Link>
+                {dashboardHref && (
+                  <Link
+                    href={dashboardHref}
+                    className="
+                      inline-flex items-center
+                      justify-center px-5 py-3
+                      text-xs font-bold
+                      text-brand-black
+                      transition-colors
+                      hover:text-brand-emerald
+                    "
+                  >
+                    Dashboard
+                  </Link>
+                )}
 
                 <button
                   type="button"
@@ -355,7 +379,8 @@ export default function Header() {
                   }
                   onClick={() =>
                     setAccountMenuOpen(
-                      (current) => !current,
+                      (current) =>
+                        !current,
                     )
                   }
                   className="
@@ -399,28 +424,38 @@ export default function Header() {
                     </p>
                   </div>
 
-                  <Link
-                    href="/dashboard"
-                    onClick={() =>
-                      setAccountMenuOpen(false)
-                    }
-                    className="
-                      mt-2 flex items-center
-                      rounded-xl px-4 py-3
-                      text-xs font-semibold
-                      text-brand-black
-                      transition-colors
-                      hover:bg-canvas-warm
-                      hover:text-brand-emerald
-                    "
-                  >
-                    Buka Dashboard
-                  </Link>
+                  {dashboardHref && (
+                    <Link
+                      href={
+                        dashboardHref
+                      }
+                      onClick={() =>
+                        setAccountMenuOpen(
+                          false,
+                        )
+                      }
+                      className="
+                        mt-2 flex items-center
+                        rounded-xl px-4 py-3
+                        text-xs font-semibold
+                        text-brand-black
+                        transition-colors
+                        hover:bg-canvas-warm
+                        hover:text-brand-emerald
+                      "
+                    >
+                      Buka Dashboard
+                    </Link>
+                  )}
 
                   <button
                     type="button"
-                    disabled={isSigningOut}
-                    onClick={handleSignOut}
+                    disabled={
+                      isSigningOut
+                    }
+                    onClick={
+                      handleSignOut
+                    }
                     className="
                       flex w-full items-center
                       gap-2 rounded-xl
@@ -492,8 +527,12 @@ export default function Header() {
               ? "Tutup menu navigasi"
               : "Buka menu navigasi"
           }
-          aria-expanded={mobileMenuOpen}
-          onClick={toggleMobileMenu}
+          aria-expanded={
+            mobileMenuOpen
+          }
+          onClick={
+            toggleMobileMenu
+          }
           className="
             flex size-11 items-center
             justify-center justify-self-end
@@ -559,53 +598,61 @@ export default function Header() {
             aria-label="Navigasi mobile"
             className="flex flex-col"
           >
-            {navigationItems.map((item) => {
-              const isActive =
-                isNavigationItemActive(
-                  item.href,
-                  pathname,
-                  currentHash,
-                );
+            {navigationItems.map(
+              (item) => {
+                const isActive =
+                  isNavigationItemActive(
+                    item.href,
+                    pathname,
+                    currentHash,
+                  );
 
-              return (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  aria-current={
-                    isActive
-                      ? "page"
-                      : undefined
-                  }
-                  onClick={() =>
-                    setMobileMenuOpen(false)
-                  }
-                  className={`
-                    flex items-center
-                    justify-between
-                    border-b
-                    border-brand-black/10
-                    py-4 text-sm
-                    font-semibold
-                    transition-colors
-
-                    ${
-                      isActive
-                        ? "text-brand-emerald"
-                        : `
-                          text-brand-black
-                          hover:text-brand-emerald
-                        `
+                return (
+                  <Link
+                    key={
+                      item.label
                     }
-                  `}
-                >
-                  <span>{item.label}</span>
+                    href={item.href}
+                    aria-current={
+                      isActive
+                        ? "page"
+                        : undefined
+                    }
+                    onClick={() =>
+                      setMobileMenuOpen(
+                        false,
+                      )
+                    }
+                    className={`
+                      flex items-center
+                      justify-between
+                      border-b
+                      border-brand-black/10
+                      py-4 text-sm
+                      font-semibold
+                      transition-colors
 
-                  {isActive && (
-                    <span className="size-1.5 rounded-full bg-brand-emerald" />
-                  )}
-                </Link>
-              );
-            })}
+                      ${
+                        isActive
+                          ? "text-brand-emerald"
+                          : `
+                            text-brand-black
+                            hover:text-brand-emerald
+                          `
+                      }
+                    `}
+                  >
+                    <span>
+                      {item.label}
+                    </span>
+
+                    {isActive && (
+                      <span className="size-1.5 rounded-full bg-brand-emerald" />
+                    )}
+                  </Link>
+                );
+              },
+            )}
           </nav>
 
           {/* Mobile authentication */}
@@ -635,28 +682,44 @@ export default function Header() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 pt-5">
-                <Link
-                  href="/dashboard"
-                  onClick={() =>
-                    setMobileMenuOpen(false)
-                  }
-                  className="
-                    inline-flex items-center
-                    justify-center rounded-md
-                    bg-brand-black
-                    px-4 py-4
-                    text-xs font-bold
-                    text-white
-                  "
-                >
-                  Dashboard
-                </Link>
+              <div
+                className={
+                  dashboardHref
+                    ? "grid grid-cols-2 gap-3 pt-5"
+                    : "grid grid-cols-1 gap-3 pt-5"
+                }
+              >
+                {dashboardHref && (
+                  <Link
+                    href={
+                      dashboardHref
+                    }
+                    onClick={() =>
+                      setMobileMenuOpen(
+                        false,
+                      )
+                    }
+                    className="
+                      inline-flex items-center
+                      justify-center rounded-md
+                      bg-brand-black
+                      px-4 py-4
+                      text-xs font-bold
+                      text-white
+                    "
+                  >
+                    Dashboard
+                  </Link>
+                )}
 
                 <button
                   type="button"
-                  onClick={handleSignOut}
-                  disabled={isSigningOut}
+                  onClick={
+                    handleSignOut
+                  }
+                  disabled={
+                    isSigningOut
+                  }
                   className="
                     inline-flex items-center
                     justify-center gap-2
@@ -680,7 +743,9 @@ export default function Header() {
               <Link
                 href={loginHref}
                 onClick={() =>
-                  setMobileMenuOpen(false)
+                  setMobileMenuOpen(
+                    false,
+                  )
                 }
                 className="
                   inline-flex items-center
@@ -697,7 +762,9 @@ export default function Header() {
               <Link
                 href={registerHref}
                 onClick={() =>
-                  setMobileMenuOpen(false)
+                  setMobileMenuOpen(
+                    false,
+                  )
                 }
                 className="
                   inline-flex items-center

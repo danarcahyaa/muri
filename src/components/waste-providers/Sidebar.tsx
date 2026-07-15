@@ -1,29 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 import {
-  LayoutDashboard,
+  usePathname,
+  useRouter,
+} from "next/navigation";
+import {
   Layers,
-  Truck,
+  LayoutDashboard,
   Leaf,
-  Factory,
   LogOut,
-  History,
+  Truck,
 } from "lucide-react";
+
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarHeader,
-  SidebarFooter,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/components/auth/AuthProvider";
 
@@ -47,32 +49,66 @@ const wasteProviderNavigation = [
     label: "Jejak Limbah",
     href: "/waste-providers/dashboard/footprint",
     icon: Leaf,
-  }
+  },
 ];
+
+function isNavigationActive(
+  pathname: string,
+  href: string,
+) {
+  if (href === "/waste-providers/dashboard") {
+    return pathname === href;
+  }
+
+  return (
+    pathname === href ||
+    pathname.startsWith(`${href}/`)
+  );
+}
 
 export function WasteProviderSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, fullName, signOut } = useAuth();
-  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const {
+    user,
+    fullName,
+    signOut,
+  } = useAuth();
+
+  const [
+    isSigningOut,
+    setIsSigningOut,
+  ] = useState(false);
 
   const displayName =
     fullName ||
-    (typeof user?.user_metadata?.name === "string"
+    (typeof user?.user_metadata?.name ===
+    "string"
       ? user.user_metadata.name
       : "") ||
     user?.email ||
     "Penyedia Limbah";
 
-  const initial = displayName.trim().charAt(0).toUpperCase() || "M";
+  const initial =
+    displayName
+      .trim()
+      .charAt(0)
+      .toUpperCase() || "M";
 
   async function handleSignOut() {
     try {
       setIsSigningOut(true);
+
       await signOut();
+
       router.replace("/");
+      router.refresh();
     } catch (error) {
-      console.error("Gagal keluar:", error);
+      console.error(
+        "Gagal keluar:",
+        error,
+      );
     } finally {
       setIsSigningOut(false);
     }
@@ -80,150 +116,340 @@ export function WasteProviderSidebar() {
 
   return (
     <>
-      {/* Desktop sidebar using shadcn component */}
-      <Sidebar className="hidden lg:block border-r border-line-trace bg-canvas-pure">
-        {/* Sidebar Header with Logo and Brand Name */}
-        <SidebarHeader className="border-b border-line-trace/40 p-4">
+      {/* Desktop full-height sidebar */}
+      <Sidebar
+        className="
+          hidden
+          border-r border-line-trace
+          bg-canvas-pure
+          [--sidebar-width:240px]
+          lg:flex
+        "
+      >
+        {/* Logo */}
+        <SidebarHeader
+          className="
+            shrink-0
+            border-b border-line-trace/70
+            px-6 py-5
+          "
+        >
           <Link
             href="/"
-            aria-label="Muri"
-            className=""
+            aria-label="Kembali ke beranda Muri"
+            className="
+              flex w-fit items-center gap-2.5
+              rounded-md
+              focus-visible:outline-none
+              focus-visible:ring-2
+              focus-visible:ring-brand-emerald/20
+            "
           >
             <Image
-              src="/logo.svg"
+              src="/logo.png"
               alt="Logo Muri"
-              width={80}
-              height={80}
+              width={40}
+              height={40}
+              priority
+              className="size-10 object-contain"
             />
+
+            <span className="font-display text-2xl font-medium tracking-tight text-brand-black">
+              Muri
+            </span>
           </Link>
         </SidebarHeader>
 
-        {/* Sidebar Navigation Options */}
-        <SidebarContent className="p-4 flex-1">
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-[11px] font-medium uppercase text-muted-moss mb-3 px-3">
+        {/* Navigation */}
+        <SidebarContent className="flex-1 overflow-y-auto px-4 py-6">
+          <SidebarGroup className="p-0">
+            <SidebarGroupLabel
+              className="
+                mb-3 h-auto px-3 py-0
+                text-[11px] font-medium
+                uppercase tracking-normal
+                text-muted-moss
+              "
+            >
               Penyedia Limbah
             </SidebarGroupLabel>
+
             <SidebarGroupContent>
               <SidebarMenu className="space-y-1.5">
-                {wasteProviderNavigation.map((item) => {
-                  const Icon = item.icon;
+                {wasteProviderNavigation.map(
+                  (item) => {
+                    const Icon = item.icon;
 
-                  const isActive =
-                    item.href === "/waste-providers/dashboard"
-                      ? pathname === item.href
-                      : pathname.startsWith(item.href);
+                    const isActive =
+                      isNavigationActive(
+                        pathname,
+                        item.href,
+                      );
 
-                  return (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton
-                        isActive={isActive}
-                        render={<Link href={item.href} />}
-                        className="w-full flex items-center gap-3 px-3 py-3 text-xs font-semibold text-muted-moss data-active:text-brand-black"
+                    return (
+                      <SidebarMenuItem
+                        key={item.href}
                       >
-                        <Icon
-                          className="size-4 shrink-0"
-                          strokeWidth={1.8}
-                        />
-                        <span>{item.label}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
+                        <SidebarMenuButton
+                          isActive={isActive}
+                          render={
+                            <Link
+                              href={item.href}
+                              aria-current={
+                                isActive
+                                  ? "page"
+                                  : undefined
+                              }
+                            />
+                          }
+                          className={`
+                            h-auto w-full
+                            justify-start gap-3
+                            rounded-md px-3 py-3
+                            text-xs font-semibold
+                            transition-colors
+
+                            ${
+                              isActive
+                                ? `
+                                  bg-brand-lime/65
+                                  text-brand-black
+                                  hover:bg-brand-lime/75
+                                  hover:text-brand-black
+                                `
+                                : `
+                                  text-muted-moss
+                                  hover:bg-canvas-warm
+                                  hover:text-brand-black
+                                `
+                            }
+                          `}
+                        >
+                          <Icon
+                            className="size-4 shrink-0"
+                            strokeWidth={1.8}
+                          />
+
+                          <span className="truncate">
+                            {item.label}
+                          </span>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  },
+                )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
 
-        {/* Sidebar Footer with User Avatar Profile and Sign-Out button */}
-        <SidebarFooter className="border-t border-line-trace/40 p-4 mt-auto">
-          <div className="flex items-center justify-between gap-3 w-full">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-lime font-display text-sm font-bold text-brand-black">
-                {initial}
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-xs font-bold text-brand-black leading-tight">
-                  {displayName}
-                </p>
-                <p className="mt-0.5 truncate text-[10px] text-muted-moss leading-none">
-                  {user?.email}
-                </p>
-              </div>
+        {/* Logged-in user */}
+        <SidebarFooter
+          className="
+            mt-auto shrink-0
+            border-t border-line-trace/70
+            p-4
+          "
+        >
+          <div
+            className="
+              flex w-full items-center gap-3
+              rounded-xl
+              bg-canvas-warm/55
+              p-3
+            "
+          >
+            <div
+              className="
+                flex size-10 shrink-0
+                items-center justify-center
+                rounded-full
+                bg-brand-lime
+                font-display text-sm
+                font-bold text-brand-black
+              "
+            >
+              {initial}
             </div>
+
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-bold leading-tight text-brand-black">
+                {displayName}
+              </p>
+
+              <p className="mt-1 truncate text-[10px] leading-none text-muted-moss">
+                {user?.email}
+              </p>
+            </div>
+
             <button
               type="button"
+              title="Keluar"
+              aria-label="Keluar dari akun"
               disabled={isSigningOut}
               onClick={handleSignOut}
-              className="text-error-rust hover:bg-error-rust/[0.06] p-2 rounded-md transition-colors disabled:opacity-50 shrink-0"
-              title="Keluar"
+              className="
+                flex size-9 shrink-0
+                items-center justify-center
+                rounded-md
+                text-error-rust
+                transition-colors
+
+                hover:bg-error-rust/[0.08]
+
+                focus-visible:outline-none
+                focus-visible:ring-2
+                focus-visible:ring-error-rust/20
+
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+              "
             >
-              <LogOut className="size-4.5" />
+              <LogOut
+                className="size-4"
+                strokeWidth={1.8}
+              />
             </button>
           </div>
         </SidebarFooter>
       </Sidebar>
 
-      {/* Mobile dashboard navigation (Always visible for easy access on mobile) */}
-      <div className="border-b border-line-trace bg-canvas-pure px-4 py-3 lg:hidden w-full flex flex-col gap-3">
-        {/* Brand Header on Mobile */}
-        <div className="flex items-center justify-between w-full px-2">
-          <Link href="/" className="flex items-center gap-2">
+      {/* Mobile header and navigation */}
+      <div
+        className="
+          sticky top-0 z-40
+          border-b border-line-trace
+          bg-canvas-pure
+          lg:hidden
+        "
+      >
+        {/* Mobile brand and account */}
+        <div className="flex items-center justify-between px-4 py-3">
+          <Link
+            href="/"
+            aria-label="Kembali ke beranda Muri"
+            className="flex items-center gap-2"
+          >
             <Image
               src="/logo.png"
               alt="Logo Muri"
-              width={28}
-              height={28}
-              className="size-7 object-contain"
+              width={32}
+              height={32}
+              priority
+              className="size-8 object-contain"
             />
-            <span className="font-display text-md font-medium tracking-tight text-brand-black">
+
+            <span className="font-display text-xl font-medium tracking-tight text-brand-black">
               Muri
             </span>
           </Link>
-          <div className="flex items-center gap-3">
-            <div className="flex size-8 items-center justify-center rounded-full bg-brand-lime font-display text-xs font-bold text-brand-black">
+
+          <div className="flex items-center gap-2">
+            <div
+              className="
+                flex size-9 items-center
+                justify-center rounded-full
+                bg-brand-lime
+                font-display text-xs
+                font-bold text-brand-black
+              "
+              title={displayName}
+            >
               {initial}
             </div>
+
             <button
               type="button"
+              title="Keluar"
+              aria-label="Keluar dari akun"
               disabled={isSigningOut}
               onClick={handleSignOut}
-              className="text-error-rust hover:bg-error-rust/[0.06] p-1.5 rounded-md transition-colors disabled:opacity-50"
-              title="Keluar"
+              className="
+                flex size-9 items-center
+                justify-center rounded-md
+                text-error-rust
+                transition-colors
+
+                hover:bg-error-rust/[0.08]
+
+                focus-visible:outline-none
+                focus-visible:ring-2
+                focus-visible:ring-error-rust/20
+
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+              "
             >
-              <LogOut className="size-4" />
+              <LogOut
+                className="size-4"
+                strokeWidth={1.8}
+              />
             </button>
           </div>
         </div>
 
-        {/* Navigation Items Scroll Area */}
+        {/* Mobile horizontal navigation */}
         <nav
-          aria-label="Navigasi penyedia limbah mobile"
-          className="flex gap-2 overflow-x-auto w-full pt-1 border-t border-line-trace/20"
+          aria-label="Navigasi dashboard penyedia limbah mobile"
+          className="
+            flex gap-2 overflow-x-auto
+            border-t border-line-trace/60
+            px-4 py-3
+          "
         >
-          {wasteProviderNavigation.map((item) => {
-            const Icon = item.icon;
+          {wasteProviderNavigation.map(
+            (item) => {
+              const Icon = item.icon;
 
-            const isActive =
-              item.href === "/waste-providers/dashboard"
-                ? pathname === item.href
-                : pathname.startsWith(item.href);
+              const isActive =
+                isNavigationActive(
+                  pathname,
+                  item.href,
+                );
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`inline-flex shrink-0 items-center gap-2 rounded-sm px-4 py-3 text-xs font-semibold ${
-                  isActive
-                    ? "bg-brand-lime text-brand-black"
-                    : "border border-line-trace text-muted-moss hover:bg-canvas-warm hover:text-brand-black"
-                }`}
-              >
-                <Icon className="size-4" strokeWidth={1.8} />
-                {item.label}
-              </Link>
-            );
-          })}
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={
+                    isActive
+                      ? "page"
+                      : undefined
+                  }
+                  className={`
+                    inline-flex shrink-0
+                    items-center gap-2
+                    rounded-md px-4 py-3
+                    text-xs font-semibold
+                    transition-colors
+
+                    ${
+                      isActive
+                        ? `
+                          bg-brand-lime/65
+                          text-brand-black
+                        `
+                        : `
+                          border border-line-trace
+                          text-muted-moss
+                          hover:bg-canvas-warm
+                          hover:text-brand-black
+                        `
+                    }
+                  `}
+                >
+                  <Icon
+                    className="size-4 shrink-0"
+                    strokeWidth={1.8}
+                  />
+
+                  <span>
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            },
+          )}
         </nav>
       </div>
     </>

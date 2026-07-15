@@ -1,18 +1,24 @@
 import { supabase } from "@/lib/supabaseClient";
-import { AuthInput, AuthResponse, PasswordResetResponse } from "@/types/auth";
+import {
+  type AuthInput,
+  type AuthResponse,
+  type PasswordResetResponse,
+} from "@/types/auth";
 import { translateSupabaseError } from "@/lib/supabaseError";
 
 /**
- * Registers a new user with email, password, and name.
- * Performs registration through Supabase Auth, then saves profile.
+ * Mendaftarkan customer baru.
  *
- * @param input Registration input data (email, password, name)
- * @returns AuthResponse containing the status of the registration
+ * User dibuat melalui Supabase Auth, kemudian profilnya
+ * disimpan ke tabel public.users.
  */
 export async function signUpWithEmail(input: AuthInput): Promise<AuthResponse> {
   const { email, password, name } = input;
 
-  if (!email || !password || !name) {
+  const normalizedEmail = email?.trim();
+  const normalizedName = name?.trim();
+
+  if (!normalizedEmail || !password || !normalizedName) {
     return {
       success: false,
       error: "Semua kolom input (Nama, Email, Password) wajib diisi.",
@@ -27,13 +33,12 @@ export async function signUpWithEmail(input: AuthInput): Promise<AuthResponse> {
   }
 
   try {
-    // Sign up using Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: email.trim(),
-      password: password,
+      email: normalizedEmail,
+      password,
       options: {
         data: {
-          name: name.trim(),
+          name: normalizedName,
         },
       },
     });
@@ -46,24 +51,31 @@ export async function signUpWithEmail(input: AuthInput): Promise<AuthResponse> {
     }
 
     const authUser = authData.user;
+
     if (!authUser) {
       return {
         success: false,
-        error: "Gagal membuat sesi autentikasi pengguna baru.",
+        error: "Gagal membuat akun customer baru.",
       };
     }
 
-    // Insert the new user's profile into the public `users` table
-    const { error: dbError } = await supabase.from("users").insert({
+    const { error: profileError } = await supabase.from("users").insert({
       id: authUser.id,
-      full_name: name.trim(),
+      full_name: normalizedName,
     });
 
-    if (dbError) {
-      console.error("Error inserting user profile:", dbError);
+    if (profileError) {
+      console.error("Gagal membuat profil customer:", profileError);
+
+      /*
+       * Membersihkan session lokal apabila Auth berhasil
+       * tetapi pembuatan profil gagal.
+       */
+      await supabase.auth.signOut();
+
       return {
         success: false,
-        error: `${translateSupabaseError(dbError)}`,
+        error: translateSupabaseError(profileError),
       };
     }
 
@@ -73,32 +85,38 @@ export async function signUpWithEmail(input: AuthInput): Promise<AuthResponse> {
       data: {
         user: {
           id: authUser.id,
-          email: authUser.email as string,
-          name: name.trim(),
+          email: authUser.email ?? normalizedEmail,
+          name: normalizedName,
         },
       },
     };
-  } catch (err: any) {
-    console.error("Error during signUpWithEmail:", err);
+  } catch (error: unknown) {
+    console.error("Error saat mendaftarkan customer:", error);
+
     return {
       success: false,
-      error: translateSupabaseError(err),
+      error: translateSupabaseError(error),
     };
   }
 }
 
 /**
- * Signs in a user with email and password.
+ * Login khusus customer.
  *
- * @param input Login input data (email, password)
- * @returns AuthResponse containing the status of the sign in
+ * Kredensial diperiksa melalui Supabase Auth.
+ * Setelah itu user wajib ditemukan di tabel public.users.
+ *
+ * Akun brand atau waste provider yang mencoba login
+ * melalui halaman customer akan langsung dikeluarkan.
  */
 export async function signInWithEmail(
   input: Omit<AuthInput, "name">,
 ): Promise<AuthResponse> {
-  const { email, password } = input;
+  const normalizedEmail = input.email?.trim();
 
-  if (!email || !password) {
+  const { password } = input;
+
+  if (!normalizedEmail || !password) {
     return {
       success: false,
       error: "Email dan kata sandi wajib diisi.",
@@ -108,8 +126,8 @@ export async function signInWithEmail(
   try {
     const { data: authData, error: authError } =
       await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password,
+        email: normalizedEmail,
+        password,
       });
 
     if (authError) {
@@ -120,6 +138,7 @@ export async function signInWithEmail(
     }
 
     const authUser = authData.user;
+
     if (!authUser) {
       return {
         success: false,
@@ -127,19 +146,43 @@ export async function signInWithEmail(
       };
     }
 
-    // Get name from user_metadata or public `users` table
-    let name = authUser.user_metadata?.name || "";
+    /*
+     * Pastikan akun memang merupakan customer.
+     */
+    const { data: customerProfile, error: customerError } = await supabase
+      .from("users")
+      .select("full_name")
+      .eq("id", authUser.id)
+      .maybeSingle();
 
-    if (!name) {
-      const { data: profile } = await supabase
-        .from("users")
-        .select("full_name")
-        .eq("id", authUser.id)
-        .single();
-      if (profile && profile.full_name) {
-        name = profile.full_name;
-      }
+    if (customerError) {
+      console.error("Gagal mengambil profil customer:", customerError);
+
+      await supabase.auth.signOut();
+
+      return {
+        success: false,
+        error: translateSupabaseError(customerError),
+      };
     }
+
+    if (!customerProfile) {
+      await supabase.auth.signOut();
+
+      return {
+        success: false,
+        error:
+          "Akun ini tidak terdaftar sebagai customer. Silakan masuk melalui halaman yang sesuai.",
+      };
+    }
+
+    const metadataName =
+      typeof authUser.user_metadata?.name === "string"
+        ? authUser.user_metadata.name
+        : "";
+
+    const customerName =
+      customerProfile.full_name || metadataName || "Pengguna";
 
     return {
       success: true,
@@ -147,23 +190,29 @@ export async function signInWithEmail(
       data: {
         user: {
           id: authUser.id,
-          email: authUser.email as string,
-          name: name || "Pengguna",
+          email: authUser.email ?? normalizedEmail,
+          name: customerName,
         },
       },
     };
-  } catch (err: any) {
-    console.error("Error during signInWithEmail:", err);
+  } catch (error: unknown) {
+    console.error("Error saat login customer:", error);
+
+    /*
+     * Bersihkan session parsial jika terjadi error
+     * setelah proses autentikasi.
+     */
+    await supabase.auth.signOut();
+
     return {
       success: false,
-      error: translateSupabaseError(err),
+      error: translateSupabaseError(error),
     };
   }
 }
+
 /**
  * Mengirim email pemulihan password.
- *
- * @param email Email pengguna
  */
 export async function requestPasswordReset(
   email: string,
@@ -212,30 +261,24 @@ export async function requestPasswordReset(
       };
     }
 
-    /*
-     * Pesan dibuat generik agar aplikasi tidak memberitahukan
-     * apakah suatu email terdaftar atau tidak.
-     */
     return {
       success: true,
       message:
         "Jika email tersebut terdaftar, tautan untuk mengatur ulang password akan segera dikirim.",
       data: null,
     };
-  } catch (err: unknown) {
-    console.error("Error requesting password reset:", err);
+  } catch (error: unknown) {
+    console.error("Error saat meminta reset password:", error);
 
     return {
       success: false,
-      error: translateSupabaseError(err),
+      error: translateSupabaseError(error),
     };
   }
 }
 
 /**
- * Memperbarui password setelah pengguna membuka link recovery.
- *
- * @param newPassword Password baru pengguna
+ * Memperbarui password dari halaman recovery.
  */
 export async function updatePassword(
   newPassword: string,
@@ -286,7 +329,6 @@ export async function updatePassword(
       };
     }
 
-    // Meminta pengguna login kembali menggunakan password baru.
     const { error: signOutError } = await supabase.auth.signOut();
 
     if (signOutError) {
@@ -301,18 +343,18 @@ export async function updatePassword(
       message: "Password berhasil diperbarui. Silakan masuk kembali.",
       data: null,
     };
-  } catch (err: unknown) {
-    console.error("Error updating password:", err);
+  } catch (error: unknown) {
+    console.error("Error saat memperbarui password:", error);
 
     return {
       success: false,
-      error: translateSupabaseError(err),
+      error: translateSupabaseError(error),
     };
   }
 }
 
 /**
- * Initiates the login/register flow using Google OAuth.
+ * Memulai autentikasi customer dengan Google.
  */
 export async function signInWithGoogle(
   from: "login" | "register" = "login",
@@ -340,7 +382,7 @@ export async function signInWithGoogle(
   });
 
   if (error) {
-    console.error("Error initiating Google sign in:", error);
+    console.error("Error saat memulai Google Sign In:", error);
 
     throw new Error(`Gagal masuk menggunakan Google: ${error.message}`);
   }

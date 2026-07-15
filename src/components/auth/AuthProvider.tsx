@@ -5,17 +5,29 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 
 import { supabase } from "@/lib/supabaseClient";
+import {
+  resolveAccountProfile,
+  type AccountProfile,
+  type AccountType,
+} from "@/services/auth/accountProfileService";
 
 type AuthContextValue = {
   session: Session | null;
   user: User | null;
+
+  accountProfile: AccountProfile | null;
+  accountType: AccountType | null;
+
   fullName: string;
+  dashboardHref: string | null;
+
   isLoading: boolean;
   signOut: () => Promise<void>;
 };
@@ -28,38 +40,69 @@ type AuthProviderProps = {
 
 export default function AuthProvider({ children }: AuthProviderProps) {
   const [session, setSession] = useState<Session | null>(null);
-  const [fullName, setFullName] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+
+  const [accountProfile, setAccountProfile] = useState<AccountProfile | null>(
+    null,
+  );
+
+  const [resolvedProfileUserId, setResolvedProfileUserId] = useState<
+    string | null
+  >(null);
+
+  const [isSessionLoading, setIsSessionLoading] = useState(true);
+
+  const currentUserIdRef = useRef<string | null>(null);
 
   const user = session?.user ?? null;
 
+  /*
+   * Membaca dan menjaga session Supabase tetap sinkron.
+   */
   useEffect(() => {
     let isMounted = true;
 
-    function updateSession(nextSession: Session | null) {
-      if (!isMounted) return;
+    function applySession(nextSession: Session | null) {
+      if (!isMounted) {
+        return;
+      }
+
+      const nextUserId = nextSession?.user.id ?? null;
+
+      /*
+       * Bersihkan profil lama apabila user berubah
+       * atau melakukan logout.
+       */
+      if (currentUserIdRef.current !== nextUserId) {
+        setAccountProfile(null);
+        setResolvedProfileUserId(null);
+      }
+
+      currentUserIdRef.current = nextUserId;
 
       setSession(nextSession);
-      setIsLoading(false);
+      setIsSessionLoading(false);
     }
 
-    // Membaca session ketika aplikasi pertama kali dimuat.
-    void supabase.auth.getSession().then(({ data, error }) => {
-      if (!isMounted) return;
+    async function initializeSession() {
+      const { data, error } = await supabase.auth.getSession();
+
+      if (!isMounted) {
+        return;
+      }
 
       if (error) {
         console.error("Gagal membaca session:", error);
       }
 
-      updateSession(data.session);
-    });
+      applySession(data.session);
+    }
 
-    // Menjaga navbar dan seluruh aplikasi tetap sinkron
-    // saat login, logout, atau token diperbarui.
+    void initializeSession();
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      updateSession(nextSession);
+      applySession(nextSession);
     });
 
     return () => {
@@ -68,48 +111,98 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     };
   }, []);
 
+  /*
+   * Menentukan jenis akun berdasarkan tabel profil:
+   *
+   * users           -> customer
+   * brands          -> brand
+   * waste_providers -> waste_provider
+   */
   useEffect(() => {
     let isCancelled = false;
 
-    async function loadProfile() {
+    async function loadAccountProfile() {
       if (!user) {
-        setFullName("");
+        setAccountProfile(null);
+        setResolvedProfileUserId(null);
         return;
       }
 
-      const metadataName =
-        typeof user.user_metadata?.name === "string"
-          ? user.user_metadata.name
-          : typeof user.user_metadata?.full_name === "string"
-            ? user.user_metadata.full_name
-            : "";
+      const currentUserId = user.id;
 
-      setFullName(metadataName);
+      try {
+        const profile = await resolveAccountProfile(currentUserId);
 
-      const { data, error } = await supabase
-        .from("users")
-        .select("full_name")
-        .eq("id", user.id)
-        .maybeSingle();
+        if (isCancelled) {
+          return;
+        }
 
-      if (isCancelled) return;
+        if (!profile) {
+          console.error(
+            "User memiliki session Auth, tetapi tidak ditemukan pada tabel users, brands, maupun waste_providers.",
+          );
 
-      if (error) {
-        console.error("Gagal mengambil profil pengguna:", error);
-        return;
-      }
+          setAccountProfile(null);
+          return;
+        }
 
-      if (data?.full_name) {
-        setFullName(data.full_name);
+        setAccountProfile(profile);
+      } catch (error) {
+        if (isCancelled) {
+          return;
+        }
+
+        console.error("Gagal menentukan jenis akun:", error);
+
+        setAccountProfile(null);
+      } finally {
+        if (!isCancelled) {
+          /*
+           * Tetap tandai proses sebagai selesai,
+           * termasuk ketika profil tidak ditemukan.
+           */
+          setResolvedProfileUserId(currentUserId);
+        }
       }
     }
 
-    void loadProfile();
+    void loadAccountProfile();
 
     return () => {
       isCancelled = true;
     };
   }, [user]);
+
+  const metadataName = useMemo(() => {
+    if (!user) {
+      return "";
+    }
+
+    if (typeof user.user_metadata?.name === "string") {
+      return user.user_metadata.name;
+    }
+
+    if (typeof user.user_metadata?.full_name === "string") {
+      return user.user_metadata.full_name;
+    }
+
+    return "";
+  }, [user]);
+
+  const fullName = accountProfile?.name || metadataName || user?.email || "";
+
+  const accountType = accountProfile?.type ?? null;
+
+  const dashboardHref = accountProfile?.dashboardHref ?? null;
+
+  /*
+   * Loading baru selesai apabila:
+   *
+   * 1. Session selesai dibaca.
+   * 2. Profil user aktif selesai diperiksa.
+   */
+  const isLoading =
+    isSessionLoading || Boolean(user && resolvedProfileUserId !== user.id);
 
   async function signOut() {
     const { error } = await supabase.auth.signOut();
@@ -117,23 +210,41 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     if (error) {
       throw error;
     }
+
+    setSession(null);
+    setAccountProfile(null);
+    setResolvedProfileUserId(null);
+
+    currentUserIdRef.current = null;
   }
 
   const contextValue = useMemo<AuthContextValue>(
     () => ({
       session,
       user,
+
+      accountProfile,
+      accountType,
+
       fullName,
+      dashboardHref,
+
       isLoading,
       signOut,
     }),
-    [session, user, fullName, isLoading],
+    [
+      session,
+      user,
+      accountProfile,
+      accountType,
+      fullName,
+      dashboardHref,
+      isLoading,
+    ],
   );
 
   return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 }
 

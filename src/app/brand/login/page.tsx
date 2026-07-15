@@ -43,7 +43,7 @@ export default function BrandLoginPage() {
       return nextPath;
     }
 
-    return "/dashboard";
+    return "/brand/dashboard";
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

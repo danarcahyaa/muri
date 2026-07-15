@@ -4,20 +4,12 @@ import * as React from "react";
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  AlertCircle,
-  KeyRound,
-  Leaf,
-  Mail,
-} from "lucide-react";
+import { AlertCircle, KeyRound, Leaf, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import {
-  Alert,
-  AlertDescription,
-} from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { BackLink } from "@/components/ui/BackLink";
 import { AuthFooterLink } from "@/components/ui/AuthFooterLink";
 
@@ -47,20 +39,14 @@ export default function WasteProviderLoginPage() {
   const getLoginDestination = (): string => {
     const nextPath = searchParams.get("next");
 
-    if (
-      nextPath &&
-      nextPath.startsWith("/") &&
-      !nextPath.startsWith("//")
-    ) {
+    if (nextPath && nextPath.startsWith("/") && !nextPath.startsWith("//")) {
       return nextPath;
     }
 
-    return "/dashboard";
+    return "/waste-providers/dashboard";
   };
 
-  const handleSubmit = async (
-    event: React.FormEvent<HTMLFormElement>,
-  ) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     setIsLoading(true);
@@ -87,10 +73,7 @@ export default function WasteProviderLoginPage() {
       });
 
       if (!response.success) {
-        setError(
-          response.error ||
-            "Gagal masuk ke akun penyedia limbah.",
-        );
+        setError(response.error || "Gagal masuk ke akun penyedia limbah.");
         return;
       }
 
@@ -111,11 +94,7 @@ export default function WasteProviderLoginPage() {
         <div className="flex justify-start">
           <BackLink
             href={fromPath}
-            label={
-              searchParams.get("from")
-                ? "Kembali"
-                : "Kembali ke Beranda"
-            }
+            label={searchParams.get("from") ? "Kembali" : "Kembali ke Beranda"}
           />
         </div>
 
@@ -140,10 +119,7 @@ export default function WasteProviderLoginPage() {
           {/* Header */}
           <div className="mb-10">
             <div className="mb-4 flex items-center gap-3 text-brand-emerald">
-              <Leaf
-                className="size-4"
-                strokeWidth={2}
-              />
+              <Leaf className="size-4" strokeWidth={2} />
 
               <span className="text-xs font-bold uppercase tracking-tight">
                 Mitra Penyedia Limbah
@@ -156,31 +132,22 @@ export default function WasteProviderLoginPage() {
             </h1>
 
             <p className="mt-7 font-body text-sm leading-relaxed text-muted-moss">
-              Kelola sisa tekstil, pantau dampak lingkungan,
-              dan berkolaborasi dalam ekosistem sirkular
-              bersama Muri.
+              Kelola sisa tekstil, pantau dampak lingkungan, dan berkolaborasi
+              dalam ekosistem sirkular bersama Muri.
             </p>
           </div>
 
           {/* Error alert */}
           {error && (
-            <Alert
-              variant="destructive"
-              className="mb-6 rounded-xl border-error-rust/20 bg-error-rust/[0.05]"
-            >
-              <AlertCircle className="size-4" />
+            <Alert variant="destructive" className="mb-6 rounded-2xl">
+              <AlertCircle className="size-4" strokeWidth={2.1} />
 
-              <AlertDescription className="text-sm leading-relaxed">
-                {error}
-              </AlertDescription>
+              <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
           {/* Form */}
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-5"
-          >
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}
             <div className="space-y-2">
               <label
@@ -198,9 +165,7 @@ export default function WasteProviderLoginPage() {
                 autoComplete="email"
                 placeholder="Masukkan email bisnis Anda"
                 value={email}
-                onChange={(event) =>
-                  setEmail(event.target.value)
-                }
+                onChange={(event) => setEmail(event.target.value)}
                 required
                 disabled={isLoading}
                 endIcon={<Mail strokeWidth={1.7} />}
@@ -224,9 +189,7 @@ export default function WasteProviderLoginPage() {
                 autoComplete="current-password"
                 placeholder="Masukkan kata sandi Anda"
                 value={password}
-                onChange={(event) =>
-                  setPassword(event.target.value)
-                }
+                onChange={(event) => setPassword(event.target.value)}
                 required
                 disabled={isLoading}
                 endIcon={<KeyRound strokeWidth={1.7} />}
