@@ -277,7 +277,7 @@ export function WasteDataTable({
                             </TooltipTrigger>
                             <TooltipContent side="top">
                               {soldOut
-                                ? "Hapus permanen — data tidak bisa dipulihkan"
+                                ? "Hapus permanen"
                                 : "Arsipkan limbah"}
                             </TooltipContent>
                           </Tooltip>
