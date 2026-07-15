@@ -18,8 +18,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { BackLink } from "@/components/ui/BackLink";
@@ -90,15 +90,11 @@ export default function BrandRegisterPage() {
         return currentLinks;
       }
 
-      return currentLinks.filter(
-        (_, currentIndex) => currentIndex !== index,
-      );
+      return currentLinks.filter((_, currentIndex) => currentIndex !== index);
     });
   };
 
-  const handleSubmit = async (
-    event: React.FormEvent<HTMLFormElement>,
-  ) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     setIsLoading(true);
@@ -143,9 +139,7 @@ export default function BrandRegisterPage() {
     );
 
     if (hasEmptyLink) {
-      setError(
-        "Harap lengkapi semua label dan URL link pendukung.",
-      );
+      setError("Harap lengkapi semua label dan URL link pendukung.");
       setIsLoading(false);
       return;
     }
@@ -164,15 +158,11 @@ export default function BrandRegisterPage() {
       });
 
       if (!response.success) {
-        setError(
-          response.error || "Gagal melakukan pendaftaran.",
-        );
+        setError(response.error || "Gagal melakukan pendaftaran.");
         return;
       }
 
-      toast.success(
-        response.message || "Pendaftaran brand berhasil!",
-      );
+      toast.success(response.message || "Pendaftaran brand berhasil!");
 
       setBrandName("");
       setEmail("");
@@ -188,9 +178,7 @@ export default function BrandRegisterPage() {
 
       router.push("/brand/login");
     } catch {
-      setError(
-        "Terjadi kesalahan. Silakan coba kembali beberapa saat lagi.",
-      );
+      setError("Terjadi kesalahan. Silakan coba kembali beberapa saat lagi.");
     } finally {
       setIsLoading(false);
     }
@@ -203,11 +191,7 @@ export default function BrandRegisterPage() {
         <div className="flex justify-start">
           <BackLink
             href={fromPath}
-            label={
-              searchParams.get("from")
-                ? "Kembali"
-                : "Kembali ke Beranda"
-            }
+            label={searchParams.get("from") ? "Kembali" : "Kembali ke Beranda"}
           />
         </div>
 
@@ -232,10 +216,7 @@ export default function BrandRegisterPage() {
           {/* Header */}
           <div className="mb-10">
             <div className="mb-4 flex items-center gap-3 text-brand-emerald">
-              <Leaf
-                className="size-4"
-                strokeWidth={2}
-              />
+              <Leaf className="size-4" strokeWidth={2} />
 
               <span className="text-xs font-bold uppercase tracking-tight">
                 Bergabung sebagai Brand
@@ -243,19 +224,14 @@ export default function BrandRegisterPage() {
             </div>
 
             <h1 className="font-display text-5xl font-medium leading-[1.08] tracking-[-0.045em] text-brand-black">
-              <span className="block">
-                Daftarkan
-              </span>
+              <span className="block">Daftarkan</span>
 
-              <span className="block">
-                Brand Anda.
-              </span>
+              <span className="block">Brand Anda.</span>
             </h1>
 
             <p className="mt-7 font-body text-sm leading-relaxed text-muted-moss">
-              Jadilah bagian dari ekosistem fesyen sirkular
-              dan ubah sisa produksi menjadi karya bernilai
-              bersama Muri.
+              Jadilah bagian dari ekosistem fesyen sirkular dan ubah sisa
+              produksi menjadi karya bernilai bersama Muri.
             </p>
           </div>
 
@@ -274,10 +250,7 @@ export default function BrandRegisterPage() {
           )}
 
           {/* Form */}
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-5"
-          >
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Brand name */}
             <div className="space-y-2">
               <label
@@ -295,14 +268,10 @@ export default function BrandRegisterPage() {
                 autoComplete="organization"
                 placeholder="Masukkan nama brand Anda"
                 value={brandName}
-                onChange={(event) =>
-                  setBrandName(event.target.value)
-                }
+                onChange={(event) => setBrandName(event.target.value)}
                 required
                 disabled={isLoading}
-                endIcon={
-                  <Building2 strokeWidth={1.7} />
-                }
+                endIcon={<Building2 strokeWidth={1.7} />}
               />
             </div>
 
@@ -323,14 +292,10 @@ export default function BrandRegisterPage() {
                 autoComplete="email"
                 placeholder="Masukkan email bisnis Anda"
                 value={email}
-                onChange={(event) =>
-                  setEmail(event.target.value)
-                }
+                onChange={(event) => setEmail(event.target.value)}
                 required
                 disabled={isLoading}
-                endIcon={
-                  <Mail strokeWidth={1.7} />
-                }
+                endIcon={<Mail strokeWidth={1.7} />}
               />
             </div>
 
@@ -352,14 +317,10 @@ export default function BrandRegisterPage() {
                 inputMode="tel"
                 placeholder="Contoh: 081234567890"
                 value={activeNumber}
-                onChange={(event) =>
-                  setActiveNumber(event.target.value)
-                }
+                onChange={(event) => setActiveNumber(event.target.value)}
                 required
                 disabled={isLoading}
-                endIcon={
-                  <Phone strokeWidth={1.7} />
-                }
+                endIcon={<Phone strokeWidth={1.7} />}
               />
             </div>
 
@@ -380,15 +341,11 @@ export default function BrandRegisterPage() {
                 autoComplete="new-password"
                 placeholder="Minimal 8 karakter"
                 value={password}
-                onChange={(event) =>
-                  setPassword(event.target.value)
-                }
+                onChange={(event) => setPassword(event.target.value)}
                 required
                 minLength={8}
                 disabled={isLoading}
-                endIcon={
-                  <KeyRound strokeWidth={1.7} />
-                }
+                endIcon={<KeyRound strokeWidth={1.7} />}
               />
             </div>
 
@@ -400,8 +357,7 @@ export default function BrandRegisterPage() {
                 </p>
 
                 <p className="mt-1 text-[11px] leading-relaxed text-muted-moss">
-                  Tambahkan website atau media sosial utama
-                  brand Anda.
+                  Tambahkan website atau media sosial utama brand Anda.
                 </p>
               </div>
 
@@ -418,17 +374,11 @@ export default function BrandRegisterPage() {
                       placeholder="Platform, contoh: Instagram"
                       value={link.label}
                       onChange={(event) =>
-                        handleLinkChange(
-                          index,
-                          "label",
-                          event.target.value,
-                        )
+                        handleLinkChange(index, "label", event.target.value)
                       }
                       required
                       disabled={isLoading}
-                      endIcon={
-                        <Globe2 strokeWidth={1.7} />
-                      }
+                      endIcon={<Globe2 strokeWidth={1.7} />}
                     />
 
                     <div className="flex items-center gap-2">
@@ -440,17 +390,11 @@ export default function BrandRegisterPage() {
                         placeholder="https://..."
                         value={link.url}
                         onChange={(event) =>
-                          handleLinkChange(
-                            index,
-                            "url",
-                            event.target.value,
-                          )
+                          handleLinkChange(index, "url", event.target.value)
                         }
                         required
                         disabled={isLoading}
-                        endIcon={
-                          <Link2 strokeWidth={1.7} />
-                        }
+                        endIcon={<Link2 strokeWidth={1.7} />}
                       />
 
                       {links.length > 1 && (
@@ -458,9 +402,7 @@ export default function BrandRegisterPage() {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          onClick={() =>
-                            handleRemoveLink(index)
-                          }
+                          onClick={() => handleRemoveLink(index)}
                           disabled={isLoading}
                           aria-label={`Hapus link ${index + 1}`}
                           title="Hapus link"
@@ -508,9 +450,9 @@ export default function BrandRegisterPage() {
                 id="brand-description"
                 placeholder="Ceritakan visi dan perjalanan brand Anda"
                 value={description}
-                onChange={(
-                  event: React.ChangeEvent<HTMLTextAreaElement>,
-                ) => setDescription(event.target.value)}
+                onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
+                  setDescription(event.target.value)
+                }
                 disabled={isLoading}
                 className="
                   min-h-32 resize-y rounded-sm

@@ -151,6 +151,7 @@ export default function Header() {
    * Tutup menu ketika berpindah halaman.
    */
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileMenuOpen(false);
     setAccountMenuOpen(false);
   }, [pathname]);

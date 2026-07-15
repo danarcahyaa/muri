@@ -9,21 +9,23 @@ const buttonVariants = cva(
     group/button inline-flex shrink-0 items-center justify-center
     box-border rounded-sm border border-transparent
     bg-clip-padding whitespace-nowrap
-    text-sm font-medium
-    transition-all outline-none select-none
+    font-body text-xs font-bold
+    outline-none select-none
     cursor-pointer
 
-    focus-visible:border-ring
-    focus-visible:ring-3
-    focus-visible:ring-ring/50
+    transition-[background-color,border-color,color,transform,box-shadow]
+    duration-300
+
+    focus-visible:ring-2
 
     active:not-aria-[haspopup]:translate-y-px
 
     disabled:pointer-events-none
+    disabled:cursor-not-allowed
     disabled:opacity-50
 
     aria-invalid:border-destructive
-    aria-invalid:ring-3
+    aria-invalid:ring-2
     aria-invalid:ring-destructive/20
 
     [&_svg]:pointer-events-none
@@ -33,79 +35,133 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          "bg-primary text-primary-foreground hover:bg-primary/80",
+        /*
+         * Default button mengikuti tombol utama
+         * pada halaman login.
+         */
+        default: `
+          bg-brand-black
+          text-canvas-pure
+          shadow-none
 
+          hover:-translate-y-0.5
+          hover:bg-brand-forest
+
+          focus-visible:border-brand-emerald
+          focus-visible:ring-brand-emerald/20
+        `,
+
+        /*
+         * Outline mengikuti tombol Google
+         * pada halaman login.
+         */
         outline: `
-          border-border bg-background
-          hover:bg-muted hover:text-foreground
-          aria-expanded:bg-muted
-          aria-expanded:text-foreground
+          border-line-trace
+          bg-transparent
+          text-brand-black
+          shadow-none
 
-          dark:border-input
-          dark:bg-input/30
-          dark:hover:bg-input/50
+          hover:-translate-y-0.5
+          hover:border-brand-emerald
+          hover:bg-canvas-warm
+
+          focus-visible:border-brand-emerald
+          focus-visible:ring-brand-emerald/10
         `,
 
         secondary: `
-          bg-secondary text-secondary-foreground
+          bg-secondary
+          text-secondary-foreground
+
+          hover:-translate-y-0.5
           hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)]
-          aria-expanded:bg-secondary
-          aria-expanded:text-secondary-foreground
+
+          focus-visible:border-ring
+          focus-visible:ring-ring/30
         `,
 
         ghost: `
-          hover:bg-muted
-          hover:text-foreground
-          aria-expanded:bg-muted
-          aria-expanded:text-foreground
-          dark:hover:bg-muted/50
+          bg-transparent
+          text-brand-black
+
+          hover:bg-canvas-warm
+          hover:text-brand-forest
+
+          focus-visible:border-brand-emerald
+          focus-visible:ring-brand-emerald/10
         `,
 
         destructive: `
-          bg-destructive/10 text-destructive
+          bg-destructive/10
+          text-destructive
+
+          hover:-translate-y-0.5
           hover:bg-destructive/20
+
           focus-visible:border-destructive/40
           focus-visible:ring-destructive/20
-
-          dark:bg-destructive/20
-          dark:hover:bg-destructive/30
-          dark:focus-visible:ring-destructive/40
         `,
 
-        link: "text-primary underline-offset-4 hover:underline",
+        link: `
+          h-auto border-0 bg-transparent p-0
+          text-brand-emerald underline-offset-4
+
+          hover:text-brand-forest
+          hover:underline
+
+          focus-visible:ring-brand-emerald/20
+        `,
 
         "solid-black": `
           bg-brand-black
           text-canvas-pure
-          hover:bg-brand-black/90
-          focus-visible:ring-brand-black/30
+          shadow-none
+
+          hover:-translate-y-0.5
+          hover:bg-brand-forest
+
+          focus-visible:border-brand-emerald
+          focus-visible:ring-brand-emerald/20
         `,
 
         "outline-black": `
           border-brand-black
           bg-transparent
           text-brand-black
+
+          hover:-translate-y-0.5
           hover:bg-brand-black/10
-          focus-visible:ring-brand-black/30
+
+          focus-visible:border-brand-black
+          focus-visible:ring-brand-black/20
         `,
 
         "outline-white": `
           border-canvas-pure
           bg-transparent
           text-canvas-pure
+
+          hover:-translate-y-0.5
           hover:bg-canvas-pure/15
-          focus-visible:ring-canvas-pure/30
+
+          focus-visible:border-canvas-pure
+          focus-visible:ring-canvas-pure/20
         `,
 
         "solid-lime": `
           bg-brand-lime
           text-brand-black
+
+          hover:-translate-y-0.5
           hover:bg-brand-lime/90
+
+          focus-visible:border-brand-lime
           focus-visible:ring-brand-lime/30
         `,
 
-        // Tombol utama login/register
+        /*
+         * Alias agar pemakaian lama tidak rusak.
+         */
         "auth-primary": `
           bg-brand-black
           text-canvas-pure
@@ -115,11 +171,9 @@ const buttonVariants = cva(
           hover:bg-brand-forest
 
           focus-visible:border-brand-emerald
-          focus-visible:ring-2
           focus-visible:ring-brand-emerald/20
         `,
 
-        // Tombol Google login/register
         "auth-outline": `
           border-line-trace
           bg-transparent
@@ -131,26 +185,24 @@ const buttonVariants = cva(
           hover:bg-canvas-warm
 
           focus-visible:border-brand-emerald
-          focus-visible:ring-2
           focus-visible:ring-brand-emerald/10
         `,
       },
 
       size: {
-        default: "h-10 gap-2 px-5 text-sm font-semibold",
-        xs: "h-6 gap-1 px-2 text-xs",
-        sm: "h-8 gap-1.5 px-4 text-xs font-semibold",
-        md: "h-10 gap-2 px-5 text-sm font-semibold",
-        lg: "h-12 gap-2 px-8 text-sm font-semibold",
+        default: "h-12 gap-2 px-5",
+        xs: "h-7 gap-1 px-2.5 text-[11px]",
+        sm: "h-9 gap-1.5 px-4 text-xs",
+        md: "h-12 gap-2 px-5 text-xs",
+        lg: "h-14 gap-2.5 px-8 text-sm",
 
-        // Ukuran tombol login/register
-        auth: "h-12 gap-2 px-5 font-body text-xs font-bold",
+        auth: "h-12 gap-2 px-5 text-xs",
 
-        icon: "size-10",
-        "icon-xs": "size-6",
-        "icon-sm": "size-8",
-        "icon-md": "size-10",
-        "icon-lg": "size-12",
+        icon: "size-12",
+        "icon-xs": "size-7",
+        "icon-sm": "size-9",
+        "icon-md": "size-12",
+        "icon-lg": "size-14",
       },
     },
 
@@ -165,6 +217,7 @@ export interface ButtonProps
   extends ButtonPrimitive.Props,
     VariantProps<typeof buttonVariants> {
   loading?: boolean;
+  fullWidth?: boolean;
 }
 
 function Button({
@@ -172,34 +225,35 @@ function Button({
   variant = "default",
   size = "default",
   loading = false,
+  fullWidth = false,
   children,
   disabled,
   ...props
 }: ButtonProps) {
+  const currentSize = size ?? "default";
+
   const isIconButton =
-    typeof size === "string" && size.startsWith("icon");
+    typeof currentSize === "string" &&
+    currentSize.startsWith("icon");
 
   return (
     <ButtonPrimitive
       data-slot="button"
       disabled={disabled || loading}
+      aria-busy={loading || undefined}
       className={cn(
         buttonVariants({
           variant,
-          size,
+          size: currentSize,
         }),
+        fullWidth && "w-full",
         className,
       )}
       {...props}
     >
-      {loading ? (
-        <>
-          <Spinner />
-          {!isIconButton && children}
-        </>
-      ) : (
-        children
-      )}
+      {loading && <Spinner />}
+
+      {(!loading || !isIconButton) && children}
     </ButtonPrimitive>
   );
 }

@@ -17,23 +17,16 @@ import { INDONESIA_PROVINCES } from "@/data/indonesiaRegions";
 import type { IndonesiaProvince } from "@/types/common";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { BackLink } from "@/components/ui/BackLink";
 import { AuthFooterLink } from "@/components/ui/AuthFooterLink";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import { registerWasteProvider } from "@/services/waste-providers/authService";
 
-function getSafeInternalPath(
-  value: string | null,
-  fallback: string,
-) {
-  if (
-    value &&
-    value.startsWith("/") &&
-    !value.startsWith("//")
-  ) {
+function getSafeInternalPath(value: string | null, fallback: string) {
+  if (value && value.startsWith("/") && !value.startsWith("//")) {
     return value;
   }
 
@@ -49,10 +42,7 @@ export default function WasteProviderRegisterPage() {
     "/auth/register",
   );
 
-  const nextPath = getSafeInternalPath(
-    searchParams.get("next"),
-    "/dashboard",
-  );
+  const nextPath = getSafeInternalPath(searchParams.get("next"), "/dashboard");
 
   const [companyName, setCompanyName] = useState("");
   const [email, setEmail] = useState("");
@@ -72,10 +62,16 @@ export default function WasteProviderRegisterPage() {
 
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (provinceRef.current && !provinceRef.current.contains(event.target as Node)) {
+      if (
+        provinceRef.current &&
+        !provinceRef.current.contains(event.target as Node)
+      ) {
         setIsProvinceDropdownOpen(false);
       }
-      if (regencyRef.current && !regencyRef.current.contains(event.target as Node)) {
+      if (
+        regencyRef.current &&
+        !regencyRef.current.contains(event.target as Node)
+      ) {
         setIsRegencyDropdownOpen(false);
       }
     }
@@ -84,12 +80,15 @@ export default function WasteProviderRegisterPage() {
   }, []);
 
   const filteredProvinces = INDONESIA_PROVINCES.filter((p: IndonesiaProvince) =>
-    p.province.toLowerCase().includes(provinceSearch.toLowerCase())
+    p.province.toLowerCase().includes(provinceSearch.toLowerCase()),
   );
 
-  const regencies = INDONESIA_PROVINCES.find((p: IndonesiaProvince) => p.province === selectedProvince)?.regencies || [];
+  const regencies =
+    INDONESIA_PROVINCES.find(
+      (p: IndonesiaProvince) => p.province === selectedProvince,
+    )?.regencies || [];
   const filteredRegencies = regencies.filter((r: string) =>
-    r.toLowerCase().includes(regencySearch.toLowerCase())
+    r.toLowerCase().includes(regencySearch.toLowerCase()),
   );
 
   React.useEffect(() => {
@@ -101,9 +100,7 @@ export default function WasteProviderRegisterPage() {
     }
   }, [error]);
 
-  const handleSubmit = async (
-    event: React.FormEvent<HTMLFormElement>,
-  ) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     setIsLoading(true);
@@ -168,16 +165,11 @@ export default function WasteProviderRegisterPage() {
       });
 
       if (!response.success) {
-        setError(
-          response.error || "Gagal melakukan pendaftaran.",
-        );
+        setError(response.error || "Gagal melakukan pendaftaran.");
         return;
       }
 
-      toast.success(
-        response.message ||
-          "Pendaftaran waste provider berhasil!",
-      );
+      toast.success(response.message || "Pendaftaran waste provider berhasil!");
 
       setCompanyName("");
       setEmail("");
@@ -191,13 +183,9 @@ export default function WasteProviderRegisterPage() {
         next: nextPath,
       });
 
-      router.push(
-        `/waste-providers/login?${loginParams.toString()}`,
-      );
+      router.push(`/waste-providers/login?${loginParams.toString()}`);
     } catch {
-      setError(
-        "Terjadi kesalahan. Silakan coba kembali beberapa saat lagi.",
-      );
+      setError("Terjadi kesalahan. Silakan coba kembali beberapa saat lagi.");
     } finally {
       setIsLoading(false);
     }
@@ -208,10 +196,7 @@ export default function WasteProviderRegisterPage() {
       <div className="w-full max-w-lg space-y-8">
         {/* Back link */}
         <div className="flex justify-start">
-          <BackLink
-            href={fromPath}
-            label="Kembali"
-          />
+          <BackLink href={fromPath} label="Kembali" />
         </div>
 
         {/* Main content */}
@@ -235,10 +220,7 @@ export default function WasteProviderRegisterPage() {
           {/* Header */}
           <div className="mb-10">
             <div className="mb-4 flex items-center gap-3 text-brand-emerald">
-              <Leaf
-                className="size-4"
-                strokeWidth={2}
-              />
+              <Leaf className="size-4" strokeWidth={2} />
 
               <span className="text-xs font-bold uppercase tracking-tight">
                 Bergabung sebagai Waste Provider
@@ -246,19 +228,14 @@ export default function WasteProviderRegisterPage() {
             </div>
 
             <h1 className="font-display text-5xl font-medium leading-[1.08] tracking-[-0.045em] text-brand-black">
-              <span className="block">
-                Daftarkan Pabrik
-              </span>
+              <span className="block">Daftarkan Pabrik</span>
 
-              <span className="block">
-                atau Garmen Anda.
-              </span>
+              <span className="block">atau Garmen Anda.</span>
             </h1>
 
             <p className="mt-7 font-body text-sm leading-relaxed text-muted-moss">
-              Ubah sisa produksi tekstil Anda menjadi material
-              bernilai dan hubungkan bisnis Anda dengan
-              ekosistem sirkular Muri.
+              Ubah sisa produksi tekstil Anda menjadi material bernilai dan
+              hubungkan bisnis Anda dengan ekosistem sirkular Muri.
             </p>
           </div>
 
@@ -277,10 +254,7 @@ export default function WasteProviderRegisterPage() {
           )}
 
           {/* Form */}
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-5"
-          >
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Company name */}
             <div className="space-y-2">
               <label
@@ -298,14 +272,10 @@ export default function WasteProviderRegisterPage() {
                 autoComplete="organization"
                 placeholder="Masukkan nama pabrik atau garmen"
                 value={companyName}
-                onChange={(event) =>
-                  setCompanyName(event.target.value)
-                }
+                onChange={(event) => setCompanyName(event.target.value)}
                 required
                 disabled={isLoading}
-                endIcon={
-                  <Factory strokeWidth={1.7} />
-                }
+                endIcon={<Factory strokeWidth={1.7} />}
               />
             </div>
 
@@ -326,14 +296,10 @@ export default function WasteProviderRegisterPage() {
                 autoComplete="email"
                 placeholder="Masukkan email bisnis Anda"
                 value={email}
-                onChange={(event) =>
-                  setEmail(event.target.value)
-                }
+                onChange={(event) => setEmail(event.target.value)}
                 required
                 disabled={isLoading}
-                endIcon={
-                  <Mail strokeWidth={1.7} />
-                }
+                endIcon={<Mail strokeWidth={1.7} />}
               />
             </div>
 
@@ -355,14 +321,10 @@ export default function WasteProviderRegisterPage() {
                 inputMode="tel"
                 placeholder="Contoh: 081234567890"
                 value={activeNumber}
-                onChange={(event) =>
-                  setActiveNumber(event.target.value)
-                }
+                onChange={(event) => setActiveNumber(event.target.value)}
                 required
                 disabled={isLoading}
-                endIcon={
-                  <Phone strokeWidth={1.7} />
-                }
+                endIcon={<Phone strokeWidth={1.7} />}
               />
             </div>
             <div className="space-y-2 animate-fade-in" ref={provinceRef}>
@@ -373,10 +335,18 @@ export default function WasteProviderRegisterPage() {
                 <button
                   type="button"
                   disabled={isLoading}
-                  onClick={() => setIsProvinceDropdownOpen(!isProvinceDropdownOpen)}
+                  onClick={() =>
+                    setIsProvinceDropdownOpen(!isProvinceDropdownOpen)
+                  }
                   className="flex w-full items-center justify-between rounded-sm border border-line-trace bg-transparent font-body text-brand-black shadow-none h-12 px-5 text-xs text-left outline-none focus:border-brand-emerald focus:ring-2 focus:ring-brand-emerald/10 disabled:bg-canvas-warm disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <span className={selectedProvince ? "text-brand-black" : "text-muted-moss/60 font-normal"}>
+                  <span
+                    className={
+                      selectedProvince
+                        ? "text-brand-black"
+                        : "text-muted-moss/60 font-normal"
+                    }
+                  >
                     {selectedProvince || "Pilih Provinsi"}
                   </span>
                   <ChevronDown className="size-4 text-muted-moss" />
@@ -431,11 +401,22 @@ export default function WasteProviderRegisterPage() {
                 <button
                   type="button"
                   disabled={isLoading || !selectedProvince}
-                  onClick={() => setIsRegencyDropdownOpen(!isRegencyDropdownOpen)}
+                  onClick={() =>
+                    setIsRegencyDropdownOpen(!isRegencyDropdownOpen)
+                  }
                   className="flex w-full items-center justify-between rounded-sm border border-line-trace bg-transparent font-body text-brand-black shadow-none h-12 px-5 text-xs text-left outline-none focus:border-brand-emerald focus:ring-2 focus:ring-brand-emerald/10 disabled:bg-canvas-warm disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <span className={selectedRegency ? "text-brand-black" : "text-muted-moss/60 font-normal"}>
-                    {selectedRegency || (selectedProvince ? "Pilih Kabupaten/Kota" : "Pilih Provinsi terlebih dahulu")}
+                  <span
+                    className={
+                      selectedRegency
+                        ? "text-brand-black"
+                        : "text-muted-moss/60 font-normal"
+                    }
+                  >
+                    {selectedRegency ||
+                      (selectedProvince
+                        ? "Pilih Kabupaten/Kota"
+                        : "Pilih Provinsi terlebih dahulu")}
                   </span>
                   <ChevronDown className="size-4 text-muted-moss" />
                 </button>
@@ -496,15 +477,11 @@ export default function WasteProviderRegisterPage() {
                 autoComplete="new-password"
                 placeholder="Minimal 8 karakter"
                 value={password}
-                onChange={(event) =>
-                  setPassword(event.target.value)
-                }
+                onChange={(event) => setPassword(event.target.value)}
                 required
                 minLength={8}
                 disabled={isLoading}
-                endIcon={
-                  <KeyRound strokeWidth={1.7} />
-                }
+                endIcon={<KeyRound strokeWidth={1.7} />}
               />
             </div>
 

@@ -1,27 +1,18 @@
 "use client";
 
-import {
-  useEffect,
-  useState,
-  type FormEvent,
-} from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  AlertCircle,
-  ArrowLeft,
-  KeyRound,
-  Leaf,
-} from "lucide-react";
+import { AlertCircle, ArrowLeft, KeyRound, Leaf } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/lib/supabaseClient";
 import { translateSupabaseError } from "@/lib/supabaseError";
 import { updatePassword } from "@/services/customer/auth/authService";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -67,8 +58,7 @@ export default function ResetPasswordPage() {
 
       if (
         event === "PASSWORD_RECOVERY" ||
-        ((event === "INITIAL_SESSION" || event === "SIGNED_IN") &&
-          session)
+        ((event === "INITIAL_SESSION" || event === "SIGNED_IN") && session)
       ) {
         handleValidSession();
       }
@@ -170,7 +160,6 @@ export default function ResetPasswordPage() {
                 className="size-3.5 transition-transform duration-300 group-hover:-translate-x-1"
                 strokeWidth={2}
               />
-
               Kembali ke login
             </Link>
           </div>

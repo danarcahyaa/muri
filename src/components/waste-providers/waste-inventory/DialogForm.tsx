@@ -5,8 +5,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 import {
   Select,
   SelectContent,
@@ -14,7 +14,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { WastePostItem, FabricCategoryItem, WasteInput } from "@/types/wasteProvider";
+import {
+  WastePostItem,
+  FabricCategoryItem,
+  WasteInput,
+} from "@/types/wasteProvider";
 import { WastePostStatus, MediaType } from "@/enums/enum";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { MediaUpload } from "@/components/ui/MediaUpload";
@@ -72,15 +76,19 @@ export function WasteDialogForm({
               name: `Media Terunggah ${idx + 1}`,
             }))
           : post.media_url
-          ? [
-              {
-                id: "existing-1",
-                url: post.media_url,
-                type: post.media_url.endsWith(".mp4") || post.media_url.includes("video") ? MediaType.VIDEO : MediaType.IMAGE,
-                name: "Media Terunggah",
-              },
-            ]
-          : []
+            ? [
+                {
+                  id: "existing-1",
+                  url: post.media_url,
+                  type:
+                    post.media_url.endsWith(".mp4") ||
+                    post.media_url.includes("video")
+                      ? MediaType.VIDEO
+                      : MediaType.IMAGE,
+                  name: "Media Terunggah",
+                },
+              ]
+            : [],
       );
       setBatchCode(post.batch_code || "");
     } else {
@@ -159,11 +167,16 @@ export function WasteDialogForm({
       <DialogContent className="max-w-md sm:max-w-3xl bg-canvas-pure border border-line-trace rounded-lg w-full max-h-[95vh] flex flex-col overflow-hidden sm:p-6 p-3">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl font-bold tracking-tight text-brand-black">
-            {isEditMode ? "Detail / Edit Limbah Kain" : "Tambah Limbah Kain Baru"}
+            {isEditMode
+              ? "Detail / Edit Limbah Kain"
+              : "Tambah Limbah Kain Baru"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden mt-2 gap-0">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col flex-1 overflow-hidden mt-2 gap-0"
+        >
           {error && (
             <div className="rounded bg-error-rust/[0.06] border border-error-rust/20 p-3 text-xs text-error-rust font-medium mb-4">
               {error}
@@ -175,8 +188,12 @@ export function WasteDialogForm({
             {/* Nama Kain */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
-                <label className="text-xs font-semibold text-brand-black/70">Nama Kain </label>
-                <span className="text-[10px] text-muted-moss font-medium">{fabricName.length}/200</span>
+                <label className="text-xs font-semibold text-brand-black/70">
+                  Nama Kain{" "}
+                </label>
+                <span className="text-[10px] text-muted-moss font-medium">
+                  {fabricName.length}/200
+                </span>
               </div>
               <Input
                 placeholder="Contoh: Katun Sisa Putih Bersih"
@@ -190,7 +207,9 @@ export function WasteDialogForm({
             {/* Jenis Kain & Status */}
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-brand-black/70">Jenis Kain</label>
+                <label className="text-xs font-semibold text-brand-black/70">
+                  Jenis Kain
+                </label>
                 <Select
                   value={categoryId.toString()}
                   onValueChange={(val) => val && setCategoryId(parseInt(val))}
@@ -199,7 +218,10 @@ export function WasteDialogForm({
                     <SelectValue placeholder="Pilih Jenis Kain">
                       {(value) => {
                         const id = parseInt(value);
-                        return categories.find((cat) => cat.id === id)?.name || "Pilih Jenis Kain";
+                        return (
+                          categories.find((cat) => cat.id === id)?.name ||
+                          "Pilih Jenis Kain"
+                        );
                       }}
                     </SelectValue>
                   </SelectTrigger>
@@ -215,10 +237,14 @@ export function WasteDialogForm({
 
               {isEditMode && (
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-brand-black/70">Status</label>
+                  <label className="text-xs font-semibold text-brand-black/70">
+                    Status
+                  </label>
                   <Select
                     value={status}
-                    onValueChange={(val) => val && setStatus(val as WastePostStatus)}
+                    onValueChange={(val) =>
+                      val && setStatus(val as WastePostStatus)
+                    }
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Pilih Status">
@@ -233,9 +259,15 @@ export function WasteDialogForm({
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={WastePostStatus.ACTIVE}>Aktif</SelectItem>
-                      <SelectItem value={WastePostStatus.SOLD_OUT}>Terjual</SelectItem>
-                      <SelectItem value={WastePostStatus.INACTIVE}>Diarsipkan</SelectItem>
+                      <SelectItem value={WastePostStatus.ACTIVE}>
+                        Aktif
+                      </SelectItem>
+                      <SelectItem value={WastePostStatus.SOLD_OUT}>
+                        Terjual
+                      </SelectItem>
+                      <SelectItem value={WastePostStatus.INACTIVE}>
+                        Diarsipkan
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -245,7 +277,9 @@ export function WasteDialogForm({
             {/* Berat, Harga, Min Order */}
             <div className="grid gap-4 grid-cols-3">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-brand-black/70">Berat (Kg)</label>
+                <label className="text-xs font-semibold text-brand-black/70">
+                  Berat (Kg)
+                </label>
                 <Input
                   type="number"
                   step="any"
@@ -258,7 +292,9 @@ export function WasteDialogForm({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-brand-black/70">Harga / Kg</label>
+                <label className="text-xs font-semibold text-brand-black/70">
+                  Harga / Kg
+                </label>
                 <Input
                   type="text"
                   placeholder="15.000"
@@ -269,14 +305,18 @@ export function WasteDialogForm({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-brand-black/70">Min Order (Kg)</label>
+                <label className="text-xs font-semibold text-brand-black/70">
+                  Min Order (Kg)
+                </label>
                 <Input
                   type="number"
                   step="any"
                   min="0"
                   placeholder="5"
                   value={minimumOrderKg || ""}
-                  onChange={(e) => setMinimumOrderKg(parseFloat(e.target.value) || 0)}
+                  onChange={(e) =>
+                    setMinimumOrderKg(parseFloat(e.target.value) || 0)
+                  }
                   required
                 />
               </div>
@@ -286,7 +326,9 @@ export function WasteDialogForm({
             {isEditMode && (
               <div className="grid gap-4 sm:grid-cols-2 bg-canvas-warm/35 p-4 rounded-lg border border-line-trace/40">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-brand-black/70">Kode Batch</label>
+                  <label className="text-xs font-semibold text-brand-black/70">
+                    Kode Batch
+                  </label>
                   <Input
                     value={batchCode}
                     disabled
@@ -295,7 +337,9 @@ export function WasteDialogForm({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-brand-black/70">Lokasi Asal</label>
+                  <label className="text-xs font-semibold text-brand-black/70">
+                    Lokasi Asal
+                  </label>
                   <Input
                     value="Bali, Denpasar"
                     disabled
@@ -310,7 +354,9 @@ export function WasteDialogForm({
 
             {/* Deskripsi & Kondisi */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-brand-black/70">Deskripsi & Kondisi</label>
+              <label className="text-xs font-semibold text-brand-black/70">
+                Deskripsi & Kondisi
+              </label>
               <RichTextEditor
                 value={details}
                 onChange={setDetails}
@@ -330,12 +376,13 @@ export function WasteDialogForm({
             >
               Batal
             </Button>
-            <Button variant={"solid-black"} type="submit" disabled={isSubmitting} className="min-w-20 flex items-center justify-center">
-              {isSubmitting ? (
-                <Spinner />
-              ) : (
-                "Simpan"
-              )}
+            <Button
+              variant={"solid-black"}
+              type="submit"
+              disabled={isSubmitting}
+              className="min-w-20 flex items-center justify-center"
+            >
+              {isSubmitting ? <Spinner /> : "Simpan"}
             </Button>
           </div>
         </form>

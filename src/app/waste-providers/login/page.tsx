@@ -4,20 +4,30 @@ import * as React from "react";
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle } from "lucide-react";
+import {
+  AlertCircle,
+  KeyRound,
+  Leaf,
+  Mail,
+} from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { loginWasteProvider } from "@/services/waste-providers/authService";
-import { translateSupabaseError } from "@/lib/supabaseError";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import {
+  Alert,
+  AlertDescription,
+} from "@/components/ui/alert";
 import { BackLink } from "@/components/ui/BackLink";
 import { AuthFooterLink } from "@/components/ui/AuthFooterLink";
+
+import { loginWasteProvider } from "@/services/waste-providers/authService";
+import { translateSupabaseError } from "@/lib/supabaseError";
 
 export default function WasteProviderLoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
   const fromPath = searchParams.get("from") || "/";
 
   const [email, setEmail] = useState("");
@@ -27,24 +37,38 @@ export default function WasteProviderLoginPage() {
 
   React.useEffect(() => {
     if (error) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
     }
   }, [error]);
 
   const getLoginDestination = (): string => {
     const nextPath = searchParams.get("next");
-    if (nextPath && nextPath.startsWith("/") && !nextPath.startsWith("//")) {
+
+    if (
+      nextPath &&
+      nextPath.startsWith("/") &&
+      !nextPath.startsWith("//")
+    ) {
       return nextPath;
     }
+
     return "/dashboard";
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+
     setIsLoading(true);
     setError(null);
 
-    if (!email.trim()) {
+    const normalizedEmail = email.trim();
+
+    if (!normalizedEmail) {
       setError("Email bisnis wajib diisi.");
       setIsLoading(false);
       return;
@@ -58,16 +82,20 @@ export default function WasteProviderLoginPage() {
 
     try {
       const response = await loginWasteProvider({
-        email: email.trim(),
+        email: normalizedEmail,
         password,
       });
 
       if (!response.success) {
-        setError(response.error || "Gagal masuk ke akun penyedia limbah.");
+        setError(
+          response.error ||
+            "Gagal masuk ke akun penyedia limbah.",
+        );
         return;
       }
 
       toast.success(response.message || "Berhasil masuk!");
+
       router.replace(getLoginDestination());
     } catch (err: unknown) {
       setError(translateSupabaseError(err));
@@ -77,40 +105,71 @@ export default function WasteProviderLoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-lg space-y-6">
-        {/* Back Link */}
+    <div className="flex min-h-screen flex-col items-center justify-center bg-canvas-pure px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-lg space-y-8">
+        {/* Back link */}
         <div className="flex justify-start">
           <BackLink
             href={fromPath}
-            label={searchParams.get("from") ? "Kembali" : "Kembali ke Beranda"}
+            label={
+              searchParams.get("from")
+                ? "Kembali"
+                : "Kembali ke Beranda"
+            }
           />
         </div>
 
-        {/* Form Container */}
-        <div className="w-full">
-          {/* Header */}
-          <div className="mb-8 flex flex-col items-center text-center">
+        {/* Main content */}
+        <div className="mx-auto w-full max-w-sm">
+          {/* Logo */}
+          <div className="mb-12 flex items-center gap-2">
             <Image
-              src="/logo.svg"
+              src="/logo.png"
               alt="Muri Logo"
-              width={48}
-              height={48}
+              width={40}
+              height={40}
               priority
-              className="mb-4 size-12 object-contain"
+              className="size-10 object-contain"
             />
-            <h1 className="font-display text-2xl font-bold tracking-tight text-brand-black sm:text-3xl">
-              Masuk Akun Penyedia Limbah
+
+            <span className="font-display text-2xl font-medium tracking-tight text-brand-black">
+              Muri
+            </span>
+          </div>
+
+          {/* Header */}
+          <div className="mb-10">
+            <div className="mb-4 flex items-center gap-3 text-brand-emerald">
+              <Leaf
+                className="size-4"
+                strokeWidth={2}
+              />
+
+              <span className="text-xs font-bold uppercase tracking-tight">
+                Mitra Penyedia Limbah
+              </span>
+            </div>
+
+            <h1 className="font-display text-5xl font-medium leading-[1.08] tracking-[-0.045em] text-brand-black">
+              <span className="block">Masuk ke Akun</span>
+              <span className="block">Mitra Anda.</span>
             </h1>
-            <p className="mt-2 font-body text-sm text-muted-moss/90 leading-relaxed">
-              Masuk kembali untuk mengelola sisa tekstil, memantau dampak lingkungan, dan berkolaborasi dalam ekosistem sirkular MURI.
+
+            <p className="mt-7 font-body text-sm leading-relaxed text-muted-moss">
+              Kelola sisa tekstil, pantau dampak lingkungan,
+              dan berkolaborasi dalam ekosistem sirkular
+              bersama Muri.
             </p>
           </div>
 
-          {/* Error Alert */}
+          {/* Error alert */}
           {error && (
-            <Alert variant="destructive" className="mb-6">
+            <Alert
+              variant="destructive"
+              className="mb-6 rounded-xl border-error-rust/20 bg-error-rust/[0.05]"
+            >
               <AlertCircle className="size-4" />
+
               <AlertDescription className="text-sm leading-relaxed">
                 {error}
               </AlertDescription>
@@ -118,7 +177,10 @@ export default function WasteProviderLoginPage() {
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-5"
+          >
             {/* Email */}
             <div className="space-y-2">
               <label
@@ -127,14 +189,21 @@ export default function WasteProviderLoginPage() {
               >
                 Email Bisnis/Pabrik
               </label>
+
               <Input
                 id="provider-email"
                 type="email"
-                placeholder="Masukkan email bisnis..."
+                variant="auth"
+                size="auth"
+                autoComplete="email"
+                placeholder="Masukkan email bisnis Anda"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(event) =>
+                  setEmail(event.target.value)
+                }
                 required
                 disabled={isLoading}
+                endIcon={<Mail strokeWidth={1.7} />}
               />
             </div>
 
@@ -146,32 +215,38 @@ export default function WasteProviderLoginPage() {
               >
                 Kata Sandi
               </label>
+
               <Input
                 id="provider-password"
                 type="password"
-                placeholder="Masukkan kata sandi Anda..."
+                variant="auth"
+                size="auth"
+                autoComplete="current-password"
+                placeholder="Masukkan kata sandi Anda"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(event) =>
+                  setPassword(event.target.value)
+                }
                 required
                 disabled={isLoading}
+                endIcon={<KeyRound strokeWidth={1.7} />}
               />
             </div>
 
-            {/* Action Buttons */}
-            <div className="pt-2">
-              <Button
-                variant="solid-black"
-                type="submit"
-                loading={isLoading}
-                disabled={isLoading}
-                className="flex w-full items-center justify-center gap-2"
-              >
-                <span>Masuk</span>
-              </Button>
-            </div>
+            {/* Submit button */}
+            <Button
+              type="submit"
+              variant="auth-primary"
+              size="auth"
+              loading={isLoading}
+              disabled={isLoading}
+              className="w-full"
+            >
+              Masuk Sekarang
+            </Button>
           </form>
 
-          {/* Footer Secondary Link */}
+          {/* Footer link */}
           <AuthFooterLink
             text="Belum memiliki akun penyedia limbah?"
             linkText="Daftar di sini"

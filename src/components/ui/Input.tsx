@@ -6,48 +6,39 @@ import { cn } from "@/lib/utils";
 
 const inputVariants = cva(
   `
-    w-full min-w-0 box-border rounded-sm border bg-transparent
-    transition-colors outline-none
+    w-full min-w-0 box-border
+    rounded-sm border
+    font-body
+    outline-none
+
+    transition-[background-color,border-color,color,box-shadow]
+    duration-200
 
     file:inline-flex
     file:h-6
     file:border-0
     file:bg-transparent
-    file:text-sm
+    file:text-xs
     file:font-medium
-    file:text-foreground
+    file:text-brand-black
 
     disabled:pointer-events-none
     disabled:cursor-not-allowed
     disabled:opacity-50
 
     aria-invalid:border-destructive
-    aria-invalid:ring-3
+    aria-invalid:ring-2
     aria-invalid:ring-destructive/20
   `,
   {
     variants: {
       variant: {
+        /*
+         * Default input mengikuti style halaman login.
+         */
         default: `
-          border-input
-          placeholder:text-muted-foreground
-
-          focus-visible:border-ring
-          focus-visible:ring-3
-          focus-visible:ring-ring/50
-
-          disabled:bg-input/50
-
-          dark:bg-input/30
-          dark:disabled:bg-input/80
-          dark:aria-invalid:border-destructive/50
-          dark:aria-invalid:ring-destructive/40
-        `,
-
-        auth: `
           border-line-trace
           bg-transparent
-          font-body
           text-brand-black
           shadow-none
 
@@ -59,17 +50,58 @@ const inputVariants = cva(
           focus-visible:ring-2
           focus-visible:ring-brand-emerald/10
 
+          aria-invalid:focus-visible:border-destructive
+          aria-invalid:focus-visible:ring-destructive/20
+
+          disabled:bg-canvas-warm
+        `,
+
+        filled: `
+          border-transparent
+          bg-canvas-warm
+          text-brand-black
+
+          placeholder:text-muted-moss/60
+
+          focus-visible:border-brand-emerald
+          focus-visible:bg-transparent
+          focus-visible:ring-2
+          focus-visible:ring-brand-emerald/10
+
+          aria-invalid:focus-visible:border-destructive
+          aria-invalid:focus-visible:ring-destructive/20
+        `,
+
+        /*
+         * Alias agar kode auth lama tetap berjalan.
+         */
+        auth: `
+          border-line-trace
+          bg-transparent
+          text-brand-black
+          shadow-none
+
+          placeholder:font-normal
+          placeholder:tracking-normal
+          placeholder:text-muted-moss/60
+
+          focus-visible:border-brand-emerald
+          focus-visible:ring-2
+          focus-visible:ring-brand-emerald/10
+
+          aria-invalid:focus-visible:border-destructive
+          aria-invalid:focus-visible:ring-destructive/20
+
           disabled:bg-canvas-warm
         `,
       },
 
       size: {
-        default: "h-10 px-3.5 text-sm",
-        sm: "h-8 px-3 text-xs",
-        md: "h-10 px-3.5 text-sm",
-        lg: "h-12 px-4 text-sm",
-
-        // Ukuran seperti input pada halaman login/register
+        default: "h-12 px-5 text-xs",
+        xs: "h-8 px-3 text-xs",
+        sm: "h-10 px-4 text-xs",
+        md: "h-12 px-5 text-xs",
+        lg: "h-14 px-5 text-sm",
         auth: "h-12 px-5 text-xs",
       },
     },
@@ -81,15 +113,58 @@ const inputVariants = cva(
   },
 );
 
+const iconLayout = {
+  default: {
+    startPosition: "left-4",
+    endPosition: "right-4",
+    startPadding: "pl-11",
+    endPadding: "pr-11",
+  },
+  xs: {
+    startPosition: "left-3",
+    endPosition: "right-3",
+    startPadding: "pl-9",
+    endPadding: "pr-9",
+  },
+  sm: {
+    startPosition: "left-3.5",
+    endPosition: "right-3.5",
+    startPadding: "pl-10",
+    endPadding: "pr-10",
+  },
+  md: {
+    startPosition: "left-4",
+    endPosition: "right-4",
+    startPadding: "pl-11",
+    endPadding: "pr-11",
+  },
+  lg: {
+    startPosition: "left-4",
+    endPosition: "right-4",
+    startPadding: "pl-11",
+    endPadding: "pr-11",
+  },
+  auth: {
+    startPosition: "left-4",
+    endPosition: "right-4",
+    startPadding: "pl-11",
+    endPadding: "pr-11",
+  },
+} as const;
+
+type InputPrimitiveProps = React.ComponentProps<typeof InputPrimitive>;
+
 export interface InputProps
-  extends Omit<React.ComponentProps<"input">, "size">,
+  extends Omit<InputPrimitiveProps, "size">,
     VariantProps<typeof inputVariants> {
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
+  wrapperClassName?: string;
 }
 
 function Input({
   className,
+  wrapperClassName,
   type,
   variant = "default",
   size = "default",
@@ -98,52 +173,34 @@ function Input({
   ...props
 }: InputProps) {
   const currentSize = size ?? "default";
-
-  const iconPosition =
-    currentSize === "sm"
-      ? "left-2.5"
-      : currentSize === "lg" || currentSize === "auth"
-        ? "left-4"
-        : "left-3";
-
-  const endIconPosition =
-    currentSize === "sm"
-      ? "right-2.5"
-      : currentSize === "lg" || currentSize === "auth"
-        ? "right-4"
-        : "right-3";
-
-  const startPadding =
-    currentSize === "sm"
-      ? "pl-8"
-      : currentSize === "lg" || currentSize === "auth"
-        ? "pl-11"
-        : "pl-10";
-
-  const endPadding =
-    currentSize === "sm"
-      ? "pr-8"
-      : currentSize === "lg" || currentSize === "auth"
-        ? "pr-11"
-        : "pr-10";
+  const layout = iconLayout[currentSize];
 
   return (
-    <div className="relative flex w-full items-center">
+    <div
+      data-slot="input-wrapper"
+      className={cn(
+        "relative flex w-full items-center",
+        wrapperClassName,
+      )}
+    >
       {startIcon && (
-        <div
+        <span
+          aria-hidden="true"
+          data-slot="input-start-icon"
           className={cn(
             `
               pointer-events-none absolute
               flex items-center justify-center
-              text-muted-foreground
+              text-muted-moss/60
+
               [&_svg]:size-4
               [&_svg]:shrink-0
             `,
-            iconPosition,
+            layout.startPosition,
           )}
         >
           {startIcon}
-        </div>
+        </span>
       )}
 
       <InputPrimitive
@@ -154,28 +211,31 @@ function Input({
             variant,
             size: currentSize,
           }),
-          startIcon && startPadding,
-          endIcon && endPadding,
+          startIcon && layout.startPadding,
+          endIcon && layout.endPadding,
           className,
         )}
         {...props}
       />
 
       {endIcon && (
-        <div
+        <span
+          aria-hidden="true"
+          data-slot="input-end-icon"
           className={cn(
             `
               pointer-events-none absolute
               flex items-center justify-center
               text-muted-moss/60
+
               [&_svg]:size-4
               [&_svg]:shrink-0
             `,
-            endIconPosition,
+            layout.endPosition,
           )}
         >
           {endIcon}
-        </div>
+        </span>
       )}
     </div>
   );

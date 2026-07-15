@@ -7,8 +7,8 @@ import { AlertCircle, ArrowLeft, CheckCircle2, Leaf, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { requestPasswordReset } from "@/services/customer/auth/authService";
 import { translateSupabaseError } from "@/lib/supabaseError";
 

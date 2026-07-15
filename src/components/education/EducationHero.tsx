@@ -1,17 +1,37 @@
 import Link from "next/link";
 import { ArrowDownRight, Briefcase, Leaf } from "lucide-react";
+import { workshops } from "@/data/workshops";
 
 export default function EducationHero() {
+  const activeWorkshopCount = workshops.filter(
+    (workshop) => workshop.remainingSlots > 0,
+  ).length;
+
   return (
     <section className="relative overflow-hidden bg-canvas-warm">
-      <div className="mx-auto w-[min(1320px,calc(100%_-_48px))] pt-[clamp(32px,4vw,56px)] pb-[clamp(72px,8vw,120px)]">
-        {" "}
+      <div
+        className="
+          mx-auto
+          w-[min(1320px,calc(100%_-_48px))]
+          pb-[clamp(72px,8vw,120px)]
+          pt-[clamp(32px,4vw,56px)]
+        "
+      >
         {/* Breadcrumb */}
         <nav
           aria-label="Breadcrumb"
-          className="flex items-center gap-5 text-xs text-muted-moss"
+          className="
+            flex items-center gap-5
+            text-xs text-muted-moss
+          "
         >
-          <Link href="/" className="transition-colors hover:text-brand-emerald">
+          <Link
+            href="/"
+            className="
+              transition-colors
+              hover:text-brand-emerald
+            "
+          >
             Beranda
           </Link>
 
@@ -19,11 +39,18 @@ export default function EducationHero() {
             /
           </span>
 
-          <span className="text-muted-moss">Edukasi</span>
+          <span className="text-brand-black">Edukasi</span>
         </nav>
+
         {/* Hero content */}
-        <div className="mt-12 grid gap-14 lg:mt-14 lg:grid-cols-[minmax(0,1.7fr)_minmax(340px,1fr)] lg:items-center">
-          {" "}
+        <div
+          className="
+            mt-12 grid gap-14
+            lg:mt-14
+            lg:grid-cols-[minmax(0,1.7fr)_minmax(340px,1fr)]
+            lg:items-center
+          "
+        >
           {/* Left content */}
           <div>
             <div className="mb-5 flex items-center gap-3 text-brand-emerald">
@@ -34,39 +61,61 @@ export default function EducationHero() {
               </span>
             </div>
 
-            <h1 className="max-w-4xl font-display text-[clamp(3.5rem,6.7vw,6.5rem)] font-normal leading-[0.94] tracking-[-0.06em] text-brand-black">
-              <span className="block">Asah Pemahaman</span>
+            <h1
+              className="
+                max-w-4xl font-display
+                text-[clamp(3.5rem,6.7vw,6.5rem)]
+                font-normal leading-[0.94]
+                tracking-[-0.06em]
+                text-brand-black
+              "
+            >
+              <span className="block">Asah Pemahaman.</span>
 
               <span className="block">Ikuti Workshop.</span>
             </h1>
 
-            <p className="mt-9 max-w-3xl text-sm leading-relaxed text-muted-moss sm:text-base">
-              Tingkatkan keterampilan Anda dalam mengolah limbah tekstil menjadi
-              produk fashion bernilai tinggi langsung dari para mentor ahli.
+            <p
+              className="
+                mt-9 max-w-3xl
+                text-sm leading-relaxed
+                text-muted-moss
+                sm:text-base
+              "
+            >
+              Tingkatkan keterampilan dalam mengolah limbah tekstil,
+              mengembangkan produk sirkular, dan membangun bisnis fashion
+              berkelanjutan bersama mentor praktisi.
             </p>
 
             <Link
               href="#program-workshop"
               className="
-                group mt-9 inline-flex items-center gap-3
-                text-xs font-bold text-brand-emerald
-                transition-colors hover:text-brand-forest
+                group mt-9 inline-flex
+                items-center gap-3
+                text-xs font-bold
+                text-brand-emerald
+                transition-colors
+                hover:text-brand-forest
               "
             >
               Jelajahi Program Workshop
               <ArrowDownRight
                 className="
-                  size-4 transition-transform duration-300
+                  size-4 transition-transform
+                  duration-300
                   group-hover:translate-x-1
                   group-hover:translate-y-1
                 "
               />
             </Link>
           </div>
+
           {/* Statistic card */}
           <aside
             className="
-              rounded-2xl border border-line-trace
+              rounded-2xl border
+              border-line-trace
               bg-canvas-pure p-7
               sm:p-8
             "
@@ -77,19 +126,28 @@ export default function EducationHero() {
 
             <div className="flex min-h-48 items-center justify-center py-8">
               <Briefcase
-                className="size-28 text-brand-black sm:size-32"
-                strokeWidth={1.5}
+                className="
+                  size-28 text-brand-black
+                  sm:size-32
+                "
+                strokeWidth={1.4}
               />
             </div>
 
             <div>
-              <p className="font-display text-4xl font-medium tracking-[-0.04em] text-brand-black">
-                84+ Workshop
+              <p
+                className="
+                  font-display text-4xl
+                  font-medium tracking-[-0.04em]
+                  text-brand-black
+                "
+              >
+                {activeWorkshopCount} Workshop Aktif
               </p>
 
-              <p className="mt-2 text-xs leading-relaxed text-muted-moss">
-                Dapatkan modul intensif, alat praktik, dan sertifikat resmi
-                ekosistem sirkular.
+              <p className="mt-3 text-xs leading-relaxed text-muted-moss">
+                Dapatkan materi terarah, pengalaman praktik, pendampingan
+                mentor, dan sertifikat partisipasi dari ekosistem sirkular Muri.
               </p>
             </div>
           </aside>

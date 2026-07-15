@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, type ReactElement } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -58,8 +58,10 @@ export function WasteTableToolbar({
   setSortBy,
   onAddClick,
 }: ToolbarProps): ReactElement {
-  const isAllCategoriesSelected = selectedCategory.length === CATEGORIES.slice(1).length;
-  const isAllStatusesSelected = selectedStatus.length === STATUSES.slice(1).length;
+  const isAllCategoriesSelected =
+    selectedCategory.length === CATEGORIES.slice(1).length;
+  const isAllStatusesSelected =
+    selectedStatus.length === STATUSES.slice(1).length;
 
   const [searchValue, setSearchValue] = useState(searchQuery);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -131,9 +133,7 @@ export function WasteTableToolbar({
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <button
-                  className="flex w-full items-center justify-between gap-1.5 rounded-sm border border-input bg-canvas-pure py-2 pr-2.5 pl-3.5 text-sm h-10 transition-colors outline-none select-none focus:border-ring focus:ring-3 focus:ring-ring/50 text-brand-black cursor-pointer"
-                >
+                <button className="flex w-full items-center justify-between gap-1.5 rounded-sm border border-input bg-canvas-pure py-2 pr-2.5 pl-3.5 text-sm h-10 transition-colors outline-none select-none focus:border-ring focus:ring-3 focus:ring-ring/50 text-brand-black cursor-pointer">
                   <div className="flex-1 text-left min-w-0 pr-1 truncate">
                     {selectedCategory.length === 0
                       ? "Jenis kain"
@@ -152,7 +152,9 @@ export function WasteTableToolbar({
                   if (isAllCategoriesSelected) {
                     setSelectedCategory([]);
                   } else {
-                    setSelectedCategory(CATEGORIES.slice(1).map((c) => c.value));
+                    setSelectedCategory(
+                      CATEGORIES.slice(1).map((c) => c.value),
+                    );
                   }
                 }}
               >
@@ -167,7 +169,9 @@ export function WasteTableToolbar({
                     if (checked) {
                       setSelectedCategory([...selectedCategory, cat.value]);
                     } else {
-                      setSelectedCategory(selectedCategory.filter((val) => val !== cat.value));
+                      setSelectedCategory(
+                        selectedCategory.filter((val) => val !== cat.value),
+                      );
                     }
                   }}
                 >
@@ -183,16 +187,17 @@ export function WasteTableToolbar({
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <button
-                  className="flex w-full items-center justify-between gap-1.5 rounded-sm border border-input bg-canvas-pure py-2 pr-2.5 pl-3.5 text-sm h-10 transition-colors outline-none select-none focus:border-ring focus:ring-3 focus:ring-ring/50 text-brand-black cursor-pointer"
-                >
+                <button className="flex w-full items-center justify-between gap-1.5 rounded-sm border border-input bg-canvas-pure py-2 pr-2.5 pl-3.5 text-sm h-10 transition-colors outline-none select-none focus:border-ring focus:ring-3 focus:ring-ring/50 text-brand-black cursor-pointer">
                   <div className="flex-1 text-left min-w-0 pr-1 truncate">
                     {selectedStatus.length === 0
                       ? "Status"
                       : selectedStatus.length === STATUSES.slice(1).length
                         ? "Semua Status"
                         : selectedStatus
-                            .map((val) => STATUSES.find((s) => s.value === val)?.label)
+                            .map(
+                              (val) =>
+                                STATUSES.find((s) => s.value === val)?.label,
+                            )
                             .filter(Boolean)
                             .join(", ")}
                   </div>
@@ -222,7 +227,9 @@ export function WasteTableToolbar({
                     if (checked) {
                       setSelectedStatus([...selectedStatus, status.value]);
                     } else {
-                      setSelectedStatus(selectedStatus.filter((val) => val !== status.value));
+                      setSelectedStatus(
+                        selectedStatus.filter((val) => val !== status.value),
+                      );
                     }
                   }}
                 >
@@ -238,9 +245,7 @@ export function WasteTableToolbar({
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <button
-                  className="flex w-full items-center justify-between gap-1.5 rounded-sm border border-input bg-canvas-pure py-2 pr-2.5 pl-3.5 text-sm h-10 transition-colors outline-none select-none focus:border-ring focus:ring-3 focus:ring-ring/50 text-brand-black cursor-pointer"
-                >
+                <button className="flex w-full items-center justify-between gap-1.5 rounded-sm border border-input bg-canvas-pure py-2 pr-2.5 pl-3.5 text-sm h-10 transition-colors outline-none select-none focus:border-ring focus:ring-3 focus:ring-ring/50 text-brand-black cursor-pointer">
                   <div className="flex-1 text-left min-w-0 pr-1">
                     {renderTriggerLabel()}
                   </div>
@@ -328,11 +333,11 @@ export function WasteTableToolbar({
             onChange={(e) => {
               const val = e.target.value;
               setSearchValue(val);
-              
+
               if (debounceRef.current) {
                 clearTimeout(debounceRef.current);
               }
-              
+
               if (val === "") {
                 debounceRef.current = setTimeout(() => {
                   setSearchQuery("");
