@@ -7,8 +7,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { loginWasteProvider } from "@/services/waste-providers/authService";
 import { translateSupabaseError } from "@/lib/supabaseError";

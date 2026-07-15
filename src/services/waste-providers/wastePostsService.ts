@@ -317,3 +317,49 @@ export async function deleteWastePost(
     };
   }
 }
+
+/**
+ * Permanently deletes a waste post and its associated media records from the database.
+ * Only to be used for posts with sold_out status.
+ */
+export async function permanentDeleteWastePost(
+  postId: string
+): Promise<BaseResponse<void>> {
+  try {
+    // Delete associated media first (in case there's no cascade)
+    const { error: mediaError } = await supabase
+      .from("waste_post_media")
+      .delete()
+      .eq("waste_post_id", postId);
+
+    if (mediaError) {
+      return {
+        success: false,
+        error: translateSupabaseError(mediaError),
+      };
+    }
+
+    // Hard delete the post
+    const { error } = await supabase
+      .from("waste_posts")
+      .delete()
+      .eq("id", postId);
+
+    if (error) {
+      return {
+        success: false,
+        error: translateSupabaseError(error),
+      };
+    }
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: translateSupabaseError(error),
+    };
+  }
+}
+

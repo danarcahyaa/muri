@@ -10,6 +10,7 @@ import {
   createWastePost,
   updateWastePost,
   deleteWastePost,
+  permanentDeleteWastePost,
 } from "@/services/waste-providers/wasteService";
 import { WastePostItem, FabricCategoryItem, WasteInput } from "@/types/wasteProvider";
 
@@ -167,20 +168,33 @@ export default function WasteInventoryPage(): ReactElement {
     setDialogOpen(true);
   };
 
-  const handleDeleteClick = async (post: WastePostItem) => {
-    if (confirm(`Apakah Anda yakin ingin mengarsipkan limbah kain "${post.custom_fabric_name || "Kain Tanpa Nama"}"?`)) {
-      try {
-        const response = await deleteWastePost(post.id);
-        if (response.success) {
-          toast.success("Limbah berhasil diarsipkan.");
-          loadInventoryData();
-        } else {
-          toast.error(response.error || "Gagal mengarsipkan limbah.");
-        }
-      } catch (err) {
-        console.error(err);
-        toast.error("Terjadi kesalahan saat menghubungi server.");
+  const handleArchiveClick = async (post: WastePostItem) => {
+    try {
+      const response = await deleteWastePost(post.id);
+      if (response.success) {
+        toast.success("Limbah berhasil diarsipkan.");
+        loadInventoryData();
+      } else {
+        toast.error(response.error || "Gagal mengarsipkan limbah.");
       }
+    } catch (err) {
+      console.error(err);
+      toast.error("Terjadi kesalahan saat menghubungi server.");
+    }
+  };
+
+  const handlePermanentDeleteClick = async (post: WastePostItem) => {
+    try {
+      const response = await permanentDeleteWastePost(post.id);
+      if (response.success) {
+        toast.success("Limbah berhasil dihapus secara permanen.");
+        loadInventoryData();
+      } else {
+        toast.error(response.error || "Gagal menghapus limbah.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Terjadi kesalahan saat menghubungi server.");
     }
   };
 
@@ -252,7 +266,8 @@ export default function WasteInventoryPage(): ReactElement {
           posts={filteredPosts}
           isLoading={isLoading}
           onViewClick={handleViewClick}
-          onDeleteClick={handleDeleteClick}
+          onArchiveClick={handleArchiveClick}
+          onPermanentDeleteClick={handlePermanentDeleteClick}
         />
       </div>
 
