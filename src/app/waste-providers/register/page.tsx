@@ -11,7 +11,10 @@ import {
   Leaf,
   Mail,
   Phone,
+  ChevronDown,
 } from "lucide-react";
+import { INDONESIA_PROVINCES } from "@/data/indonesiaRegions";
+import type { IndonesiaProvince } from "@/types/common";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -55,8 +58,39 @@ export default function WasteProviderRegisterPage() {
   const [email, setEmail] = useState("");
   const [activeNumber, setActiveNumber] = useState("");
   const [password, setPassword] = useState("");
+  const [selectedProvince, setSelectedProvince] = useState("");
+  const [selectedRegency, setSelectedRegency] = useState("");
+  const [provinceSearch, setProvinceSearch] = useState("");
+  const [regencySearch, setRegencySearch] = useState("");
+  const [isProvinceDropdownOpen, setIsProvinceDropdownOpen] = useState(false);
+  const [isRegencyDropdownOpen, setIsRegencyDropdownOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const provinceRef = React.useRef<HTMLDivElement>(null);
+  const regencyRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (provinceRef.current && !provinceRef.current.contains(event.target as Node)) {
+        setIsProvinceDropdownOpen(false);
+      }
+      if (regencyRef.current && !regencyRef.current.contains(event.target as Node)) {
+        setIsRegencyDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredProvinces = INDONESIA_PROVINCES.filter((p: IndonesiaProvince) =>
+    p.province.toLowerCase().includes(provinceSearch.toLowerCase())
+  );
+
+  const regencies = INDONESIA_PROVINCES.find((p: IndonesiaProvince) => p.province === selectedProvince)?.regencies || [];
+  const filteredRegencies = regencies.filter((r: string) =>
+    r.toLowerCase().includes(regencySearch.toLowerCase())
+  );
 
   React.useEffect(() => {
     if (error) {
@@ -97,6 +131,18 @@ export default function WasteProviderRegisterPage() {
       return;
     }
 
+    if (!selectedProvince) {
+      setError("Provinsi  wajib dipilih.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!selectedRegency) {
+      setError("Kabupaten wajib dipilih.");
+      setIsLoading(false);
+      return;
+    }
+
     if (!password) {
       setError("Kata sandi wajib diisi.");
       setIsLoading(false);
@@ -115,6 +161,10 @@ export default function WasteProviderRegisterPage() {
         email: normalizedEmail,
         activeNumber: normalizedActiveNumber,
         password,
+        address: {
+          province: selectedProvince,
+          regency: selectedRegency,
+        },
       });
 
       if (!response.success) {
@@ -133,6 +183,8 @@ export default function WasteProviderRegisterPage() {
       setEmail("");
       setActiveNumber("");
       setPassword("");
+      setSelectedProvince("");
+      setSelectedRegency("");
 
       const loginParams = new URLSearchParams({
         from: "/waste-providers/register",
@@ -313,6 +365,119 @@ export default function WasteProviderRegisterPage() {
                 }
               />
             </div>
+            <div className="space-y-2 animate-fade-in" ref={provinceRef}>
+              <label className="text-xs font-bold text-brand-black">
+                Provinsi Pabrik
+              </label>
+              <div className="relative">
+                <button
+                  type="button"
+                  disabled={isLoading}
+                  onClick={() => setIsProvinceDropdownOpen(!isProvinceDropdownOpen)}
+                  className="flex w-full items-center justify-between rounded-sm border border-line-trace bg-transparent font-body text-brand-black shadow-none h-12 px-5 text-xs text-left outline-none focus:border-brand-emerald focus:ring-2 focus:ring-brand-emerald/10 disabled:bg-canvas-warm disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <span className={selectedProvince ? "text-brand-black" : "text-muted-moss/60 font-normal"}>
+                    {selectedProvince || "Pilih Provinsi"}
+                  </span>
+                  <ChevronDown className="size-4 text-muted-moss" />
+                </button>
+
+                {isProvinceDropdownOpen && (
+                  <div className="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-sm border border-line-trace bg-canvas-pure p-1 shadow-md">
+                    <div className="p-1 border-b border-line-trace mb-1">
+                      <input
+                        type="text"
+                        placeholder="Cari provinsi..."
+                        value={provinceSearch}
+                        onChange={(e) => setProvinceSearch(e.target.value)}
+                        className="w-full px-3 py-2 text-xs rounded-sm border border-line-trace bg-transparent outline-none focus:border-brand-emerald focus:ring-1 focus:ring-brand-emerald text-brand-black"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div className="max-h-40 overflow-y-auto">
+                      {filteredProvinces.length > 0 ? (
+                        filteredProvinces.map((prov: IndonesiaProvince) => (
+                          <button
+                            key={prov.province}
+                            type="button"
+                            onClick={() => {
+                              setSelectedProvince(prov.province);
+                              setSelectedRegency("");
+                              setRegencySearch("");
+                              setIsProvinceDropdownOpen(false);
+                              setProvinceSearch("");
+                            }}
+                            className="flex w-full cursor-default items-center rounded-sm py-2 px-3 text-xs hover:bg-canvas-warm/50 text-left text-brand-black"
+                          >
+                            {prov.province}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="py-2 px-3 text-xs text-muted-moss text-center">
+                          Tidak ditemukan
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2 animate-fade-in" ref={regencyRef}>
+              <label className="text-xs font-bold text-brand-black">
+                Kabupaten
+              </label>
+              <div className="relative">
+                <button
+                  type="button"
+                  disabled={isLoading || !selectedProvince}
+                  onClick={() => setIsRegencyDropdownOpen(!isRegencyDropdownOpen)}
+                  className="flex w-full items-center justify-between rounded-sm border border-line-trace bg-transparent font-body text-brand-black shadow-none h-12 px-5 text-xs text-left outline-none focus:border-brand-emerald focus:ring-2 focus:ring-brand-emerald/10 disabled:bg-canvas-warm disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <span className={selectedRegency ? "text-brand-black" : "text-muted-moss/60 font-normal"}>
+                    {selectedRegency || (selectedProvince ? "Pilih Kabupaten/Kota" : "Pilih Provinsi terlebih dahulu")}
+                  </span>
+                  <ChevronDown className="size-4 text-muted-moss" />
+                </button>
+
+                {isRegencyDropdownOpen && selectedProvince && (
+                  <div className="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-sm border border-line-trace bg-canvas-pure p-1 shadow-md">
+                    <div className="p-1 border-b border-line-trace mb-1">
+                      <input
+                        type="text"
+                        placeholder="Cari kabupaten/kota..."
+                        value={regencySearch}
+                        onChange={(e) => setRegencySearch(e.target.value)}
+                        className="w-full px-3 py-2 text-xs rounded-sm border border-line-trace bg-transparent outline-none focus:border-brand-emerald focus:ring-1 focus:ring-brand-emerald text-brand-black"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div className="max-h-40 overflow-y-auto">
+                      {filteredRegencies.length > 0 ? (
+                        filteredRegencies.map((regency: string) => (
+                          <button
+                            key={regency}
+                            type="button"
+                            onClick={() => {
+                              setSelectedRegency(regency);
+                              setIsRegencyDropdownOpen(false);
+                              setRegencySearch("");
+                            }}
+                            className="flex w-full cursor-default items-center rounded-sm py-2 px-3 text-xs hover:bg-canvas-warm/50 text-left text-brand-black"
+                          >
+                            {regency}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="py-2 px-3 text-xs text-muted-moss text-center">
+                          Tidak ditemukan
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* Password */}
             <div className="space-y-2">
@@ -360,13 +525,7 @@ export default function WasteProviderRegisterPage() {
           <AuthFooterLink
             text="Sudah memiliki akun waste provider?"
             linkText="Masuk di sini"
-            href={{
-              pathname: "/waste-providers/login",
-              query: {
-                from: "/waste-providers/register",
-                next: nextPath,
-              },
-            }}
+            href={`/waste-providers/login?from=/waste-providers/register&next=${encodeURIComponent(nextPath)}`}
           />
         </div>
       </div>

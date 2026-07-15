@@ -5,6 +5,7 @@ export interface WasteProviderRegisterInput {
   email: string;
   password?: string;
   activeNumber: string;
+  address?: { province: string; regency: string } | null;
 }
 
 export interface WasteProviderRegisterData {
@@ -52,6 +53,8 @@ export interface WastePostItem {
   media_list?: { url: string; type: MediaType }[];
   carbon_saved_kg?: number;
   water_saved_liter?: number;
+  batch_code?: string;
+  origin_city?: string;
 }
 
 export interface FabricCategoryItem {

@@ -31,6 +31,10 @@ export async function getWastePosts(
         waste_post_media (
           media_url,
           media_type
+        ),
+        waste_batches (
+          batch_code,
+          origin_city
         )
       `)
       .eq("provider_id", providerId);
@@ -86,6 +90,8 @@ export async function getWastePosts(
         })),
         carbon_saved_kg: carbon,
         water_saved_liter: water,
+        batch_code: post.waste_batches?.[0]?.batch_code || undefined,
+        origin_city: post.waste_batches?.[0]?.origin_city || undefined,
       };
     });
 
@@ -133,63 +139,75 @@ export async function getWastePostsCount(
 }
 
 /**
- * Creates a new waste post.
+ * Creates a new waste post using the database RPC transaction function.
+ * Storage uploads happen client-side before calling the database transaction.
  */
 export async function createWastePost(
   providerId: string,
   post: WasteInput
 ): Promise<BaseResponse<void>> {
   try {
-    const { data: insertedPost, error } = await supabase
-      .from("waste_posts")
-      .insert({
-        provider_id: providerId,
-        custom_fabric_name: post.custom_fabric_name,
-        fabric_category_id: post.fabric_category_id,
-        weight_kg: post.weight_kg,
-        price_per_kg: post.price_per_kg,
-        minimum_order_kg: post.minimum_order_kg,
-        details_and_conditions: post.details_and_conditions,
-        status: post.status,
-      })
-      .select("id")
+    // 1. Fetch provider's address (regency/origin_city)
+    const { data: providerData } = await supabase
+      .from("waste_providers")
+      .select("address")
+      .eq("id", providerId)
       .single();
 
-    if (error || !insertedPost) {
-      return {
-        success: false,
-        error: translateSupabaseError(error || new Error("Gagal mengambil ID post")),
-      };
+    let originCity = "Unknown";
+    if (providerData?.address) {
+      try {
+        const addr = typeof providerData.address === "string"
+          ? JSON.parse(providerData.address)
+          : providerData.address;
+        originCity = addr.regency || addr.city || "Unknown";
+      } catch (e) {
+        originCity = String(providerData.address);
+      }
     }
 
-    const postId = insertedPost.id;
+    // 2. Generate 5-character batch code without prefix
+    const batchCode = Math.random().toString(36).substring(2, 7).toUpperCase();
+
+    // 3. Upload media files to Supabase Storage first (outside the DB transaction)
+    const mediaUrls: string[] = [];
+    const mediaTypes: string[] = [];
 
     if (post.media && post.media.length > 0) {
-      const mediaRows = [];
       for (const item of post.media) {
         let mediaUrl = item.url;
         if (item.file) {
           mediaUrl = await uploadMediaFile(providerId, item.file);
         }
-        mediaRows.push({
-          waste_post_id: postId,
-          media_url: mediaUrl,
-          media_type: item.type,
-        });
+        mediaUrls.push(mediaUrl);
+        mediaTypes.push(item.type as string);
       }
+    }
 
-      if (mediaRows.length > 0) {
-        const { error: mediaError } = await supabase
-          .from("waste_post_media")
-          .insert(mediaRows);
-
-        if (mediaError) {
-          return {
-            success: false,
-            error: translateSupabaseError(mediaError),
-          };
-        }
+    // 4. Call the 12-parameter database transaction RPC
+    const { error } = await (supabase.rpc as any)(
+      "create_waste_post_with_media_and_batch",
+      {
+        p_provider_id: providerId,
+        p_custom_fabric_name: post.custom_fabric_name,
+        p_fabric_category_id: post.fabric_category_id,
+        p_weight_kg: post.weight_kg,
+        p_price_per_kg: post.price_per_kg,
+        p_minimum_order_kg: post.minimum_order_kg,
+        p_details_and_conditions: post.details_and_conditions,
+        p_status: post.status,
+        p_media_urls: mediaUrls,
+        p_media_types: mediaTypes,
+        p_batch_code: batchCode,
+        p_origin_city: originCity,
       }
+    );
+
+    if (error) {
+      return {
+        success: false,
+        error: translateSupabaseError(error),
+      };
     }
 
     return {

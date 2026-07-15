@@ -14,7 +14,7 @@ import { AuthInput, AuthResponse } from "@/types/auth";
 export async function registerWasteProvider(
   input: WasteProviderRegisterInput
 ): Promise<WasteProviderRegisterResponse> {
-  const { companyName, email, password, activeNumber } = input;
+  const { companyName, email, password, activeNumber, address } = input;
 
   if (!companyName.trim() || !email.trim() || !password || !activeNumber.trim()) {
     return {
@@ -56,7 +56,7 @@ export async function registerWasteProvider(
       id: authUser.id,
       company_name: companyName.trim(),
       active_number: activeNumber.trim(),
-      address: null,
+      address: (address ? address : null) as any,
       pickup_address: null,
       pickup_maps_url: null,
     });

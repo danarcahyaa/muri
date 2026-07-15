@@ -4,7 +4,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -48,6 +47,7 @@ export function WasteDialogForm({
   const [details, setDetails] = useState("");
   const [status, setStatus] = useState<WastePostStatus>(WastePostStatus.ACTIVE);
   const [media, setMedia] = useState<MediaItem[]>([]);
+  const [batchCode, setBatchCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -82,6 +82,7 @@ export function WasteDialogForm({
             ]
           : []
       );
+      setBatchCode(post.batch_code || "");
     } else {
       setFabricName("");
       setCategoryId(categories[0]?.id || 0);
@@ -92,6 +93,7 @@ export function WasteDialogForm({
       setDetails("");
       setStatus(WastePostStatus.ACTIVE);
       setMedia([]);
+      setBatchCode("");
     }
     setError(null);
   }, [post, open, categories]);
@@ -154,7 +156,7 @@ export function WasteDialogForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md sm:max-w-3xl bg-canvas-pure border border-line-trace rounded-lg w-full max-h-[95vh] flex flex-col overflow-hidden  sm:p-6 p-3">
+      <DialogContent className="max-w-md sm:max-w-3xl bg-canvas-pure border border-line-trace rounded-lg w-full max-h-[95vh] flex flex-col overflow-hidden sm:p-6 p-3">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl font-bold tracking-tight text-brand-black">
             {isEditMode ? "Detail / Edit Limbah Kain" : "Tambah Limbah Kain Baru"}
@@ -279,6 +281,29 @@ export function WasteDialogForm({
                 />
               </div>
             </div>
+
+            {/* Batch & Location (Only in Detail/Edit Mode) */}
+            {isEditMode && (
+              <div className="grid gap-4 sm:grid-cols-2 bg-canvas-warm/35 p-4 rounded-lg border border-line-trace/40">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-brand-black/70">Kode Batch</label>
+                  <Input
+                    value={batchCode}
+                    disabled
+                    className="bg-canvas-warm/50 cursor-not-allowed opacity-75 font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-brand-black/70">Lokasi Asal</label>
+                  <Input
+                    value="Bali, Denpasar"
+                    disabled
+                    className="bg-canvas-warm/50 cursor-not-allowed opacity-75"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Foto & Video Upload */}
             <MediaUpload value={media} onChange={setMedia} />

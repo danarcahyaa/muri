@@ -80,7 +80,7 @@ export function WasteDataTable({
 
   return (
     <>
-      {/* ─── Alert Dialog ─────────────────────────────────────────────── */}
+      {/* Alert Dialog */}
       <AlertDialog open={!!pendingAction} onOpenChange={(open) => { if (!open) setPendingAction(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -127,7 +127,7 @@ export function WasteDataTable({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* ─── Table ────────────────────────────────────────────────────── */}
+      {/* Table */}
       <div className="w-full bg-canvas-pure border border-line-trace rounded-lg overflow-hidden">
         <Table>
           <TableHeader>
@@ -228,7 +228,7 @@ export function WasteDataTable({
                     <TableCell className="w-24 text-right px-6 py-3.5">
                       <TooltipProvider>
                         <div className="flex justify-end gap-2">
-                          {/* ── View / Edit button ── */}
+                          {/*  View / Edit button  */}
                           <Tooltip>
                             <TooltipTrigger>
                               <button
@@ -251,7 +251,7 @@ export function WasteDataTable({
                             </TooltipContent>
                           </Tooltip>
 
-                          {/* ── Archive / Permanent Delete button ── */}
+                          {/* Archive / Permanent Delete button */}
                           <Tooltip>
                             <TooltipTrigger>
                               <button

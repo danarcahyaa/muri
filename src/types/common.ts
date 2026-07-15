@@ -14,3 +14,8 @@ export interface MediaItem {
   type: MediaType
   name: string
 }
+
+export interface IndonesiaProvince {
+  province: string;
+  regencies: string[];
+}
