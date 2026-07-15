@@ -454,20 +454,9 @@ export default function BrandRegisterPage() {
                   setDescription(event.target.value)
                 }
                 disabled={isLoading}
-                className="
-                  min-h-32 resize-y rounded-sm
-                  border-line-trace bg-transparent
-                  px-5 py-4
-                  font-body text-xs text-brand-black
-                  shadow-none
-                  placeholder:text-xs
-                  placeholder:font-normal
-                  placeholder:tracking-normal
-                  placeholder:text-muted-moss/60
-                  focus-visible:border-brand-emerald
-                  focus-visible:ring-2
-                  focus-visible:ring-brand-emerald/10
-                "
+                variant="auth"
+                size="auth"
+                className="min-h-32 resize-y"
               />
             </div>
 

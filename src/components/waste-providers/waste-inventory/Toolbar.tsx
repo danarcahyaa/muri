@@ -133,7 +133,7 @@ export function WasteTableToolbar({
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <button className="flex w-full items-center justify-between gap-1.5 rounded-sm border border-input bg-canvas-pure py-2 pr-2.5 pl-3.5 text-sm h-10 transition-colors outline-none select-none focus:border-ring focus:ring-3 focus:ring-ring/50 text-brand-black cursor-pointer">
+                <button className="flex w-full items-center justify-between gap-1.5 rounded-sm border border-line-trace bg-canvas-pure py-2 pr-4 pl-5 text-xs h-12 transition-colors outline-none select-none focus:border-brand-emerald focus:ring-2 focus:ring-brand-emerald/10 text-brand-black cursor-pointer">
                   <div className="flex-1 text-left min-w-0 pr-1 truncate">
                     {selectedCategory.length === 0
                       ? "Jenis kain"
@@ -187,7 +187,7 @@ export function WasteTableToolbar({
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <button className="flex w-full items-center justify-between gap-1.5 rounded-sm border border-input bg-canvas-pure py-2 pr-2.5 pl-3.5 text-sm h-10 transition-colors outline-none select-none focus:border-ring focus:ring-3 focus:ring-ring/50 text-brand-black cursor-pointer">
+                <button className="flex w-full items-center justify-between gap-1.5 rounded-sm border border-line-trace bg-canvas-pure py-2 pr-4 pl-5 text-xs h-12 transition-colors outline-none select-none focus:border-brand-emerald focus:ring-2 focus:ring-brand-emerald/10 text-brand-black cursor-pointer">
                   <div className="flex-1 text-left min-w-0 pr-1 truncate">
                     {selectedStatus.length === 0
                       ? "Status"
@@ -245,7 +245,7 @@ export function WasteTableToolbar({
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <button className="flex w-full items-center justify-between gap-1.5 rounded-sm border border-input bg-canvas-pure py-2 pr-2.5 pl-3.5 text-sm h-10 transition-colors outline-none select-none focus:border-ring focus:ring-3 focus:ring-ring/50 text-brand-black cursor-pointer">
+                <button className="flex w-full items-center justify-between gap-1.5 rounded-sm border border-line-trace bg-canvas-pure py-2 pr-4 pl-5 text-xs h-12 transition-colors outline-none select-none focus:border-brand-emerald focus:ring-2 focus:ring-brand-emerald/10 text-brand-black cursor-pointer">
                   <div className="flex-1 text-left min-w-0 pr-1">
                     {renderTriggerLabel()}
                   </div>
@@ -348,7 +348,7 @@ export function WasteTableToolbar({
             size="default"
           />
           <Button
-            variant="outline"
+            variant={"solid-white"}
             size="icon"
             onClick={() => {
               if (debounceRef.current) {

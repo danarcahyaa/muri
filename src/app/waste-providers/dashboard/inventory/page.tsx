@@ -19,8 +19,8 @@ import { WasteSummaryMetrics } from "@/components/waste-providers/waste-inventor
 import { WasteTableToolbar } from "@/components/waste-providers/waste-inventory/Toolbar";
 import { WasteDataTable } from "@/components/waste-providers/waste-inventory/Table";
 import { WasteDialogForm } from "@/components/waste-providers/waste-inventory/DialogForm";
+import { ALL_CATEGORIES } from "@/constants/constant";
 
-const ALL_CATEGORIES = ["Katun", "Denim", "Linen", "Rayon", "Polyester", "Sutra", "Sintetis", "Campuran"];
 const ALL_STATUSES = ["active", "sold_out", "inactive"];
 
 export default function WasteInventoryPage(): ReactElement {
@@ -53,9 +53,9 @@ export default function WasteInventoryPage(): ReactElement {
     loadCategories();
   }, []);
 
-  // ─── Supabase fetch ───────────────────────────────────────────────────────
+  // Supabase fetch
   // Only runs when: user changes, refreshTrigger fires (CRUD), or searchQuery changes.
-  // Category/status/sort changes do NOT trigger a refetch — they are handled client-side.
+  // Category/status/sort changes do NOT trigger a refetch
   useEffect(() => {
     const userId = user?.id;
     if (!userId) return;
@@ -66,7 +66,7 @@ export default function WasteInventoryPage(): ReactElement {
         setError(null);
 
         if (searchQuery.trim()) {
-          // ── Search mode: push all filters to Supabase ──
+          //  Search mode: push all filters to Supabase
           let categoryIds: number[] | undefined = undefined;
           if (selectedCategory.length > 0 && selectedCategory.length < ALL_CATEGORIES.length) {
             categoryIds = categories
@@ -98,7 +98,7 @@ export default function WasteInventoryPage(): ReactElement {
             setError(res.error || "Gagal memuat data inventaris.");
           }
         } else {
-          // ── Normal mode: fetch all, filter/sort client-side ──
+          // Normal mode: fetch all, filter/sort client-side
           const res = await getWastePosts(uid);
           if (res.success && res.data) {
             setAllPosts(res.data);
@@ -123,7 +123,7 @@ export default function WasteInventoryPage(): ReactElement {
     setRefreshTrigger((prev) => prev + 1);
   }
 
-  // ─── Client-side filter & sort (no-search mode only) ─────────────────────
+  // Client-side filter & sort (no-search mode only)
   const filteredPosts: WastePostItem[] = useMemo(() => {
     // In search mode, Supabase already returned filtered results
     if (searchQuery.trim()) return allPosts;
@@ -271,7 +271,7 @@ export default function WasteInventoryPage(): ReactElement {
         />
       </div>
 
-      {/* Dialog Form Form Tambah / Detail Edit */}
+      {/* Dialog Form  */}
       <WasteDialogForm
         open={dialogOpen}
         onOpenChange={setDialogOpen}

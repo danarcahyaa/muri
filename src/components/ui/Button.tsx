@@ -129,7 +129,17 @@ const buttonVariants = cva(
           focus-visible:border-brand-black
           focus-visible:ring-brand-black/20
         `,
+        "solid-white": `
+          border-line-trace
+          bg-canvas-pure
+          text-brand-black
+          shadow-none
 
+          hover:bg-canvas-warm
+
+          focus-visible:border-brand-emerald
+          focus-visible:ring-brand-emerald/20
+        `,
         "outline-white": `
           border-canvas-pure
           bg-transparent

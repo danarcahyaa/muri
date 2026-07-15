@@ -41,13 +41,13 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
   }
 
   return (
-    <div className={cn("flex flex-col border border-input rounded-sm bg-transparent w-full overflow-hidden text-sm focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 transition-all", className)}>
+    <div className={cn("flex flex-col border border-line-trace rounded-sm bg-transparent w-full overflow-hidden text-sm focus-within:border-brand-emerald focus-within:ring-2 focus-within:ring-brand-emerald/10 transition-all", className)}>
       {/* Toolbar */}
-      <div className="flex items-center gap-1 p-1.5 border-b border-input/60 bg-muted/20">
+      <div className="flex items-center gap-1 p-1.5 border-b border-line-trace/60 bg-canvas-warm/30">
         <button
           type="button"
           onClick={() => execCommand("bold")}
-          className="p-1.5 rounded-sm hover:bg-muted text-brand-black/70 hover:text-brand-black transition-colors"
+          className="p-1.5 rounded-sm hover:bg-canvas-warm text-brand-black/70 hover:text-brand-black transition-colors"
           title="Tebal (Bold)"
         >
           <Bold className="size-4" />
@@ -55,7 +55,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
         <button
           type="button"
           onClick={() => execCommand("italic")}
-          className="p-1.5 rounded-sm hover:bg-muted text-brand-black/70 hover:text-brand-black transition-colors"
+          className="p-1.5 rounded-sm hover:bg-canvas-warm text-brand-black/70 hover:text-brand-black transition-colors"
           title="Miring (Italic)"
         >
           <Italic className="size-4" />
@@ -63,16 +63,16 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
         <button
           type="button"
           onClick={() => execCommand("underline")}
-          className="p-1.5 rounded-sm hover:bg-muted text-brand-black/70 hover:text-brand-black transition-colors"
+          className="p-1.5 rounded-sm hover:bg-canvas-warm text-brand-black/70 hover:text-brand-black transition-colors"
           title="Garis Bawah (Underline)"
         >
           <Underline className="size-4" />
         </button>
-        <div className="w-px h-4 bg-input/60 mx-1" />
+        <div className="w-px h-4 bg-line-trace/60 mx-1" />
         <button
           type="button"
           onClick={() => execCommand("insertUnorderedList")}
-          className="p-1.5 rounded-sm hover:bg-muted text-brand-black/70 hover:text-brand-black transition-colors"
+          className="p-1.5 rounded-sm hover:bg-canvas-warm text-brand-black/70 hover:text-brand-black transition-colors"
           title="Daftar Simbol (Bullet List)"
         >
           <List className="size-4" />
@@ -80,7 +80,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
         <button
           type="button"
           onClick={() => execCommand("insertOrderedList")}
-          className="p-1.5 rounded-sm hover:bg-muted text-brand-black/70 hover:text-brand-black transition-colors"
+          className="p-1.5 rounded-sm hover:bg-canvas-warm text-brand-black/70 hover:text-brand-black transition-colors"
           title="Daftar Angka (Numbered List)"
         >
           <ListOrdered className="size-4" />
@@ -92,7 +92,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
         ref={editorRef}
         contentEditable
         onInput={handleInput}
-        className="p-3 min-h-45 outline-none bg-canvas-pure prose prose-sm max-w-none overflow-y-auto cursor-text text-brand-black [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-1 empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/60"
+        className="px-5 py-4 min-h-45 outline-none bg-canvas-pure prose prose-sm max-w-none overflow-y-auto cursor-text text-brand-black text-xs [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-1 empty:before:content-[attr(data-placeholder)] empty:before:text-muted-moss/60"
         data-placeholder={placeholder}
       />
     </div>
