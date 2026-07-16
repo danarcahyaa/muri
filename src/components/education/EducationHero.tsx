@@ -1,12 +1,19 @@
 import Link from "next/link";
-import { ArrowDownRight, Briefcase, Leaf } from "lucide-react";
-import { workshops } from "@/data/workshops";
+import {
+  ArrowDownRight,
+  Briefcase,
+  Leaf,
+} from "lucide-react";
 
-export default function EducationHero() {
-  const activeWorkshopCount = workshops.filter(
-    (workshop) => workshop.remainingSlots > 0,
-  ).length;
+interface EducationHeroProps {
+  activeWorkshopCount: number;
+  hasLoadError?: boolean;
+}
 
+export default function EducationHero({
+  activeWorkshopCount,
+  hasLoadError = false,
+}: EducationHeroProps) {
   return (
     <section className="relative overflow-hidden bg-canvas-warm">
       <div
@@ -35,11 +42,16 @@ export default function EducationHero() {
             Beranda
           </Link>
 
-          <span aria-hidden="true" className="text-muted-moss/50">
+          <span
+            aria-hidden="true"
+            className="text-muted-moss/50"
+          >
             /
           </span>
 
-          <span className="text-brand-black">Edukasi</span>
+          <span className="text-brand-black">
+            Edukasi
+          </span>
         </nav>
 
         {/* Hero content */}
@@ -54,7 +66,10 @@ export default function EducationHero() {
           {/* Left content */}
           <div>
             <div className="mb-5 flex items-center gap-3 text-brand-emerald">
-              <Leaf className="size-4" strokeWidth={2} />
+              <Leaf
+                className="size-4"
+                strokeWidth={2}
+              />
 
               <span className="text-sm font-bold uppercase tracking-tight">
                 Program Pemberdayaan Muri
@@ -70,9 +85,13 @@ export default function EducationHero() {
                 text-brand-black
               "
             >
-              <span className="block">Asah Pemahaman.</span>
+              <span className="block">
+                Asah Pemahaman.
+              </span>
 
-              <span className="block">Ikuti Workshop.</span>
+              <span className="block">
+                Ikuti Workshop.
+              </span>
             </h1>
 
             <p
@@ -83,9 +102,12 @@ export default function EducationHero() {
                 sm:text-base
               "
             >
-              Tingkatkan keterampilan dalam mengolah limbah tekstil,
-              mengembangkan produk sirkular, dan membangun bisnis fashion
-              berkelanjutan bersama mentor praktisi.
+              Tingkatkan keterampilan dalam
+              mengolah limbah tekstil,
+              mengembangkan produk sirkular,
+              dan membangun bisnis fashion
+              berkelanjutan bersama mentor
+              praktisi.
             </p>
 
             <Link
@@ -100,9 +122,11 @@ export default function EducationHero() {
               "
             >
               Jelajahi Program Workshop
+
               <ArrowDownRight
                 className="
-                  size-4 transition-transform
+                  size-4
+                  transition-transform
                   duration-300
                   group-hover:translate-x-1
                   group-hover:translate-y-1
@@ -138,16 +162,22 @@ export default function EducationHero() {
               <p
                 className="
                   font-display text-4xl
-                  font-medium tracking-[-0.04em]
+                  font-medium
+                  tracking-[-0.04em]
                   text-brand-black
                 "
               >
-                {activeWorkshopCount} Workshop Aktif
+                {hasLoadError
+                  ? "Workshop Aktif"
+                  : `${activeWorkshopCount} Workshop Aktif`}
               </p>
 
               <p className="mt-3 text-xs leading-relaxed text-muted-moss">
-                Dapatkan materi terarah, pengalaman praktik, pendampingan
-                mentor, dan sertifikat partisipasi dari ekosistem sirkular Muri.
+                Dapatkan materi terarah,
+                pengalaman praktik,
+                pendampingan mentor, dan
+                sertifikat partisipasi dari
+                ekosistem sirkular Muri.
               </p>
             </div>
           </aside>
@@ -155,4 +185,4 @@ export default function EducationHero() {
       </div>
     </section>
   );
-}
+} 

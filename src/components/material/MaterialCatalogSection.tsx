@@ -1,33 +1,50 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
   ChevronDown,
+  ImageOff,
   Leaf,
   MapPin,
   Search,
   UserRound,
 } from "lucide-react";
 
-import {
-  materials,
-  type MaterialItem,
-  type MaterialLocation,
-} from "@/data/materials";
-
-const locations = ["Semua", "Denpasar", "Gianyar", "Badung"] as const;
-
-type LocationFilter = (typeof locations)[number];
+import type { MaterialCatalogItem } from "@/types/material";
+import RichTextContent from "../ui/RichTextContent";
 
 type SortOption = "default" | "price-low" | "price-high";
 
-export default function ProductCatalogSection() {
+interface MaterialCatalogSectionProps {
+  materials: MaterialCatalogItem[];
+  hasLoadError?: boolean;
+}
+
+export default function MaterialCatalogSection({
+  materials,
+  hasLoadError = false,
+}: MaterialCatalogSectionProps) {
   const [query, setQuery] = React.useState("");
-  const [location, setLocation] = React.useState<LocationFilter>("Semua");
+
+  const [location, setLocation] = React.useState("Semua");
+
   const [sort, setSort] = React.useState<SortOption>("default");
+
+  /**
+   * Kota dibuat dinamis berdasarkan batch
+   * yang dikembalikan Supabase.
+   */
+  const locations = React.useMemo(() => {
+    const uniqueLocations = Array.from(
+      new Set(
+        materials.map((material) => material.originCity.trim()).filter(Boolean),
+      ),
+    ).sort((first, second) => first.localeCompare(second, "id"));
+
+    return ["Semua", ...uniqueLocations];
+  }, [materials]);
 
   const filteredMaterials = React.useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -36,11 +53,13 @@ export default function ProductCatalogSection() {
       const matchesSearch =
         !normalizedQuery ||
         material.title.toLowerCase().includes(normalizedQuery) ||
-        material.provider.toLowerCase().includes(normalizedQuery) ||
-        material.batchId.toLowerCase().includes(normalizedQuery);
+        material.categoryName.toLowerCase().includes(normalizedQuery) ||
+        material.providerName.toLowerCase().includes(normalizedQuery) ||
+        material.batchCode.toLowerCase().includes(normalizedQuery) ||
+        material.originCity.toLowerCase().includes(normalizedQuery);
 
       const matchesLocation =
-        location === "Semua" || material.location === location;
+        location === "Semua" || material.originCity === location;
 
       return matchesSearch && matchesLocation;
     });
@@ -56,7 +75,13 @@ export default function ProductCatalogSection() {
 
       return 0;
     });
-  }, [location, query, sort]);
+  }, [location, materials, query, sort]);
+
+  function resetFilters() {
+    setQuery("");
+    setLocation("Semua");
+    setSort("default");
+  }
 
   return (
     <section id="katalog-material" className="bg-canvas-pure">
@@ -64,7 +89,8 @@ export default function ProductCatalogSection() {
       <div className="border-b border-line-trace">
         <div
           className="
-            mx-auto grid w-[min(1320px,calc(100%_-_48px))]
+            mx-auto grid
+            w-[min(1320px,calc(100%_-_48px))]
             gap-4 py-8
             lg:grid-cols-[minmax(0,1fr)_auto_auto]
             lg:items-center
@@ -83,11 +109,10 @@ export default function ProductCatalogSection() {
                 h-12 w-full rounded-sm
                 border border-line-trace
                 bg-transparent px-5 pr-12
-                font-body text-xs text-brand-black
+                font-body text-xs
+                text-brand-black
                 outline-none transition
-
                 placeholder:text-muted-moss/65
-
                 focus:border-brand-emerald
                 focus:ring-2
                 focus:ring-brand-emerald/10
@@ -123,7 +148,8 @@ export default function ProductCatalogSection() {
                   type="button"
                   onClick={() => setLocation(item)}
                   className={`
-                    shrink-0 rounded-sm px-4 py-2.5
+                    shrink-0 rounded-sm
+                    px-4 py-2.5
                     text-[11px] font-semibold
                     transition-colors
                     ${
@@ -154,7 +180,6 @@ export default function ProductCatalogSection() {
                 text-xs font-medium
                 text-brand-black
                 outline-none transition
-
                 focus:border-brand-emerald
                 focus:ring-2
                 focus:ring-brand-emerald/10
@@ -182,14 +207,19 @@ export default function ProductCatalogSection() {
       </div>
 
       {/* Catalog */}
-      <div className="mx-auto w-[min(1320px,calc(100%_-_48px))] py-[clamp(80px,9vw,130px)]">
+      <div
+        className="
+          mx-auto
+          w-[min(1320px,calc(100%_-_48px))]
+          py-[clamp(80px,9vw,130px)]
+        "
+      >
         {/* Heading */}
         <div
           className="
             grid gap-10
             lg:grid-cols-[1.35fr_0.85fr]
-            lg:items-end
-            lg:gap-20
+            lg:items-end lg:gap-20
           "
         >
           <div>
@@ -220,20 +250,19 @@ export default function ProductCatalogSection() {
           </p>
         </div>
 
-        {/* Results */}
         {filteredMaterials.length > 0 ? (
           <div className="mt-16 grid gap-6 lg:grid-cols-2">
             {filteredMaterials.map((material) => (
-              <MaterialCard key={material.slug} material={material} />
+              <MaterialCard key={material.batchId} material={material} />
             ))}
           </div>
         ) : (
           <EmptyMaterialState
-            onReset={() => {
-              setQuery("");
-              setLocation("Semua");
-              setSort("default");
-            }}
+            hasLoadError={hasLoadError}
+            hasActiveFilters={
+              query.length > 0 || location !== "Semua" || sort !== "default"
+            }
+            onReset={resetFilters}
           />
         )}
       </div>
@@ -242,10 +271,12 @@ export default function ProductCatalogSection() {
 }
 
 interface MaterialCardProps {
-  material: MaterialItem;
+  material: MaterialCatalogItem;
 }
 
 function MaterialCard({ material }: MaterialCardProps) {
+  const materialHref = `/material/${encodeURIComponent(material.batchCode)}`;
+
   return (
     <article
       className="
@@ -253,54 +284,70 @@ function MaterialCard({ material }: MaterialCardProps) {
         border border-line-trace
         bg-canvas-pure p-4
         transition duration-300
-
         hover:-translate-y-1
         hover:border-brand-emerald
         hover:shadow-2xl
         hover:shadow-brand-black/5
-
         sm:p-7
       "
     >
       {/* Image */}
       <Link
-        href={`/produk/${material.slug}`}
+        href={materialHref}
         className="
           relative block aspect-[16/7.5]
           overflow-hidden rounded-lg
           bg-canvas-warm
         "
       >
-        <Image
-          src={material.image}
-          alt={material.title}
-          fill
-          sizes="(max-width: 1024px) 100vw, 50vw"
-          className="
-            object-cover transition duration-500
-            group-hover:scale-[1.025]
-          "
-        />
+        {material.imageUrl ? (
+          <>
+            {/* Supabase Storage URL dapat langsung ditampilkan
+                tanpa konfigurasi remotePatterns Next Image. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={material.imageUrl}
+              alt={material.title}
+              loading="lazy"
+              className="
+                h-full w-full object-cover
+                transition duration-500
+                group-hover:scale-[1.025]
+              "
+            />
+          </>
+        ) : (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-muted-moss/50">
+            <ImageOff className="size-9" strokeWidth={1.4} />
+
+            <span className="text-[10px] font-medium">Foto belum tersedia</span>
+          </div>
+        )}
       </Link>
 
       {/* Metadata */}
       <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-bold text-brand-emerald">
-        <MaterialMeta icon={UserRound} value={material.provider} />
+        <MaterialMeta icon={UserRound} value={material.providerName} />
 
         <span aria-hidden="true" className="text-muted-moss/40">
           ·
         </span>
 
-        <MaterialMeta icon={MapPin} value={material.location} />
+        <MaterialMeta icon={MapPin} value={material.originCity} />
       </div>
 
       {/* Content */}
       <div className="mt-5">
-        <Link href={`/produk/${material.slug}`} className="block">
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-moss">
+          {material.categoryName}
+        </p>
+
+        <Link href={materialHref} className="block">
           <h3
             className="
-              font-display text-3xl font-medium
-              leading-tight tracking-[-0.035em]
+              font-display text-3xl
+              font-medium leading-tight
+              tracking-[-0.035em]
               text-brand-black
               transition-colors
               group-hover:text-brand-emerald
@@ -310,34 +357,40 @@ function MaterialCard({ material }: MaterialCardProps) {
           </h3>
         </Link>
 
-        <p className="mt-3 text-xs leading-relaxed text-muted-moss">
-          {material.description}
-        </p>
+        <RichTextContent
+          html={material.description}
+          mode="plain"
+          className="mt-3 line-clamp-3 text-xs leading-relaxed text-muted-moss"
+        />
       </div>
 
-      {/* Material statistics */}
+      {/* Statistics */}
       <div className="mt-7 grid grid-cols-1 gap-2 sm:grid-cols-3">
-        <MaterialStat label="Volume" value={`${material.volumeKg} kg`} />
+        <MaterialStat
+          label="Tersedia"
+          value={`${formatWeight(material.availableWeightKg)} kg`}
+        />
 
         <MaterialStat
           label="Harga"
           value={`${formatRupiah(material.pricePerKg)}/kg`}
         />
 
-        <MaterialStat label="ID Batch" value={material.batchId} />
+        <MaterialStat label="ID Batch" value={material.batchCode} />
       </div>
 
       {/* Action */}
       <div className="mt-7">
         <Link
-          href={`/produk/${material.slug}`}
+          href={materialHref}
           className="
-            group/action inline-flex items-center
-            justify-center gap-3 rounded-sm
+            group/action inline-flex
+            items-center justify-center
+            gap-3 rounded-sm
             bg-brand-forest px-6 py-4
-            text-xs font-bold text-canvas-pure
+            text-xs font-bold
+            text-canvas-pure
             transition duration-300
-
             hover:-translate-y-0.5
             hover:bg-brand-black
           "
@@ -367,6 +420,7 @@ function MaterialMeta({ icon: Icon, value }: MaterialMetaProps) {
   return (
     <span className="inline-flex items-center gap-2">
       <Icon className="size-3.5" strokeWidth={2} />
+
       <span>{value}</span>
     </span>
   );
@@ -390,48 +444,74 @@ function MaterialStat({ label, value }: MaterialStatProps) {
 }
 
 interface EmptyMaterialStateProps {
+  hasLoadError: boolean;
+  hasActiveFilters: boolean;
   onReset: () => void;
 }
 
-function EmptyMaterialState({ onReset }: EmptyMaterialStateProps) {
+function EmptyMaterialState({
+  hasLoadError,
+  hasActiveFilters,
+  onReset,
+}: EmptyMaterialStateProps) {
+  const title = hasLoadError
+    ? "Katalog gagal dimuat"
+    : "Material tidak ditemukan";
+
+  const description = hasLoadError
+    ? "Data material belum dapat diambil. Silakan muat ulang halaman."
+    : hasActiveFilters
+      ? "Coba gunakan kata pencarian atau lokasi yang berbeda."
+      : "Belum ada batch material aktif yang tersedia.";
+
   return (
     <div
       className="
-        mt-16 flex min-h-72 flex-col
-        items-center justify-center
-        rounded-2xl border border-dashed
-        border-line-trace bg-canvas-warm/30
+        mt-16 flex min-h-72
+        flex-col items-center
+        justify-center rounded-2xl
+        border border-dashed
+        border-line-trace
+        bg-canvas-warm/30
         px-6 text-center
       "
     >
       <Search className="size-10 text-muted-moss/50" strokeWidth={1.5} />
 
       <h3 className="mt-5 font-display text-2xl font-medium text-brand-black">
-        Material tidak ditemukan
+        {title}
       </h3>
 
       <p className="mt-2 max-w-md text-xs leading-relaxed text-muted-moss">
-        Coba gunakan kata pencarian atau lokasi yang berbeda.
+        {description}
       </p>
 
-      <button
-        type="button"
-        onClick={onReset}
-        className="
-          mt-6 text-xs font-bold
-          text-brand-emerald
-          transition-colors
-          hover:text-brand-forest
-        "
-      >
-        Reset pencarian
-      </button>
+      {!hasLoadError && hasActiveFilters && (
+        <button
+          type="button"
+          onClick={onReset}
+          className="
+            mt-6 text-xs font-bold
+            text-brand-emerald
+            transition-colors
+            hover:text-brand-forest
+          "
+        >
+          Reset pencarian
+        </button>
+      )}
     </div>
   );
 }
 
-function formatRupiah(value: number) {
+function formatRupiah(value: number): string {
   return new Intl.NumberFormat("id-ID", {
     maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function formatWeight(value: number): string {
+  return new Intl.NumberFormat("id-ID", {
+    maximumFractionDigits: 2,
   }).format(value);
 }
