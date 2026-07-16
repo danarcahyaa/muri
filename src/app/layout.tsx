@@ -10,12 +10,11 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   weight: ["300", "400", "500", "600", "700", "800"],
 });
 
-// Perubahan di sini: Tambahkan properti icons
 export const metadata: Metadata = {
   title: "MURIs",
   description: "MURI combines enterprise waste tracking with sustainable solutions. Circular economy platform powered by AI.",
   icons: {
-    icon: "/logo.png", // Mengarah ke file di dalam folder public
+    icon: "/logo.png", 
   },
 };
 
