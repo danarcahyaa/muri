@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import MaterialHero from "@/components/material/MaterialHero";
 import MaterialCatalogSection from "@/components/material/MaterialCatalogSection";
 import { getActiveMaterialBatches } from "@/services/material";
+import MaterialHero from "@/components/material/MaterialHero";
 
 export const metadata: Metadata = {
   title: "Katalog Material Sirkular | Muri",
