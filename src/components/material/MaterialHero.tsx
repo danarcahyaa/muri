@@ -1,6 +1,6 @@
 import { Leaf } from "lucide-react";
 
-export default function MaterialHero() {
+export default function ProductHero() {
   return (
     <section className="overflow-hidden bg-brand-forest text-canvas-pure">
       <div

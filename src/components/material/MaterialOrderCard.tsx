@@ -141,8 +141,6 @@ export default function MaterialOrderCard({
           </div>
         </div>
 
-        <SummaryRow label="Harga" value={`${formatIdr(pricePerKg)}/kg`} />
-        <SummaryRow label="Tersedia" value={`${availableKg} kg`} />
       </div>
 
       <div className="mt-6 rounded-xl bg-brand-lime p-6 text-brand-forest">
