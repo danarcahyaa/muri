@@ -34,6 +34,8 @@ import {
   formatIndonesianDate,
   formatCurrencyIDR,
 } from "@/lib/formatter";
+import { Button } from "@/components/ui/Button";
+import { PendingAction } from "@/types/common";
 
 interface TableProps {
   posts: WastePostItem[];
@@ -42,11 +44,6 @@ interface TableProps {
   onArchiveClick: (post: WastePostItem) => void;
   onPermanentDeleteClick: (post: WastePostItem) => void;
 }
-
-type PendingAction = {
-  post: WastePostItem;
-  type: "archive" | "permanent_delete";
-};
 
 export function WasteDataTable({
   posts,
