@@ -1,21 +1,10 @@
 "use client";
 
-import {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  LogOut,
-  Menu,
-  X,
-} from "lucide-react";
-import {
-  usePathname,
-  useRouter,
-} from "next/navigation";
+import { Coins, LogOut, Menu, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 
 import { useAuth } from "@/components/auth/AuthProvider";
 import { navigationItems } from "@/data/navigation";
@@ -41,72 +30,48 @@ function isNavigationItemActive(
   const itemHash = getHrefHash(href);
 
   if (itemHash) {
-    return (
-      pathname === itemPath &&
-      currentHash === itemHash
-    );
+    return pathname === itemPath && currentHash === itemHash;
   }
 
   if (itemPath === "/") {
     return pathname === "/";
   }
 
-  return (
-    pathname === itemPath ||
-    pathname.startsWith(
-      `${itemPath}/`,
-    )
-  );
+  return pathname === itemPath || pathname.startsWith(`${itemPath}/`);
 }
 
 export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const accountMenuRef =
-    useRef<HTMLDivElement>(null);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
 
-  const [
-    mobileMenuOpen,
-    setMobileMenuOpen,
-  ] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const [
-    accountMenuOpen,
-    setAccountMenuOpen,
-  ] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
 
-  const [
-    isSigningOut,
-    setIsSigningOut,
-  ] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
-  const [
-    currentHash,
-    setCurrentHash,
-  ] = useState("");
+  const [currentHash, setCurrentHash] = useState("");
 
   const {
     user,
     fullName,
     dashboardHref,
+    accountType,
+    totalPoints,
     isLoading,
     signOut,
   } = useAuth();
 
   const currentPath =
-    typeof window !== "undefined"
-      ? `${pathname}${currentHash}`
-      : pathname;
+    typeof window !== "undefined" ? `${pathname}${currentHash}` : pathname;
 
   /*
    * Login/navbar publik diarahkan ke login customer.
    * Login brand dan waste provider memiliki halaman sendiri.
    */
-  const nextPath =
-    pathname === "/"
-      ? "/dashboard"
-      : currentPath;
+  const nextPath = pathname === "/" ? "/dashboard" : currentPath;
 
   const loginHref = {
     pathname: "/auth/login",
@@ -126,41 +91,28 @@ export default function Header() {
 
   const displayName =
     fullName ||
-    (typeof user?.user_metadata?.name ===
-    "string"
+    (typeof user?.user_metadata?.name === "string"
       ? user.user_metadata.name
       : "") ||
     user?.email ||
     "Pengguna";
 
-  const initial =
-    displayName
-      .trim()
-      .charAt(0)
-      .toUpperCase() || "M";
+  const initial = displayName.trim().charAt(0).toUpperCase() || "M";
 
   /*
    * Membaca hash seperti #ekosistem.
    */
   useEffect(() => {
     const updateHash = () => {
-      setCurrentHash(
-        window.location.hash,
-      );
+      setCurrentHash(window.location.hash);
     };
 
     updateHash();
 
-    window.addEventListener(
-      "hashchange",
-      updateHash,
-    );
+    window.addEventListener("hashchange", updateHash);
 
     return () => {
-      window.removeEventListener(
-        "hashchange",
-        updateHash,
-      );
+      window.removeEventListener("hashchange", updateHash);
     };
   }, [pathname]);
 
@@ -177,25 +129,15 @@ export default function Header() {
    * atau menekan Escape.
    */
   useEffect(() => {
-    function handleOutsideClick(
-      event: MouseEvent,
-    ) {
-      const target =
-        event.target as Node;
+    function handleOutsideClick(event: MouseEvent) {
+      const target = event.target as Node;
 
-      if (
-        accountMenuRef.current &&
-        !accountMenuRef.current.contains(
-          target,
-        )
-      ) {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(target)) {
         setAccountMenuOpen(false);
       }
     }
 
-    function handleEscape(
-      event: KeyboardEvent,
-    ) {
+    function handleEscape(event: KeyboardEvent) {
       if (event.key !== "Escape") {
         return;
       }
@@ -204,26 +146,14 @@ export default function Header() {
       setMobileMenuOpen(false);
     }
 
-    document.addEventListener(
-      "mousedown",
-      handleOutsideClick,
-    );
+    document.addEventListener("mousedown", handleOutsideClick);
 
-    document.addEventListener(
-      "keydown",
-      handleEscape,
-    );
+    document.addEventListener("keydown", handleEscape);
 
     return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleOutsideClick,
-      );
+      document.removeEventListener("mousedown", handleOutsideClick);
 
-      document.removeEventListener(
-        "keydown",
-        handleEscape,
-      );
+      document.removeEventListener("keydown", handleEscape);
     };
   }, []);
 
@@ -239,19 +169,14 @@ export default function Header() {
       router.replace("/");
       router.refresh();
     } catch (error) {
-      console.error(
-        "Gagal keluar:",
-        error,
-      );
+      console.error("Gagal keluar:", error);
     } finally {
       setIsSigningOut(false);
     }
   }
 
   function toggleMobileMenu() {
-    setMobileMenuOpen(
-      (current) => !current,
-    );
+    setMobileMenuOpen((current) => !current);
 
     setAccountMenuOpen(false);
   }
@@ -297,25 +222,19 @@ export default function Header() {
             lg:flex
           "
         >
-          {navigationItems.map(
-            (item) => {
-              const isActive =
-                isNavigationItemActive(
-                  item.href,
-                  pathname,
-                  currentHash,
-                );
+          {navigationItems.map((item) => {
+            const isActive = isNavigationItemActive(
+              item.href,
+              pathname,
+              currentHash,
+            );
 
-              return (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  aria-current={
-                    isActive
-                      ? "page"
-                      : undefined
-                  }
-                  className={`
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                aria-current={isActive ? "page" : undefined}
+                className={`
                     group relative inline-flex
                     items-center whitespace-nowrap
                     py-3 text-xs font-semibold
@@ -330,12 +249,11 @@ export default function Header() {
                         `
                     }
                   `}
-                >
-                  {item.label}
-                </Link>
-              );
-            },
-          )}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Desktop authentication */}
@@ -343,10 +261,7 @@ export default function Header() {
           {isLoading ? (
             <div className="h-12 w-44 animate-pulse rounded-md bg-brand-black/5" />
           ) : user ? (
-            <div
-              ref={accountMenuRef}
-              className="relative"
-            >
+            <div ref={accountMenuRef} className="relative">
               <div
                 className="
                   flex items-center
@@ -355,6 +270,26 @@ export default function Header() {
                   bg-canvas-pure p-1
                 "
               >
+                {accountType === "customer" && (
+                  <div
+                    title={`${totalPoints} coin`}
+                    className="
+                      inline-flex items-center
+                      gap-2 rounded-full
+                      bg-brand-lime/25
+                      px-4 py-3
+                      text-xs font-bold
+                      text-brand-black
+                    "
+                  >
+                    <Coins className="size-4 text-brand-emerald" />
+
+                    <span>{totalPoints.toLocaleString("id-ID")}</span>
+
+                    <span className="hidden xl:inline">Coin</span>
+                  </div>
+                )}
+
                 {dashboardHref && (
                   <Link
                     href={dashboardHref}
@@ -374,15 +309,8 @@ export default function Header() {
                 <button
                   type="button"
                   aria-label="Buka menu akun"
-                  aria-expanded={
-                    accountMenuOpen
-                  }
-                  onClick={() =>
-                    setAccountMenuOpen(
-                      (current) =>
-                        !current,
-                    )
-                  }
+                  aria-expanded={accountMenuOpen}
+                  onClick={() => setAccountMenuOpen((current) => !current)}
                   className="
                     flex size-10 items-center
                     justify-center rounded-full
@@ -422,18 +350,29 @@ export default function Header() {
                     <p className="mt-1 truncate text-[11px] text-muted-moss">
                       {user.email}
                     </p>
+
+                    {accountType === "customer" && (
+                      <div
+                        className="
+                          mt-3 inline-flex items-center
+                          gap-2 rounded-full
+                          bg-brand-lime/25
+                          px-3 py-2
+                          text-xs font-bold
+                          text-brand-black
+                        "
+                      >
+                        <Coins className="size-4 text-brand-emerald" />
+
+                        <span>{totalPoints.toLocaleString("id-ID")} Coin</span>
+                      </div>
+                    )}
                   </div>
 
                   {dashboardHref && (
                     <Link
-                      href={
-                        dashboardHref
-                      }
-                      onClick={() =>
-                        setAccountMenuOpen(
-                          false,
-                        )
-                      }
+                      href={dashboardHref}
+                      onClick={() => setAccountMenuOpen(false)}
                       className="
                         mt-2 flex items-center
                         rounded-xl px-4 py-3
@@ -450,12 +389,8 @@ export default function Header() {
 
                   <button
                     type="button"
-                    disabled={
-                      isSigningOut
-                    }
-                    onClick={
-                      handleSignOut
-                    }
+                    disabled={isSigningOut}
+                    onClick={handleSignOut}
                     className="
                       flex w-full items-center
                       gap-2 rounded-xl
@@ -470,9 +405,7 @@ export default function Header() {
                   >
                     <LogOut className="size-4" />
 
-                    {isSigningOut
-                      ? "Sedang keluar..."
-                      : "Keluar"}
+                    {isSigningOut ? "Sedang keluar..." : "Keluar"}
                   </button>
                 </div>
               )}
@@ -523,16 +456,10 @@ export default function Header() {
         <button
           type="button"
           aria-label={
-            mobileMenuOpen
-              ? "Tutup menu navigasi"
-              : "Buka menu navigasi"
+            mobileMenuOpen ? "Tutup menu navigasi" : "Buka menu navigasi"
           }
-          aria-expanded={
-            mobileMenuOpen
-          }
-          onClick={
-            toggleMobileMenu
-          }
+          aria-expanded={mobileMenuOpen}
+          onClick={toggleMobileMenu}
           className="
             flex size-11 items-center
             justify-center justify-self-end
@@ -594,36 +521,21 @@ export default function Header() {
             py-5
           "
         >
-          <nav
-            aria-label="Navigasi mobile"
-            className="flex flex-col"
-          >
-            {navigationItems.map(
-              (item) => {
-                const isActive =
-                  isNavigationItemActive(
-                    item.href,
-                    pathname,
-                    currentHash,
-                  );
+          <nav aria-label="Navigasi mobile" className="flex flex-col">
+            {navigationItems.map((item) => {
+              const isActive = isNavigationItemActive(
+                item.href,
+                pathname,
+                currentHash,
+              );
 
-                return (
-                  <Link
-                    key={
-                      item.label
-                    }
-                    href={item.href}
-                    aria-current={
-                      isActive
-                        ? "page"
-                        : undefined
-                    }
-                    onClick={() =>
-                      setMobileMenuOpen(
-                        false,
-                      )
-                    }
-                    className={`
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  aria-current={isActive ? "page" : undefined}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`
                       flex items-center
                       justify-between
                       border-b
@@ -641,18 +553,15 @@ export default function Header() {
                           `
                       }
                     `}
-                  >
-                    <span>
-                      {item.label}
-                    </span>
+                >
+                  <span>{item.label}</span>
 
-                    {isActive && (
-                      <span className="size-1.5 rounded-full bg-brand-emerald" />
-                    )}
-                  </Link>
-                );
-              },
-            )}
+                  {isActive && (
+                    <span className="size-1.5 rounded-full bg-brand-emerald" />
+                  )}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Mobile authentication */}
@@ -679,6 +588,23 @@ export default function Header() {
                   <p className="mt-1 truncate text-xs text-muted-moss">
                     {user.email}
                   </p>
+
+                  {accountType === "customer" && (
+                    <div
+                      className="
+                        mt-2 inline-flex items-center
+                        gap-2 rounded-full
+                        bg-brand-lime/25
+                        px-3 py-1.5
+                        text-xs font-bold
+                        text-brand-black
+                      "
+                    >
+                      <Coins className="size-4 text-brand-emerald" />
+
+                      <span>{totalPoints.toLocaleString("id-ID")} Coin</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -691,14 +617,8 @@ export default function Header() {
               >
                 {dashboardHref && (
                   <Link
-                    href={
-                      dashboardHref
-                    }
-                    onClick={() =>
-                      setMobileMenuOpen(
-                        false,
-                      )
-                    }
+                    href={dashboardHref}
+                    onClick={() => setMobileMenuOpen(false)}
                     className="
                       inline-flex items-center
                       justify-center rounded-md
@@ -714,12 +634,8 @@ export default function Header() {
 
                 <button
                   type="button"
-                  onClick={
-                    handleSignOut
-                  }
-                  disabled={
-                    isSigningOut
-                  }
+                  onClick={handleSignOut}
+                  disabled={isSigningOut}
                   className="
                     inline-flex items-center
                     justify-center gap-2
@@ -732,9 +648,7 @@ export default function Header() {
                 >
                   <LogOut className="size-4" />
 
-                  {isSigningOut
-                    ? "Keluar..."
-                    : "Keluar"}
+                  {isSigningOut ? "Keluar..." : "Keluar"}
                 </button>
               </div>
             </div>
@@ -742,11 +656,7 @@ export default function Header() {
             <div className="grid grid-cols-2 gap-3 pt-5">
               <Link
                 href={loginHref}
-                onClick={() =>
-                  setMobileMenuOpen(
-                    false,
-                  )
-                }
+                onClick={() => setMobileMenuOpen(false)}
                 className="
                   inline-flex items-center
                   justify-center rounded-md
@@ -761,11 +671,7 @@ export default function Header() {
 
               <Link
                 href={registerHref}
-                onClick={() =>
-                  setMobileMenuOpen(
-                    false,
-                  )
-                }
+                onClick={() => setMobileMenuOpen(false)}
                 className="
                   inline-flex items-center
                   justify-center rounded-md
