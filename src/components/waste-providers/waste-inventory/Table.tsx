@@ -110,7 +110,9 @@ export function WasteDataTable({
                     &rdquo;
                   </span>{" "}
                   berstatus{" "}
-                  <span className="font-semibold text-[#B05B00]">Terjual</span>{" "}
+                  <span className="font-semibold text-[#B05B00]">
+                    Terjual
+                  </span>{" "}
                   akan dihapus secara{" "}
                   <span className="font-semibold text-error-rust">
                     permanen
@@ -132,11 +134,25 @@ export function WasteDataTable({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <Button variant={"outline-black"} size={"sm"} onClick={() => setPendingAction(null)}>
+            <Button
+              variant={"outline-black"}
+              size={"sm"}
+              onClick={() => setPendingAction(null)}
+            >
               Batal
             </Button>
-            <Button variant={pendingAction?.type === "permanent_delete" ? "destructive" : "solid-black"} size={"sm"} onClick={handleConfirm}>
-              {pendingAction?.type === "permanent_delete" ? "Hapus Permanen" : "Arsipkan"}
+            <Button
+              variant={
+                pendingAction?.type === "permanent_delete"
+                  ? "destructive"
+                  : "solid-black"
+              }
+              size={"sm"}
+              onClick={handleConfirm}
+            >
+              {pendingAction?.type === "permanent_delete"
+                ? "Hapus Permanen"
+                : "Arsipkan"}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -220,12 +236,12 @@ export function WasteDataTable({
                       {formatIndonesianDate(post.created_at)}
                     </TableCell>
                     <TableCell className="px-4 py-3.5">
-                      <StatusBadge 
+                      <StatusBadge
                         variant={
-                          post.status === "active" 
-                            ? "success" 
-                            : post.status === "sold_out" 
-                              ? "warning" 
+                          post.status === "active"
+                            ? "success"
+                            : post.status === "sold_out"
+                              ? "warning"
                               : "neutral"
                         }
                       >
@@ -237,37 +253,55 @@ export function WasteDataTable({
                         <div className="flex justify-end gap-2">
                           {/*  View / Edit button  */}
                           <TableActionButton
-                              onClick={() => !soldOut && onViewClick(post)}
-                              disabled={soldOut}
-                              aria-label={soldOut ? "Tidak dapat diedit — sudah terjual" : "Lihat / Edit Detail"}
-                            >
-                              {soldOut ? (
-                                <PencilOff className="size-4" />
-                              ) : (
-                                <Eye className="size-4" />
-                              )}
-                            </TableActionButton>
+                            onClick={() => !soldOut && onViewClick(post)}
+                            disabled={soldOut}
+                            aria-label={
+                              soldOut
+                                ? "Tidak dapat diedit — sudah terjual"
+                                : "Lihat / Edit Detail"
+                            }
+                          >
+                            {soldOut ? (
+                              <PencilOff className="size-4" />
+                            ) : (
+                              <Eye className="size-4" />
+                            )}
+                          </TableActionButton>
 
-                        {/* Archive / Permanent Delete button */}
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <TableActionButton
-                              variant={soldOut ? "destructive" : "default"}
-                              onClick={() =>
-                                setPendingAction({
-                                  post,
-                                  type: soldOut ? "permanent_delete" : "archive",
-                                })
+                          {/* Archive / Permanent Delete button */}
+                          <Tooltip>
+                            <TooltipTrigger
+                              render={
+                                <TableActionButton
+                                  variant={soldOut ? "destructive" : "default"}
+                                  onClick={() =>
+                                    setPendingAction({
+                                      post,
+                                      type: soldOut
+                                        ? "permanent_delete"
+                                        : "archive",
+                                    })
+                                  }
+                                  aria-label={
+                                    soldOut
+                                      ? "Hapus permanen"
+                                      : "Arsipkan limbah"
+                                  }
+                                >
+                                  {soldOut ? (
+                                    <Trash2
+                                      aria-hidden="true"
+                                      className="size-4"
+                                    />
+                                  ) : (
+                                    <Archive
+                                      aria-hidden="true"
+                                      className="size-4"
+                                    />
+                                  )}
+                                </TableActionButton>
                               }
-                              aria-label={soldOut ? "Hapus permanen" : "Arsipkan limbah"}
-                            >
-                              {soldOut ? (
-                                <Trash2 className="size-4" />
-                              ) : (
-                                <Archive className="size-4" />
-                              )}
-                            </TableActionButton>
-                            </TooltipTrigger>
+                            />
 
                             <TooltipContent side="top">
                               {soldOut ? "Hapus permanen" : "Arsipkan limbah"}
