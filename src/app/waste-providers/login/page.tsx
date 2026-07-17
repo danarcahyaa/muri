@@ -1,92 +1,8 @@
-"use client";
+import { Suspense } from "react";
 
-import * as React from "react";
-import { useState } from "react";
-import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, KeyRound, Leaf, Mail } from "lucide-react";
-import { toast } from "sonner";
-
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { BackLink } from "@/components/ui/BackLink";
-import { AuthFooterLink } from "@/components/ui/AuthFooterLink";
-
-import { loginWasteProvider } from "@/services/waste-providers/authService";
-import { translateSupabaseError } from "@/lib/supabaseError";
+import WasteProviderLoginContent from "./WasteProviderLoginContent";
 
 export default function WasteProviderLoginPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const fromPath = searchParams.get("from") || "/";
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  React.useEffect(() => {
-    if (error) {
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
-    }
-  }, [error]);
-
-  const getLoginDestination = (): string => {
-    const nextPath = searchParams.get("next");
-
-    if (nextPath && nextPath.startsWith("/") && !nextPath.startsWith("//")) {
-      return nextPath;
-    }
-
-    return "/waste-providers/dashboard";
-  };
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    setIsLoading(true);
-    setError(null);
-
-    const normalizedEmail = email.trim();
-
-    if (!normalizedEmail) {
-      setError("Email bisnis wajib diisi.");
-      setIsLoading(false);
-      return;
-    }
-
-    if (!password) {
-      setError("Kata sandi wajib diisi.");
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const response = await loginWasteProvider({
-        email: normalizedEmail,
-        password,
-      });
-
-      if (!response.success) {
-        setError(response.error || "Gagal masuk ke akun penyedia limbah.");
-        return;
-      }
-
-      toast.success(response.message || "Berhasil masuk!");
-
-      router.replace(getLoginDestination());
-    } catch (err: unknown) {
-      setError(translateSupabaseError(err));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-canvas-pure px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-lg space-y-8">
@@ -209,14 +125,10 @@ export default function WasteProviderLoginPage() {
             </Button>
           </form>
 
-          {/* Footer link */}
-          <AuthFooterLink
-            text="Belum memiliki akun penyedia limbah?"
-            linkText="Daftar di sini"
-            href="/waste-providers/register"
-          />
-        </div>
-      </div>
+function WasteProviderLoginFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-canvas-pure">
+      <p className="text-sm text-muted-moss">Memuat halaman login...</p>
     </div>
   );
 }

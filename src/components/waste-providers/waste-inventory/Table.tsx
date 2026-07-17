@@ -29,8 +29,11 @@ import {
 import { WastePostItem } from "@/types/wasteProvider";
 import { WastePostStatus } from "@/enums/enum";
 import { Eye, Archive, Trash2, PencilOff } from "lucide-react";
-import { formatWeightKg, formatIndonesianDate, formatCurrencyIDR } from "@/lib/formatter";
-import { Button } from "@/components/ui/Button";
+import {
+  formatWeightKg,
+  formatIndonesianDate,
+  formatCurrencyIDR,
+} from "@/lib/formatter";
 
 interface TableProps {
   posts: WastePostItem[];
@@ -56,7 +59,9 @@ export function WasteDataTable({
   const itemsPerPage = 5;
 
   // Pending action to confirm via AlertDialog
-  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(
+    null,
+  );
 
   // Reset page to 1 when posts list change (e.g. on new filter or search query)
   useEffect(() => {
@@ -66,7 +71,7 @@ export function WasteDataTable({
   const totalPages = Math.ceil(posts.length / itemsPerPage);
   const paginatedPosts = posts.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   function handleConfirm() {
@@ -79,12 +84,18 @@ export function WasteDataTable({
     setPendingAction(null);
   }
 
-  const isSoldOut = (post: WastePostItem) => post.status === WastePostStatus.SOLD_OUT;
+  const isSoldOut = (post: WastePostItem) =>
+    post.status === WastePostStatus.SOLD_OUT;
 
   return (
     <>
       {/* Alert Dialog */}
-      <AlertDialog open={!!pendingAction} onOpenChange={(open) => { if (!open) setPendingAction(null); }}>
+      <AlertDialog
+        open={!!pendingAction}
+        onOpenChange={(open) => {
+          if (!open) setPendingAction(null);
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
@@ -97,17 +108,26 @@ export function WasteDataTable({
                 <>
                   Limbah{" "}
                   <span className="font-semibold text-brand-black">
-                    &ldquo;{pendingAction.post.custom_fabric_name || "Kain Tanpa Nama"}&rdquo;
+                    &ldquo;
+                    {pendingAction.post.custom_fabric_name || "Kain Tanpa Nama"}
+                    &rdquo;
                   </span>{" "}
-                  berstatus <span className="font-semibold text-[#B05B00]">Terjual</span> akan dihapus
-                  secara <span className="font-semibold text-error-rust">permanen</span> dari sistem.
-                  Tindakan ini tidak dapat dibatalkan.
+                  berstatus{" "}
+                  <span className="font-semibold text-[#B05B00]">Terjual</span>{" "}
+                  akan dihapus secara{" "}
+                  <span className="font-semibold text-error-rust">
+                    permanen
+                  </span>{" "}
+                  dari sistem. Tindakan ini tidak dapat dibatalkan.
                 </>
               ) : (
                 <>
                   Limbah{" "}
                   <span className="font-semibold text-brand-black">
-                    &ldquo;{pendingAction?.post.custom_fabric_name || "Kain Tanpa Nama"}&rdquo;
+                    &ldquo;
+                    {pendingAction?.post.custom_fabric_name ||
+                      "Kain Tanpa Nama"}
+                    &rdquo;
                   </span>{" "}
                   akan diarsipkan dan tidak akan muncul di daftar aktif.
                 </>
@@ -137,7 +157,9 @@ export function WasteDataTable({
               <TableHead className="px-4 py-3.5">Harga/Kg</TableHead>
               <TableHead className="px-4 py-3.5">Tanggal</TableHead>
               <TableHead className="px-4 py-3.5">Status</TableHead>
-              <TableHead className="w-24 text-right px-6 py-3.5">Aksi</TableHead>
+              <TableHead className="w-24 text-right px-6 py-3.5">
+                Aksi
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-line-trace/40">
@@ -145,8 +167,12 @@ export function WasteDataTable({
               <TableSkeleton columnsCount={8} rowsCount={itemsPerPage} />
             ) : posts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-10 text-xs text-muted-moss">
-                  Belum ada material terdaftar yang cocok dengan filter pencarian.
+                <TableCell
+                  colSpan={8}
+                  className="text-center py-10 text-xs text-muted-moss"
+                >
+                  Belum ada material terdaftar yang cocok dengan filter
+                  pencarian.
                 </TableCell>
               </TableRow>
             ) : (
@@ -168,11 +194,17 @@ export function WasteDataTable({
                       : "bg-canvas-warm text-muted-moss";
 
                 return (
-                  <TableRow key={post.id} className="hover:bg-canvas-warm/10 transition-colors">
+                  <TableRow
+                    key={post.id}
+                    className="hover:bg-canvas-warm/10 transition-colors"
+                  >
                     <TableCell className="w-16 text-center text-xs font-mono font-medium text-muted-moss px-4 py-3.5">
                       {(currentPage - 1) * itemsPerPage + index + 1}
                     </TableCell>
-                    <TableCell className="font-semibold text-brand-black px-4 py-3.5 max-w-[200px] truncate" title={post.custom_fabric_name || "Kain Tanpa Nama"}>
+                    <TableCell
+                      className="font-semibold text-brand-black px-4 py-3.5 max-w-[200px] truncate"
+                      title={post.custom_fabric_name || "Kain Tanpa Nama"}
+                    >
                       {post.custom_fabric_name || "Kain Tanpa Nama"}
                     </TableCell>
                     <TableCell className="text-brand-black px-4 py-3.5">
@@ -183,7 +215,9 @@ export function WasteDataTable({
                     </TableCell>
                     <TableCell className="text-brand-black px-4 py-3.5">
                       {formatCurrencyIDR(post.price_per_kg)}
-                      <span className="text-muted-moss text-[10px] ml-0.5">/kg</span>
+                      <span className="text-muted-moss text-[10px] ml-0.5">
+                        /kg
+                      </span>
                     </TableCell>
                     <TableCell className="text-brand-black px-4 py-3.5">
                       {formatIndonesianDate(post.created_at)}
@@ -237,10 +271,9 @@ export function WasteDataTable({
                               )}
                             </TableActionButton>
                             </TooltipTrigger>
+
                             <TooltipContent side="top">
-                              {soldOut
-                                ? "Hapus permanen"
-                                : "Arsipkan limbah"}
+                              {soldOut ? "Hapus permanen" : "Arsipkan limbah"}
                             </TooltipContent>
                           </Tooltip>
                         </div>
@@ -255,7 +288,19 @@ export function WasteDataTable({
         {totalPages > 1 && (
           <div className="flex items-center justify-between border-t border-line-trace px-6 py-4 bg-canvas-warm/10">
             <div className="text-xs text-muted-moss">
-              Menampilkan <span className="font-semibold text-brand-black">{((currentPage - 1) * itemsPerPage) + 1}</span> - <span className="font-semibold text-brand-black">{Math.min(currentPage * itemsPerPage, posts.length)}</span> dari <span className="font-semibold text-brand-black">{posts.length}</span> data
+              Menampilkan{" "}
+              <span className="font-semibold text-brand-black">
+                {(currentPage - 1) * itemsPerPage + 1}
+              </span>{" "}
+              -{" "}
+              <span className="font-semibold text-brand-black">
+                {Math.min(currentPage * itemsPerPage, posts.length)}
+              </span>{" "}
+              dari{" "}
+              <span className="font-semibold text-brand-black">
+                {posts.length}
+              </span>{" "}
+              data
             </div>
             <div className="flex gap-2">
               <button
@@ -266,7 +311,9 @@ export function WasteDataTable({
                 Sebelumnya
               </button>
               <button
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
                 className="inline-flex h-8 items-center justify-center rounded border border-line-trace bg-canvas-pure px-3 text-xs font-semibold text-brand-black hover:bg-canvas-warm disabled:opacity-50 disabled:hover:bg-canvas-pure transition-colors"
               >

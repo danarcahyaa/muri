@@ -5,6 +5,7 @@ import EducationOutcomeSection from "@/components/education/EducationOutcomeSect
 import EducationWorkshopSection from "@/components/education/EducationWorkshopSection";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
+import { getWorkshops } from "@/services/workshop";
 
 export const metadata: Metadata = {
   title: "Edukasi & Workshop | Muri",
@@ -13,7 +14,30 @@ export const metadata: Metadata = {
     "Ikuti workshop pengolahan limbah tekstil, upcycling, pengembangan produk, dan bisnis fashion sirkular bersama Muri.",
 };
 
-export default function EducationPage() {
+export const dynamic = "force-dynamic";
+
+export default async function EducationPage() {
+  const workshopResponse = await getWorkshops();
+
+  const hasWorkshopLoadError =
+    !workshopResponse.success;
+
+  const workshops = workshopResponse.success
+    ? workshopResponse.data ?? []
+    : [];
+
+  const activeWorkshopCount = workshops.filter(
+    (workshop) =>
+      workshop.remainingSlots > 0,
+  ).length;
+
+  if (!workshopResponse.success) {
+    console.error(
+      "[EducationPage] Failed to fetch workshops:",
+      workshopResponse.error,
+    );
+  }
+
   return (
     <div
       className="
@@ -25,9 +49,21 @@ export default function EducationPage() {
       <Header />
 
       <main className="pt-16">
-        <EducationHero />
+        <EducationHero
+          activeWorkshopCount={
+            activeWorkshopCount
+          }
+          hasLoadError={
+            hasWorkshopLoadError
+          }
+        />
 
-        <EducationWorkshopSection />
+        <EducationWorkshopSection
+          workshops={workshops}
+          hasLoadError={
+            hasWorkshopLoadError
+          }
+        />
 
         <EducationOutcomeSection />
       </main>

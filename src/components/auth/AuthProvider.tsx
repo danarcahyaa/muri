@@ -27,6 +27,7 @@ type AuthContextValue = {
 
   fullName: string;
   dashboardHref: string | null;
+  totalPoints: number;
 
   isLoading: boolean;
   signOut: () => Promise<void>;
@@ -195,6 +196,8 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
   const dashboardHref = accountProfile?.dashboardHref ?? null;
 
+  const totalPoints = accountProfile?.totalPoints ?? 0;
+
   /*
    * Loading baru selesai apabila:
    *
@@ -228,6 +231,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
       fullName,
       dashboardHref,
+      totalPoints,
 
       isLoading,
       signOut,
@@ -239,6 +243,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       accountType,
       fullName,
       dashboardHref,
+      totalPoints,
       isLoading,
     ],
   );
