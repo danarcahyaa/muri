@@ -7,7 +7,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { TableSkeleton } from "@/components/ui/TableSkeleton";
+import { TableActionButton } from "@/components/ui/TableActionButton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +30,7 @@ import { WastePostItem } from "@/types/wasteProvider";
 import { WastePostStatus } from "@/enums/enum";
 import { Eye, Archive, Trash2, PencilOff } from "lucide-react";
 import { formatWeightKg, formatIndonesianDate, formatCurrencyIDR } from "@/lib/formatter";
+import { Button } from "@/components/ui/Button";
 
 interface TableProps {
   posts: WastePostItem[];
@@ -112,17 +115,12 @@ export function WasteDataTable({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirm}
-              className={
-                pendingAction?.type === "permanent_delete"
-                  ? "bg-error-rust text-white hover:bg-error-rust/90"
-                  : "bg-brand-forest text-white hover:bg-brand-forest/90"
-              }
-            >
+            <Button variant={"outline-black"} size={"sm"} onClick={() => setPendingAction(null)}>
+              Batal
+            </Button>
+            <Button variant={pendingAction?.type === "permanent_delete" ? "destructive" : "solid-black"} size={"sm"} onClick={handleConfirm}>
               {pendingAction?.type === "permanent_delete" ? "Hapus Permanen" : "Arsipkan"}
-            </AlertDialogAction>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -144,37 +142,7 @@ export function WasteDataTable({
           </TableHeader>
           <TableBody className="divide-y divide-line-trace/40">
             {isLoading ? (
-              Array.from({ length: 5 }).map((_, idx) => (
-                <TableRow key={idx} className="hover:bg-transparent">
-                  <TableCell className="w-16 text-center px-4 py-3.5">
-                    <Skeleton className="h-4 w-6 mx-auto" />
-                  </TableCell>
-                  <TableCell className="px-4 py-3.5">
-                    <Skeleton className="h-4 w-44" />
-                  </TableCell>
-                  <TableCell className="px-4 py-3.5">
-                    <Skeleton className="h-4 w-24" />
-                  </TableCell>
-                  <TableCell className="px-4 py-3.5">
-                    <Skeleton className="h-4 w-20" />
-                  </TableCell>
-                  <TableCell className="px-4 py-3.5">
-                    <Skeleton className="h-4 w-24" />
-                  </TableCell>
-                  <TableCell className="px-4 py-3.5">
-                    <Skeleton className="h-5 w-16 rounded" />
-                  </TableCell>
-                  <TableCell className="px-4 py-3.5">
-                    <Skeleton className="h-5 w-16 rounded" />
-                  </TableCell>
-                  <TableCell className="w-24 text-right px-6 py-3.5">
-                    <div className="flex justify-end gap-2">
-                      <Skeleton className="size-8 rounded" />
-                      <Skeleton className="size-8 rounded" />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+              <TableSkeleton columnsCount={8} rowsCount={itemsPerPage} />
             ) : posts.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="text-center py-10 text-xs text-muted-moss">
@@ -221,59 +189,53 @@ export function WasteDataTable({
                       {formatIndonesianDate(post.created_at)}
                     </TableCell>
                     <TableCell className="px-4 py-3.5">
-                      <span className={`inline-block rounded px-2.5 py-0.5 text-[10px] uppercase font-bold tracking-wider ${statusColor}`}>
+                      <StatusBadge 
+                        variant={
+                          post.status === "active" 
+                            ? "success" 
+                            : post.status === "sold_out" 
+                              ? "warning" 
+                              : "neutral"
+                        }
+                      >
                         {displayStatus}
-                      </span>
+                      </StatusBadge>
                     </TableCell>
                     <TableCell className="w-24 text-right px-6 py-3.5">
                       <TooltipProvider>
                         <div className="flex justify-end gap-2">
                           {/*  View / Edit button  */}
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <button
-                                onClick={() => !soldOut && onViewClick(post)}
-                                disabled={soldOut}
-                                className="inline-flex size-8 items-center justify-center rounded-md border border-line-trace bg-canvas-pure text-muted-moss hover:bg-canvas-warm hover:text-brand-black transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-canvas-pure"
-                                aria-label={soldOut ? "Tidak dapat diedit — sudah terjual" : "Lihat / Edit Detail"}
-                              >
-                                {soldOut ? (
-                                  <PencilOff className="size-4" />
-                                ) : (
-                                  <Eye className="size-4" />
-                                )}
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent side="top">
-                              {soldOut
-                                ? "Limbah terjual tidak dapat diedit"
-                                : "Lihat / Edit Detail"}
-                            </TooltipContent>
-                          </Tooltip>
+                          <TableActionButton
+                              onClick={() => !soldOut && onViewClick(post)}
+                              disabled={soldOut}
+                              aria-label={soldOut ? "Tidak dapat diedit — sudah terjual" : "Lihat / Edit Detail"}
+                            >
+                              {soldOut ? (
+                                <PencilOff className="size-4" />
+                              ) : (
+                                <Eye className="size-4" />
+                              )}
+                            </TableActionButton>
 
-                          {/* Archive / Permanent Delete button */}
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <button
-                                onClick={() =>
-                                  setPendingAction({
-                                    post,
-                                    type: soldOut ? "permanent_delete" : "archive",
-                                  })
-                                }
-                                className={`inline-flex size-8 items-center justify-center rounded-md border transition-colors ${
-                                  soldOut
-                                    ? "border-error-rust/40 bg-canvas-pure text-error-rust hover:bg-error-rust/[0.06]"
-                                    : "border-line-trace bg-canvas-pure text-muted-moss hover:bg-canvas-warm hover:text-brand-black"
-                                }`}
-                                aria-label={soldOut ? "Hapus permanen" : "Arsipkan limbah"}
-                              >
-                                {soldOut ? (
-                                  <Trash2 className="size-4" />
-                                ) : (
-                                  <Archive className="size-4" />
-                                )}
-                              </button>
+                        {/* Archive / Permanent Delete button */}
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <TableActionButton
+                              variant={soldOut ? "destructive" : "default"}
+                              onClick={() =>
+                                setPendingAction({
+                                  post,
+                                  type: soldOut ? "permanent_delete" : "archive",
+                                })
+                              }
+                              aria-label={soldOut ? "Hapus permanen" : "Arsipkan limbah"}
+                            >
+                              {soldOut ? (
+                                <Trash2 className="size-4" />
+                              ) : (
+                                <Archive className="size-4" />
+                              )}
+                            </TableActionButton>
                             </TooltipTrigger>
                             <TooltipContent side="top">
                               {soldOut

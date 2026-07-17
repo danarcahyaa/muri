@@ -89,12 +89,24 @@ const buttonVariants = cva(
         `,
 
         destructive: `
-          bg-destructive/10
-          text-destructive
+          bg-destructive
+          text-white
 
-          hover:bg-destructive/20
+          hover:bg-destructive/80
 
           focus-visible:border-destructive/40
+          focus-visible:ring-destructive/20
+        `,
+
+        "outline-destructive": `
+          border-destructive/40
+          bg-transparent
+          text-destructive
+
+          hover:bg-destructive/10
+          hover:border-destructive
+
+          focus-visible:border-destructive
           focus-visible:ring-destructive/20
         `,
 

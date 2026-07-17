@@ -15,6 +15,11 @@ export interface MediaItem {
   name: string
 }
 
+export interface MediaGalleryItem {
+  url: string;
+  type: "image" | "video";
+}
+
 export interface IndonesiaProvince {
   province: string;
   regencies: string[];

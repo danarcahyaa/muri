@@ -12,4 +12,6 @@
 export { getWastePosts, getWastePostsCount, createWastePost, updateWastePost, deleteWastePost } from "./wastePostsService";
 export { getFabricCategories } from "./wasteCategoryService";
 export { getTotalWasteWeight } from "./wasteStatsService";
+export { getWastePurchases, confirmWastePurchase, getPurchaseMetrics } from "./purchaseService";
 // wasteMediaService (uploadMediaFile) is intentionally not re-exported — internal use only.
+

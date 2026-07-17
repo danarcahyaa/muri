@@ -122,7 +122,7 @@ export default function WasteProviderLoginPage() {
               <Leaf className="size-4" strokeWidth={2} />
 
               <span className="text-xs font-bold uppercase tracking-tight">
-                Mitra Penyedia Limbah
+                Penyedia Limbah
               </span>
             </div>
 
@@ -154,7 +154,7 @@ export default function WasteProviderLoginPage() {
                 htmlFor="provider-email"
                 className="text-xs font-bold text-brand-black"
               >
-                Email Bisnis/Pabrik
+                Email
               </label>
 
               <Input
@@ -163,7 +163,7 @@ export default function WasteProviderLoginPage() {
                 variant="auth"
                 size="auth"
                 autoComplete="email"
-                placeholder="Masukkan email bisnis Anda"
+                placeholder="Masukkan email pabrik/garmen Anda"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 required

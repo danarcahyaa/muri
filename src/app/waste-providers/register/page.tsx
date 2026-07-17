@@ -285,7 +285,7 @@ export default function WasteProviderRegisterPage() {
                 htmlFor="provider-email"
                 className="text-xs font-bold text-brand-black"
               >
-                Email Bisnis/Pabrik
+                Email
               </label>
 
               <Input
@@ -294,7 +294,7 @@ export default function WasteProviderRegisterPage() {
                 variant="auth"
                 size="auth"
                 autoComplete="email"
-                placeholder="Masukkan email bisnis Anda"
+                placeholder="Masukkan email untuk pabrik/garmen Anda"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 required
@@ -329,7 +329,7 @@ export default function WasteProviderRegisterPage() {
             </div>
             <div className="space-y-2 animate-fade-in" ref={provinceRef}>
               <label className="text-xs font-bold text-brand-black">
-                Provinsi Pabrik
+                Provinsi
               </label>
               <div className="relative">
                 <button
