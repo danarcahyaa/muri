@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -18,16 +19,105 @@ interface AuthRoleSelectorProps {
   mode: AuthMode;
 }
 
+/**
+ * Memastikan URL hanya berupa internal path.
+ *
+ * Valid:
+ * /dashboard
+ * /brand/dashboard
+ *
+ * Tidak valid:
+ * https://example.com
+ * //example.com
+ */
 function getSafeInternalPath(
   value: string | null,
-  fallback: string,
-) {
+): string | null {
   if (
     value &&
     value.startsWith("/") &&
     !value.startsWith("//")
   ) {
     return value;
+  }
+
+  return null;
+}
+
+/**
+ * Memeriksa apakah suatu path berada di dalam
+ * area role tertentu.
+ *
+ * Contoh:
+ * /brand
+ * /brand/dashboard
+ */
+function isPathInsideRole(
+  path: string,
+  roleRoot: string,
+): boolean {
+  return (
+    path === roleRoot ||
+    path.startsWith(`${roleRoot}/`)
+  );
+}
+
+/**
+ * Menentukan tujuan customer.
+ *
+ * Customer tidak boleh diarahkan ke dashboard
+ * Brand atau Waste Provider.
+ */
+function getCustomerNextPath(
+  requestedNextPath: string | null,
+): string {
+  if (!requestedNextPath) {
+    return "/dashboard";
+  }
+
+  const belongsToBrand = isPathInsideRole(
+    requestedNextPath,
+    "/brand",
+  );
+
+  const belongsToWasteProvider = isPathInsideRole(
+    requestedNextPath,
+    "/waste-providers",
+  );
+
+  if (
+    belongsToBrand ||
+    belongsToWasteProvider
+  ) {
+    return "/dashboard";
+  }
+
+  return requestedNextPath;
+}
+
+/**
+ * Menentukan tujuan role bisnis.
+ *
+ * Brand hanya boleh diarahkan ke /brand/*
+ * Waste Provider hanya boleh diarahkan ke
+ * /waste-providers/*
+ */
+function getRoleNextPath(
+  requestedNextPath: string | null,
+  roleRoot: string,
+  fallback: string,
+): string {
+  if (!requestedNextPath) {
+    return fallback;
+  }
+
+  if (
+    isPathInsideRole(
+      requestedNextPath,
+      roleRoot,
+    )
+  ) {
+    return requestedNextPath;
   }
 
   return fallback;
@@ -38,15 +128,15 @@ export function AuthRoleSelector({
 }: AuthRoleSelectorProps) {
   const searchParams = useSearchParams();
 
-  const fromPath = getSafeInternalPath(
-    searchParams.get("from"),
-    "/",
-  );
+  const fromPath =
+    getSafeInternalPath(
+      searchParams.get("from"),
+    ) ?? "/";
 
-  const nextPath = getSafeInternalPath(
-    searchParams.get("next"),
-    "/dashboard",
-  );
+  const requestedNextPath =
+    getSafeInternalPath(
+      searchParams.get("next"),
+    );
 
   const isLogin = mode === "login";
 
@@ -63,25 +153,59 @@ export function AuthRoleSelector({
     : "/waste-providers/register";
 
   /*
-   * Saat user berada di halaman login/register role tertentu,
-   * tombol kembali akan mengarah ke portal role ini.
+   * Destination harus berbeda untuk setiap role.
+   *
+   * Ini adalah bagian utama yang memperbaiki bug.
+   */
+  const customerNextPath =
+    getCustomerNextPath(
+      requestedNextPath,
+    );
+
+  const brandNextPath =
+    getRoleNextPath(
+      requestedNextPath,
+      "/brand",
+      "/brand/dashboard",
+    );
+
+  const wasteProviderNextPath =
+    getRoleNextPath(
+      requestedNextPath,
+      "/waste-providers",
+      "/waste-providers/dashboard",
+    );
+
+  /*
+   * Saat user berada di halaman login/register
+   * role tertentu, tombol kembali akan kembali
+   * ke portal pemilihan role.
    */
   const portalPath = isLogin
     ? "/auth/login"
     : "/auth/register";
 
-  const portalParams = new URLSearchParams({
-    from: fromPath,
-    next: nextPath,
-  });
+  const portalParams =
+    new URLSearchParams();
+
+  portalParams.set(
+    "from",
+    fromPath,
+  );
+
+  /*
+   * Hanya teruskan next asli jika memang ada.
+   * Jangan otomatis membuat next=/dashboard.
+   */
+  if (requestedNextPath) {
+    portalParams.set(
+      "next",
+      requestedNextPath,
+    );
+  }
 
   const returnToPortalPath =
     `${portalPath}?${portalParams.toString()}`;
-
-  const commonQuery = {
-    from: returnToPortalPath,
-    next: nextPath,
-  };
 
   return (
     <main className="min-h-screen bg-canvas-pure px-6 py-10 sm:px-8 lg:px-12">
@@ -118,6 +242,7 @@ export function AuthRoleSelector({
             "
           >
             <ArrowLeft
+              aria-hidden="true"
               className="
                 size-3.5 transition-transform
                 group-hover:-translate-x-1
@@ -133,7 +258,11 @@ export function AuthRoleSelector({
         <div className="my-auto py-16">
           <div className="mx-auto max-w-2xl text-center">
             <div className="mb-4 flex items-center justify-center gap-3 text-brand-emerald">
-              <Leaf className="size-4" strokeWidth={2} />
+              <Leaf
+                aria-hidden="true"
+                className="size-4"
+                strokeWidth={2}
+              />
 
               <span className="text-xs font-bold uppercase tracking-tight">
                 {isLogin
@@ -160,9 +289,14 @@ export function AuthRoleSelector({
             <RoleCard
               href={{
                 pathname: customerPath,
-                query: commonQuery,
+                query: {
+                  from: returnToPortalPath,
+                  next: customerNextPath,
+                },
               }}
-              icon={<UserRound className="size-6" />}
+              icon={
+                <UserRound className="size-6" />
+              }
               eyebrow="Untuk Pengguna"
               title="Customer"
               description={
@@ -180,9 +314,14 @@ export function AuthRoleSelector({
             <RoleCard
               href={{
                 pathname: brandPath,
-                query: commonQuery,
+                query: {
+                  from: returnToPortalPath,
+                  next: brandNextPath,
+                },
               }}
-              icon={<Building2 className="size-6" />}
+              icon={
+                <Building2 className="size-6" />
+              }
               eyebrow="Untuk Bisnis"
               title="Brand"
               description={
@@ -200,9 +339,14 @@ export function AuthRoleSelector({
             <RoleCard
               href={{
                 pathname: wasteProviderPath,
-                query: commonQuery,
+                query: {
+                  from: returnToPortalPath,
+                  next: wasteProviderNextPath,
+                },
               }}
-              icon={<Factory className="size-6" />}
+              icon={
+                <Factory className="size-6" />
+              }
               eyebrow="Untuk Pabrik & Garmen"
               title="Waste Provider"
               description={
@@ -231,7 +375,7 @@ interface RoleCardProps {
       next: string;
     };
   };
-  icon: React.ReactNode;
+  icon: ReactNode;
   eyebrow: string;
   title: string;
   description: string;
@@ -296,6 +440,7 @@ function RoleCard({
         <span>{action}</span>
 
         <ArrowRight
+          aria-hidden="true"
           className="
             size-4 shrink-0 transition-transform
             group-hover:translate-x-1

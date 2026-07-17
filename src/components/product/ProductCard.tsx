@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Shirt } from "lucide-react";
+import { ArrowRight, BadgeCheck, Shirt, Tag } from "lucide-react";
 
 import type { ProductCatalogItem } from "@/types/product";
 
@@ -7,12 +7,8 @@ interface ProductCardProps {
   product: ProductCatalogItem;
 }
 
-export default function ProductCard({
-  product,
-}: ProductCardProps) {
-  const productHref = `/produk/${encodeURIComponent(
-    product.slug,
-  )}`;
+export default function ProductCard({ product }: ProductCardProps) {
+  const productHref = `/produk/${encodeURIComponent(product.slug)}`;
 
   return (
     <article
@@ -69,26 +65,47 @@ export default function ProductCard({
 
       <div
         className="
-          mt-6 flex items-center
-          justify-between gap-4
-          text-[11px] font-bold
-          text-brand-emerald
-        "
+    mt-6 flex items-center
+    justify-between gap-4
+    text-[11px] font-bold
+    text-brand-emerald
+  "
       >
-        <span className="truncate">
-          {product.brandName}
+        <span
+          className="
+      flex min-w-0 items-center gap-2
+    "
+          title={`Brand: ${product.brandName}`}
+        >
+          <BadgeCheck
+            aria-hidden="true"
+            className="size-3.5 shrink-0"
+            strokeWidth={2}
+          />
+
+          <span className="truncate">{product.brandName}</span>
         </span>
 
-        <span className="shrink-0">
-          {product.categoryName}
+        <span
+          className="
+      flex min-w-0 items-center
+      justify-end gap-2
+      text-right
+    "
+          title={`Kategori: ${product.categoryName}`}
+        >
+          <Tag
+            aria-hidden="true"
+            className="size-3.5 shrink-0"
+            strokeWidth={2}
+          />
+
+          <span className="truncate">{product.categoryName}</span>
         </span>
       </div>
 
       <div className="mt-7 flex-1">
-        <Link
-          href={productHref}
-          className="block"
-        >
+        <Link href={productHref} className="block">
           <h2
             className="
               truncate font-display
@@ -117,9 +134,7 @@ export default function ProductCard({
         "
       >
         <p className="font-display text-2xl font-bold tracking-tight text-brand-black">
-          {formatCompactRupiah(
-            product.priceIdr,
-          )}
+          {formatCompactRupiah(product.priceIdr)}
         </p>
 
         <Link
@@ -152,18 +167,12 @@ function formatCompactRupiah(value: number): string {
   if (value >= 1_000_000) {
     const million = value / 1_000_000;
 
-    return `IDR ${
-      Number.isInteger(million)
-        ? million
-        : million.toFixed(1)
-    }M`;
+    return `IDR ${Number.isInteger(million) ? million : million.toFixed(1)}M`;
   }
 
   if (value >= 1_000) {
     return `IDR ${Math.round(value / 1_000)}K`;
   }
 
-  return `IDR ${new Intl.NumberFormat(
-    "id-ID",
-  ).format(value)}`;
+  return `IDR ${new Intl.NumberFormat("id-ID").format(value)}`;
 }

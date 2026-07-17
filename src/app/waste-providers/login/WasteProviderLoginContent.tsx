@@ -16,15 +16,46 @@ import { AuthFooterLink } from "@/components/ui/AuthFooterLink";
 import { translateSupabaseError } from "@/lib/supabaseError";
 import { loginWasteProvider } from "@/services/waste-providers/authService";
 
+function getSafeInternalPath(value: string | null, fallback: string): string {
+  if (value && value.startsWith("/") && !value.startsWith("//")) {
+    return value;
+  }
+
+  return fallback;
+}
+
+/**
+ * Waste Provider hanya boleh diarahkan ke
+ * route /waste-providers.
+ *
+ * Jika next=/dashboard atau route role lain,
+ * destination kembali ke:
+ * /waste-providers/dashboard
+ */
+function getWasteProviderLoginDestination(nextPath: string | null): string {
+  const fallback = "/waste-providers/dashboard";
+
+  const safeNextPath = getSafeInternalPath(nextPath, fallback);
+
+  const belongsToWasteProvider =
+    safeNextPath === "/waste-providers" ||
+    safeNextPath.startsWith("/waste-providers/");
+
+  return belongsToWasteProvider ? safeNextPath : fallback;
+}
+
 export default function WasteProviderLoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const fromPath = searchParams.get("from") || "/";
+  const fromPath = getSafeInternalPath(searchParams.get("from"), "/");
 
   const [email, setEmail] = useState("");
+
   const [password, setPassword] = useState("");
+
   const [error, setError] = useState<string | null>(null);
+
   const [isLoading, setIsLoading] = useState(false);
 
   React.useEffect(() => {
@@ -36,16 +67,6 @@ export default function WasteProviderLoginPage() {
     }
   }, [error]);
 
-  const getLoginDestination = (): string => {
-    const nextPath = searchParams.get("next");
-
-    if (nextPath && nextPath.startsWith("/") && !nextPath.startsWith("//")) {
-      return nextPath;
-    }
-
-    return "/waste-providers/dashboard";
-  };
-
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -56,13 +77,17 @@ export default function WasteProviderLoginPage() {
 
     if (!normalizedEmail) {
       setError("Email bisnis wajib diisi.");
+
       setIsLoading(false);
+
       return;
     }
 
     if (!password) {
       setError("Kata sandi wajib diisi.");
+
       setIsLoading(false);
+
       return;
     }
 
@@ -74,12 +99,18 @@ export default function WasteProviderLoginPage() {
 
       if (!response.success) {
         setError(response.error || "Gagal masuk ke akun penyedia limbah.");
+
         return;
       }
 
+      const destination = getWasteProviderLoginDestination(
+        searchParams.get("next"),
+      );
+
       toast.success(response.message || "Berhasil masuk!");
 
-      router.replace(getLoginDestination());
+      router.replace(destination);
+      router.refresh();
     } catch (err: unknown) {
       setError(translateSupabaseError(err));
     } finally {
@@ -119,7 +150,7 @@ export default function WasteProviderLoginPage() {
           {/* Header */}
           <div className="mb-10">
             <div className="mb-4 flex items-center gap-3 text-brand-emerald">
-              <Leaf className="size-4" strokeWidth={2} />
+              <Leaf aria-hidden="true" className="size-4" strokeWidth={2} />
 
               <span className="text-xs font-bold uppercase tracking-tight">
                 Mitra Penyedia Limbah
@@ -128,6 +159,7 @@ export default function WasteProviderLoginPage() {
 
             <h1 className="font-display text-5xl font-medium leading-[1.08] tracking-[-0.045em] text-brand-black">
               <span className="block">Masuk ke Akun</span>
+
               <span className="block">Mitra Anda.</span>
             </h1>
 

@@ -16,15 +16,43 @@ import { AuthFooterLink } from "@/components/ui/AuthFooterLink";
 import { translateSupabaseError } from "@/lib/supabaseError";
 import { loginBrand } from "@/services/brand-fashion/auth/authService";
 
+function getSafeInternalPath(value: string | null, fallback: string): string {
+  if (value && value.startsWith("/") && !value.startsWith("//")) {
+    return value;
+  }
+
+  return fallback;
+}
+
+/**
+ * Brand hanya boleh diarahkan ke route /brand.
+ *
+ * Jika next=/dashboard atau route role lain,
+ * destination akan kembali ke /brand/dashboard.
+ */
+function getBrandLoginDestination(nextPath: string | null): string {
+  const fallback = "/brand/dashboard";
+
+  const safeNextPath = getSafeInternalPath(nextPath, fallback);
+
+  const belongsToBrand =
+    safeNextPath === "/brand" || safeNextPath.startsWith("/brand/");
+
+  return belongsToBrand ? safeNextPath : fallback;
+}
+
 export default function BrandLoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const fromPath = searchParams.get("from") || "/";
+  const fromPath = getSafeInternalPath(searchParams.get("from"), "/");
 
   const [email, setEmail] = useState("");
+
   const [password, setPassword] = useState("");
+
   const [error, setError] = useState<string | null>(null);
+
   const [isLoading, setIsLoading] = useState(false);
 
   React.useEffect(() => {
@@ -36,16 +64,6 @@ export default function BrandLoginContent() {
     }
   }, [error]);
 
-  const getLoginDestination = (): string => {
-    const nextPath = searchParams.get("next");
-
-    if (nextPath && nextPath.startsWith("/") && !nextPath.startsWith("//")) {
-      return nextPath;
-    }
-
-    return "/brand/dashboard";
-  };
-
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -56,13 +74,17 @@ export default function BrandLoginContent() {
 
     if (!normalizedEmail) {
       setError("Email bisnis wajib diisi.");
+
       setIsLoading(false);
+
       return;
     }
 
     if (!password) {
       setError("Kata sandi wajib diisi.");
+
       setIsLoading(false);
+
       return;
     }
 
@@ -74,12 +96,16 @@ export default function BrandLoginContent() {
 
       if (!response.success) {
         setError(response.error || "Gagal masuk ke akun brand.");
+
         return;
       }
 
+      const destination = getBrandLoginDestination(searchParams.get("next"));
+
       toast.success(response.message || "Berhasil masuk!");
 
-      router.replace(getLoginDestination());
+      router.replace(destination);
+      router.refresh();
     } catch (err: unknown) {
       setError(translateSupabaseError(err));
     } finally {
@@ -119,7 +145,7 @@ export default function BrandLoginContent() {
           {/* Header */}
           <div className="mb-10">
             <div className="mb-4 flex items-center gap-3 text-brand-emerald">
-              <Leaf className="size-4" strokeWidth={2} />
+              <Leaf aria-hidden="true" className="size-4" strokeWidth={2} />
 
               <span className="text-xs font-bold uppercase tracking-tight">
                 Brand Partner

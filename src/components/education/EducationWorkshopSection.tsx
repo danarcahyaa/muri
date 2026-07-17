@@ -15,25 +15,16 @@ import {
 } from "lucide-react";
 
 import RichTextContent from "@/components/ui/RichTextContent";
-import {
-  formatWorkshopDate,
-  formatWorkshopTime,
-} from "@/lib/workshop";
+import { formatWorkshopDate, formatWorkshopTime } from "@/lib/workshop";
 import { getWorkshops } from "@/services/workshop";
-import type {
-  WorkshopCatalogItem,
-} from "@/types/workshop";
+import type { WorkshopCatalogItem } from "@/types/workshop";
 
 export default async function EducationWorkshopSection() {
   const response = await getWorkshops();
 
-  const hasLoadError =
-    !response.success;
+  const hasLoadError = !response.success;
 
-  const workshops =
-    response.success
-      ? response.data ?? []
-      : [];
+  const workshops = response.success ? (response.data ?? []) : [];
 
   if (!response.success) {
     console.error(
@@ -43,10 +34,7 @@ export default async function EducationWorkshopSection() {
   }
 
   return (
-    <section
-      id="program-workshop"
-      className="scroll-mt-20 bg-canvas-pure"
-    >
+    <section id="program-workshop" className="scroll-mt-20 bg-canvas-pure">
       <div
         className="
           mx-auto
@@ -65,10 +53,7 @@ export default async function EducationWorkshopSection() {
         >
           <div>
             <div className="mb-5 flex items-center gap-3 text-brand-emerald">
-              <Leaf
-                className="size-4"
-                strokeWidth={2}
-              />
+              <Leaf className="size-4" strokeWidth={2} />
 
               <span className="text-sm font-bold uppercase tracking-tight">
                 Jadwal Kelas Terdekat
@@ -90,38 +75,21 @@ export default async function EducationWorkshopSection() {
 
           <div>
             <p className="max-w-lg text-sm leading-relaxed text-muted-moss 2xl:text-base">
-              Pilih kelas sesuai minat
-              Anda, mulai dari pengolahan
-              material tekstil,
-              pengembangan produk, hingga
-              strategi bisnis fashion
+              Pilih kelas sesuai minat Anda, mulai dari pengolahan material
+              tekstil, pengembangan produk, hingga strategi bisnis fashion
               berkelanjutan.
             </p>
-
-            {!hasLoadError && (
-              <p className="mt-5 text-xs font-bold text-brand-emerald">
-                {workshops.length} program
-                tersedia
-              </p>
-            )}
           </div>
         </div>
 
         {workshops.length > 0 ? (
           <div className="mt-16 grid gap-6 lg:grid-cols-2">
-            {workshops.map(
-              (workshop) => (
-                <WorkshopCard
-                  key={workshop.id}
-                  workshop={workshop}
-                />
-              ),
-            )}
+            {workshops.map((workshop) => (
+              <WorkshopCard key={workshop.id} workshop={workshop} />
+            ))}
           </div>
         ) : (
-          <EmptyWorkshopState
-            hasLoadError={hasLoadError}
-          />
+          <EmptyWorkshopState hasLoadError={hasLoadError} />
         )}
       </div>
     </section>
@@ -132,11 +100,8 @@ interface WorkshopCardProps {
   workshop: WorkshopCatalogItem;
 }
 
-function WorkshopCard({
-  workshop,
-}: WorkshopCardProps) {
-  const workshopHref =
-    `/edukasi/workshop/${workshop.id}`;
+function WorkshopCard({ workshop }: WorkshopCardProps) {
+  const workshopHref = `/edukasi/workshop/${workshop.id}`;
 
   return (
     <article
@@ -217,34 +182,23 @@ function WorkshopCard({
           text-brand-emerald
         "
       >
-        <WorkshopMeta
-          icon={UserRound}
-          value={workshop.speakerName}
-        />
+        <WorkshopMeta icon={UserRound} value={workshop.speakerName} />
 
         <MetadataSeparator />
 
         <WorkshopMeta
           icon={CalendarDays}
-          value={formatWorkshopDate(
-            workshop.heldAt,
-          )}
+          value={formatWorkshopDate(workshop.heldAt)}
         />
 
         <MetadataSeparator />
 
-        <WorkshopMeta
-          icon={MapPin}
-          value={workshop.location}
-        />
+        <WorkshopMeta icon={MapPin} value={workshop.location} />
       </div>
 
       {/* Content */}
       <div className="mt-7 flex-1">
-        <Link
-          href={workshopHref}
-          className="block"
-        >
+        <Link href={workshopHref} className="block">
           <h3
             className="
               line-clamp-2
@@ -278,33 +232,6 @@ function WorkshopCard({
         />
       </div>
 
-      {/* Quick information */}
-      <div className="mt-7 grid gap-2 sm:grid-cols-3">
-        <WorkshopFact
-          icon={Clock3}
-          label="Waktu"
-          value={formatWorkshopTime(
-            workshop.heldAt,
-          )}
-        />
-
-        <WorkshopFact
-          icon={UserRound}
-          label="Pembicara"
-          value={workshop.speakerRole}
-        />
-
-        <WorkshopFact
-          icon={UsersRound}
-          label="Ketersediaan"
-          value={
-            workshop.isFull
-              ? "Kuota penuh"
-              : `${workshop.remainingSlots} slot tersisa`
-          }
-        />
-      </div>
-
       {/* Footer */}
       <div
         className="
@@ -328,11 +255,6 @@ function WorkshopCard({
               text-brand-black
             "
           >
-            <Coins
-              className="size-4 text-brand-emerald"
-              strokeWidth={1.8}
-            />
-
             {workshop.pointCost} POIN
           </p>
         </div>
@@ -372,16 +294,10 @@ interface WorkshopMetaProps {
   value: string;
 }
 
-function WorkshopMeta({
-  icon: Icon,
-  value,
-}: WorkshopMetaProps) {
+function WorkshopMeta({ icon: Icon, value }: WorkshopMetaProps) {
   return (
     <span className="inline-flex items-center gap-2">
-      <Icon
-        className="size-3.5"
-        strokeWidth={2}
-      />
+      <Icon className="size-3.5" strokeWidth={2} />
 
       <span>{value}</span>
     </span>
@@ -390,10 +306,7 @@ function WorkshopMeta({
 
 function MetadataSeparator() {
   return (
-    <span
-      aria-hidden="true"
-      className="text-muted-moss/40"
-    >
+    <span aria-hidden="true" className="text-muted-moss/40">
       ·
     </span>
   );
@@ -409,22 +322,13 @@ interface WorkshopFactProps {
   value: string;
 }
 
-function WorkshopFact({
-  icon: Icon,
-  label,
-  value,
-}: WorkshopFactProps) {
+function WorkshopFact({ icon: Icon, label, value }: WorkshopFactProps) {
   return (
     <div className="rounded-lg bg-canvas-warm px-4 py-3">
       <div className="flex items-center gap-2 text-muted-moss">
-        <Icon
-          className="size-3.5"
-          strokeWidth={1.8}
-        />
+        <Icon className="size-3.5" strokeWidth={1.8} />
 
-        <span className="text-[9px] uppercase tracking-wide">
-          {label}
-        </span>
+        <span className="text-[9px] uppercase tracking-wide">{label}</span>
       </div>
 
       <p className="mt-2 truncate text-[11px] font-bold text-brand-black">
@@ -434,11 +338,7 @@ function WorkshopFact({
   );
 }
 
-function EmptyWorkshopState({
-  hasLoadError,
-}: {
-  hasLoadError: boolean;
-}) {
+function EmptyWorkshopState({ hasLoadError }: { hasLoadError: boolean }) {
   return (
     <div
       className="
@@ -452,15 +352,10 @@ function EmptyWorkshopState({
         px-6 text-center
       "
     >
-      <CalendarDays
-        className="size-10 text-muted-moss/50"
-        strokeWidth={1.5}
-      />
+      <CalendarDays className="size-10 text-muted-moss/50" strokeWidth={1.5} />
 
       <h3 className="mt-5 font-display text-2xl font-medium text-brand-black">
-        {hasLoadError
-          ? "Workshop gagal dimuat"
-          : "Belum ada workshop tersedia"}
+        {hasLoadError ? "Workshop gagal dimuat" : "Belum ada workshop tersedia"}
       </h3>
 
       <p className="mt-2 max-w-md text-xs leading-relaxed text-muted-moss">

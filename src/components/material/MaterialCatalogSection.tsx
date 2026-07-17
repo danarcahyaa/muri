@@ -149,7 +149,7 @@ export default function MaterialCatalogSection({
                   onClick={() => setLocation(item)}
                   className={`
                     shrink-0 rounded-sm
-                    px-4 py-2.5
+                    px-4 py-3
                     text-[11px] font-semibold
                     transition-colors
                     ${
