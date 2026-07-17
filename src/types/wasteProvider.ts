@@ -81,3 +81,44 @@ export interface WasteFilterInput {
   sortOrder?: "asc" | "desc";
 }
 
+export interface WastePurchaseItem {
+  id: string;
+  brand_id: string;
+  category_name_snapshot: string;
+  fabric_name_snapshot: string;
+  original_price_per_kg: number;
+  final_price_idr: number;
+  weight_bought_kg: number;
+  purchase_status: string;
+  media_urls_snapshot: any;
+  waste_post_id: string;
+  created_at: string;
+  updated_at: string;
+  brands: {
+    id: string;
+    brand_name: string;
+  };
+  waste_posts: {
+    id: string;
+    provider_id: string;
+    custom_fabric_name: string;
+  };
+}
+
+export interface PurchaseListResponse extends BaseResponse {
+  data?: {
+    purchases: WastePurchaseItem[];
+    totalCount: number;
+  };
+}
+
+export interface PurchaseMetricsData {
+  waitingCount: number;
+  completedCount: number;
+  cancelledCount: number;
+  rejectedCount: number;
+}
+
+export type PurchaseMetricsResponse = BaseResponse<PurchaseMetricsData>;
+
+

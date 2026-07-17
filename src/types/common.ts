@@ -1,4 +1,5 @@
 import { MediaType } from "@/enums/enum";
+import { WastePostItem } from "./wasteProvider";
 
 export interface BaseResponse<T = any> {
   success: boolean;
@@ -14,6 +15,16 @@ export interface MediaItem {
   type: MediaType
   name: string
 }
+
+export interface MediaGalleryItem {
+  url: string;
+  type: "image" | "video";
+}
+
+export type PendingAction = {
+  post: WastePostItem;
+  type: "archive" | "permanent_delete";
+};
 
 export interface IndonesiaProvince {
   province: string;

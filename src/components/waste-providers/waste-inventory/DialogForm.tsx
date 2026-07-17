@@ -251,7 +251,6 @@ export function WasteDialogForm({
                         {(value) => {
                           const labels: Record<string, string> = {
                             [WastePostStatus.ACTIVE]: "Aktif",
-                            [WastePostStatus.SOLD_OUT]: "Terjual",
                             [WastePostStatus.INACTIVE]: "Diarsipkan",
                           };
                           return labels[value] || "Pilih Status";
@@ -261,9 +260,6 @@ export function WasteDialogForm({
                     <SelectContent>
                       <SelectItem value={WastePostStatus.ACTIVE}>
                         Aktif
-                      </SelectItem>
-                      <SelectItem value={WastePostStatus.SOLD_OUT}>
-                        Terjual
                       </SelectItem>
                       <SelectItem value={WastePostStatus.INACTIVE}>
                         Diarsipkan

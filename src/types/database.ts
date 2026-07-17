@@ -785,7 +785,7 @@ export type Database = {
       waste_providers: {
         Row: {
           active_number: string
-          address: string | null
+          address: Json | null
           company_name: string
           created_at: string | null
           id: string
@@ -798,7 +798,7 @@ export type Database = {
         }
         Insert: {
           active_number: string
-          address?: string | null
+          address?: Json | null
           company_name: string
           created_at?: string | null
           id: string
@@ -811,7 +811,7 @@ export type Database = {
         }
         Update: {
           active_number?: string
-          address?: string | null
+          address?: Json | null
           company_name?: string
           created_at?: string | null
           id?: string
@@ -834,7 +834,7 @@ export type Database = {
           id: string
           media_urls_snapshot: Json
           original_price_per_kg: number
-          purchase_status: Database["public"]["Enums"]["purchase_status"] | null
+          purchase_status: Database["public"]["Enums"]["order_status"] | null
           updated_at: string | null
           waste_post_id: string
           weight_bought_kg: number
@@ -848,9 +848,7 @@ export type Database = {
           id?: string
           media_urls_snapshot: Json
           original_price_per_kg: number
-          purchase_status?:
-            | Database["public"]["Enums"]["purchase_status"]
-            | null
+          purchase_status?: Database["public"]["Enums"]["order_status"] | null
           updated_at?: string | null
           waste_post_id: string
           weight_bought_kg: number
@@ -864,9 +862,7 @@ export type Database = {
           id?: string
           media_urls_snapshot?: Json
           original_price_per_kg?: number
-          purchase_status?:
-            | Database["public"]["Enums"]["purchase_status"]
-            | null
+          purchase_status?: Database["public"]["Enums"]["order_status"] | null
           updated_at?: string | null
           waste_post_id?: string
           weight_bought_kg?: number
@@ -991,11 +987,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_waste_post_with_media_and_batch: {
+        Args: {
+          p_batch_code: string
+          p_custom_fabric_name: string
+          p_details_and_conditions: string
+          p_fabric_category_id: number
+          p_media_types: string[]
+          p_media_urls: string[]
+          p_minimum_order_kg: number
+          p_origin_city: string
+          p_price_per_kg: number
+          p_provider_id: string
+          p_status: Database["public"]["Enums"]["waste_post_status"]
+          p_weight_kg: number
+        }
+        Returns: string
+      }
+      get_total_waste_weight: { Args: { provider_id: string }; Returns: number }
     }
     Enums: {
       entity_role: "consumer" | "brand" | "waste_provider"
       media_type: "image" | "video"
+      order_status: "pending" | "complete" | "cancelled" | "rejected"
       product_status: "draft" | "published" | "archived"
       purchase_status:
         | "waiting_confirmation"
@@ -1132,13 +1146,8 @@ export const Constants = {
     Enums: {
       entity_role: ["consumer", "brand", "waste_provider"],
       media_type: ["image", "video"],
+      order_status: ["pending", "complete", "cancelled", "rejected"],
       product_status: ["draft", "published", "archived"],
-      purchase_status: [
-        "waiting_confirmation",
-        "paid",
-        "completed",
-        "cancelled",
-      ],
       waste_post_status: ["active", "inactive", "sold_out"],
     },
   },
