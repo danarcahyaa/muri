@@ -16,11 +16,11 @@ export enum ProductStatus {
   ARCHIVED = "archived",
 }
 
-export enum PurchaseStatus {
-  WAITING_CONFIRMATION = "waiting_confirmation",
-  PAID = "paid",
-  COMPLETED = "completed",
+export enum OrderStatus {
+  PENDING = "pending",
+  COMPLETE = "complete",
   CANCELLED = "cancelled",
+  REJECTED = "rejected",
 }
 
 export enum MediaType {

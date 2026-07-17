@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabaseClient";
 import { translateSupabaseError } from "@/lib/supabaseError";
 import { DashboardStatsResponse } from "@/types/wasteProvider";
-import { PurchaseStatus, WastePostStatus } from "@/enums/enum";
+import { OrderStatus as PurchaseStatus, WastePostStatus } from "@/enums/enum";
 
 /**
  * Fetches waste provider dashboard statistics.
@@ -51,7 +51,7 @@ export async function getDashboardStats(
     const { count: pendingOrdersCount, error: purchasesError } = await supabase
       .from("waste_purchases")
       .select("id, waste_posts!inner(provider_id)", { count: "exact", head: true })
-      .eq("purchase_status", PurchaseStatus.WAITING_CONFIRMATION)
+      .eq("purchase_status", PurchaseStatus.PENDING)
       .eq("waste_posts.provider_id", providerId);
 
     if (purchasesError) {
