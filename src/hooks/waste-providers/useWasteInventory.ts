@@ -33,6 +33,7 @@ export function useWasteInventory(): UseWasteInventoryReturn {
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<WastePostItem | null>(null);
+  const [batchWarningOpen, setBatchWarningOpen] = useState(false);
 
   // Increment to manually trigger a data re-fetch after CRUD
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -167,8 +168,14 @@ export function useWasteInventory(): UseWasteInventoryReturn {
 
   // --- Action Handlers ---
 
+
   const handleOpenAddDialog = () => {
     setSelectedPost(null);
+    setBatchWarningOpen(true);
+  };
+
+  const handleConfirmAddDialog = () => {
+    setBatchWarningOpen(false);
     setDialogOpen(true);
   };
 
@@ -248,7 +255,10 @@ export function useWasteInventory(): UseWasteInventoryReturn {
     dialogOpen,
     setDialogOpen,
     selectedPost,
+    batchWarningOpen,
+    setBatchWarningOpen,
     handleOpenAddDialog,
+    handleConfirmAddDialog,
     handleViewClick,
     handleArchiveClick,
     handlePermanentDeleteClick,

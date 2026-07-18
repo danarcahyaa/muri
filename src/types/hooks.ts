@@ -21,8 +21,11 @@ export interface UseWasteInventoryReturn {
   dialogOpen: boolean;
   setDialogOpen: (v: boolean) => void;
   selectedPost: WastePostItem | null;
+  batchWarningOpen: boolean;
+  setBatchWarningOpen: (v: boolean) => void;
   // Handlers
   handleOpenAddDialog: () => void;
+  handleConfirmAddDialog: () => void;
   handleViewClick: (post: WastePostItem) => void;
   handleArchiveClick: (post: WastePostItem) => Promise<void>;
   handlePermanentDeleteClick: (post: WastePostItem) => Promise<void>;
