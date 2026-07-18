@@ -99,20 +99,13 @@ export default function WasteInventoryPage(): ReactElement {
           <AlertDialogOverlay />
           <AlertDialogContent>
             <AlertDialogTitle>Perhatian: Jejak Limbah Permanen</AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-3 text-sm text-muted-foreground">
-                <p>
-                  Limbah yang Anda tambahkan akan secara otomatis membuat{" "}
-                  <strong className="text-foreground">jejak limbah </strong> yang digunakan
-                  oleh pihak brand untuk melacak asal-usul bahan baku mereka.
-                </p>
-                <p>
-                  Jejak limbah ini bersifat{" "}
-                  <strong className="text-foreground">permanen dan tidak dapat diubah maupun dihapus</strong>{" "}
-                  setelah limbah berhasil ditambahkan.
-                </p>
-                <p>Pastikan informasi yang Anda masukkan sudah benar sebelum melanjutkan.</p>
-              </div>
+            <AlertDialogDescription className="space-y-3 text-sm text-muted-foreground">
+              Limbah yang Anda tambahkan akan secara otomatis membuat{" "}
+              <strong className="text-foreground">jejak limbah</strong> yang digunakan oleh pihak
+              brand untuk melacak asal-usul bahan baku mereka. Jejak limbah ini bersifat{" "}
+              <strong className="text-foreground">permanen dan tidak dapat diubah maupun dihapus</strong>{" "}
+              setelah limbah berhasil ditambahkan. Pastikan informasi yang Anda masukkan sudah benar
+              sebelum melanjutkan.
             </AlertDialogDescription>
             <div className="flex justify-end gap-3 mt-2">
               <AlertDialogCancel id="batch-warning-cancel">Batal</AlertDialogCancel>

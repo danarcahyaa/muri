@@ -14,7 +14,6 @@ const MATERIAL_BATCH_SELECT = `
   batch_code,
   waste_id,
   initial_weight_kg,
-  current_available_weight_kg,
   origin_city,
   created_at,
 
@@ -75,7 +74,7 @@ export async function getActiveMaterialBatches(): Promise<
       .from("waste_batches")
       .select(MATERIAL_BATCH_SELECT)
       .eq("waste_posts.status", "active")
-      .gt("current_available_weight_kg", 0)
+      .gt("initial_weight_kg", 0)
       .order("created_at", {
         ascending: false,
       });
@@ -152,7 +151,7 @@ function mapMaterialBatch(
     ),
 
     availableWeightKg: toNumber(
-      row.current_available_weight_kg,
+      row.initial_weight_kg,
     ),
 
     minimumOrderKg: toNumber(
@@ -214,7 +213,6 @@ const MATERIAL_DETAIL_SELECT = `
   batch_code,
   waste_id,
   initial_weight_kg,
-  current_available_weight_kg,
   origin_city,
   created_at,
 
@@ -374,7 +372,7 @@ function mapMaterialDetail(
     ),
 
     availableWeightKg: toNumber(
-      row.current_available_weight_kg,
+      row.initial_weight_kg,
     ),
 
     minimumOrderKg: toNumber(
