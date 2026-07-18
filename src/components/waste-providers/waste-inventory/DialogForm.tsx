@@ -147,6 +147,7 @@ export function WasteDialogForm({
       await onSubmit({
         custom_fabric_name: fabricName,
         fabric_category_id: categoryId,
+        fabric_category_name: categories.find((c) => c.id === categoryId)?.name ?? "",
         weight_kg: weightKg,
         price_per_kg: pricePerKg,
         minimum_order_kg: minimumOrderKg,

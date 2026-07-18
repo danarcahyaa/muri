@@ -65,6 +65,7 @@ export interface FabricCategoryItem {
 export interface WasteInput {
   custom_fabric_name: string | null;
   fabric_category_id: number;
+  fabric_category_name: string;
   weight_kg: number;
   price_per_kg: number;
   minimum_order_kg: number;
