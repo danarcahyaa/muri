@@ -1,4 +1,4 @@
-import type { WastePostItem, FabricCategoryItem, WasteInput, WastePurchaseItem } from "@/types/wasteProvider";
+import type { WastePostItem, FabricCategoryItem, WasteInput, WastePurchaseItem, WasteBatchItem } from "@/types/wasteProvider";
 
 /** Return type for the `useWasteInventory` hook. */
 export interface UseWasteInventoryReturn {
@@ -61,4 +61,26 @@ export interface UseWastePurchasesReturn {
   handleViewDetail: (purchase: WastePurchaseItem) => void;
   handleFilterSearchExecute: () => void;
   handleStatusFilterChange: (statuses: string[]) => void;
+}
+
+/** Return type for the `useWasteBatch` hook. */
+export interface UseWasteBatchReturn {
+  // Data
+  batches: WasteBatchItem[];
+  isLoading: boolean;
+  error: string | null;
+  // Filter state
+  searchQuery: string;
+  setSearchQuery: (v: string) => void;
+  dateFrom: string;
+  setDateFrom: (v: string) => void;
+  dateTo: string;
+  setDateTo: (v: string) => void;
+  // Detail dialog
+  selectedBatch: WasteBatchItem | null;
+  detailOpen: boolean;
+  setDetailOpen: (v: boolean) => void;
+  // Handlers
+  handleSearch: () => void;
+  handleViewDetail: (batch: WasteBatchItem) => void;
 }

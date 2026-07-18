@@ -122,4 +122,20 @@ export interface PurchaseMetricsData {
 
 export type PurchaseMetricsResponse = BaseResponse<PurchaseMetricsData>;
 
+/** Represents a single waste batch (jejak limbah) record. */
+export interface WasteBatchItem {
+  id: string;
+  batch_code: string;
+  initial_weight_kg: number;
+  origin_city: string;
+  fabric_name_snapshot: string;
+  fabric_category_snapshot: string;
+  media_urls_snapshot: { url: string; type: string }[];
+  created_at: string | null;
+}
 
+export interface WasteBatchFilterInput {
+  searchQuery?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}

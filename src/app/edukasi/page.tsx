@@ -58,12 +58,7 @@ export default async function EducationPage() {
           }
         />
 
-        <EducationWorkshopSection
-          workshops={workshops}
-          hasLoadError={
-            hasWorkshopLoadError
-          }
-        />
+        <EducationWorkshopSection />
 
         <EducationOutcomeSection />
       </main>
