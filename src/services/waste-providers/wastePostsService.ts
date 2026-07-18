@@ -147,7 +147,7 @@ export async function createWastePost(
   post: WasteInput
 ): Promise<BaseResponse<void>> {
   try {
-    // 1. Fetch provider's address (regency/origin_city)
+    //  Fetch provider's address — gabungkan province dan regency: "Bali, Denpasar"
     const { data: providerData } = await supabase
       .from("waste_providers")
       .select("address")
@@ -159,17 +159,23 @@ export async function createWastePost(
       try {
         const addr = typeof providerData.address === "string"
           ? JSON.parse(providerData.address)
-          : providerData.address;
-        originCity = addr.regency || addr.city || "Unknown";
+          : providerData.address as Record<string, string>;
+        const province: string = addr.province ?? "";
+        const regency: string = addr.regency ?? addr.city ?? "";
+        if (province && regency) {
+          originCity = `${province}, ${regency}`;
+        } else {
+          originCity = province || regency || "Unknown";
+        }
       } catch (e) {
         originCity = String(providerData.address);
       }
     }
 
-    // 2. Generate 5-character batch code without prefix
+    // Generate 5-character batch code without prefix
     const batchCode = Math.random().toString(36).substring(2, 7).toUpperCase();
 
-    // 3. Upload media files to Supabase Storage first (outside the DB transaction)
+    // Upload media files to Supabase Storage first (outside the DB transaction)
     const mediaUrls: string[] = [];
     const mediaTypes: string[] = [];
 
@@ -184,13 +190,22 @@ export async function createWastePost(
       }
     }
 
-    // 4. Call the 12-parameter database transaction RPC
-    const { error } = await (supabase.rpc as any)(
+    // Build media snapshot (array of { url, type } objects)
+    const mediaUrlsSnapshot = mediaUrls.map((url, i) => ({
+      url,
+      type: mediaTypes[i] ?? "image",
+    }));
+
+    //  Call the database transaction RPC with snapshot columns
+    const { error } = await supabase.rpc(
       "create_waste_post_with_media_and_batch",
       {
         p_provider_id: providerId,
-        p_custom_fabric_name: post.custom_fabric_name,
+        p_custom_fabric_name: post.custom_fabric_name ?? "",
         p_fabric_category_id: post.fabric_category_id,
+        p_fabric_name_snapshot: post.custom_fabric_name ?? "",
+        p_fabric_category_snapshot: post.fabric_category_name,
+        p_media_urls_snapshot: mediaUrlsSnapshot,
         p_weight_kg: post.weight_kg,
         p_price_per_kg: post.price_per_kg,
         p_minimum_order_kg: post.minimum_order_kg,

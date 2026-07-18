@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -659,27 +659,33 @@ export type Database = {
         Row: {
           batch_code: string
           created_at: string | null
-          current_available_weight_kg: number
+          fabric_category_snapshot: string
+          fabric_name_snapshot: string
           id: string
           initial_weight_kg: number
+          media_urls_snapshot: Json
           origin_city: string
           waste_id: string
         }
         Insert: {
           batch_code: string
           created_at?: string | null
-          current_available_weight_kg: number
+          fabric_category_snapshot: string
+          fabric_name_snapshot: string
           id?: string
           initial_weight_kg: number
+          media_urls_snapshot: Json
           origin_city: string
           waste_id: string
         }
         Update: {
           batch_code?: string
           created_at?: string | null
-          current_available_weight_kg?: number
+          fabric_category_snapshot?: string
+          fabric_name_snapshot?: string
           id?: string
           initial_weight_kg?: number
+          media_urls_snapshot?: Json
           origin_city?: string
           waste_id?: string
         }
@@ -993,8 +999,11 @@ export type Database = {
           p_custom_fabric_name: string
           p_details_and_conditions: string
           p_fabric_category_id: number
+          p_fabric_category_snapshot: string
+          p_fabric_name_snapshot: string
           p_media_types: string[]
           p_media_urls: string[]
+          p_media_urls_snapshot: Json
           p_minimum_order_kg: number
           p_origin_city: string
           p_price_per_kg: number
@@ -1005,6 +1014,18 @@ export type Database = {
         Returns: string
       }
       get_total_waste_weight: { Args: { provider_id: string }; Returns: number }
+      get_waste_purchases_rpc: {
+        Args: {
+          p_date_from?: string
+          p_date_to?: string
+          p_provider_id: string
+          p_search_query?: string
+          p_status_filter?: string[]
+        }
+        Returns: {
+          result_row: Json
+        }[]
+      }
     }
     Enums: {
       entity_role: "consumer" | "brand" | "waste_provider"
