@@ -13,7 +13,7 @@ export interface WorkshopCatalogItem {
   speakerRole: string;
 
   location: string;
-  mapsUrl: string | null;
+  bannerUrl: string | null;
 
   pointCost: number;
   quota: number;

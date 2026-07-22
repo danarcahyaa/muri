@@ -13,6 +13,7 @@ const WORKSHOP_CATALOG_SELECT = `
   speaker_name,
   speaker_role,
   location,
+  banner_url,
   description,
   point_cost,
   quota,
@@ -109,6 +110,73 @@ export async function getWorkshops(): Promise<
       error: translateSupabaseError(error),
     };
   }
+}
+
+function mapWorkshopCatalogItem(
+  row: WorkshopCatalogQueryRow,
+): WorkshopCatalogItem {
+  const registrations =
+    row.workshop_registrations ?? [];
+
+  const registeredCount =
+    registrations.filter((registration) =>
+      isActiveRegistrationStatus(
+        registration.status,
+      ),
+    ).length;
+
+  const quota = toNumber(row.quota);
+
+  const remainingSlots = Math.max(
+    quota - registeredCount,
+    0,
+  );
+
+  return {
+    id: row.id,
+    brandId: row.brand_id,
+
+    title: row.title,
+    descriptionHtml: row.description,
+
+    speakerName: row.speaker_name,
+    speakerRole: row.speaker_role,
+
+    location: row.location,
+    mapsUrl: row.maps_url,
+
+    pointCost: toNumber(row.point_cost),
+    quota,
+
+    registeredCount,
+    remainingSlots,
+    isFull: remainingSlots <= 0,
+
+    heldAt: row.held_at,
+
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function isActiveRegistrationStatus(
+  status: string,
+): status is WorkshopRegistrationStatus {
+  return (
+    status === "registered" ||
+    status === "attended"
+  );
+}
+
+function toNumber(value: unknown): number {
+  const parsed =
+    typeof value === "number"
+      ? value
+      : Number(value);
+
+  return Number.isFinite(parsed)
+    ? parsed
+    : 0;
 }
 
 const UUID_PATTERN =

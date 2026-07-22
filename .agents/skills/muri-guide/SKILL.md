@@ -38,3 +38,11 @@ Untuk mengubah style UI dari MURI, selalu ikuti style guide yang ada pada file `
 - Selalu gunakan fungsi `translateSupabaseError` dari `@/lib/supabaseError` untuk menerjemahkan error dari Supabase. Hindari penggunaan `err.message` secara langsung.
 - Selalu gunakan `BaseResponse` untuk membungkus response dari `services`.
 - Selalu buat response data types untuk service functions agar consistent dengan BaseResponse.
+
+# Panduan Clean Structure Files
+## Hooks
+- Selalu pisahkan hooks dengan komponen UI. Letakan `hooks` di folder `src/hooks/`.
+## Services
+- Selalu pisahkan services dengan komponen UI. Letakan `services` di folder `src/services/`.
+## Components
+- Selalu pisahkan komponen dengan UI. Letakan `components` di folder `src/components/`.
