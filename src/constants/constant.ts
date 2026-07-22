@@ -1,4 +1,5 @@
 import { OrderStatus as PurchaseStatus, WastePostStatus } from "@/enums/enum";
+import { WorkshopPublishStatusFilter } from "@/types/brandWorkshop";
 
 export const ALL_CATEGORIES = ["Katun", "Denim", "Linen", "Rayon", "Polyester", "Sutra", "Sintetis", "Campuran"];
 
@@ -15,4 +16,11 @@ export const ALL_STATUSES = [
   PurchaseStatus.COMPLETE,
   PurchaseStatus.CANCELLED,
   PurchaseStatus.REJECTED,
+];
+
+
+export const WORKSHOP_STATUS_OPTIONS: { value: WorkshopPublishStatusFilter; label: string }[] = [
+  { value: "all", label: "Semua Status" },
+  { value: "published", label: "Dipublikasikan" },
+  { value: "draft", label: "Draft" },
 ];

@@ -97,5 +97,5 @@ Tombol melayang melingkar sempurna (`rounded-full`) di sisi kanan layar berwarna
 - Tampilkan foto lembar perca asli secara jujur berdampingan dengan gambar baju hasil rekayasa kecerdasan buatan.
 
 ### Don't
-- Jangan pernah mencampur skema warna latar belakang hangat `#F5F3EC` dengan bayangan komponen (*drop shadows*) yang pekat, hitam, atau tebal; andalkan pembatas garis tipis 1px (`Hairline Border` warna `#C2C9C6`).
+- Jangan pernah mencampur skema warna latar belakang hangat `#F5F3EC` dengan bayangan komponen (*drop shadows*) ; andalkan pembatas garis tipis 1px (`Hairline Border` warna `#C2C9C6`).
 - Jangan gunakan warna hijau limau neon `#C8F169` sebagai warna teks tubuh (*body text*); batasi penggunaannya hanya untuk tombol aksi, ikon, dan teks penunjuk sub-header kecil.
