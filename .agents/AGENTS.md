@@ -9,3 +9,4 @@ Ensure all agents (including Antigravity) follow these coding conventions when c
    - Utilities, Helpers, Hooks: Use `camelCase.ts` (e.g., `supabaseClient.ts`, `useTheme.ts`).
 3. **Styling**: Use Tailwind CSS variables defined in `@/app/globals.css` to respect the eco-friendly sustainability color theme (emerald green primary accents).
 4. **Clean Code**: Keep components reusable and small. Avoid placing modular files outside `src/components`, `src/hooks`, and `src/lib`.
+5. **Supabase Total Record Queries**: Jika ada query untuk mengambil data total record/jumlah data, gunakan langsung opsi `count` dari Supabase (misal `.select("*", { count: "exact", head: true })`) dan jangan mengambil/mengunduh seluruh record data hanya untuk dihitung `.length`-nya.
