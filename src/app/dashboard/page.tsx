@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ArrowRight, Leaf } from "lucide-react";
-import CustomerWorkshopHistorySection from "@/components/dashboard/CustomerWorkshopHistorySection";
 import CustomerDashboardSummarySection from "@/components/dashboard/CustomerDashboardSummarySection";
 
 export default function DashboardPage() {
@@ -10,7 +9,6 @@ export default function DashboardPage() {
 
       <CustomerDashboardSummarySection />
 
-      <CustomerWorkshopHistorySection />
     </div>
   );
 }

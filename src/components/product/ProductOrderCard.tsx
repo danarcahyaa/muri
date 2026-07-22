@@ -5,11 +5,12 @@ import Link from "next/link";
 import {
   ArrowRight,
   Gift,
+  LoaderCircle,
   Minus,
   Plus,
   ShoppingBag,
 } from "lucide-react";
-
+import { useAuth } from "@/components/auth/AuthProvider";
 import { formatIdr } from "@/lib/product-detail";
 import type { ProductBonusSummary } from "@/types/product";
 
@@ -32,43 +33,33 @@ export default function ProductOrderCard({
   bonusProductQty,
   bonusCoinCost,
 }: ProductOrderCardProps) {
-  const [quantity, setQuantity] =
-    React.useState(stock > 0 ? 1 : 0);
-
+  const [quantity, setQuantity] = React.useState(stock > 0 ? 1 : 0);
+  const { user, isLoading } = useAuth();
   const isSoldOut = stock <= 0;
   const totalPrice = priceIdr * quantity;
   const totalBonusQty =
-    bonusProduct && bonusProductQty > 0
-      ? quantity * bonusProductQty
-      : 0;
+    bonusProduct && bonusProductQty > 0 ? quantity * bonusProductQty : 0;
 
   const checkoutPath = `/produk/${encodeURIComponent(
     slug,
   )}/checkout?quantity=${quantity}`;
 
-  const checkoutHref = `/auth/login?redirect=${encodeURIComponent(
-    checkoutPath,
-  )}`;
+  const checkoutHref = user
+    ? checkoutPath
+    : `/auth/login?redirect=${encodeURIComponent(checkoutPath)}`;
 
   function decreaseQuantity() {
-    setQuantity((current) =>
-      Math.max(1, current - 1),
-    );
+    setQuantity((current) => Math.max(1, current - 1));
   }
 
   function increaseQuantity() {
-    setQuantity((current) =>
-      Math.min(stock, current + 1),
-    );
+    setQuantity((current) => Math.min(stock, current + 1));
   }
 
   return (
     <div className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-7">
       <div className="flex items-center gap-3 text-brand-emerald">
-        <ShoppingBag
-          className="size-4"
-          strokeWidth={2}
-        />
+        <ShoppingBag className="size-4" strokeWidth={2} />
 
         <h2 className="text-xs font-bold uppercase tracking-tight">
           Ringkasan Pesanan
@@ -86,9 +77,7 @@ export default function ProductOrderCard({
             </p>
           </div>
 
-          <p className="shrink-0 text-[10px] text-muted-moss">
-            Stok {stock}
-          </p>
+          <p className="shrink-0 text-[10px] text-muted-moss">Stok {stock}</p>
         </div>
 
         <div className="mt-5 inline-flex items-center overflow-hidden rounded-lg border border-line-trace bg-canvas-pure">
@@ -109,9 +98,7 @@ export default function ProductOrderCard({
           <button
             type="button"
             onClick={increaseQuantity}
-            disabled={
-              isSoldOut || quantity >= stock
-            }
+            disabled={isSoldOut || quantity >= stock}
             aria-label="Tambah jumlah"
             className="flex size-10 items-center justify-center text-brand-black transition hover:bg-canvas-warm disabled:cursor-not-allowed disabled:opacity-35"
           >
@@ -129,9 +116,7 @@ export default function ProductOrderCard({
           {formatIdr(totalPrice)}
         </p>
 
-        <p className="mt-5 text-[11px] opacity-70">
-          Untuk {quantity} produk
-        </p>
+        <p className="mt-5 text-[11px] opacity-70">Untuk {quantity} produk</p>
       </div>
 
       {bonusProduct && totalBonusQty > 0 && (
@@ -168,17 +153,33 @@ export default function ProductOrderCard({
         </button>
       ) : (
         <Link
+          aria-disabled={isLoading}
+          onClick={(event) => {
+            if (isLoading) {
+              event.preventDefault();
+            }
+          }}
           href={checkoutHref}
           className="group mt-7 flex w-full items-center justify-center gap-3 rounded-sm bg-brand-forest px-6 py-4 text-xs font-bold text-canvas-pure transition duration-300 hover:bg-brand-black"
         >
-          Beli Sekarang
-
-          <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+          {isLoading ? (
+            <>
+              <LoaderCircle className="size-4 animate-spin" />
+              Memeriksa Akun...
+            </>
+          ) : (
+            <>
+              Beli Sekarang
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+            </>
+          )}
         </Link>
       )}
 
       <p className="mt-4 text-center text-[10px] leading-relaxed text-muted-moss">
-        Masuk atau buat akun untuk melanjutkan pembelian.
+        {user
+          ? "Anda akan diarahkan ke halaman checkout."
+          : "Masuk atau buat akun untuk melanjutkan pembelian."}
       </p>
     </div>
   );

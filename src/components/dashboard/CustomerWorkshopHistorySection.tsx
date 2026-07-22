@@ -13,39 +13,27 @@ import {
 } from "lucide-react";
 
 import { WorkshopRegistrationStatus } from "@/enums/enum";
-import {
-  formatWorkshopDate,
-  formatWorkshopTime,
-} from "@/lib/workshop";
+import { formatWorkshopDate, formatWorkshopTime } from "@/lib/workshop";
 import { getMyWorkshopHistory } from "@/services/customer";
-import type {
-  CustomerWorkshopHistoryItem,
-} from "@/types/customerWorkshop";
+import type { CustomerWorkshopHistoryItem } from "@/types/customerWorkshop";
 
 export default function CustomerWorkshopHistorySection() {
-  const [history, setHistory] = useState<
-    CustomerWorkshopHistoryItem[]
-  >([]);
+  const [history, setHistory] = useState<CustomerWorkshopHistoryItem[]>([]);
 
-  const [isLoading, setIsLoading] =
-    useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [errorMessage, setErrorMessage] =
-    useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const loadHistory = useCallback(async () => {
     setIsLoading(true);
     setErrorMessage(null);
 
     try {
-      const result =
-        await getMyWorkshopHistory();
+      const result = await getMyWorkshopHistory();
 
       if (!result.success) {
         setHistory([]);
-        setErrorMessage(
-          "Riwayat workshop belum dapat dimuat.",
-        );
+        setErrorMessage("Riwayat workshop belum dapat dimuat.");
 
         return;
       }
@@ -53,9 +41,7 @@ export default function CustomerWorkshopHistorySection() {
       setHistory(result.data ?? []);
     } catch {
       setHistory([]);
-      setErrorMessage(
-        "Terjadi kesalahan saat memuat riwayat workshop.",
-      );
+      setErrorMessage("Terjadi kesalahan saat memuat riwayat workshop.");
     } finally {
       setIsLoading(false);
     }
@@ -67,23 +53,14 @@ export default function CustomerWorkshopHistorySection() {
 
   return (
     <section className="mt-6 overflow-hidden rounded-3xl border border-line-trace bg-canvas-pure">
-      <div
-        className="
-          flex flex-col gap-5
-          border-b border-line-trace
-          px-6 py-6
-          sm:flex-row sm:items-center
-          sm:justify-between sm:px-8
-        "
-      >
+      <div className="border-b border-line-trace px-6 py-6 sm:px-8">
         <div>
           <h2 className="font-display text-2xl font-medium tracking-tight text-brand-black">
-            Workshop Saya
+            Riwayat Workshop
           </h2>
 
           <p className="mt-2 text-xs text-muted-moss">
-            Riwayat pendaftaran dan workshop
-            yang Anda ikuti.
+            Pendaftaran aktif dan workshop yang pernah Anda ikuti.
           </p>
         </div>
 
@@ -99,7 +76,6 @@ export default function CustomerWorkshopHistorySection() {
           "
         >
           Cari Workshop
-
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
         </Link>
       </div>
@@ -107,19 +83,13 @@ export default function CustomerWorkshopHistorySection() {
       {isLoading ? (
         <WorkshopHistorySkeleton />
       ) : errorMessage ? (
-        <WorkshopHistoryError
-          message={errorMessage}
-          onRetry={loadHistory}
-        />
+        <WorkshopHistoryError message={errorMessage} onRetry={loadHistory} />
       ) : history.length === 0 ? (
         <EmptyWorkshopHistory />
       ) : (
         <div className="grid gap-4 p-5 sm:p-6 xl:grid-cols-2">
           {history.map((item) => (
-            <WorkshopHistoryCard
-              key={item.id}
-              item={item}
-            />
+            <WorkshopHistoryCard key={item.id} item={item} />
           ))}
         </div>
       )}
@@ -127,30 +97,22 @@ export default function CustomerWorkshopHistorySection() {
   );
 }
 
-function WorkshopHistoryCard({
-  item,
-}: {
-  item: CustomerWorkshopHistoryItem;
-}) {
+function WorkshopHistoryCard({ item }: { item: CustomerWorkshopHistoryItem }) {
   const workshop = item.workshop;
   const status = getStatusMeta(item.status);
 
   if (!workshop) {
     return (
       <article className="rounded-2xl border border-line-trace bg-canvas-warm/40 p-6">
-        <StatusBadge
-          label={status.label}
-          className={status.className}
-        />
+        <StatusBadge label={status.label} className={status.className} />
 
         <h3 className="mt-5 font-display text-xl font-medium text-brand-black">
           Workshop tidak tersedia
         </h3>
 
         <p className="mt-2 text-xs leading-5 text-muted-moss">
-          Detail workshop ini sudah tidak dapat
-          diakses, tetapi riwayat pendaftaran
-          Anda tetap tersimpan.
+          Detail workshop ini sudah tidak dapat diakses, tetapi riwayat
+          pendaftaran Anda tetap tersimpan.
         </p>
       </article>
     );
@@ -170,17 +132,12 @@ function WorkshopHistoryCard({
       "
     >
       <div className="flex items-start justify-between gap-4">
-        <StatusBadge
-          label={status.label}
-          className={status.className}
-        />
+        <StatusBadge label={status.label} className={status.className} />
 
         <div className="inline-flex items-center gap-2 text-xs font-bold text-brand-forest">
           <Coins className="size-4" />
 
-          {item.pointsSpent === 0
-            ? "Gratis"
-            : `${item.pointsSpent} poin`}
+          {item.pointsSpent === 0 ? "Gratis" : `${item.pointsSpent} poin`}
         </div>
       </div>
 
@@ -193,10 +150,7 @@ function WorkshopHistoryCard({
             text-brand-forest
           "
         >
-          <Presentation
-            className="size-5"
-            strokeWidth={1.8}
-          />
+          <Presentation className="size-5" strokeWidth={1.8} />
         </div>
 
         <h3 className="mt-5 font-display text-2xl font-medium leading-tight tracking-[-0.035em] text-brand-black">
@@ -207,43 +161,30 @@ function WorkshopHistoryCard({
           {workshop.speakerName}
         </p>
 
-        <p className="mt-1 text-xs text-muted-moss">
-          {workshop.speakerRole}
-        </p>
+        <p className="mt-1 text-xs text-muted-moss">{workshop.speakerRole}</p>
       </div>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         <HistoryFact
           icon={CalendarDays}
           label="Tanggal"
-          value={formatWorkshopDate(
-            workshop.heldAt,
-          )}
+          value={formatWorkshopDate(workshop.heldAt)}
         />
 
         <HistoryFact
           icon={Clock3}
           label="Waktu"
-          value={formatWorkshopTime(
-            workshop.heldAt,
-          )}
+          value={formatWorkshopTime(workshop.heldAt)}
         />
 
         <div className="sm:col-span-2">
-          <HistoryFact
-            icon={MapPin}
-            label="Lokasi"
-            value={workshop.location}
-          />
+          <HistoryFact icon={MapPin} label="Lokasi" value={workshop.location} />
         </div>
       </div>
 
       <div className="mt-6 flex flex-col gap-4 border-t border-line-trace pt-5 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-[10px] text-muted-moss">
-          Terdaftar{" "}
-          {formatRegistrationDate(
-            item.createdAt,
-          )}
+          Terdaftar {formatRegistrationDate(item.createdAt)}
         </p>
 
         <Link
@@ -257,7 +198,6 @@ function WorkshopHistoryCard({
           "
         >
           Lihat Detail
-
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
         </Link>
       </div>
@@ -277,14 +217,9 @@ function HistoryFact({
   return (
     <div className="rounded-xl bg-canvas-warm px-4 py-4">
       <div className="flex items-center gap-2 text-muted-moss">
-        <Icon
-          className="size-4 shrink-0"
-          strokeWidth={1.8}
-        />
+        <Icon className="size-4 shrink-0" strokeWidth={1.8} />
 
-        <span className="text-[9px] uppercase tracking-wide">
-          {label}
-        </span>
+        <span className="text-[9px] uppercase tracking-wide">{label}</span>
       </div>
 
       <p className="mt-2 text-xs font-bold leading-5 text-brand-black">
@@ -316,30 +251,25 @@ function StatusBadge({
   );
 }
 
-function getStatusMeta(
-  status: WorkshopRegistrationStatus,
-) {
+function getStatusMeta(status: WorkshopRegistrationStatus) {
   switch (status) {
     case WorkshopRegistrationStatus.ATTENDED:
       return {
         label: "Sudah Hadir",
-        className:
-          "bg-brand-lime/50 text-brand-forest",
+        className: "bg-brand-lime/50 text-brand-forest",
       };
 
     case WorkshopRegistrationStatus.CANCELLED:
       return {
         label: "Dibatalkan",
-        className:
-          "bg-red-50 text-red-700",
+        className: "bg-red-50 text-red-700",
       };
 
     case WorkshopRegistrationStatus.REGISTERED:
     default:
       return {
         label: "Terdaftar",
-        className:
-          "bg-brand-emerald/10 text-brand-emerald",
+        className: "bg-brand-emerald/10 text-brand-emerald",
       };
   }
 }
@@ -366,18 +296,13 @@ function WorkshopHistoryError({
 }) {
   return (
     <div className="flex min-h-64 flex-col items-center justify-center px-6 py-12 text-center">
-      <RefreshCw
-        className="size-9 text-muted-moss/50"
-        strokeWidth={1.5}
-      />
+      <RefreshCw className="size-9 text-muted-moss/50" strokeWidth={1.5} />
 
       <h3 className="mt-5 font-display text-xl font-medium text-brand-black">
         Riwayat gagal dimuat
       </h3>
 
-      <p className="mt-2 text-xs text-muted-moss">
-        {message}
-      </p>
+      <p className="mt-2 text-xs text-muted-moss">{message}</p>
 
       <button
         type="button"
@@ -403,40 +328,20 @@ function WorkshopHistoryError({
 function EmptyWorkshopHistory() {
   return (
     <div className="flex min-h-64 flex-col items-center justify-center px-6 py-12 text-center">
-      <Presentation
-        className="size-10 text-muted-moss/40"
-        strokeWidth={1.4}
-      />
+      <Presentation className="size-10 text-muted-moss/40" strokeWidth={1.4} />
 
       <h3 className="mt-5 font-display text-xl font-medium text-brand-black">
         Belum ada workshop
       </h3>
 
       <p className="mt-2 max-w-sm text-xs leading-5 text-muted-moss">
-        Workshop yang Anda daftarkan akan muncul
-        di bagian ini.
+        Workshop yang Anda daftarkan akan muncul di bagian ini.
       </p>
-
-      <Link
-        href="/edukasi"
-        className="
-          mt-6 inline-flex items-center gap-2
-          rounded-md bg-brand-forest
-          px-5 py-3
-          text-xs font-bold text-white
-          transition hover:bg-brand-black
-        "
-      >
-        Lihat Workshop
-        <ArrowRight className="size-4" />
-      </Link>
     </div>
   );
 }
 
-function formatRegistrationDate(
-  value: string | null,
-): string {
+function formatRegistrationDate(value: string | null): string {
   if (!value) {
     return "-";
   }

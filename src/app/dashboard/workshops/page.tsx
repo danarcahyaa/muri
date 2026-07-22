@@ -1,14 +1,58 @@
-import { CalendarDays } from "lucide-react";
+import Link from "next/link";
+import {
+  ArrowRight,
+  CalendarDays,
+} from "lucide-react";
 
-import DashboardSectionPlaceholder from "@/components/dashboard/DashboardSectionPlaceholder";
+import CustomerWorkshopHistorySection from "@/components/dashboard/CustomerWorkshopHistorySection";
 
 export default function CustomerWorkshopsPage() {
   return (
-    <DashboardSectionPlaceholder
-      icon={CalendarDays}
-      eyebrow="Dashboard Customer"
-      title="Workshop Saya"
-      description="Kelola pendaftaran workshop, lihat jadwal mendatang, serta riwayat workshop yang sudah Anda ikuti."
-    />
+    <div className="mx-auto w-full max-w-[1320px] px-5 py-10 sm:px-6 lg:px-8 lg:py-14">
+      <div className="flex flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <div className="flex items-center gap-3 text-brand-emerald">
+            <CalendarDays
+              className="size-4"
+              strokeWidth={2}
+            />
+
+            <span className="text-xs font-bold uppercase tracking-tight">
+              Dashboard Customer
+            </span>
+          </div>
+
+          <h1 className="mt-4 font-display text-5xl font-medium leading-none tracking-[-0.05em] text-brand-black sm:text-6xl">
+            Workshop Saya
+          </h1>
+
+          <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-moss">
+            Pantau workshop mendatang, status
+            pendaftaran, serta seluruh riwayat
+            workshop Anda.
+          </p>
+        </div>
+
+        <Link
+          href="/edukasi"
+          className="
+            group inline-flex w-fit
+            items-center justify-center
+            gap-2 rounded-md
+            bg-brand-black px-6 py-4
+            text-xs font-bold text-white
+            transition
+            hover:-translate-y-0.5
+            hover:bg-brand-forest
+          "
+        >
+          Cari Workshop
+
+          <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+        </Link>
+      </div>
+
+      <CustomerWorkshopHistorySection />
+    </div>
   );
 }
