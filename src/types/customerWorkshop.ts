@@ -1,6 +1,4 @@
-import type {
-  WorkshopRegistrationStatus,
-} from "@/enums/enum";
+import type { WorkshopRegistrationStatus } from "@/enums/enum";
 
 export type WorkshopRegistrationErrorCode =
   | "UNAUTHENTICATED"
@@ -38,4 +36,26 @@ export interface CustomerWorkshopRegistration {
 
   attendedAt: string | null;
   cancelledAt: string | null;
+}
+
+export interface CustomerWorkshopSummary {
+  id: string;
+
+  title: string;
+
+  speakerName: string;
+  speakerRole: string;
+
+  location: string;
+  heldAt: string;
+
+  bannerUrl: string | null;
+}
+
+export interface CustomerWorkshopHistoryItem extends CustomerWorkshopRegistration {
+  /**
+   * Bisa null apabila workshop tidak dapat dibaca lagi,
+   * misalnya workshop dihapus atau aksesnya berubah.
+   */
+  workshop: CustomerWorkshopSummary | null;
 }

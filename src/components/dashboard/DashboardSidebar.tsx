@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  ChartNoAxesColumnIncreasing,
+  CalendarDays,
+  Coins,
   LayoutDashboard,
-  PackageSearch,
-  Recycle,
-  Sparkles,
+  ShoppingBag,
+  UserRound,
 } from "lucide-react";
 
 const dashboardNavigation = [
@@ -17,24 +17,24 @@ const dashboardNavigation = [
     icon: LayoutDashboard,
   },
   {
-    label: "AI Material",
-    href: "/dashboard/ai-material",
-    icon: Sparkles,
+    label: "Pesanan Saya",
+    href: "/dashboard/orders",
+    icon: ShoppingBag,
   },
   {
-    label: "Material Saya",
-    href: "/dashboard/material",
-    icon: PackageSearch,
+    label: "Workshop Saya",
+    href: "/dashboard/workshops",
+    icon: CalendarDays,
   },
   {
-    label: "Aktivitas Sirkular",
-    href: "/dashboard/aktivitas",
-    icon: Recycle,
+    label: "Poin & Dampak",
+    href: "/dashboard/points",
+    icon: Coins,
   },
   {
-    label: "Laporan Dampak",
-    href: "/dashboard/laporan",
-    icon: ChartNoAxesColumnIncreasing,
+    label: "Profil",
+    href: "/dashboard/profile",
+    icon: UserRound,
   },
 ];
 

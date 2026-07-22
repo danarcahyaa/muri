@@ -1,14 +1,11 @@
-import type {
-  QueryData,
-} from "@supabase/supabase-js";
+import type { QueryData } from "@supabase/supabase-js";
 
-import {
-  WorkshopRegistrationStatus,
-} from "@/enums/enum";
+import { WorkshopRegistrationStatus } from "@/enums/enum";
 import { supabase } from "@/lib/supabaseClient";
 import { translateSupabaseError } from "@/lib/supabaseError";
 import type { BaseResponse } from "@/types/common";
 import type {
+  CustomerWorkshopHistoryItem,
   CustomerWorkshopRegistration,
   RegisterWorkshopResult,
   WorkshopRegistrationErrorCode,
@@ -29,19 +26,45 @@ const REGISTRATION_SELECT = `
   cancelled_at
 ` as const;
 
+const REGISTRATION_HISTORY_SELECT = `
+  id,
+  workshop_id,
+  points_redeemed,
+  status,
+  created_at,
+  updated_at,
+  attended_at,
+  cancelled_at,
+
+  workshops (
+    id,
+    title,
+    speaker_name,
+    speaker_role,
+    location,
+    held_at,
+    banner_url
+  )
+` as const;
+
 const registrationTypeQuery = supabase
   .from("workshop_registrations")
   .select(REGISTRATION_SELECT);
 
-type RegistrationQueryRow = QueryData<
-  typeof registrationTypeQuery
+type RegistrationQueryRow = QueryData<typeof registrationTypeQuery>[number];
+
+const registrationHistoryTypeQuery = supabase
+  .from("workshop_registrations")
+  .select(REGISTRATION_HISTORY_SELECT);
+
+type RegistrationHistoryQueryRow = QueryData<
+  typeof registrationHistoryTypeQuery
 >[number];
 
 type RegisterWorkshopRpcReturns =
   Database["public"]["Functions"]["register_customer_workshop"]["Returns"];
 
-type RegisterWorkshopRpcRow =
-  RegisterWorkshopRpcReturns[number];
+type RegisterWorkshopRpcRow = RegisterWorkshopRpcReturns[number];
 
 const REGISTRATION_ERROR_CODES: readonly WorkshopRegistrationErrorCode[] = [
   "UNAUTHENTICATED",
@@ -67,22 +90,16 @@ export async function registerWorkshop(
   try {
     const normalizedWorkshopId = workshopId.trim();
 
-    if (
-      !normalizedWorkshopId ||
-      !UUID_PATTERN.test(normalizedWorkshopId)
-    ) {
+    if (!normalizedWorkshopId || !UUID_PATTERN.test(normalizedWorkshopId)) {
       return {
         success: false,
         error: "INVALID_WORKSHOP_ID",
       };
     }
 
-    const { data, error } = await supabase.rpc(
-      "register_customer_workshop",
-      {
-        p_workshop_id: normalizedWorkshopId,
-      },
-    );
+    const { data, error } = await supabase.rpc("register_customer_workshop", {
+      p_workshop_id: normalizedWorkshopId,
+    });
 
     if (error) {
       return {
@@ -91,8 +108,7 @@ export async function registerWorkshop(
       };
     }
 
-    const row: RegisterWorkshopRpcRow | undefined =
-      data?.[0];
+    const row: RegisterWorkshopRpcRow | undefined = data?.[0];
 
     if (!row) {
       return {
@@ -101,9 +117,7 @@ export async function registerWorkshop(
       };
     }
 
-    const status = parseRegistrationStatus(
-      row.registration_status,
-    );
+    const status = parseRegistrationStatus(row.registration_status);
 
     if (!status) {
       return {
@@ -120,12 +134,8 @@ export async function registerWorkshop(
 
         status,
 
-        pointsSpent: toNonNegativeInteger(
-          row.points_spent,
-        ),
-        remainingPoints: toNonNegativeInteger(
-          row.remaining_points,
-        ),
+        pointsSpent: toNonNegativeInteger(row.points_spent),
+        remainingPoints: toNonNegativeInteger(row.remaining_points),
 
         registeredAt: row.registered_at,
       },
@@ -146,16 +156,11 @@ export async function registerWorkshop(
  */
 export async function getMyActiveWorkshopRegistration(
   workshopId: string,
-): Promise<
-  BaseResponse<CustomerWorkshopRegistration | null>
-> {
+): Promise<BaseResponse<CustomerWorkshopRegistration | null>> {
   try {
     const normalizedWorkshopId = workshopId.trim();
 
-    if (
-      !normalizedWorkshopId ||
-      !UUID_PATTERN.test(normalizedWorkshopId)
-    ) {
+    if (!normalizedWorkshopId || !UUID_PATTERN.test(normalizedWorkshopId)) {
       return {
         success: true,
         data: null,
@@ -233,9 +238,7 @@ export async function getMyWorkshopRegistrations(): Promise<
     const registrations = (data ?? [])
       .map(mapRegistration)
       .filter(
-        (
-          registration,
-        ): registration is CustomerWorkshopRegistration =>
+        (registration): registration is CustomerWorkshopRegistration =>
           registration !== null,
       );
 
@@ -252,11 +255,50 @@ export async function getMyWorkshopRegistrations(): Promise<
 }
 
 /**
+ * Mengambil riwayat workshop customer beserta
+ * informasi workshop yang diperlukan dashboard.
+ *
+ * RLS pada workshop_registrations memastikan
+ * customer hanya membaca registrasinya sendiri.
+ */
+export async function getMyWorkshopHistory(): Promise<
+  BaseResponse<CustomerWorkshopHistoryItem[]>
+> {
+  try {
+    const { data, error } = await supabase
+      .from("workshop_registrations")
+      .select(REGISTRATION_HISTORY_SELECT)
+      .order("created_at", {
+        ascending: false,
+      });
+
+    if (error) {
+      return {
+        success: false,
+        error: translateSupabaseError(error),
+      };
+    }
+
+    const history = (data ?? [])
+      .map(mapWorkshopHistoryItem)
+      .filter((item): item is CustomerWorkshopHistoryItem => item !== null);
+
+    return {
+      success: true,
+      data: history,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: translateSupabaseError(error),
+    };
+  }
+}
+
+/**
  * Mengubah error code database menjadi pesan untuk customer.
  */
-export function getWorkshopRegistrationErrorMessage(
-  error: unknown,
-): string {
+export function getWorkshopRegistrationErrorMessage(error: unknown): string {
   switch (error) {
     case "UNAUTHENTICATED":
       return "Silakan masuk terlebih dahulu untuk mendaftar workshop.";
@@ -290,9 +332,7 @@ export function getWorkshopRegistrationErrorMessage(
 function mapRegistration(
   row: RegistrationQueryRow,
 ): CustomerWorkshopRegistration | null {
-  const status = parseRegistrationStatus(
-    row.status,
-  );
+  const status = parseRegistrationStatus(row.status);
 
   if (!status) {
     return null;
@@ -304,15 +344,45 @@ function mapRegistration(
 
     status,
 
-    pointsSpent: toNonNegativeInteger(
-      row.points_redeemed,
-    ),
+    pointsSpent: toNonNegativeInteger(row.points_redeemed),
 
     createdAt: row.created_at,
     updatedAt: row.updated_at,
 
     attendedAt: row.attended_at,
     cancelledAt: row.cancelled_at,
+  };
+}
+
+function mapWorkshopHistoryItem(
+  row: RegistrationHistoryQueryRow,
+): CustomerWorkshopHistoryItem | null {
+  const registration = mapRegistration(row);
+
+  if (!registration) {
+    return null;
+  }
+
+  const workshop = unwrapRelation(row.workshops);
+
+  return {
+    ...registration,
+
+    workshop: workshop
+      ? {
+          id: workshop.id,
+
+          title: workshop.title,
+
+          speakerName: workshop.speaker_name,
+          speakerRole: workshop.speaker_role,
+
+          location: workshop.location,
+          heldAt: workshop.held_at,
+
+          bannerUrl: workshop.banner_url,
+        }
+      : null,
   };
 }
 
@@ -334,12 +404,10 @@ function parseRegistrationStatus(
   }
 }
 
-function mapWorkshopRegistrationError(
-  error: {
-    code?: string;
-    message: string;
-  },
-): string {
+function mapWorkshopRegistrationError(error: {
+  code?: string;
+  message: string;
+}): string {
   /*
    * Defense tambahan bila unique index menangkap
    * request pendaftaran yang terjadi bersamaan.
@@ -348,8 +416,8 @@ function mapWorkshopRegistrationError(
     return "ALREADY_REGISTERED";
   }
 
-  const knownCode = REGISTRATION_ERROR_CODES.find(
-    (code) => error.message.includes(code),
+  const knownCode = REGISTRATION_ERROR_CODES.find((code) =>
+    error.message.includes(code),
   );
 
   if (knownCode) {
@@ -359,17 +427,20 @@ function mapWorkshopRegistrationError(
   return translateSupabaseError(error);
 }
 
-function toNonNegativeInteger(
-  value: unknown,
-): number {
-  const parsed =
-    typeof value === "number"
-      ? value
-      : Number(value);
+function toNonNegativeInteger(value: unknown): number {
+  const parsed = typeof value === "number" ? value : Number(value);
 
   if (!Number.isFinite(parsed)) {
     return 0;
   }
 
   return Math.max(0, Math.floor(parsed));
+}
+
+function unwrapRelation<T>(value: T | T[] | null | undefined): T | null {
+  if (Array.isArray(value)) {
+    return value[0] ?? null;
+  }
+
+  return value ?? null;
 }

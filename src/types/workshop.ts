@@ -1,6 +1,4 @@
-export type {
-  WorkshopRegistrationStatus,
-} from "@/enums/enum";
+export type { WorkshopRegistrationStatus } from "@/enums/enum";
 
 export interface WorkshopCatalogItem {
   id: string;
@@ -13,7 +11,7 @@ export interface WorkshopCatalogItem {
   speakerRole: string;
 
   location: string;
-  bannerUrl: string | null;
+  mapsUrl: string | null;
 
   pointCost: number;
   quota: number;

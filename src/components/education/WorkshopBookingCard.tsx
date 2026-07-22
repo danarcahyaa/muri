@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
@@ -43,6 +44,8 @@ export default function WorkshopBookingCard({
     useState<CustomerWorkshopRegistration | null>(null);
 
   const [isCheckingRegistration, setIsCheckingRegistration] = useState(true);
+
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const bookingPercentage = getBookingPercentage(workshop);
 
@@ -95,20 +98,38 @@ export default function WorkshopBookingCard({
     };
   }, [workshop.id]);
 
-  async function handleRegister() {
-    if (isSubmitting || workshop.isFull) {
+  useEffect(() => {
+    if (!isConfirmOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+
+    document.body.style.overflow = "hidden";
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape" && !isSubmitting) {
+        setIsConfirmOpen(false);
+      }
+    }
+
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isConfirmOpen, isSubmitting]);
+
+  async function handleRegisterClick() {
+    if (isSubmitting || workshop.isFull || activeRegistration) {
       return;
     }
 
     setFeedback(null);
-    setIsSubmitting(true);
 
     try {
-      /*
-       * Cek apakah customer sudah login.
-       * Bila belum, arahkan ke login dan kembali
-       * ke detail workshop setelah berhasil login.
-       */
       const {
         data: { user },
         error: authError,
@@ -119,16 +140,24 @@ export default function WorkshopBookingCard({
         return;
       }
 
-      const confirmed = window.confirm(
-        workshop.pointCost > 0
-          ? `Daftar workshop ini menggunakan ${workshop.pointCost} poin. Lanjutkan?`
-          : "Daftar workshop ini sekarang?",
-      );
+      setIsConfirmOpen(true);
+    } catch {
+      setFeedback({
+        type: "error",
+        message: "Status akun belum dapat diperiksa. Silakan coba kembali.",
+      });
+    }
+  }
 
-      if (!confirmed) {
-        return;
-      }
+  async function handleConfirmRegistration() {
+    if (isSubmitting) {
+      return;
+    }
 
+    setFeedback(null);
+    setIsSubmitting(true);
+
+    try {
       const result = await registerWorkshop(workshop.id);
 
       if (!result.success) {
@@ -148,23 +177,24 @@ export default function WorkshopBookingCard({
           message:
             "Pendaftaran berhasil diproses, tetapi data hasil tidak ditemukan.",
         });
-        setActiveRegistration({
-          id: registration.registrationId,
-          workshopId: registration.workshopId,
-
-          status: registration.status,
-
-          pointsSpent: registration.pointsSpent,
-
-          createdAt: registration.registeredAt,
-          updatedAt: registration.registeredAt,
-
-          attendedAt: null,
-          cancelledAt: null,
-        });
 
         return;
       }
+
+      setActiveRegistration({
+        id: registration.registrationId,
+        workshopId: registration.workshopId,
+
+        status: registration.status,
+
+        pointsSpent: registration.pointsSpent,
+
+        createdAt: registration.registeredAt,
+        updatedAt: registration.registeredAt,
+
+        attendedAt: null,
+        cancelledAt: null,
+      });
 
       setFeedback({
         type: "success",
@@ -174,10 +204,7 @@ export default function WorkshopBookingCard({
             : "Pendaftaran workshop berhasil.",
       });
 
-      /*
-       * Memuat ulang server component agar jumlah slot
-       * dan peserta diperbarui dari database.
-       */
+      setIsConfirmOpen(false);
       router.refresh();
     } catch {
       setFeedback({
@@ -188,7 +215,6 @@ export default function WorkshopBookingCard({
       setIsSubmitting(false);
     }
   }
-
   return (
     <aside
       className="
@@ -295,29 +321,20 @@ export default function WorkshopBookingCard({
         <button
           type="button"
           disabled={isSubmitting}
-          onClick={handleRegister}
+          onClick={handleRegisterClick}
           className="
-      group mt-7 flex w-full items-center
-      justify-center gap-3 rounded-sm
-      bg-brand-forest px-6 py-4
-      text-xs font-bold text-canvas-pure
-      transition duration-300
-      hover:bg-brand-black
-      disabled:cursor-not-allowed
-      disabled:opacity-60
-    "
+    group mt-7 flex w-full items-center
+    justify-center gap-3 rounded-sm
+    bg-brand-forest px-6 py-4
+    text-xs font-bold text-canvas-pure
+    transition duration-300
+    hover:bg-brand-black
+    disabled:cursor-not-allowed
+    disabled:opacity-60
+  "
         >
-          {isSubmitting ? (
-            <>
-              <LoaderCircle className="size-4 animate-spin" />
-              Memproses...
-            </>
-          ) : (
-            <>
-              Daftar Workshop
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-            </>
-          )}
+          Daftar Workshop
+          <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
         </button>
       )}
 
@@ -355,6 +372,169 @@ export default function WorkshopBookingCard({
           Masuk atau buat akun untuk melanjutkan pendaftaran.
         </p>
       )}
+      {isConfirmOpen &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            className="
+        fixed inset-0 z-[9999]
+        overflow-y-auto
+        bg-brand-black/60
+        backdrop-blur-sm
+      "
+            onMouseDown={() => {
+              if (!isSubmitting) {
+                setIsConfirmOpen(false);
+              }
+            }}
+          >
+            <div
+              className="
+          flex min-h-full
+          items-center justify-center
+          px-4 py-6
+          sm:px-6 sm:py-10
+        "
+            >
+              <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="workshop-confirmation-title"
+                onMouseDown={(event) => {
+                  event.stopPropagation();
+                }}
+                className="
+            my-auto w-full max-w-md
+            max-h-[calc(100dvh-3rem)]
+            overflow-y-auto
+            rounded-2xl
+            border border-line-trace
+            bg-canvas-pure
+            p-6 shadow-2xl
+            sm:p-8
+          "
+              >
+                <div
+                  className="
+              flex size-12 items-center
+              justify-center rounded-full
+              bg-brand-lime
+              text-brand-forest
+            "
+                >
+                  <Coins className="size-5" strokeWidth={1.8} />
+                </div>
+
+                <h3
+                  id="workshop-confirmation-title"
+                  className="
+              mt-6 font-display
+              text-3xl font-medium
+              tracking-[-0.04em]
+              text-brand-black
+            "
+                >
+                  Konfirmasi Pendaftaran
+                </h3>
+
+                <p className="mt-3 text-sm leading-6 text-muted-moss">
+                  Anda akan mendaftar workshop{" "}
+                  <strong className="text-brand-black">{workshop.title}</strong>
+                  .
+                </p>
+
+                <div className="mt-6 rounded-xl bg-canvas-warm p-5">
+                  <div className="flex items-center justify-between gap-5">
+                    <span className="text-xs text-muted-moss">
+                      Biaya pendaftaran
+                    </span>
+
+                    <span className="text-sm font-bold text-brand-forest">
+                      {workshop.pointCost === 0
+                        ? "Gratis"
+                        : `${workshop.pointCost} poin`}
+                    </span>
+                  </div>
+
+                  <div
+                    className="
+                mt-4 flex items-center
+                justify-between gap-5
+                border-t border-line-trace
+                pt-4
+              "
+                  >
+                    <span className="text-xs text-muted-moss">Sisa slot</span>
+
+                    <span className="text-sm font-bold text-brand-black">
+                      {workshop.remainingSlots} slot
+                    </span>
+                  </div>
+                </div>
+
+                <p className="mt-5 text-xs leading-5 text-muted-moss">
+                  Pastikan jadwal dan lokasi workshop sudah sesuai sebelum
+                  melanjutkan.
+                </p>
+
+                <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => {
+                      setIsConfirmOpen(false);
+                    }}
+                    className="
+                rounded-sm border
+                border-line-trace
+                px-5 py-3.5
+                text-xs font-bold
+                text-brand-black
+                transition
+                hover:border-brand-forest
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+              "
+                  >
+                    Kembali
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={handleConfirmRegistration}
+                    className="
+                flex items-center
+                justify-center gap-2
+                rounded-sm
+                bg-brand-forest
+                px-5 py-3.5
+                text-xs font-bold
+                text-canvas-pure
+                transition
+                hover:bg-brand-black
+                disabled:cursor-not-allowed
+                disabled:opacity-60
+              "
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <LoaderCircle className="size-4 animate-spin" />
+                        Memproses...
+                      </>
+                    ) : (
+                      <>
+                        Konfirmasi Daftar
+                        <ArrowRight className="size-4" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </aside>
   );
 }
