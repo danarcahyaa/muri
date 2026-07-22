@@ -24,6 +24,7 @@ Untuk mengubah style UI dari MURI, selalu ikuti style guide yang ada pada file `
 - Selalu impor client `supabase` dari `@/lib/supabaseClient` untuk melakukan pemanggilan data.
 - Tangani error secara eksplisit dan tunjukkan pesan state loading/error pada komponen.
 - Letakkan di `src/services` untuk logika bisnis dan pemanggilan data.
+- Selalu gunakan opsi `count` dari Supabase (misal `.select("*", { count: "exact", head: true })`) jika hanya membutuhkan total record/jumlah data. Hindari mengambil seluruh record data lalu menghitung `.length`-nya.
 
 ## 3. Penggunaan Interface dan Type
 
