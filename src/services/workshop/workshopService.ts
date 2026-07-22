@@ -3,10 +3,8 @@ import type { QueryData } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabaseClient";
 import { translateSupabaseError } from "@/lib/supabaseError";
 import type { BaseResponse } from "@/types/common";
-import type {
-  WorkshopCatalogItem,
-  WorkshopRegistrationStatus,
-} from "@/types/workshop";
+import type { Database } from "@/types/database";
+import type { WorkshopCatalogItem } from "@/types/workshop";
 
 const WORKSHOP_CATALOG_SELECT = `
   id,
@@ -15,23 +13,14 @@ const WORKSHOP_CATALOG_SELECT = `
   speaker_name,
   speaker_role,
   location,
-  maps_url,
   description,
   point_cost,
   quota,
   held_at,
   created_at,
-  updated_at,
-
-  workshop_registrations (
-    status
-  )
+  updated_at
 ` as const;
 
-/**
- * Digunakan untuk mengambil inferred type
- * dari nested Supabase query.
- */
 const workshopCatalogTypeQuery = supabase
   .from("workshops")
   .select(WORKSHOP_CATALOG_SELECT);
@@ -40,34 +29,156 @@ type WorkshopCatalogQueryRow = QueryData<
   typeof workshopCatalogTypeQuery
 >[number];
 
+type WorkshopAvailabilityRpcReturns =
+  Database["public"]["Functions"]["get_workshop_availability"]["Returns"];
+
+type WorkshopAvailabilityRpcRow = WorkshopAvailabilityRpcReturns[number];
+interface WorkshopAvailability {
+  workshopId: string;
+  registeredCount: number;
+  remainingSlots: number;
+  isFull: boolean;
+}
+
 /**
- * Mengambil workshop beserta jumlah pendaftaran aktif.
+ * Mengambil seluruh workshop published beserta
+ * aggregate kuota yang aman.
  */
 export async function getWorkshops(): Promise<
   BaseResponse<WorkshopCatalogItem[]>
 > {
   try {
-    const { data, error } = await supabase
-      .from("workshops")
-      .select(WORKSHOP_CATALOG_SELECT)
-      .order("held_at", {
-        ascending: true,
-      });
+    const [workshopResponse, availabilityResponse] = await Promise.all([
+      supabase
+        .from("workshops")
+        .select(WORKSHOP_CATALOG_SELECT)
+        .eq("is_published", true)
+        .order("held_at", {
+          ascending: true,
+        }),
 
-    if (error) {
+      supabase.rpc("get_workshop_availability"),
+    ]);
+
+    if (workshopResponse.error) {
       return {
         success: false,
-        error: translateSupabaseError(error),
+        error: translateSupabaseError(workshopResponse.error),
       };
     }
 
-    const workshops = (data ?? []).map(
-      mapWorkshopCatalogItem,
+    if (availabilityResponse.error) {
+      return {
+        success: false,
+        error: translateSupabaseError(availabilityResponse.error),
+      };
+    }
+
+    const availabilityMap = createAvailabilityMap(
+      availabilityResponse.data ?? [],
     );
+
+    const workshops: WorkshopCatalogItem[] = [];
+
+    for (const row of workshopResponse.data ?? []) {
+      const availability = availabilityMap.get(row.id);
+
+      if (!availability) {
+        return {
+          success: false,
+          error: "Data ketersediaan workshop tidak lengkap.",
+        };
+      }
+
+      workshops.push(mapWorkshopCatalogItem(row, availability));
+    }
 
     return {
       success: true,
       data: workshops,
+    };
+  } catch (error) {
+    console.error("[getWorkshops] Raw error:", error);
+
+    if (error instanceof Error && error.cause) {
+      console.error("[getWorkshops] Error cause:", error.cause);
+    }
+
+    return {
+      success: false,
+      error: translateSupabaseError(error),
+    };
+  }
+}
+
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/**
+ * Mengambil satu workshop published berdasarkan UUID.
+ */
+export async function getWorkshopById(
+  workshopId: string,
+): Promise<BaseResponse<WorkshopCatalogItem | null>> {
+  try {
+    const normalizedWorkshopId = workshopId.trim();
+
+    if (!normalizedWorkshopId || !UUID_PATTERN.test(normalizedWorkshopId)) {
+      return {
+        success: true,
+        data: null,
+      };
+    }
+
+    const [workshopResponse, availabilityResponse] = await Promise.all([
+      supabase
+        .from("workshops")
+        .select(WORKSHOP_CATALOG_SELECT)
+        .eq("id", normalizedWorkshopId)
+        .eq("is_published", true)
+        .maybeSingle(),
+
+      supabase.rpc("get_workshop_availability", {
+        p_workshop_id: normalizedWorkshopId,
+      }),
+    ]);
+
+    if (workshopResponse.error) {
+      return {
+        success: false,
+        error: translateSupabaseError(workshopResponse.error),
+      };
+    }
+
+    if (!workshopResponse.data) {
+      return {
+        success: true,
+        data: null,
+      };
+    }
+
+    if (availabilityResponse.error) {
+      return {
+        success: false,
+        error: translateSupabaseError(availabilityResponse.error),
+      };
+    }
+
+    const availabilityRow = availabilityResponse.data?.[0];
+
+    if (!availabilityRow) {
+      return {
+        success: false,
+        error: "Data ketersediaan workshop tidak ditemukan.",
+      };
+    }
+
+    return {
+      success: true,
+      data: mapWorkshopCatalogItem(
+        workshopResponse.data,
+        mapWorkshopAvailability(availabilityRow),
+      ),
     };
   } catch (error) {
     return {
@@ -79,24 +190,8 @@ export async function getWorkshops(): Promise<
 
 function mapWorkshopCatalogItem(
   row: WorkshopCatalogQueryRow,
+  availability: WorkshopAvailability,
 ): WorkshopCatalogItem {
-  const registrations =
-    row.workshop_registrations ?? [];
-
-  const registeredCount =
-    registrations.filter((registration) =>
-      isActiveRegistrationStatus(
-        registration.status,
-      ),
-    ).length;
-
-  const quota = toNumber(row.quota);
-
-  const remainingSlots = Math.max(
-    quota - registeredCount,
-    0,
-  );
-
   return {
     id: row.id,
     brandId: row.brand_id,
@@ -108,14 +203,14 @@ function mapWorkshopCatalogItem(
     speakerRole: row.speaker_role,
 
     location: row.location,
-    mapsUrl: row.maps_url,
+    mapsUrl: null,
 
-    pointCost: toNumber(row.point_cost),
-    quota,
+    pointCost: toNonNegativeInteger(row.point_cost),
+    quota: toNonNegativeInteger(row.quota),
 
-    registeredCount,
-    remainingSlots,
-    isFull: remainingSlots <= 0,
+    registeredCount: availability.registeredCount,
+    remainingSlots: availability.remainingSlots,
+    isFull: availability.isFull,
 
     heldAt: row.held_at,
 
@@ -124,76 +219,38 @@ function mapWorkshopCatalogItem(
   };
 }
 
-function isActiveRegistrationStatus(
-  status: string,
-): status is WorkshopRegistrationStatus {
-  return (
-    status === "registered" ||
-    status === "attended"
+function createAvailabilityMap(
+  rows: WorkshopAvailabilityRpcRow[],
+): Map<string, WorkshopAvailability> {
+  return new Map(
+    rows.map((row) => {
+      const availability = mapWorkshopAvailability(row);
+
+      return [availability.workshopId, availability];
+    }),
   );
 }
 
-function toNumber(value: unknown): number {
-  const parsed =
-    typeof value === "number"
-      ? value
-      : Number(value);
+function mapWorkshopAvailability(
+  row: WorkshopAvailabilityRpcRow,
+): WorkshopAvailability {
+  return {
+    workshopId: row.workshop_id,
 
-  return Number.isFinite(parsed)
-    ? parsed
-    : 0;
+    registeredCount: toNonNegativeInteger(row.registered_count),
+
+    remainingSlots: toNonNegativeInteger(row.remaining_slots),
+
+    isFull: row.is_full,
+  };
 }
 
-const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+function toNonNegativeInteger(value: unknown): number {
+  const parsed = typeof value === "number" ? value : Number(value);
 
-/**
- * Mengambil satu workshop berdasarkan UUID.
- */
-export async function getWorkshopById(
-  workshopId: string,
-): Promise<BaseResponse<WorkshopCatalogItem | null>> {
-  try {
-    const normalizedWorkshopId = workshopId.trim();
-
-    if (
-      !normalizedWorkshopId ||
-      !UUID_PATTERN.test(normalizedWorkshopId)
-    ) {
-      return {
-        success: true,
-        data: null,
-      };
-    }
-
-    const { data, error } = await supabase
-      .from("workshops")
-      .select(WORKSHOP_CATALOG_SELECT)
-      .eq("id", normalizedWorkshopId)
-      .maybeSingle();
-
-    if (error) {
-      return {
-        success: false,
-        error: translateSupabaseError(error),
-      };
-    }
-
-    if (!data) {
-      return {
-        success: true,
-        data: null,
-      };
-    }
-
-    return {
-      success: true,
-      data: mapWorkshopCatalogItem(data),
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: translateSupabaseError(error),
-    };
+  if (!Number.isFinite(parsed)) {
+    return 0;
   }
+
+  return Math.max(0, Math.floor(parsed));
 }

@@ -28,3 +28,8 @@ export enum MediaType {
   VIDEO = "video",
 }
 
+export enum WorkshopRegistrationStatus {
+  REGISTERED = "registered",
+  ATTENDED = "attended",
+  CANCELLED = "cancelled",
+}

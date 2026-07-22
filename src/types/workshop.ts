@@ -1,7 +1,6 @@
-export type WorkshopRegistrationStatus =
-  | "registered"
-  | "attended"
-  | "cancelled";
+export type {
+  WorkshopRegistrationStatus,
+} from "@/enums/enum";
 
 export interface WorkshopCatalogItem {
   id: string;

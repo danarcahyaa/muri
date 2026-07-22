@@ -1,30 +1,193 @@
-import Link from "next/link";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ArrowRight,
-  CalendarDays,
-  Clock3,
+  CheckCircle2,
   Coins,
   Leaf,
-  MapPin,
+  LoaderCircle,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 
-import {
-  formatWorkshopDate,
-  formatWorkshopTime,
-} from "@/lib/workshop";
+import { supabase } from "@/lib/supabaseClient";
 import type { WorkshopCatalogItem } from "@/types/workshop";
+import type { CustomerWorkshopRegistration } from "@/types/customerWorkshop";
+import {
+  getMyActiveWorkshopRegistration,
+  getWorkshopRegistrationErrorMessage,
+  registerWorkshop,
+} from "@/services/customer";
 
 interface WorkshopBookingCardProps {
   workshop: WorkshopCatalogItem;
   loginHref: string;
 }
 
+type FeedbackState = {
+  type: "success" | "error";
+  message: string;
+} | null;
+
 export default function WorkshopBookingCard({
   workshop,
   loginHref,
 }: WorkshopBookingCardProps) {
+  const router = useRouter();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [feedback, setFeedback] = useState<FeedbackState>(null);
+
+  const [activeRegistration, setActiveRegistration] =
+    useState<CustomerWorkshopRegistration | null>(null);
+
+  const [isCheckingRegistration, setIsCheckingRegistration] = useState(true);
+
   const bookingPercentage = getBookingPercentage(workshop);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function checkRegistration() {
+      setIsCheckingRegistration(true);
+
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+          if (!isCancelled) {
+            setActiveRegistration(null);
+          }
+
+          return;
+        }
+
+        const result = await getMyActiveWorkshopRegistration(workshop.id);
+
+        if (isCancelled) {
+          return;
+        }
+
+        if (!result.success) {
+          setFeedback({
+            type: "error",
+            message: "Status pendaftaran belum dapat diperiksa.",
+          });
+
+          return;
+        }
+
+        setActiveRegistration(result.data ?? null);
+      } finally {
+        if (!isCancelled) {
+          setIsCheckingRegistration(false);
+        }
+      }
+    }
+
+    void checkRegistration();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [workshop.id]);
+
+  async function handleRegister() {
+    if (isSubmitting || workshop.isFull) {
+      return;
+    }
+
+    setFeedback(null);
+    setIsSubmitting(true);
+
+    try {
+      /*
+       * Cek apakah customer sudah login.
+       * Bila belum, arahkan ke login dan kembali
+       * ke detail workshop setelah berhasil login.
+       */
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        router.push(loginHref);
+        return;
+      }
+
+      const confirmed = window.confirm(
+        workshop.pointCost > 0
+          ? `Daftar workshop ini menggunakan ${workshop.pointCost} poin. Lanjutkan?`
+          : "Daftar workshop ini sekarang?",
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      const result = await registerWorkshop(workshop.id);
+
+      if (!result.success) {
+        setFeedback({
+          type: "error",
+          message: getWorkshopRegistrationErrorMessage(result.error),
+        });
+
+        return;
+      }
+
+      const registration = result.data;
+
+      if (!registration) {
+        setFeedback({
+          type: "error",
+          message:
+            "Pendaftaran berhasil diproses, tetapi data hasil tidak ditemukan.",
+        });
+        setActiveRegistration({
+          id: registration.registrationId,
+          workshopId: registration.workshopId,
+
+          status: registration.status,
+
+          pointsSpent: registration.pointsSpent,
+
+          createdAt: registration.registeredAt,
+          updatedAt: registration.registeredAt,
+
+          attendedAt: null,
+          cancelledAt: null,
+        });
+
+        return;
+      }
+
+      setFeedback({
+        type: "success",
+        message:
+          workshop.pointCost > 0
+            ? `Pendaftaran berhasil. Sisa poin Anda ${registration.remainingPoints}.`
+            : "Pendaftaran workshop berhasil.",
+      });
+
+      /*
+       * Memuat ulang server component agar jumlah slot
+       * dan peserta diperbarui dari database.
+       */
+      router.refresh();
+    } catch {
+      setFeedback({
+        type: "error",
+        message: "Terjadi kesalahan saat mendaftar. Silakan coba kembali.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
     <aside
@@ -54,7 +217,9 @@ export default function WorkshopBookingCard({
         <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-line-trace">
           <div
             className="h-full rounded-full bg-brand-emerald transition-[width]"
-            style={{ width: `${bookingPercentage}%` }}
+            style={{
+              width: `${bookingPercentage}%`,
+            }}
           />
         </div>
 
@@ -80,95 +245,117 @@ export default function WorkshopBookingCard({
           )}
         </div>
 
-        <p className="mt-4 text-[11px] opacity-70">
-          Untuk satu peserta
-        </p>
+        <p className="mt-4 text-[11px] opacity-70">Untuk satu peserta</p>
       </div>
 
-      {/* <div className="mt-6 divide-y divide-line-trace">
-        <CheckoutFact
-          icon={CalendarDays}
-          label="Tanggal"
-          value={formatWorkshopDate(workshop.heldAt)}
-        />
-
-        <CheckoutFact
-          icon={Clock3}
-          label="Waktu"
-          value={formatWorkshopTime(workshop.heldAt)}
-        />
-
-        <CheckoutFact
-          icon={MapPin}
-          label="Lokasi"
-          value={workshop.location}
-        />
-      </div> */}
-
-      {workshop.isFull ? (
+      {isCheckingRegistration ? (
         <button
           type="button"
           disabled
           className="
-            mt-7 flex w-full cursor-not-allowed
-            items-center justify-center rounded-sm
-            bg-muted-moss/25 px-6 py-4
-            text-xs font-bold text-muted-moss
-          "
+      mt-7 flex w-full cursor-wait
+      items-center justify-center gap-3
+      rounded-sm bg-brand-forest/70
+      px-6 py-4 text-xs font-bold
+      text-canvas-pure
+    "
+        >
+          <LoaderCircle className="size-4 animate-spin" />
+          Memeriksa Pendaftaran...
+        </button>
+      ) : activeRegistration ? (
+        <button
+          type="button"
+          disabled
+          className="
+      mt-7 flex w-full cursor-default
+      items-center justify-center gap-3
+      rounded-sm bg-brand-lime
+      px-6 py-4 text-xs font-bold
+      text-brand-forest
+    "
+        >
+          <CheckCircle2 className="size-4" />
+          Sudah Terdaftar
+        </button>
+      ) : workshop.isFull ? (
+        <button
+          type="button"
+          disabled
+          className="
+      mt-7 flex w-full cursor-not-allowed
+      items-center justify-center rounded-sm
+      bg-muted-moss/25 px-6 py-4
+      text-xs font-bold text-muted-moss
+    "
         >
           Kuota Penuh
         </button>
       ) : (
-        <Link
-          href={loginHref}
+        <button
+          type="button"
+          disabled={isSubmitting}
+          onClick={handleRegister}
           className="
-            group mt-7 flex w-full items-center
-            justify-center gap-3 rounded-sm
-            bg-brand-forest px-6 py-4
-            text-xs font-bold text-canvas-pure
-            transition duration-300 hover:bg-brand-black
-          "
+      group mt-7 flex w-full items-center
+      justify-center gap-3 rounded-sm
+      bg-brand-forest px-6 py-4
+      text-xs font-bold text-canvas-pure
+      transition duration-300
+      hover:bg-brand-black
+      disabled:cursor-not-allowed
+      disabled:opacity-60
+    "
         >
-          Daftar Workshop
-
-          <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-        </Link>
+          {isSubmitting ? (
+            <>
+              <LoaderCircle className="size-4 animate-spin" />
+              Memproses...
+            </>
+          ) : (
+            <>
+              Daftar Workshop
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+            </>
+          )}
+        </button>
       )}
 
-      <p className="mt-4 text-center text-[10px] leading-relaxed text-muted-moss">
-        Masuk atau buat akun untuk melanjutkan pendaftaran.
-      </p>
+      {feedback && (
+        <div
+          role={feedback.type === "error" ? "alert" : "status"}
+          className={`
+            mt-4 rounded-lg border px-4 py-3
+            text-xs leading-5
+            ${
+              feedback.type === "success"
+                ? "border-brand-emerald/20 bg-brand-lime/40 text-brand-forest"
+                : "border-red-200 bg-red-50 text-red-700"
+            }
+          `}
+        >
+          <div className="flex items-start gap-2">
+            {feedback.type === "success" && (
+              <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
+            )}
+
+            <p>{feedback.message}</p>
+          </div>
+        </div>
+      )}
+
+      {!feedback && activeRegistration && (
+        <p className="mt-4 text-center text-[10px] leading-relaxed text-muted-moss">
+          Pendaftaran tersimpan dan dapat dilihat kembali melalui dashboard.
+        </p>
+      )}
+
+      {!feedback && !activeRegistration && !isCheckingRegistration && (
+        <p className="mt-4 text-center text-[10px] leading-relaxed text-muted-moss">
+          Masuk atau buat akun untuk melanjutkan pendaftaran.
+        </p>
+      )}
     </aside>
-  );
-}
-
-interface CheckoutFactProps {
-  icon: LucideIcon;
-  label: string;
-  value: string;
-}
-
-function CheckoutFact({
-  icon: Icon,
-  label,
-  value,
-}: CheckoutFactProps) {
-  return (
-    <div className="flex gap-4 py-4 first:pt-0 last:pb-0">
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-canvas-warm text-brand-emerald">
-        <Icon className="size-4" strokeWidth={1.8} />
-      </div>
-
-      <div className="min-w-0">
-        <p className="text-[9px] uppercase tracking-wide text-muted-moss">
-          {label}
-        </p>
-
-        <p className="mt-1 text-xs font-bold leading-5 text-brand-black">
-          {value}
-        </p>
-      </div>
-    </div>
   );
 }
 
