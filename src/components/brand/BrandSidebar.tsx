@@ -80,7 +80,7 @@ const brandNavigation: NavigationGroup[] = [
     ],
   },
   {
-    groupName: "Sourcing Material",
+    groupName: "Sourcing Limbah",
     items: [
       {
         label: "Cari",
