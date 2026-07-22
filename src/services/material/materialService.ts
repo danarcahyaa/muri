@@ -16,19 +16,17 @@ const MATERIAL_BATCH_SELECT = `
   initial_weight_kg,
   origin_city,
   created_at,
+  fabric_category_snapshot,
+  fabric_name_snapshot,
+  media_urls_snapshot,
 
   waste_posts!inner (
     id,
-    custom_fabric_name,
+    fabric_category_id,
     minimum_order_kg,
     price_per_kg,
     details_and_conditions,
     status,
-
-    fabric_categories!inner (
-      id,
-      name
-    ),
 
     waste_providers!inner (
       id,
@@ -45,26 +43,31 @@ const MATERIAL_BATCH_SELECT = `
 ` as const;
 
 /**
- * Query khusus untuk mengambil inferred TypeScript type
- * dari nested Supabase query.
- *
- * Query ini tidak dijalankan.
+ * Query ini hanya dipakai agar QueryData dapat mengambil tipe
+ * hasil nested select langsung dari generated Supabase types.
  */
 const materialBatchTypeQuery = supabase
   .from("waste_batches")
   .select(MATERIAL_BATCH_SELECT);
 
-type MaterialBatchQueryResult = QueryData<
-  typeof materialBatchTypeQuery
->;
+type MaterialBatchQueryResult = QueryData<typeof materialBatchTypeQuery>;
 
-type MaterialBatchQueryRow =
-  MaterialBatchQueryResult[number];
+type MaterialBatchQueryRow = MaterialBatchQueryResult[number];
+
+interface RawMediaRow {
+  id: string;
+  media_url: string;
+  media_type: string;
+  created_at: string | null;
+}
 
 /**
- * Mengambil seluruh batch material yang:
- * - waste post berstatus active
- * - stok batch masih tersedia
+ * Mengambil seluruh batch material publik.
+ *
+ * Catatan stok:
+ * schema baru tidak memiliki current_available_weight_kg.
+ * Untuk sementara availableWeightKg menggunakan initial_weight_kg.
+ * Lihat README untuk rekomendasi penyimpanan stok aktual.
  */
 export async function getActiveMaterialBatches(): Promise<
   BaseResponse<MaterialCatalogItem[]>
@@ -88,12 +91,7 @@ export async function getActiveMaterialBatches(): Promise<
 
     const materials = (data ?? [])
       .map(mapMaterialBatch)
-      .filter(
-        (
-          material,
-        ): material is MaterialCatalogItem =>
-          material !== null,
-      );
+      .filter((material): material is MaterialCatalogItem => material !== null);
 
     return {
       success: true,
@@ -116,96 +114,70 @@ function mapMaterialBatch(
     return null;
   }
 
-  const category = wastePost.fabric_categories;
   const provider = wastePost.waste_providers;
 
-  if (!category || !provider) {
+  if (!provider) {
     return null;
   }
 
-  const media = normalizeMedia(
-    wastePost.waste_post_media ?? [],
+  const fabricNameSnapshot = normalizeRequiredText(
+    row.fabric_name_snapshot,
+    "Material tanpa nama",
   );
 
-  const customFabricName =
-    wastePost.custom_fabric_name?.trim();
+  const fabricCategorySnapshot = normalizeRequiredText(
+    row.fabric_category_snapshot,
+    "Tanpa kategori",
+  );
+
+  const media = normalizeMaterialMedia(
+    row.media_urls_snapshot,
+    wastePost.waste_post_media ?? [],
+    row.id,
+  );
+
+  const initialWeightKg = toNumber(row.initial_weight_kg);
 
   return {
     batchId: row.id,
     batchCode: row.batch_code,
     wastePostId: wastePost.id,
 
-    title: customFabricName || category.name,
+    /**
+     * Nama, kategori, dan media menggunakan snapshot batch.
+     * Dengan begitu tampilan batch tidak berubah jika waste post
+     * atau media sumber diedit setelah batch dibuat.
+     */
+    title: fabricNameSnapshot,
     description: wastePost.details_and_conditions,
 
-    categoryId: category.id,
-    categoryName: category.name,
+    categoryId: wastePost.fabric_category_id,
+    categoryName: fabricCategorySnapshot,
+
+    fabricNameSnapshot,
+    fabricCategorySnapshot,
 
     providerId: provider.id,
     providerName: provider.company_name,
 
     originCity: row.origin_city,
 
-    initialWeightKg: toNumber(
-      row.initial_weight_kg,
-    ),
+    initialWeightKg,
 
-    availableWeightKg: toNumber(
-      row.initial_weight_kg,
-    ),
+    // Temporary fallback karena schema baru tidak menyimpan stok berjalan.
+    availableWeightKg: initialWeightKg,
 
-    minimumOrderKg: toNumber(
-      wastePost.minimum_order_kg,
-    ),
+    minimumOrderKg: toNumber(wastePost.minimum_order_kg),
 
-    pricePerKg: toNumber(
-      wastePost.price_per_kg,
-    ),
+    pricePerKg: toNumber(wastePost.price_per_kg),
 
-    status: wastePost.status,
+    status: String(wastePost.status),
 
     media,
-    imageUrl: media[0]?.url ?? null,
+    imageUrl: getPrimaryImageUrl(media),
 
     createdAt: row.created_at,
   };
-}
-
-function normalizeMedia(
-  mediaRows: MaterialBatchQueryRow["waste_posts"]["waste_post_media"],
-): MaterialCatalogMedia[] {
-  return [...(mediaRows ?? [])]
-    .sort((first, second) => {
-      const firstDate =
-        first.created_at ?? "9999-12-31";
-
-      const secondDate =
-        second.created_at ?? "9999-12-31";
-
-      const dateComparison =
-        firstDate.localeCompare(secondDate);
-
-      if (dateComparison !== 0) {
-        return dateComparison;
-      }
-
-      return first.id.localeCompare(second.id);
-    })
-    .map((media) => ({
-      id: media.id,
-      url: media.media_url,
-      type: media.media_type,
-      createdAt: media.created_at,
-    }));
-}
-
-function toNumber(value: unknown): number {
-  const parsed =
-    typeof value === "number"
-      ? value
-      : Number(value);
-
-  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 const MATERIAL_DETAIL_SELECT = `
@@ -215,12 +187,14 @@ const MATERIAL_DETAIL_SELECT = `
   initial_weight_kg,
   origin_city,
   created_at,
+  fabric_category_snapshot,
+  fabric_name_snapshot,
+  media_urls_snapshot,
 
   waste_posts!inner (
     id,
     provider_id,
     fabric_category_id,
-    custom_fabric_name,
     weight_kg,
     minimum_order_kg,
     price_per_kg,
@@ -228,11 +202,6 @@ const MATERIAL_DETAIL_SELECT = `
     created_at,
     updated_at,
     status,
-
-    fabric_categories!inner (
-      id,
-      name
-    ),
 
     waste_providers!inner (
       id,
@@ -253,15 +222,14 @@ const materialDetailTypeQuery = supabase
   .from("waste_batches")
   .select(MATERIAL_DETAIL_SELECT);
 
-type MaterialDetailQueryRow = QueryData<
-  typeof materialDetailTypeQuery
->[number];
+type MaterialDetailQueryRow = QueryData<typeof materialDetailTypeQuery>[number];
 
 /**
  * Mengambil satu material berdasarkan batch_code.
  *
- * Hanya material aktif dengan stok yang masih tersedia
- * yang dapat dibuka pada katalog publik.
+ * Query lama memakai current_available_weight_kg, tetapi kolom tersebut
+ * tidak ada pada schema baru. Karena itu filter sementara memakai
+ * initial_weight_kg.
  */
 export async function getMaterialBatchByCode(
   batchCode: string,
@@ -281,7 +249,7 @@ export async function getMaterialBatchByCode(
       .select(MATERIAL_DETAIL_SELECT)
       .eq("batch_code", normalizedBatchCode)
       .eq("waste_posts.status", "active")
-      .gt("current_available_weight_kg", 0)
+      .gt("initial_weight_kg", 0)
       .maybeSingle();
 
     if (error) {
@@ -298,11 +266,9 @@ export async function getMaterialBatchByCode(
       };
     }
 
-    const material = mapMaterialDetail(data);
-
     return {
       success: true,
-      data: material,
+      data: mapMaterialDetail(data),
     };
   } catch (error) {
     return {
@@ -321,41 +287,43 @@ function mapMaterialDetail(
     return null;
   }
 
-  const category = wastePost.fabric_categories;
   const provider = wastePost.waste_providers;
 
-  if (!category || !provider) {
+  if (!provider) {
     return null;
   }
 
-  const media = normalizeDetailMedia(
-    wastePost.waste_post_media ?? [],
+  const fabricNameSnapshot = normalizeRequiredText(
+    row.fabric_name_snapshot,
+    "Material tanpa nama",
   );
 
-  const imageMedia = media.filter((item) => {
-    const mediaType = String(item.type).toLowerCase();
+  const fabricCategorySnapshot = normalizeRequiredText(
+    row.fabric_category_snapshot,
+    "Tanpa kategori",
+  );
 
-    return (
-      mediaType === "image" ||
-      mediaType === "photo" ||
-      mediaType === "picture"
-    );
-  });
+  const media = normalizeMaterialMedia(
+    row.media_urls_snapshot,
+    wastePost.waste_post_media ?? [],
+    row.id,
+  );
 
-  const customFabricName =
-    wastePost.custom_fabric_name?.trim();
+  const initialWeightKg = toNumber(row.initial_weight_kg);
 
   return {
     batchId: row.id,
     batchCode: row.batch_code,
     wastePostId: wastePost.id,
 
-    title: customFabricName || category.name,
-    descriptionHtml:
-      wastePost.details_and_conditions,
+    title: fabricNameSnapshot,
+    descriptionHtml: wastePost.details_and_conditions,
 
-    categoryId: category.id,
-    categoryName: category.name,
+    categoryId: wastePost.fabric_category_id,
+    categoryName: fabricCategorySnapshot,
+
+    fabricNameSnapshot,
+    fabricCategorySnapshot,
 
     providerId: provider.id,
     providerName: provider.company_name,
@@ -363,31 +331,21 @@ function mapMaterialDetail(
 
     originCity: row.origin_city,
 
-    postWeightKg: toNumber(
-      wastePost.weight_kg,
-    ),
+    postWeightKg: toNumber(wastePost.weight_kg),
 
-    initialWeightKg: toNumber(
-      row.initial_weight_kg,
-    ),
+    initialWeightKg,
 
-    availableWeightKg: toNumber(
-      row.initial_weight_kg,
-    ),
+    // Temporary fallback karena schema baru tidak menyimpan stok berjalan.
+    availableWeightKg: initialWeightKg,
 
-    minimumOrderKg: toNumber(
-      wastePost.minimum_order_kg,
-    ),
+    minimumOrderKg: toNumber(wastePost.minimum_order_kg),
 
-    pricePerKg: toNumber(
-      wastePost.price_per_kg,
-    ),
+    pricePerKg: toNumber(wastePost.price_per_kg),
 
-    status: wastePost.status,
+    status: String(wastePost.status),
 
     media,
-    primaryImageUrl:
-      imageMedia[0]?.url ?? null,
+    primaryImageUrl: getPrimaryImageUrl(media),
 
     batchCreatedAt: row.created_at,
     postCreatedAt: wastePost.created_at,
@@ -395,24 +353,144 @@ function mapMaterialDetail(
   };
 }
 
-function normalizeDetailMedia(
-  rows: Array<{
-    id: string;
-    media_url: string;
-    media_type: MaterialCatalogMedia["type"];
-    created_at: string | null;
-  }>,
+/**
+ * media_urls_snapshot adalah jsonb. Fungsi ini mendukung format:
+ *
+ * 1. ["https://.../image.jpg"]
+ * 2. [{ "url": "...", "type": "image" }]
+ * 3. [{ "media_url": "...", "media_type": "image" }]
+ * 4. JSON string yang berisi salah satu format di atas
+ *
+ * Jika snapshot kosong atau tidak valid, media live dari waste_post_media
+ * dipakai sebagai fallback untuk data lama.
+ */
+function normalizeMaterialMedia(
+  snapshot: unknown,
+  fallbackRows: RawMediaRow[],
+  batchId: string,
 ): MaterialCatalogMedia[] {
+  const snapshotMedia = deduplicateMedia(parseSnapshotMedia(snapshot, batchId));
+
+  if (snapshotMedia.length > 0) {
+    return snapshotMedia;
+  }
+
+  return normalizeLiveMedia(fallbackRows);
+}
+
+function parseSnapshotMedia(
+  value: unknown,
+  idPrefix: string,
+): MaterialCatalogMedia[] {
+  if (value == null) {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap((item, index) =>
+      parseSnapshotItem(item, `${idPrefix}-snapshot-${index}`),
+    );
+  }
+
+  if (typeof value === "string") {
+    const normalized = value.trim();
+
+    if (!normalized) {
+      return [];
+    }
+
+    if (normalized.startsWith("[") || normalized.startsWith("{")) {
+      try {
+        return parseSnapshotMedia(JSON.parse(normalized), idPrefix);
+      } catch {
+        // Bukan JSON string; perlakukan sebagai URL biasa.
+      }
+    }
+
+    return [
+      {
+        id: `${idPrefix}-snapshot-0`,
+        url: normalized,
+        type: inferMediaType(normalized),
+        createdAt: null,
+      },
+    ];
+  }
+
+  if (typeof value === "object") {
+    const objectValue = value as Record<string, unknown>;
+
+    const nestedMedia =
+      objectValue.media_urls ??
+      objectValue.mediaUrls ??
+      objectValue.urls ??
+      objectValue.media;
+
+    if (nestedMedia !== undefined) {
+      return parseSnapshotMedia(nestedMedia, idPrefix);
+    }
+
+    return parseSnapshotItem(objectValue, `${idPrefix}-snapshot-0`);
+  }
+
+  return [];
+}
+
+function parseSnapshotItem(
+  value: unknown,
+  fallbackId: string,
+): MaterialCatalogMedia[] {
+  if (typeof value === "string") {
+    const url = value.trim();
+
+    if (!url) {
+      return [];
+    }
+
+    return [
+      {
+        id: fallbackId,
+        url,
+        type: inferMediaType(url),
+        createdAt: null,
+      },
+    ];
+  }
+
+  if (value == null || typeof value !== "object" || Array.isArray(value)) {
+    return [];
+  }
+
+  const item = value as Record<string, unknown>;
+
+  const url = firstNonEmptyString(item.url, item.media_url, item.src);
+
+  if (!url) {
+    return [];
+  }
+
+  const type =
+    firstNonEmptyString(item.type, item.media_type, item.mime_type) ??
+    inferMediaType(url);
+
+  return [
+    {
+      id: firstNonEmptyString(item.id) ?? fallbackId,
+      url,
+      type,
+      createdAt: firstNonEmptyString(item.createdAt, item.created_at) ?? null,
+    },
+  ];
+}
+
+function normalizeLiveMedia(rows: RawMediaRow[]): MaterialCatalogMedia[] {
   return [...rows]
     .sort((first, second) => {
-      const firstDate =
-        first.created_at ?? "9999-12-31";
+      const firstDate = first.created_at ?? "9999-12-31";
 
-      const secondDate =
-        second.created_at ?? "9999-12-31";
+      const secondDate = second.created_at ?? "9999-12-31";
 
-      const dateComparison =
-        firstDate.localeCompare(secondDate);
+      const dateComparison = firstDate.localeCompare(secondDate);
 
       if (dateComparison !== 0) {
         return dateComparison;
@@ -426,4 +504,74 @@ function normalizeDetailMedia(
       type: media.media_type,
       createdAt: media.created_at,
     }));
+}
+
+function deduplicateMedia(
+  media: MaterialCatalogMedia[],
+): MaterialCatalogMedia[] {
+  const urls = new Set<string>();
+
+  return media.filter((item) => {
+    const normalizedUrl = item.url.trim();
+
+    if (!normalizedUrl || urls.has(normalizedUrl)) {
+      return false;
+    }
+
+    urls.add(normalizedUrl);
+    return true;
+  });
+}
+
+function getPrimaryImageUrl(media: MaterialCatalogMedia[]): string | null {
+  return media.find((item) => isImageMedia(item.type, item.url))?.url ?? null;
+}
+
+function isImageMedia(type: string, url: string): boolean {
+  const normalizedType = type.trim().toLowerCase();
+
+  if (
+    normalizedType === "image" ||
+    normalizedType === "photo" ||
+    normalizedType === "picture" ||
+    normalizedType.startsWith("image/")
+  ) {
+    return true;
+  }
+
+  if (normalizedType === "video" || normalizedType.startsWith("video/")) {
+    return false;
+  }
+
+  return inferMediaType(url) === "image";
+}
+
+function inferMediaType(url: string): string {
+  return /\.(mp4|webm|mov|m4v)(?:$|[?#])/i.test(url) ? "video" : "image";
+}
+
+function firstNonEmptyString(...values: unknown[]): string | null {
+  for (const value of values) {
+    if (typeof value !== "string") {
+      continue;
+    }
+
+    const normalized = value.trim();
+
+    if (normalized) {
+      return normalized;
+    }
+  }
+
+  return null;
+}
+
+function normalizeRequiredText(value: unknown, fallback: string): string {
+  return firstNonEmptyString(value) ?? fallback;
+}
+
+function toNumber(value: unknown): number {
+  const parsed = typeof value === "number" ? value : Number(value);
+
+  return Number.isFinite(parsed) ? parsed : 0;
 }

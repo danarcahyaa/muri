@@ -1,15 +1,15 @@
-import type { Database } from "@/types/database";
-
-export type WastePostStatus =
-  Database["public"]["Enums"]["waste_post_status"];
-
-export type WasteMediaType =
-  Database["public"]["Enums"]["media_type"];
+/**
+ * View-model material yang digunakan komponen UI.
+ *
+ * Tipe ini sengaja tidak mengekspos bentuk mentah jsonb
+ * media_urls_snapshot. Service menormalisasikannya menjadi array
+ * MaterialCatalogMedia agar komponen tidak perlu memahami format database.
+ */
 
 export interface MaterialCatalogMedia {
   id: string;
   url: string;
-  type: WasteMediaType;
+  type: string;
   createdAt: string | null;
 }
 
@@ -24,6 +24,13 @@ export interface MaterialCatalogItem {
   categoryId: number;
   categoryName: string;
 
+  /**
+   * Nilai immutable yang disalin ketika batch dibuat.
+   * title dan categoryName saat ini menggunakan nilai snapshot ini.
+   */
+  fabricNameSnapshot: string;
+  fabricCategorySnapshot: string;
+
   providerId: string;
   providerName: string;
 
@@ -34,7 +41,7 @@ export interface MaterialCatalogItem {
   minimumOrderKg: number;
   pricePerKg: number;
 
-  status: WastePostStatus;
+  status: string;
 
   media: MaterialCatalogMedia[];
   imageUrl: string | null;
@@ -53,6 +60,13 @@ export interface MaterialDetailItem {
   categoryId: number;
   categoryName: string;
 
+  /**
+   * Nilai immutable yang disalin ketika batch dibuat.
+   * title dan categoryName saat ini menggunakan nilai snapshot ini.
+   */
+  fabricNameSnapshot: string;
+  fabricCategorySnapshot: string;
+
   providerId: string;
   providerName: string;
   providerCreatedAt: string | null;
@@ -65,7 +79,7 @@ export interface MaterialDetailItem {
   minimumOrderKg: number;
   pricePerKg: number;
 
-  status: WastePostStatus;
+  status: string;
 
   media: MaterialCatalogMedia[];
   primaryImageUrl: string | null;

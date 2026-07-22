@@ -1,10 +1,14 @@
-export function formatWeight(value: number): string {
+export function formatWeight(
+  value: number,
+): string {
   return new Intl.NumberFormat("id-ID", {
     maximumFractionDigits: 2,
   }).format(value);
 }
 
-export function formatDate(value: string | null): string {
+export function formatDate(
+  value: string | null,
+): string {
   if (!value) {
     return "-";
   }
@@ -22,7 +26,9 @@ export function formatDate(value: string | null): string {
   }).format(date);
 }
 
-export function formatMaterialStatus(status: string): string {
+export function formatMaterialStatus(
+  status: string,
+): string {
   switch (status) {
     case "active":
       return "Tersedia";
