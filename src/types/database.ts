@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -340,7 +340,7 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
-          order_status: string
+          order_status: Database["public"]["Enums"]["order_status"]
           phone_number: string | null
           points_earned: number
           receiver_name: string
@@ -353,7 +353,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           id?: string
-          order_status?: string
+          order_status?: Database["public"]["Enums"]["order_status"]
           phone_number?: string | null
           points_earned?: number
           receiver_name: string
@@ -366,7 +366,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           id?: string
-          order_status?: string
+          order_status?: Database["public"]["Enums"]["order_status"]
           phone_number?: string | null
           points_earned?: number
           receiver_name?: string
@@ -934,13 +934,15 @@ export type Database = {
       }
       workshops: {
         Row: {
+          banner_url: string | null
           brand_id: string
           created_at: string | null
           description: string
+          detail: string | null
           held_at: string
           id: string
+          is_published: boolean | null
           location: string
-          maps_url: string | null
           point_cost: number
           quota: number
           speaker_name: string
@@ -949,13 +951,15 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          banner_url?: string | null
           brand_id: string
           created_at?: string | null
           description: string
+          detail?: string | null
           held_at: string
           id?: string
+          is_published?: boolean | null
           location: string
-          maps_url?: string | null
           point_cost?: number
           quota: number
           speaker_name: string
@@ -964,13 +968,15 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          banner_url?: string | null
           brand_id?: string
           created_at?: string | null
           description?: string
+          detail?: string | null
           held_at?: string
           id?: string
+          is_published?: boolean | null
           location?: string
-          maps_url?: string | null
           point_cost?: number
           quota?: number
           speaker_name?: string
@@ -1005,13 +1011,21 @@ export type Database = {
           p_media_urls: string[]
           p_media_urls_snapshot: Json
           p_minimum_order_kg: number
-          p_origin_city: string
+          p_origin_city?: string
           p_price_per_kg: number
           p_provider_id: string
           p_status: Database["public"]["Enums"]["waste_post_status"]
           p_weight_kg: number
         }
         Returns: string
+      }
+      get_brand_incoming_orders_count: {
+        Args: { p_brand_id: string }
+        Returns: number
+      }
+      get_brand_total_waste_saved: {
+        Args: { p_brand_id: string }
+        Returns: number
       }
       get_total_waste_weight: { Args: { provider_id: string }; Returns: number }
       get_waste_purchases_rpc: {
@@ -1169,6 +1183,12 @@ export const Constants = {
       media_type: ["image", "video"],
       order_status: ["pending", "complete", "cancelled", "rejected"],
       product_status: ["draft", "published", "archived"],
+      purchase_status: [
+        "waiting_confirmation",
+        "paid",
+        "completed",
+        "cancelled",
+      ],
       waste_post_status: ["active", "inactive", "sold_out"],
     },
   },

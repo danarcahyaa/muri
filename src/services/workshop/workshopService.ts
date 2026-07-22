@@ -15,7 +15,7 @@ const WORKSHOP_CATALOG_SELECT = `
   speaker_name,
   speaker_role,
   location,
-  maps_url,
+  banner_url,
   description,
   point_cost,
   quota,
@@ -108,7 +108,7 @@ function mapWorkshopCatalogItem(
     speakerRole: row.speaker_role,
 
     location: row.location,
-    mapsUrl: row.maps_url,
+    bannerUrl: row.banner_url,
 
     pointCost: toNumber(row.point_cost),
     quota,

@@ -73,7 +73,8 @@ export default async function WorkshopDetailPage({
   }
 
   const workshop = result.data;
-  const mapsUrl = normalizeExternalUrl(workshop.mapsUrl);
+  // maps_url column was removed from the workshops table; always null for now
+  const mapsUrl = null;
   const loginHref = `/auth/login?redirect=${encodeURIComponent(
     `/edukasi/workshop/${workshop.id}`,
   )}`;
