@@ -1,3 +1,5 @@
+import type { ProductPaymentOption } from "@/types/product";
+
 export function formatIdr(value: number): string {
   return `IDR ${new Intl.NumberFormat("id-ID", {
     maximumFractionDigits: 0,
@@ -13,9 +15,7 @@ export function formatDecimal(
   }).format(value);
 }
 
-export function formatProductStatus(
-  status: string,
-): string {
+export function formatProductStatus(status: string): string {
   switch (status) {
     case "active":
       return "Aktif";
@@ -32,15 +32,11 @@ export function formatProductStatus(
     default:
       return status
         .replaceAll("_", " ")
-        .replace(/\b\w/g, (character) =>
-          character.toUpperCase(),
-        );
+        .replace(/\b\w/g, (character) => character.toUpperCase());
   }
 }
 
-export function decodeProductSlug(
-  value: string,
-): string {
+export function decodeProductSlug(value: string): string {
   try {
     return decodeURIComponent(value).trim();
   } catch {
@@ -48,10 +44,30 @@ export function decodeProductSlug(
   }
 }
 
-export function buildTraceabilityHref(
-  productionId: string,
+export function buildTraceabilityHref(productionId: string): string {
+  return `/traceability?production=${encodeURIComponent(productionId)}`;
+}
+
+export function formatCoin(value: number): string {
+  return `${new Intl.NumberFormat("id-ID", {
+    maximumFractionDigits: 0,
+  }).format(Math.max(0, value))} coin`;
+}
+
+export function formatProductPaymentOption(
+  option: ProductPaymentOption,
 ): string {
-  return `/traceability?production=${encodeURIComponent(
-    productionId,
-  )}`;
+  switch (option) {
+    case "idr":
+      return "Pembayaran IDR";
+
+    case "coin":
+      return "Pembayaran Coin";
+
+    case "idr_or_coin":
+      return "IDR atau Coin";
+
+    default:
+      return option;
+  }
 }

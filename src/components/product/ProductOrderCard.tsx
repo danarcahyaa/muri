@@ -11,14 +11,22 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { formatIdr } from "@/lib/product-detail";
-import type { ProductBonusSummary } from "@/types/product";
+import { formatCoin, formatIdr } from "@/lib/product-detail";
+import type {
+  ProductBonusSummary,
+  ProductPaymentOption,
+} from "@/types/product";
 
 interface ProductOrderCardProps {
   slug: string;
   productName: string;
+
+  paymentOption: ProductPaymentOption;
   priceIdr: number;
+  priceCoin: number | null;
+
   stock: number;
+
   bonusProduct: ProductBonusSummary | null;
   bonusProductQty: number;
   bonusCoinCost: number;
@@ -27,7 +35,9 @@ interface ProductOrderCardProps {
 export default function ProductOrderCard({
   slug,
   productName,
+  paymentOption,
   priceIdr,
+  priceCoin,
   stock,
   bonusProduct,
   bonusProductQty,
@@ -37,6 +47,20 @@ export default function ProductOrderCard({
   const { user, isLoading } = useAuth();
   const isSoldOut = stock <= 0;
   const totalPrice = priceIdr * quantity;
+
+  const acceptsIdr = paymentOption === "idr" || paymentOption === "idr_or_coin";
+
+  const acceptsCoin =
+    paymentOption === "coin" || paymentOption === "idr_or_coin";
+
+  const totalCoinPrice = priceCoin !== null ? priceCoin * quantity : null;
+
+  /*
+   * Checkout lama hanya memahami pembayaran IDR.
+   * Produk dengan pilihan coin ditahan sampai RPC baru aktif.
+   */
+  const isNewPaymentFlowRequired = paymentOption !== "idr";
+
   const totalBonusQty =
     bonusProduct && bonusProductQty > 0 ? quantity * bonusProductQty : 0;
 
@@ -106,15 +130,40 @@ export default function ProductOrderCard({
           </button>
         </div>
       </div>
-
       <div className="mt-5 rounded-xl bg-brand-lime p-6 text-brand-forest">
         <p className="text-[10px] uppercase tracking-wide opacity-70">
           Total Harga
         </p>
 
-        <p className="mt-8 font-display text-[clamp(2.7rem,4vw,4rem)] font-medium leading-none tracking-[-0.055em]">
-          {formatIdr(totalPrice)}
-        </p>
+        <div className="mt-7 space-y-5">
+          {acceptsIdr && (
+            <div>
+              <p className="text-[9px] font-bold uppercase opacity-60">
+                Pembayaran IDR
+              </p>
+
+              <p className="mt-2 font-display text-[clamp(2.4rem,4vw,3.6rem)] font-medium leading-none tracking-[-0.055em]">
+                {formatIdr(totalPrice)}
+              </p>
+            </div>
+          )}
+
+          {acceptsCoin && totalCoinPrice !== null && (
+            <div
+              className={
+                acceptsIdr ? "border-t border-brand-forest/15 pt-5" : ""
+              }
+            >
+              <p className="text-[9px] font-bold uppercase opacity-60">
+                Pembayaran Coin
+              </p>
+
+              <p className="mt-2 font-display text-[clamp(2.4rem,4vw,3.6rem)] font-medium leading-none tracking-[-0.055em]">
+                {formatCoin(totalCoinPrice)}
+              </p>
+            </div>
+          )}
+        </div>
 
         <p className="mt-5 text-[11px] opacity-70">Untuk {quantity} produk</p>
       </div>
@@ -151,15 +200,23 @@ export default function ProductOrderCard({
         >
           Stok Habis
         </button>
+      ) : isNewPaymentFlowRequired ? (
+        <button
+          type="button"
+          disabled
+          className="mt-7 flex w-full cursor-not-allowed items-center justify-center rounded-sm bg-muted-moss/25 px-6 py-4 text-xs font-bold text-muted-moss"
+        >
+          Checkout Coin Sedang Disiapkan
+        </button>
       ) : (
         <Link
+          href={checkoutHref}
           aria-disabled={isLoading}
           onClick={(event) => {
             if (isLoading) {
               event.preventDefault();
             }
           }}
-          href={checkoutHref}
           className="group mt-7 flex w-full items-center justify-center gap-3 rounded-sm bg-brand-forest px-6 py-4 text-xs font-bold text-canvas-pure transition duration-300 hover:bg-brand-black"
         >
           {isLoading ? (
@@ -177,9 +234,11 @@ export default function ProductOrderCard({
       )}
 
       <p className="mt-4 text-center text-[10px] leading-relaxed text-muted-moss">
-        {user
-          ? "Anda akan diarahkan ke halaman checkout."
-          : "Masuk atau buat akun untuk melanjutkan pembelian."}
+        {isNewPaymentFlowRequired
+          ? "Pembayaran coin akan aktif setelah checkout baru selesai diterapkan."
+          : user
+            ? "Anda akan diarahkan ke halaman checkout."
+            : "Masuk atau buat akun untuk melanjutkan pembelian."}
       </p>
     </div>
   );

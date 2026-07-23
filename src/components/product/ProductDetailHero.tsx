@@ -1,15 +1,29 @@
 import Link from "next/link";
-import { Leaf } from "lucide-react";
+import {
+  Coins,
+  Leaf,
+  WalletCards,
+} from "lucide-react";
 
 import RichTextContent from "@/components/ui/RichTextContent";
-import { formatIdr } from "@/lib/product-detail";
+import {
+  formatCoin,
+  formatIdr,
+  formatProductPaymentOption,
+} from "@/lib/product-detail";
+import type {
+  ProductPaymentOption,
+} from "@/types/product";
 
 interface ProductDetailHeroProps {
   title: string;
   descriptionHtml: string | null;
   brandName: string;
   categoryName: string;
+
+  paymentOption: ProductPaymentOption;
   priceIdr: number;
+  priceCoin: number | null;
 }
 
 export default function ProductDetailHero({
@@ -17,8 +31,18 @@ export default function ProductDetailHero({
   descriptionHtml,
   brandName,
   categoryName,
+  paymentOption,
   priceIdr,
+  priceCoin,
 }: ProductDetailHeroProps) {
+  const acceptsIdr =
+    paymentOption === "idr" ||
+    paymentOption === "idr_or_coin";
+
+  const acceptsCoin =
+    paymentOption === "coin" ||
+    paymentOption === "idr_or_coin";
+
   return (
     <section className="bg-canvas-warm">
       <div
@@ -59,7 +83,7 @@ export default function ProductDetailHero({
         <div
           className="
             mt-14 grid gap-12
-            lg:grid-cols-[minmax(0,1fr)_320px]
+            lg:grid-cols-[minmax(0,1fr)_360px]
             lg:items-center lg:gap-20
           "
         >
@@ -97,28 +121,77 @@ export default function ProductDetailHero({
           </div>
 
           <aside className="rounded-2xl border border-line-trace bg-canvas-pure p-7 sm:p-8">
-            <p className="text-[10px] uppercase tracking-wide text-muted-moss">
-              Harga Produk
-            </p>
+            <div className="flex items-center gap-3">
+              <WalletCards
+                className="size-4 text-brand-emerald"
+                strokeWidth={1.8}
+              />
 
-            <p
-              className="
-                mt-8 font-display
-                text-[clamp(2.8rem,4.2vw,4.2rem)]
-                font-medium leading-none
-                tracking-[-0.055em]
-                text-brand-black
-              "
-            >
-              {formatIdr(priceIdr)}
-            </p>
+              <p className="text-[10px] font-bold uppercase tracking-wide text-muted-moss">
+                {formatProductPaymentOption(
+                  paymentOption,
+                )}
+              </p>
+            </div>
+
+            <div className="mt-7 space-y-4">
+              {acceptsIdr && (
+                <PriceOption
+                  label="Harga IDR"
+                  value={formatIdr(priceIdr)}
+                />
+              )}
+
+              {acceptsCoin && (
+                <PriceOption
+                  label="Harga Coin"
+                  value={
+                    priceCoin !== null
+                      ? formatCoin(priceCoin)
+                      : "Belum tersedia"
+                  }
+                  coin
+                />
+              )}
+            </div>
 
             <p className="mt-5 text-[11px] text-muted-moss">
-              /1 produk
+              Harga untuk 1 produk
             </p>
           </aside>
         </div>
       </div>
     </section>
+  );
+}
+
+function PriceOption({
+  label,
+  value,
+  coin = false,
+}: {
+  label: string;
+  value: string;
+  coin?: boolean;
+}) {
+  return (
+    <div className="rounded-xl bg-canvas-warm p-5">
+      <div className="flex items-center gap-2">
+        {coin && (
+          <Coins
+            className="size-4 text-brand-emerald"
+            strokeWidth={1.8}
+          />
+        )}
+
+        <p className="text-[10px] uppercase tracking-wide text-muted-moss">
+          {label}
+        </p>
+      </div>
+
+      <p className="mt-4 font-display text-[clamp(2rem,3vw,3rem)] font-medium leading-none tracking-[-0.05em] text-brand-black">
+        {value}
+      </p>
+    </div>
   );
 }

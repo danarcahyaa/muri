@@ -18,7 +18,9 @@ const PRODUCT_CATALOG_SELECT = `
   product_name,
   sku,
   description,
+  payment_option,
   price_idr,
+  price_coin,
   created_at,
   status,
 
@@ -104,7 +106,12 @@ function mapProductCatalogItem(
 
     name,
     description: normalizeOptionalText(row.description),
-    priceIdr: toNumber(row.price_idr),
+
+    paymentOption: row.payment_option,
+
+    priceIdr: toNonNegativeNumber(row.price_idr),
+
+    priceCoin: normalizeCoinPrice(row.price_coin),
 
     brandId: brand.id,
     brandName: brand.brand_name,
@@ -132,7 +139,9 @@ const PRODUCT_DETAIL_SELECT = `
   product_name,
   sku,
   description,
+  payment_option,
   price_idr,
+  price_coin,
   stock,
   carbon_saved_kg,
   water_saved_liter,
@@ -290,10 +299,17 @@ function mapProductDetail(
     descriptionHtml: normalizeOptionalText(row.description),
     detailHtml: row.detail?.trim() || "",
 
-    priceIdr: toNumber(row.price_idr),
+    paymentOption: row.payment_option,
+
+    priceIdr: toNonNegativeNumber(row.price_idr),
+
+    priceCoin: normalizeCoinPrice(row.price_coin),
+
     stock: toNonNegativeInteger(row.stock),
-    carbonSavedKg: toNumber(row.carbon_saved_kg),
-    waterSavedLiter: toNumber(row.water_saved_liter),
+
+    carbonSavedKg: toNonNegativeNumber(row.carbon_saved_kg),
+
+    waterSavedLiter: toNonNegativeNumber(row.water_saved_liter),
 
     status: row.status,
     productionId: row.production_id,
@@ -393,4 +409,18 @@ function toNumber(value: unknown): number {
 
 function toNonNegativeInteger(value: unknown): number {
   return Math.max(0, Math.floor(toNumber(value)));
+}
+
+function toNonNegativeNumber(value: unknown): number {
+  return Math.max(0, toNumber(value));
+}
+
+function normalizeCoinPrice(value: unknown): number | null {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  const price = toNonNegativeInteger(value);
+
+  return price > 0 ? price : null;
 }

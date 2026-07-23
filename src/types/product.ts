@@ -1,8 +1,9 @@
 import type { Database } from "@/types/database";
 
-export type ProductStatus =
-  Database["public"]["Enums"]["product_status"];
+export type ProductStatus = Database["public"]["Enums"]["product_status"];
 
+export type ProductPaymentOption =
+  Database["public"]["Enums"]["product_payment_option"];
 export interface ProductCatalogItem {
   id: string;
 
@@ -11,7 +12,10 @@ export interface ProductCatalogItem {
 
   name: string;
   description: string | null;
+
+  paymentOption: ProductPaymentOption;
   priceIdr: number;
+  priceCoin: number | null;
 
   brandId: string;
   brandName: string;
@@ -21,7 +25,6 @@ export interface ProductCatalogItem {
 
   createdAt: string | null;
 }
-
 export interface ProductBonusSummary {
   id: string;
   slug: string;
@@ -51,7 +54,10 @@ export interface ProductDetailItem {
   descriptionHtml: string | null;
   detailHtml: string;
 
+  paymentOption: ProductPaymentOption;
   priceIdr: number;
+  priceCoin: number | null;
+
   stock: number;
   carbonSavedKg: number;
   waterSavedLiter: number;

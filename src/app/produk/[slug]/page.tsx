@@ -27,9 +27,7 @@ export const dynamic = "force-dynamic";
  * Mencegah query detail yang sama dijalankan dua kali
  * saat generateMetadata dan page dirender dalam request yang sama.
  */
-const getProduct = cache((sku: string) =>
-  getProductBySku(sku),
-);
+const getProduct = cache((sku: string) => getProductBySku(sku));
 
 export async function generateMetadata({
   params,
@@ -41,15 +39,12 @@ export async function generateMetadata({
   if (!result.success || !result.data) {
     return {
       title: "Produk Tidak Ditemukan | Muri",
-      description:
-        "Produk yang Anda cari tidak tersedia.",
+      description: "Produk yang Anda cari tidak tersedia.",
     };
   }
 
   const description = result.data.descriptionHtml
-    ? sanitizeRichTextAsPlainHtml(
-        result.data.descriptionHtml,
-      ).slice(0, 160)
+    ? sanitizeRichTextAsPlainHtml(result.data.descriptionHtml).slice(0, 160)
     : "";
 
   return {
@@ -88,12 +83,12 @@ export default async function ProductDetailPage({
       <main className="pt-16">
         <ProductDetailHero
           title={product.name}
-          descriptionHtml={
-            product.descriptionHtml
-          }
+          descriptionHtml={product.descriptionHtml}
           brandName={product.brand.name}
           categoryName={product.categoryName}
+          paymentOption={product.paymentOption}
           priceIdr={product.priceIdr}
+          priceCoin={product.priceCoin}
         />
 
         <section className="bg-canvas-warm/45">
@@ -106,23 +101,25 @@ export default async function ProductDetailPage({
               lg:items-start
             "
           >
-            <ProductDetailContent
-              product={product}
-            />
+            <ProductDetailContent product={product} />
 
-            <ProductOrderSidebar
-              slug={product.slug}
-              productName={product.name}
-              priceIdr={product.priceIdr}
-              stock={product.stock}
-              bonusProduct={product.bonusProduct}
-              bonusProductQty={
-                product.bonusProductQty
-              }
-              bonusCoinCost={
-                product.bonusCoinCost
-              }
-            />
+<ProductOrderSidebar
+  slug={product.slug}
+  productName={product.name}
+  paymentOption={
+    product.paymentOption
+  }
+  priceIdr={product.priceIdr}
+  priceCoin={product.priceCoin}
+  stock={product.stock}
+  bonusProduct={product.bonusProduct}
+  bonusProductQty={
+    product.bonusProductQty
+  }
+  bonusCoinCost={
+    product.bonusCoinCost
+  }
+/>
           </div>
         </section>
       </main>
