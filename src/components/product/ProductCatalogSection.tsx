@@ -1,16 +1,12 @@
 "use client";
 
-import * as React from "react";
 import type { ComponentType } from "react";
 import { Leaf, PackageSearch, RefreshCw } from "lucide-react";
 
 import ProductCard from "@/components/product/ProductCard";
-import ProductCatalogToolbar, {
-  type ProductSortOption,
-} from "@/components/product/ProductCatalogToolbar";
+import ProductCatalogToolbar from "@/components/product/ProductCatalogToolbar";
+import { useProductCatalogFilters } from "@/hooks/product/useProductCatalogFilters";
 import type { ProductCatalogItem } from "@/types/product";
-
-const ALL_FILTER = "Semua";
 
 interface ProductCatalogSectionProps {
   products: ProductCatalogItem[];
@@ -21,113 +17,24 @@ export default function ProductCatalogSection({
   products,
   hasLoadError = false,
 }: ProductCatalogSectionProps) {
-  const [query, setQuery] = React.useState("");
-  const [brand, setBrand] =
-    React.useState(ALL_FILTER);
-  const [category, setCategory] =
-    React.useState(ALL_FILTER);
-  const [sort, setSort] =
-    React.useState<ProductSortOption>("default");
-
-  const brands = React.useMemo(
-    () => [
-      ALL_FILTER,
-      ...Array.from(
-        new Set(
-          products.map(
-            (product) => product.brandName,
-          ),
-        ),
-      ).sort((first, second) =>
-        first.localeCompare(second, "id"),
-      ),
-    ],
-    [products],
-  );
-
-  const categories = React.useMemo(
-    () => [
-      ALL_FILTER,
-      ...Array.from(
-        new Set(
-          products.map(
-            (product) => product.categoryName,
-          ),
-        ),
-      ).sort((first, second) =>
-        first.localeCompare(second, "id"),
-      ),
-    ],
-    [products],
-  );
-
-  const filteredProducts = React.useMemo(() => {
-    const normalizedQuery = query
-      .trim()
-      .toLowerCase();
-
-    const result = products.filter((product) => {
-      const searchableContent = [
-        product.name,
-        product.brandName,
-        product.categoryName,
-        product.description,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-
-      const matchesSearch =
-        !normalizedQuery ||
-        searchableContent.includes(normalizedQuery);
-
-      const matchesBrand =
-        brand === ALL_FILTER ||
-        product.brandName === brand;
-
-      const matchesCategory =
-        category === ALL_FILTER ||
-        product.categoryName === category;
-
-      return (
-        matchesSearch &&
-        matchesBrand &&
-        matchesCategory
-      );
-    });
-
-    return [...result].sort((first, second) => {
-      if (sort === "price-low") {
-        return first.priceIdr - second.priceIdr;
-      }
-
-      if (sort === "price-high") {
-        return second.priceIdr - first.priceIdr;
-      }
-
-      if (sort === "name-az") {
-        return first.name.localeCompare(
-          second.name,
-          "id",
-        );
-      }
-
-      return compareNewest(first, second);
-    });
-  }, [brand, category, products, query, sort]);
-
-  function resetFilters() {
-    setQuery("");
-    setBrand(ALL_FILTER);
-    setCategory(ALL_FILTER);
-    setSort("default");
-  }
+  const {
+    query,
+    setQuery,
+    brand,
+    setBrand,
+    brands,
+    category,
+    setCategory,
+    categories,
+    sort,
+    setSort,
+    filteredProducts,
+    hasActiveFilters,
+    resetFilters,
+  } = useProductCatalogFilters(products);
 
   return (
-    <section
-      id="katalog-produk"
-      className="bg-canvas-pure"
-    >
+    <section id="katalog-produk" className="bg-canvas-pure">
       <ProductCatalogToolbar
         query={query}
         onQueryChange={setQuery}
@@ -150,19 +57,15 @@ export default function ProductCatalogSection({
       >
         <div className="flex flex-wrap items-end justify-between gap-5">
           <div className="flex items-center gap-3 text-brand-emerald">
-            <Leaf
-              className="size-4"
-              strokeWidth={2}
-            />
+            <Leaf className="size-4" strokeWidth={2} />
 
             <span className="text-sm font-bold uppercase tracking-tight">
               Jelajahi Produk Sirkular
             </span>
           </div>
 
-          <p className="text-sm text-muted-moss">
-            {filteredProducts.length} dari{" "}
-            {products.length} produk
+          <p className="text-sm text-muted-moss" aria-live="polite">
+            {filteredProducts.length} dari {products.length} produk
           </p>
         </div>
 
@@ -175,10 +78,7 @@ export default function ProductCatalogSection({
         ) : filteredProducts.length > 0 ? (
           <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-              />
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
         ) : products.length === 0 ? (
@@ -192,8 +92,8 @@ export default function ProductCatalogSection({
             icon={PackageSearch}
             title="Produk tidak ditemukan"
             description="Coba gunakan kata pencarian atau filter yang berbeda."
-            actionLabel="Reset pencarian"
-            onAction={resetFilters}
+            actionLabel={hasActiveFilters ? "Reset pencarian" : undefined}
+            onAction={hasActiveFilters ? resetFilters : undefined}
           />
         )}
       </div>
@@ -258,19 +158,4 @@ function CatalogMessage({
       )}
     </div>
   );
-}
-
-function compareNewest(
-  first: ProductCatalogItem,
-  second: ProductCatalogItem,
-): number {
-  const firstDate = first.createdAt
-    ? new Date(first.createdAt).getTime()
-    : 0;
-
-  const secondDate = second.createdAt
-    ? new Date(second.createdAt).getTime()
-    : 0;
-
-  return secondDate - firstDate;
 }

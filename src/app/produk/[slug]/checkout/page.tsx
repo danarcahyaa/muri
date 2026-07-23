@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 
-import CustomerProductCheckout from "@/components/product/CustomerProductCheckout";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
+import CustomerProductCheckout from "@/components/product/CustomerProductCheckout";
 import { decodeProductSlug } from "@/lib/product-detail";
 
 interface ProductCheckoutPageProps {
   params: Promise<{
     slug: string;
   }>;
-
   searchParams: Promise<{
     quantity?: string | string[];
   }>;
@@ -19,8 +18,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Checkout Produk | Muri",
-  description:
-    "Selesaikan pembelian produk sirkular Anda.",
+  description: "Selesaikan pembelian produk sirkular Anda.",
 };
 
 export default async function ProductCheckoutPage({
@@ -29,24 +27,8 @@ export default async function ProductCheckoutPage({
 }: ProductCheckoutPageProps) {
   const { slug } = await params;
   const query = await searchParams;
-
   const sku = decodeProductSlug(slug);
-
-  const quantityValue = Array.isArray(
-    query.quantity,
-  )
-    ? query.quantity[0]
-    : query.quantity;
-
-  const parsedQuantity = Number(
-    quantityValue ?? "1",
-  );
-
-  const requestedQuantity =
-    Number.isInteger(parsedQuantity) &&
-    parsedQuantity >= 1
-      ? parsedQuantity
-      : 0;
+  const requestedQuantity = parseRequestedQuantity(query.quantity);
 
   return (
     <div className="min-h-screen overflow-x-clip bg-canvas-warm/45 text-brand-black">
@@ -57,9 +39,7 @@ export default async function ProductCheckoutPage({
           <div className="mx-auto w-[min(1320px,calc(100%_-_48px))]">
             <CustomerProductCheckout
               sku={sku}
-              requestedQuantity={
-                requestedQuantity
-              }
+              requestedQuantity={requestedQuantity}
             />
           </div>
         </section>
@@ -68,4 +48,15 @@ export default async function ProductCheckoutPage({
       <Footer />
     </div>
   );
+}
+
+function parseRequestedQuantity(
+  value: string | string[] | undefined,
+): number {
+  const rawValue = Array.isArray(value) ? value[0] : value;
+  const parsedValue = Number(rawValue ?? "1");
+
+  return Number.isSafeInteger(parsedValue) && parsedValue >= 1
+    ? parsedValue
+    : 0;
 }

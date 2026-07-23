@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { cache } from "react";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import MaterialDetailContent from "@/components/material/MaterialDetailContent";
-import MaterialHero from "@/components/material/MaterialHeroDetail";
+import MaterialHeroDetail from "@/components/material/MaterialHeroDetail";
 import MaterialOrderSidebar from "@/components/material/MaterialOrderSidebar";
 import { sanitizeRichTextAsPlainHtml } from "@/lib/richText";
 import { getMaterialBatchByCode } from "@/services/material";
@@ -16,15 +16,8 @@ interface MaterialDetailPageProps {
   }>;
 }
 
-/**
- * Stok dan harga dapat berubah, sehingga halaman selalu dirender dinamis.
- */
 export const dynamic = "force-dynamic";
 
-/**
- * Mencegah query yang sama dijalankan dua kali dalam satu request,
- * yaitu saat generateMetadata dan saat page dirender.
- */
 const getMaterial = cache((batchCode: string) =>
   getMaterialBatchByCode(batchCode),
 );
@@ -38,6 +31,7 @@ export async function generateMetadata({
   if (!result.success || !result.data) {
     return {
       title: "Material Tidak Ditemukan | Muri",
+      description: "Material yang Anda cari tidak tersedia.",
     };
   }
 
@@ -78,7 +72,7 @@ export default async function MaterialDetailPage({
       <Header />
 
       <main className="pt-16">
-        <MaterialHero
+        <MaterialHeroDetail
           title={material.title}
           categoryName={material.categoryName}
           providerName={material.providerName}

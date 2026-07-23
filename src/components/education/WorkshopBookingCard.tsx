@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   CheckCircle2,
@@ -11,210 +9,31 @@ import {
   LoaderCircle,
 } from "lucide-react";
 
-import { supabase } from "@/lib/supabaseClient";
+import { useWorkshopBooking } from "@/hooks/education/useWorkshopBooking";
 import type { WorkshopCatalogItem } from "@/types/workshop";
-import type { CustomerWorkshopRegistration } from "@/types/customerWorkshop";
-import {
-  getMyActiveWorkshopRegistration,
-  getWorkshopRegistrationErrorMessage,
-  registerWorkshop,
-} from "@/services/customer";
 
 interface WorkshopBookingCardProps {
   workshop: WorkshopCatalogItem;
   loginHref: string;
 }
 
-type FeedbackState = {
-  type: "success" | "error";
-  message: string;
-} | null;
 
 export default function WorkshopBookingCard({
   workshop,
   loginHref,
 }: WorkshopBookingCardProps) {
-  const router = useRouter();
+  const {
+    activeRegistration,
+    bookingPercentage,
+    closeConfirmation,
+    feedback,
+    handleConfirmRegistration,
+    handleRegisterClick,
+    isCheckingRegistration,
+    isConfirmOpen,
+    isSubmitting,
+  } = useWorkshopBooking({ workshop, loginHref });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [feedback, setFeedback] = useState<FeedbackState>(null);
-
-  const [activeRegistration, setActiveRegistration] =
-    useState<CustomerWorkshopRegistration | null>(null);
-
-  const [isCheckingRegistration, setIsCheckingRegistration] = useState(true);
-
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-
-  const bookingPercentage = getBookingPercentage(workshop);
-
-  useEffect(() => {
-    let isCancelled = false;
-
-    async function checkRegistration() {
-      setIsCheckingRegistration(true);
-
-      try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
-        if (!user) {
-          if (!isCancelled) {
-            setActiveRegistration(null);
-          }
-
-          return;
-        }
-
-        const result = await getMyActiveWorkshopRegistration(workshop.id);
-
-        if (isCancelled) {
-          return;
-        }
-
-        if (!result.success) {
-          setFeedback({
-            type: "error",
-            message: "Status pendaftaran belum dapat diperiksa.",
-          });
-
-          return;
-        }
-
-        setActiveRegistration(result.data ?? null);
-      } finally {
-        if (!isCancelled) {
-          setIsCheckingRegistration(false);
-        }
-      }
-    }
-
-    void checkRegistration();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [workshop.id]);
-
-  useEffect(() => {
-    if (!isConfirmOpen) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-
-    document.body.style.overflow = "hidden";
-
-    function handleEscape(event: KeyboardEvent) {
-      if (event.key === "Escape" && !isSubmitting) {
-        setIsConfirmOpen(false);
-      }
-    }
-
-    document.addEventListener("keydown", handleEscape);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [isConfirmOpen, isSubmitting]);
-
-  async function handleRegisterClick() {
-    if (isSubmitting || workshop.isFull || activeRegistration) {
-      return;
-    }
-
-    setFeedback(null);
-
-    try {
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
-
-      if (authError || !user) {
-        router.push(loginHref);
-        return;
-      }
-
-      setIsConfirmOpen(true);
-    } catch {
-      setFeedback({
-        type: "error",
-        message: "Status akun belum dapat diperiksa. Silakan coba kembali.",
-      });
-    }
-  }
-
-  async function handleConfirmRegistration() {
-    if (isSubmitting) {
-      return;
-    }
-
-    setFeedback(null);
-    setIsSubmitting(true);
-
-    try {
-      const result = await registerWorkshop(workshop.id);
-
-      if (!result.success) {
-        setFeedback({
-          type: "error",
-          message: getWorkshopRegistrationErrorMessage(result.error),
-        });
-
-        return;
-      }
-
-      const registration = result.data;
-
-      if (!registration) {
-        setFeedback({
-          type: "error",
-          message:
-            "Pendaftaran berhasil diproses, tetapi data hasil tidak ditemukan.",
-        });
-
-        return;
-      }
-
-      setActiveRegistration({
-        id: registration.registrationId,
-        workshopId: registration.workshopId,
-
-        status: registration.status,
-
-        pointsSpent: registration.pointsSpent,
-
-        createdAt: registration.registeredAt,
-        updatedAt: registration.registeredAt,
-
-        attendedAt: null,
-        cancelledAt: null,
-      });
-
-      setFeedback({
-        type: "success",
-        message:
-          workshop.pointCost > 0
-            ? `Pendaftaran berhasil. Sisa poin Anda ${registration.remainingPoints}.`
-            : "Pendaftaran workshop berhasil.",
-      });
-
-      setIsConfirmOpen(false);
-      router.refresh();
-    } catch {
-      setFeedback({
-        type: "error",
-        message: "Terjadi kesalahan saat mendaftar. Silakan coba kembali.",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
   return (
     <aside
       className="
@@ -240,12 +59,17 @@ export default function WorkshopBookingCard({
           </p>
         </div>
 
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-line-trace">
+        <div
+          role="progressbar"
+          aria-label="Persentase kuota workshop terisi"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(bookingPercentage)}
+          className="mt-4 h-1.5 overflow-hidden rounded-full bg-line-trace"
+        >
           <div
             className="h-full rounded-full bg-brand-emerald transition-[width]"
-            style={{
-              width: `${bookingPercentage}%`,
-            }}
+            style={{ width: `${bookingPercentage}%` }}
           />
         </div>
 
@@ -384,7 +208,7 @@ export default function WorkshopBookingCard({
       "
             onMouseDown={() => {
               if (!isSubmitting) {
-                setIsConfirmOpen(false);
+                closeConfirmation();
               }
             }}
           >
@@ -482,7 +306,7 @@ export default function WorkshopBookingCard({
                     type="button"
                     disabled={isSubmitting}
                     onClick={() => {
-                      setIsConfirmOpen(false);
+                      closeConfirmation();
                     }}
                     className="
                 rounded-sm border
@@ -539,13 +363,3 @@ export default function WorkshopBookingCard({
   );
 }
 
-function getBookingPercentage(workshop: WorkshopCatalogItem): number {
-  if (workshop.quota <= 0) {
-    return 100;
-  }
-
-  return Math.min(
-    Math.max((workshop.registeredCount / workshop.quota) * 100, 0),
-    100,
-  );
-}

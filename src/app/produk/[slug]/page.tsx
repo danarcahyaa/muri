@@ -1,16 +1,15 @@
 import type { Metadata } from "next";
-import { cache } from "react";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import ProductDetailContent from "@/components/product/ProductDetailContent";
 import ProductDetailHero from "@/components/product/ProductDetailHero";
 import ProductOrderSidebar from "@/components/product/ProductOrderSidebar";
-
+import { decodeProductSlug } from "@/lib/product-detail";
 import { sanitizeRichTextAsPlainHtml } from "@/lib/richText";
 import { getProductBySku } from "@/services/product";
-import { decodeProductSlug } from "@/lib/product-detail";
 
 interface ProductDetailPageProps {
   params: Promise<{
@@ -24,8 +23,8 @@ interface ProductDetailPageProps {
 export const dynamic = "force-dynamic";
 
 /**
- * Mencegah query detail yang sama dijalankan dua kali
- * saat generateMetadata dan page dirender dalam request yang sama.
+ * Mencegah query detail yang sama dijalankan dua kali saat metadata dan page
+ * dirender dalam request yang sama.
  */
 const getProduct = cache((sku: string) => getProductBySku(sku));
 
@@ -103,23 +102,17 @@ export default async function ProductDetailPage({
           >
             <ProductDetailContent product={product} />
 
-<ProductOrderSidebar
-  slug={product.slug}
-  productName={product.name}
-  paymentOption={
-    product.paymentOption
-  }
-  priceIdr={product.priceIdr}
-  priceCoin={product.priceCoin}
-  stock={product.stock}
-  bonusProduct={product.bonusProduct}
-  bonusProductQty={
-    product.bonusProductQty
-  }
-  bonusCoinCost={
-    product.bonusCoinCost
-  }
-/>
+            <ProductOrderSidebar
+              slug={product.slug}
+              productName={product.name}
+              paymentOption={product.paymentOption}
+              priceIdr={product.priceIdr}
+              priceCoin={product.priceCoin}
+              stock={product.stock}
+              bonusProduct={product.bonusProduct}
+              bonusProductQty={product.bonusProductQty}
+              bonusCoinCost={product.bonusCoinCost}
+            />
           </div>
         </section>
       </main>

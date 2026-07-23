@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import type { ComponentType } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -12,10 +12,12 @@ import {
   UserRound,
 } from "lucide-react";
 
+import RichTextContent from "@/components/ui/RichTextContent";
+import {
+  type MaterialSortOption,
+  useMaterialCatalogFilters,
+} from "@/hooks/material/useMaterialCatalogFilters";
 import type { MaterialCatalogItem } from "@/types/material";
-import RichTextContent from "../ui/RichTextContent";
-
-type SortOption = "default" | "price-low" | "price-high";
 
 interface MaterialCatalogSectionProps {
   materials: MaterialCatalogItem[];
@@ -26,66 +28,21 @@ export default function MaterialCatalogSection({
   materials,
   hasLoadError = false,
 }: MaterialCatalogSectionProps) {
-  const [query, setQuery] = React.useState("");
-
-  const [location, setLocation] = React.useState("Semua");
-
-  const [sort, setSort] = React.useState<SortOption>("default");
-
-  /**
-   * Kota dibuat dinamis berdasarkan batch
-   * yang dikembalikan Supabase.
-   */
-  const locations = React.useMemo(() => {
-    const uniqueLocations = Array.from(
-      new Set(
-        materials.map((material) => material.originCity.trim()).filter(Boolean),
-      ),
-    ).sort((first, second) => first.localeCompare(second, "id"));
-
-    return ["Semua", ...uniqueLocations];
-  }, [materials]);
-
-  const filteredMaterials = React.useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-
-    const result = materials.filter((material) => {
-      const matchesSearch =
-        !normalizedQuery ||
-        material.title.toLowerCase().includes(normalizedQuery) ||
-        material.categoryName.toLowerCase().includes(normalizedQuery) ||
-        material.providerName.toLowerCase().includes(normalizedQuery) ||
-        material.batchCode.toLowerCase().includes(normalizedQuery) ||
-        material.originCity.toLowerCase().includes(normalizedQuery);
-
-      const matchesLocation =
-        location === "Semua" || material.originCity === location;
-
-      return matchesSearch && matchesLocation;
-    });
-
-    return [...result].sort((first, second) => {
-      if (sort === "price-low") {
-        return first.pricePerKg - second.pricePerKg;
-      }
-
-      if (sort === "price-high") {
-        return second.pricePerKg - first.pricePerKg;
-      }
-
-      return 0;
-    });
-  }, [location, materials, query, sort]);
-
-  function resetFilters() {
-    setQuery("");
-    setLocation("Semua");
-    setSort("default");
-  }
+  const {
+    query,
+    setQuery,
+    location,
+    setLocation,
+    sort,
+    setSort,
+    locations,
+    filteredMaterials,
+    hasActiveFilters,
+    resetFilters,
+  } = useMaterialCatalogFilters(materials);
 
   return (
     <section id="katalog-material" className="bg-canvas-pure">
-      {/* Filter toolbar */}
       <div className="border-b border-line-trace">
         <div
           className="
@@ -96,7 +53,6 @@ export default function MaterialCatalogSection({
             lg:items-center
           "
         >
-          {/* Search */}
           <label className="relative block">
             <span className="sr-only">Cari material</span>
 
@@ -131,7 +87,6 @@ export default function MaterialCatalogSection({
             />
           </label>
 
-          {/* Location filters */}
           <div
             className="
               flex overflow-x-auto rounded-sm
@@ -146,6 +101,7 @@ export default function MaterialCatalogSection({
                 <button
                   key={item}
                   type="button"
+                  aria-pressed={isActive}
                   onClick={() => setLocation(item)}
                   className={`
                     shrink-0 rounded-sm
@@ -165,13 +121,14 @@ export default function MaterialCatalogSection({
             })}
           </div>
 
-          {/* Sort */}
           <label className="relative block">
             <span className="sr-only">Urutkan material</span>
 
             <select
               value={sort}
-              onChange={(event) => setSort(event.target.value as SortOption)}
+              onChange={(event) =>
+                setSort(event.target.value as MaterialSortOption)
+              }
               className="
                 h-12 w-full min-w-44
                 appearance-none rounded-sm
@@ -186,9 +143,7 @@ export default function MaterialCatalogSection({
               "
             >
               <option value="default">Urutkan harga</option>
-
               <option value="price-low">Harga terendah</option>
-
               <option value="price-high">Harga tertinggi</option>
             </select>
 
@@ -206,7 +161,6 @@ export default function MaterialCatalogSection({
         </div>
       </div>
 
-      {/* Catalog */}
       <div
         className="
           mx-auto
@@ -214,7 +168,6 @@ export default function MaterialCatalogSection({
           py-[clamp(80px,9vw,130px)]
         "
       >
-        {/* Heading */}
         <div
           className="
             grid gap-10
@@ -259,9 +212,7 @@ export default function MaterialCatalogSection({
         ) : (
           <EmptyMaterialState
             hasLoadError={hasLoadError}
-            hasActiveFilters={
-              query.length > 0 || location !== "Semua" || sort !== "default"
-            }
+            hasActiveFilters={hasActiveFilters}
             onReset={resetFilters}
           />
         )}
@@ -291,7 +242,6 @@ function MaterialCard({ material }: MaterialCardProps) {
         sm:p-7
       "
     >
-      {/* Image */}
       <Link
         href={materialHref}
         className="
@@ -301,42 +251,35 @@ function MaterialCard({ material }: MaterialCardProps) {
         "
       >
         {material.imageUrl ? (
-          <>
-            {/* Supabase Storage URL dapat langsung ditampilkan
-                tanpa konfigurasi remotePatterns Next Image. */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={material.imageUrl}
-              alt={material.title}
-              loading="lazy"
-              className="
-                h-full w-full object-cover
-                transition duration-500
-                group-hover:scale-[1.025]
-              "
-            />
-          </>
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={material.imageUrl}
+            alt={material.title}
+            loading="lazy"
+            className="
+              h-full w-full object-cover
+              transition duration-500
+              group-hover:scale-[1.025]
+            "
+          />
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-muted-moss/50">
             <ImageOff className="size-9" strokeWidth={1.4} />
-
-            <span className="text-[10px] font-medium">Foto belum tersedia</span>
+            <span className="text-[10px] font-medium">
+              Foto belum tersedia
+            </span>
           </div>
         )}
       </Link>
 
-      {/* Metadata */}
       <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-bold text-brand-emerald">
         <MaterialMeta icon={UserRound} value={material.providerName} />
-
         <span aria-hidden="true" className="text-muted-moss/40">
           ·
         </span>
-
         <MaterialMeta icon={MapPin} value={material.originCity} />
       </div>
 
-      {/* Content */}
       <div className="mt-5">
         <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-moss">
           {material.categoryName}
@@ -364,22 +307,18 @@ function MaterialCard({ material }: MaterialCardProps) {
         />
       </div>
 
-      {/* Statistics */}
       <div className="mt-7 grid grid-cols-1 gap-2 sm:grid-cols-3">
         <MaterialStat
           label="Tersedia"
           value={`${formatWeight(material.availableWeightKg)} kg`}
         />
-
         <MaterialStat
           label="Harga"
           value={`${formatRupiah(material.pricePerKg)}/kg`}
         />
-
         <MaterialStat label="ID Batch" value={material.batchCode} />
       </div>
 
-      {/* Action */}
       <div className="mt-7">
         <Link
           href={materialHref}
@@ -409,7 +348,7 @@ function MaterialCard({ material }: MaterialCardProps) {
 }
 
 interface MaterialMetaProps {
-  icon: React.ComponentType<{
+  icon: ComponentType<{
     className?: string;
     strokeWidth?: number;
   }>;
@@ -420,7 +359,6 @@ function MaterialMeta({ icon: Icon, value }: MaterialMetaProps) {
   return (
     <span className="inline-flex items-center gap-2">
       <Icon className="size-3.5" strokeWidth={2} />
-
       <span>{value}</span>
     </span>
   );
@@ -435,7 +373,6 @@ function MaterialStat({ label, value }: MaterialStatProps) {
   return (
     <div className="rounded-lg bg-canvas-warm px-4 py-3">
       <p className="text-[10px] text-muted-moss">{label}</p>
-
       <p className="mt-1 truncate text-xs font-bold text-brand-black">
         {value}
       </p>

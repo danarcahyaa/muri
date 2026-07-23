@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 
-import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import Header from "@/components/layout/Header";
 import MaterialCatalogSection from "@/components/material/MaterialCatalogSection";
-import { getActiveMaterialBatches } from "@/services/material";
 import MaterialHero from "@/components/material/MaterialHero";
+import { getActiveMaterialBatches } from "@/services/material";
 
 export const metadata: Metadata = {
   title: "Katalog Material Sirkular | Muri",
@@ -16,9 +16,7 @@ export const dynamic = "force-dynamic";
 
 export default async function MaterialPage() {
   const materialResponse = await getActiveMaterialBatches();
-
   const hasLoadError = !materialResponse.success;
-
   const materials = materialResponse.success
     ? (materialResponse.data ?? [])
     : [];

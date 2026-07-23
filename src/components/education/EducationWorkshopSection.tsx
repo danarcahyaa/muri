@@ -5,34 +5,25 @@ import Link from "next/link";
 import {
   ArrowRight,
   CalendarDays,
-  Clock3,
-  Coins,
   Leaf,
   MapPin,
   Presentation,
   UserRound,
-  UsersRound,
 } from "lucide-react";
 
 import RichTextContent from "@/components/ui/RichTextContent";
-import { formatWorkshopDate, formatWorkshopTime } from "@/lib/workshop";
-import { getWorkshops } from "@/services/workshop";
+import { formatWorkshopDate } from "@/lib/workshop";
 import type { WorkshopCatalogItem } from "@/types/workshop";
 
-export default async function EducationWorkshopSection() {
-  const response = await getWorkshops();
+interface EducationWorkshopSectionProps {
+  workshops: WorkshopCatalogItem[];
+  hasLoadError?: boolean;
+}
 
-  const hasLoadError = !response.success;
-
-  const workshops = response.success ? (response.data ?? []) : [];
-
-  if (!response.success) {
-    console.error(
-      "[EducationWorkshopSection] Failed to fetch workshops:",
-      response.error,
-    );
-  }
-
+export default function EducationWorkshopSection({
+  workshops,
+  hasLoadError = false,
+}: EducationWorkshopSectionProps) {
   return (
     <section id="program-workshop" className="scroll-mt-20 bg-canvas-pure">
       <div
@@ -255,7 +246,7 @@ function WorkshopCard({ workshop }: WorkshopCardProps) {
               text-brand-black
             "
           >
-            {workshop.pointCost} POIN
+            {workshop.pointCost === 0 ? "GRATIS" : `${workshop.pointCost} POIN`}
           </p>
         </div>
 
@@ -309,32 +300,6 @@ function MetadataSeparator() {
     <span aria-hidden="true" className="text-muted-moss/40">
       ·
     </span>
-  );
-}
-
-interface WorkshopFactProps {
-  icon: ComponentType<{
-    className?: string;
-    strokeWidth?: number;
-  }>;
-
-  label: string;
-  value: string;
-}
-
-function WorkshopFact({ icon: Icon, label, value }: WorkshopFactProps) {
-  return (
-    <div className="rounded-lg bg-canvas-warm px-4 py-3">
-      <div className="flex items-center gap-2 text-muted-moss">
-        <Icon className="size-3.5" strokeWidth={1.8} />
-
-        <span className="text-[9px] uppercase tracking-wide">{label}</span>
-      </div>
-
-      <p className="mt-2 truncate text-[11px] font-bold text-brand-black">
-        {value}
-      </p>
-    </div>
   );
 }
 

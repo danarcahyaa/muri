@@ -1,6 +1,6 @@
 import { Leaf } from "lucide-react";
 
-export default function ProductHero() {
+export default function MaterialHero() {
   return (
     <section className="overflow-hidden bg-brand-forest text-canvas-pure">
       <div
@@ -12,7 +12,6 @@ export default function ProductHero() {
           lg:gap-24
         "
       >
-        {/* Left content */}
         <div>
           <div className="mb-5 flex items-center gap-3 text-brand-lime">
             <Leaf className="size-4" strokeWidth={2} />
@@ -40,7 +39,6 @@ export default function ProductHero() {
           </p>
         </div>
 
-        {/* Highlight card */}
         <aside
           className="
             rounded-2xl border border-canvas-pure/20
@@ -76,9 +74,7 @@ interface HangerIconProps {
   className?: string;
 }
 
-function HangerIcon({
-  className,
-}: HangerIconProps) {
+function HangerIcon({ className }: HangerIconProps) {
   return (
     <svg
       aria-hidden="true"

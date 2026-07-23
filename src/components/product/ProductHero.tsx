@@ -4,14 +4,21 @@ import { Leaf, Shirt } from "lucide-react";
 export default function ProductHero() {
   return (
     <section className="relative overflow-hidden bg-canvas-warm">
-      <div className="mx-auto w-[min(1320px,calc(100%_-_48px))] pt-[clamp(32px,4vw,56px)] pb-[clamp(72px,8vw,120px)]">
-        {" "}
-        {/* Breadcrumb */}
+      <div
+        className="
+          mx-auto w-[min(1320px,calc(100%_-_48px))]
+          pb-[clamp(72px,8vw,120px)]
+          pt-[clamp(32px,4vw,56px)]
+        "
+      >
         <nav
           aria-label="Breadcrumb"
           className="flex items-center gap-5 text-xs text-muted-moss"
         >
-          <Link href="/" className="transition-colors hover:text-brand-emerald">
+          <Link
+            href="/"
+            className="transition-colors hover:text-brand-emerald"
+          >
             Beranda
           </Link>
 
@@ -21,10 +28,8 @@ export default function ProductHero() {
 
           <span className="text-muted-moss">Produk</span>
         </nav>
-        {/* Hero content */}
+
         <div className="mt-12 grid gap-14 lg:mt-14 lg:grid-cols-[minmax(0,1.7fr)_minmax(340px,1fr)] lg:items-center">
-          {" "}
-          {/* Left */}
           <div>
             <div className="mb-5 flex items-center gap-3 text-brand-emerald">
               <Leaf className="size-4" strokeWidth={2} />
@@ -44,12 +49,11 @@ export default function ProductHero() {
               lingkungan.
             </p>
           </div>
-          {/* Feature card */}
+
           <aside
             className="
               rounded-2xl border border-line-trace
-              bg-canvas-pure p-7
-              sm:p-8
+              bg-canvas-pure p-7 sm:p-8
             "
           >
             <p className="text-xs font-bold uppercase tracking-tight text-brand-emerald">
@@ -63,14 +67,7 @@ export default function ProductHero() {
               />
             </div>
 
-            <h2
-              className="
-                max-w-sm font-display text-4xl
-                font-medium leading-tight
-                tracking-[-0.045em]
-                text-brand-black
-              "
-            >
+            <h2 className="max-w-sm font-display text-4xl font-medium leading-tight tracking-[-0.045em] text-brand-black">
               Produk Ramah Bumi.
             </h2>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -10,7 +10,8 @@ import {
   Plus,
   ShoppingBag,
 } from "lucide-react";
-import { useAuth } from "@/components/auth/AuthProvider";
+
+import { useProductOrder } from "@/hooks/product/useProductOrder";
 import { formatCoin, formatIdr } from "@/lib/product-detail";
 import type {
   ProductBonusSummary,
@@ -20,13 +21,10 @@ import type {
 interface ProductOrderCardProps {
   slug: string;
   productName: string;
-
   paymentOption: ProductPaymentOption;
   priceIdr: number;
   priceCoin: number | null;
-
   stock: number;
-
   bonusProduct: ProductBonusSummary | null;
   bonusProductQty: number;
   bonusCoinCost: number;
@@ -43,42 +41,30 @@ export default function ProductOrderCard({
   bonusProductQty,
   bonusCoinCost,
 }: ProductOrderCardProps) {
-  const [quantity, setQuantity] = React.useState(stock > 0 ? 1 : 0);
-  const { user, isLoading } = useAuth();
-  const isSoldOut = stock <= 0;
-  const totalPrice = priceIdr * quantity;
-
-  const acceptsIdr = paymentOption === "idr" || paymentOption === "idr_or_coin";
-
-  const acceptsCoin =
-    paymentOption === "coin" || paymentOption === "idr_or_coin";
-
-  const totalCoinPrice = priceCoin !== null ? priceCoin * quantity : null;
-
-  /*
-   * Checkout lama hanya memahami pembayaran IDR.
-   * Produk dengan pilihan coin ditahan sampai RPC baru aktif.
-   */
-  const isNewPaymentFlowRequired = paymentOption !== "idr";
-
-  const totalBonusQty =
-    bonusProduct && bonusProductQty > 0 ? quantity * bonusProductQty : 0;
-
-  const checkoutPath = `/produk/${encodeURIComponent(
+  const {
+    user,
+    isAuthLoading,
+    quantity,
+    isSoldOut,
+    availableStock,
+    acceptsIdr,
+    acceptsCoin,
+    requiresNewPaymentFlow,
+    totalPriceIdr,
+    totalPriceCoin,
+    totalBonusQty,
+    checkoutHref,
+    decreaseQuantity,
+    increaseQuantity,
+  } = useProductOrder({
     slug,
-  )}/checkout?quantity=${quantity}`;
-
-  const checkoutHref = user
-    ? checkoutPath
-    : `/auth/login?redirect=${encodeURIComponent(checkoutPath)}`;
-
-  function decreaseQuantity() {
-    setQuantity((current) => Math.max(1, current - 1));
-  }
-
-  function increaseQuantity() {
-    setQuantity((current) => Math.min(stock, current + 1));
-  }
+    paymentOption,
+    priceIdr,
+    priceCoin,
+    stock,
+    bonusProduct,
+    bonusProductQty,
+  });
 
   return (
     <div className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-7">
@@ -96,12 +82,15 @@ export default function ProductOrderCard({
             <p className="text-[10px] uppercase tracking-wide text-muted-moss">
               Atur Jumlah
             </p>
+
             <p className="mt-1 line-clamp-1 text-xs font-bold text-brand-black">
               {productName}
             </p>
           </div>
 
-          <p className="shrink-0 text-[10px] text-muted-moss">Stok {stock}</p>
+          <p className="shrink-0 text-[10px] text-muted-moss">
+            Stok {availableStock}
+          </p>
         </div>
 
         <div className="mt-5 inline-flex items-center overflow-hidden rounded-lg border border-line-trace bg-canvas-pure">
@@ -115,14 +104,17 @@ export default function ProductOrderCard({
             <Minus className="size-3.5" />
           </button>
 
-          <span className="flex h-10 min-w-12 items-center justify-center border-x border-line-trace px-3 text-xs font-bold text-brand-black">
+          <span
+            className="flex h-10 min-w-12 items-center justify-center border-x border-line-trace px-3 text-xs font-bold text-brand-black"
+            aria-live="polite"
+          >
             {quantity}
           </span>
 
           <button
             type="button"
             onClick={increaseQuantity}
-            disabled={isSoldOut || quantity >= stock}
+            disabled={isSoldOut || quantity >= availableStock}
             aria-label="Tambah jumlah"
             className="flex size-10 items-center justify-center text-brand-black transition hover:bg-canvas-warm disabled:cursor-not-allowed disabled:opacity-35"
           >
@@ -130,6 +122,7 @@ export default function ProductOrderCard({
           </button>
         </div>
       </div>
+
       <div className="mt-5 rounded-xl bg-brand-lime p-6 text-brand-forest">
         <p className="text-[10px] uppercase tracking-wide opacity-70">
           Total Harga
@@ -143,15 +136,17 @@ export default function ProductOrderCard({
               </p>
 
               <p className="mt-2 font-display text-[clamp(2.4rem,4vw,3.6rem)] font-medium leading-none tracking-[-0.055em]">
-                {formatIdr(totalPrice)}
+                {formatIdr(totalPriceIdr)}
               </p>
             </div>
           )}
 
-          {acceptsCoin && totalCoinPrice !== null && (
+          {acceptsCoin && totalPriceCoin !== null && (
             <div
               className={
-                acceptsIdr ? "border-t border-brand-forest/15 pt-5" : ""
+                acceptsIdr
+                  ? "border-t border-brand-forest/15 pt-5"
+                  : ""
               }
             >
               <p className="text-[9px] font-bold uppercase opacity-60">
@@ -159,13 +154,15 @@ export default function ProductOrderCard({
               </p>
 
               <p className="mt-2 font-display text-[clamp(2.4rem,4vw,3.6rem)] font-medium leading-none tracking-[-0.055em]">
-                {formatCoin(totalCoinPrice)}
+                {formatCoin(totalPriceCoin)}
               </p>
             </div>
           )}
         </div>
 
-        <p className="mt-5 text-[11px] opacity-70">Untuk {quantity} produk</p>
+        <p className="mt-5 text-[11px] opacity-70">
+          Untuk {quantity} produk
+        </p>
       </div>
 
       {bonusProduct && totalBonusQty > 0 && (
@@ -193,33 +190,23 @@ export default function ProductOrderCard({
       )}
 
       {isSoldOut ? (
-        <button
-          type="button"
-          disabled
-          className="mt-7 flex w-full cursor-not-allowed items-center justify-center rounded-sm bg-muted-moss/25 px-6 py-4 text-xs font-bold text-muted-moss"
-        >
-          Stok Habis
-        </button>
-      ) : isNewPaymentFlowRequired ? (
-        <button
-          type="button"
-          disabled
-          className="mt-7 flex w-full cursor-not-allowed items-center justify-center rounded-sm bg-muted-moss/25 px-6 py-4 text-xs font-bold text-muted-moss"
-        >
+        <DisabledCheckoutButton>Stok Habis</DisabledCheckoutButton>
+      ) : requiresNewPaymentFlow ? (
+        <DisabledCheckoutButton>
           Checkout Coin Sedang Disiapkan
-        </button>
+        </DisabledCheckoutButton>
       ) : (
         <Link
           href={checkoutHref}
-          aria-disabled={isLoading}
+          aria-disabled={isAuthLoading}
           onClick={(event) => {
-            if (isLoading) {
+            if (isAuthLoading) {
               event.preventDefault();
             }
           }}
           className="group mt-7 flex w-full items-center justify-center gap-3 rounded-sm bg-brand-forest px-6 py-4 text-xs font-bold text-canvas-pure transition duration-300 hover:bg-brand-black"
         >
-          {isLoading ? (
+          {isAuthLoading ? (
             <>
               <LoaderCircle className="size-4 animate-spin" />
               Memeriksa Akun...
@@ -234,12 +221,24 @@ export default function ProductOrderCard({
       )}
 
       <p className="mt-4 text-center text-[10px] leading-relaxed text-muted-moss">
-        {isNewPaymentFlowRequired
+        {requiresNewPaymentFlow
           ? "Pembayaran coin akan aktif setelah checkout baru selesai diterapkan."
           : user
             ? "Anda akan diarahkan ke halaman checkout."
             : "Masuk atau buat akun untuk melanjutkan pembelian."}
       </p>
     </div>
+  );
+}
+
+function DisabledCheckoutButton({ children }: { children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      disabled
+      className="mt-7 flex w-full cursor-not-allowed items-center justify-center rounded-sm bg-muted-moss/25 px-6 py-4 text-xs font-bold text-muted-moss"
+    >
+      {children}
+    </button>
   );
 }

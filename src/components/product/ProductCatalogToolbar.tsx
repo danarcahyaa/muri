@@ -3,11 +3,9 @@
 import type { ReactNode } from "react";
 import { ChevronDown, Search } from "lucide-react";
 
-export type ProductSortOption =
-  | "default"
-  | "price-low"
-  | "price-high"
-  | "name-az";
+import type { ProductSortOption } from "@/hooks/product/useProductCatalogFilters";
+
+export type { ProductSortOption } from "@/hooks/product/useProductCatalogFilters";
 
 interface ProductCatalogToolbarProps {
   query: string;
@@ -99,6 +97,7 @@ export default function ProductCatalogToolbar({
               <button
                 key={item}
                 type="button"
+                aria-pressed={isActive}
                 onClick={() =>
                   onBrandChange(item)
                 }

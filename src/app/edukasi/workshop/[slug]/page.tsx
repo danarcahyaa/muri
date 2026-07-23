@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { cache } from "react";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
-import Footer from "@/components/layout/Footer";
-import Header from "@/components/layout/Header";
 import WorkshopBookingCard from "@/components/education/WorkshopBookingCard";
 import WorkshopDetailContent from "@/components/education/WorkshopDetailContent";
 import WorkshopHero from "@/components/education/WorkshopHero";
+import Footer from "@/components/layout/Footer";
+import Header from "@/components/layout/Header";
 import { sanitizeRichTextAsPlainHtml } from "@/lib/richText";
 import { getWorkshopById } from "@/services/workshop";
 
@@ -16,14 +16,12 @@ interface WorkshopDetailPageProps {
   }>;
 }
 
-/**
- * Kuota workshop dapat berubah karena registrasi baru.
- */
+/** Kuota workshop dapat berubah karena registrasi baru. */
 export const dynamic = "force-dynamic";
 
 /**
- * Mencegah query yang sama dijalankan dua kali dalam satu request,
- * yaitu saat generateMetadata dan saat page dirender.
+ * Mencegah service yang sama dijalankan dua kali dalam satu request,
+ * yaitu ketika generateMetadata dan halaman dirender.
  */
 const getWorkshop = cache((workshopId: string) =>
   getWorkshopById(workshopId),
@@ -32,8 +30,8 @@ const getWorkshop = cache((workshopId: string) =>
 export async function generateMetadata({
   params,
 }: WorkshopDetailPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const result = await getWorkshop(slug);
+  const { slug: workshopId } = await params;
+  const result = await getWorkshop(workshopId);
 
   if (!result.success || !result.data) {
     return {
@@ -49,16 +47,15 @@ export async function generateMetadata({
   return {
     title: `${result.data.title} | Workshop Muri`,
     description:
-      description ||
-      `Ikuti workshop ${result.data.title} bersama Muri.`,
+      description || `Ikuti workshop ${result.data.title} bersama Muri.`,
   };
 }
 
 export default async function WorkshopDetailPage({
   params,
 }: WorkshopDetailPageProps) {
-  const { slug } = await params;
-  const result = await getWorkshop(slug);
+  const { slug: workshopId } = await params;
+  const result = await getWorkshop(workshopId);
 
   if (!result.success) {
     throw new Error(
@@ -73,8 +70,6 @@ export default async function WorkshopDetailPage({
   }
 
   const workshop = result.data;
-  // maps_url column was removed from the workshops table; always null for now
-  const mapsUrl = null;
   const loginHref = `/auth/login?redirect=${encodeURIComponent(
     `/edukasi/workshop/${workshop.id}`,
   )}`;
@@ -96,10 +91,7 @@ export default async function WorkshopDetailPage({
               lg:items-start
             "
           >
-            <WorkshopDetailContent
-              workshop={workshop}
-              mapsUrl={mapsUrl}
-            />
+            <WorkshopDetailContent workshop={workshop} mapsUrl={null} />
 
             <WorkshopBookingCard
               workshop={workshop}
@@ -107,28 +99,9 @@ export default async function WorkshopDetailPage({
             />
           </div>
         </section>
-
       </main>
 
       <Footer />
     </div>
   );
-}
-
-function normalizeExternalUrl(value: string | null): string | null {
-  if (!value) {
-    return null;
-  }
-
-  try {
-    const url = new URL(value);
-
-    if (url.protocol !== "http:" && url.protocol !== "https:") {
-      return null;
-    }
-
-    return url.toString();
-  } catch {
-    return null;
-  }
 }
