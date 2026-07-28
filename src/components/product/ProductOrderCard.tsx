@@ -49,7 +49,6 @@ export default function ProductOrderCard({
     availableStock,
     acceptsIdr,
     acceptsCoin,
-    requiresNewPaymentFlow,
     totalPriceIdr,
     totalPriceCoin,
     totalBonusQty,
@@ -66,6 +65,16 @@ export default function ProductOrderCard({
     bonusProductQty,
   });
 
+  /*
+   * Checkout lama ditahan sampai frontend
+   * menggunakan create_customer_checkout_order.
+   */
+
+  const totalBonusCoinReward = Math.max(0, bonusCoinCost) * quantity;
+
+  const hasProductBonus = Boolean(bonusProduct) && totalBonusQty > 0;
+
+  const hasCoinReward = totalBonusCoinReward > 0;
   return (
     <div className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-7">
       <div className="flex items-center gap-3 text-brand-emerald">
@@ -88,7 +97,7 @@ export default function ProductOrderCard({
             </p>
           </div>
 
-          <p className="shrink-0 text-[10px] text-muted-moss">
+          <p className="sh``rink-0 text-[10px] text-muted-moss">
             Stok {availableStock}
           </p>
         </div>
@@ -144,9 +153,7 @@ export default function ProductOrderCard({
           {acceptsCoin && totalPriceCoin !== null && (
             <div
               className={
-                acceptsIdr
-                  ? "border-t border-brand-forest/15 pt-5"
-                  : ""
+                acceptsIdr ? "border-t border-brand-forest/15 pt-5" : ""
               }
             >
               <p className="text-[9px] font-bold uppercase opacity-60">
@@ -160,30 +167,37 @@ export default function ProductOrderCard({
           )}
         </div>
 
-        <p className="mt-5 text-[11px] opacity-70">
-          Untuk {quantity} produk
-        </p>
+        <p className="mt-5 text-[11px] opacity-70">Untuk {quantity} produk</p>
       </div>
 
-      {bonusProduct && totalBonusQty > 0 && (
+      {(hasProductBonus || hasCoinReward) && (
         <div className="mt-5 rounded-xl border border-brand-lime bg-brand-lime/15 p-5">
           <div className="flex gap-3">
             <Gift className="mt-0.5 size-4 shrink-0 text-brand-emerald" />
 
-            <div>
+            <div className="min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-wide text-brand-emerald">
-                Bonus Produk
+                Bonus Pembelian
               </p>
 
-              <p className="mt-2 text-xs font-bold leading-5 text-brand-black">
-                {totalBonusQty}× {bonusProduct.name}
-              </p>
+              <div className="mt-3 space-y-2">
+                {hasProductBonus && bonusProduct && (
+                  <p className="text-xs font-bold leading-5 text-brand-black">
+                    {totalBonusQty}× {bonusProduct.name}
+                  </p>
+                )}
 
-              {bonusCoinCost > 0 && (
-                <p className="mt-2 text-[10px] leading-relaxed text-muted-moss">
-                  Membutuhkan {bonusCoinCost} koin untuk setiap paket bonus.
-                </p>
-              )}
+                {hasCoinReward && (
+                  <p className="text-xs font-bold leading-5 text-brand-black">
+                    + {formatCoin(totalBonusCoinReward)}
+                  </p>
+                )}
+              </div>
+
+              <p className="mt-3 text-[10px] leading-relaxed text-muted-moss">
+                Produk bonus otomatis ditambahkan ke pesanan. Bonus coin akan
+                masuk setelah pesanan selesai.
+              </p>
             </div>
           </div>
         </div>
@@ -191,10 +205,6 @@ export default function ProductOrderCard({
 
       {isSoldOut ? (
         <DisabledCheckoutButton>Stok Habis</DisabledCheckoutButton>
-      ) : requiresNewPaymentFlow ? (
-        <DisabledCheckoutButton>
-          Checkout Coin Sedang Disiapkan
-        </DisabledCheckoutButton>
       ) : (
         <Link
           href={checkoutHref}
@@ -221,11 +231,9 @@ export default function ProductOrderCard({
       )}
 
       <p className="mt-4 text-center text-[10px] leading-relaxed text-muted-moss">
-        {requiresNewPaymentFlow
-          ? "Pembayaran coin akan aktif setelah checkout baru selesai diterapkan."
-          : user
-            ? "Anda akan diarahkan ke halaman checkout."
-            : "Masuk atau buat akun untuk melanjutkan pembelian."}
+        {user
+          ? "Pilih QRIS atau coin pada halaman checkout."
+          : "Masuk atau buat akun untuk melanjutkan pembelian."}
       </p>
     </div>
   );

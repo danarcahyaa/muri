@@ -3,3 +3,4 @@ export * from "./dashboardService";
 export * from "./orderService";
 export * from "./productPurchaseService";
 export * from "./workshopRegistrationService";
+export * from "./secureCheckoutService";

@@ -33,9 +33,6 @@ const inputVariants = cva(
   {
     variants: {
       variant: {
-        /*
-         * Default input mengikuti style halaman login.
-         */
         default: `
           border-line-trace
           bg-transparent
@@ -72,9 +69,40 @@ const inputVariants = cva(
           aria-invalid:focus-visible:ring-destructive/20
         `,
 
-        /*
-         * Alias agar kode auth lama tetap berjalan.
-         */
+        plain: `
+          border-transparent
+          bg-transparent
+          text-inherit
+          shadow-none
+
+          placeholder:text-current
+          placeholder:opacity-50
+
+          focus-visible:border-transparent
+          focus-visible:ring-0
+
+          aria-invalid:focus-visible:border-transparent
+          aria-invalid:focus-visible:ring-0
+        `,
+
+        underline: `
+          rounded-none
+          border-x-0 border-t-0
+          border-b-line-trace
+          bg-transparent
+          px-0
+          text-brand-black
+          shadow-none
+
+          placeholder:text-muted-moss/60
+
+          focus-visible:border-b-brand-emerald
+          focus-visible:ring-0
+
+          aria-invalid:focus-visible:border-b-destructive
+          aria-invalid:focus-visible:ring-0
+        `,
+
         auth: `
           border-line-trace
           bg-transparent
@@ -103,6 +131,7 @@ const inputVariants = cva(
         md: "h-12 px-5 text-xs",
         lg: "h-14 px-5 text-sm",
         auth: "h-12 px-5 text-xs",
+        content: "h-auto p-0 text-inherit",
       },
     },
 
@@ -150,6 +179,12 @@ const iconLayout = {
     startPadding: "pl-11",
     endPadding: "pr-11",
   },
+  content: {
+    startPosition: "left-0",
+    endPosition: "right-0",
+    startPadding: "pl-7",
+    endPadding: "pr-7",
+  },
 } as const;
 
 type InputPrimitiveProps = React.ComponentProps<typeof InputPrimitive>;
@@ -178,10 +213,7 @@ function Input({
   return (
     <div
       data-slot="input-wrapper"
-      className={cn(
-        "relative flex w-full items-center",
-        wrapperClassName,
-      )}
+      className={cn("relative flex w-full items-center", wrapperClassName)}
     >
       {startIcon && (
         <span
