@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
@@ -27,10 +22,7 @@ import {
   X,
 } from "lucide-react";
 
-import {
-  formatCoin,
-  formatIdr,
-} from "@/lib/product-detail";
+import { formatCoin, formatIdr } from "@/lib/product-detail";
 import {
   createCustomerCheckoutOrder,
   getCustomerCheckoutPreview,
@@ -47,10 +39,7 @@ interface CustomerProductCheckoutProps {
   requestedQuantity: number;
 }
 
-type CheckoutStep =
-  | "form"
-  | "review"
-  | "success";
+type CheckoutStep = "form" | "review" | "success";
 
 export default function CustomerProductCheckout({
   sku,
@@ -58,137 +47,83 @@ export default function CustomerProductCheckout({
 }: CustomerProductCheckoutProps) {
   const router = useRouter();
 
-  const checkoutTokenRef =
-    useRef<string | null>(null);
+  const checkoutTokenRef = useRef<string | null>(null);
 
-  const [checkout, setCheckout] =
-    useState<CustomerCheckoutPreview | null>(
-      null,
-    );
+  const [checkout, setCheckout] = useState<CustomerCheckoutPreview | null>(
+    null,
+  );
 
-  const [step, setStep] =
-    useState<CheckoutStep>("form");
+  const [step, setStep] = useState<CheckoutStep>("form");
 
-  const [
-    selectedPaymentMethod,
-    setSelectedPaymentMethod,
-  ] =
-    useState<CustomerCheckoutPaymentMethod | null>(
-      null,
-    );
+  const [selectedPaymentMethod, setSelectedPaymentMethod] =
+    useState<CustomerCheckoutPaymentMethod | null>(null);
 
-  const [receiverName, setReceiverName] =
-    useState("");
+  const [receiverName, setReceiverName] = useState("");
 
-  const [phoneNumber, setPhoneNumber] =
-    useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
-  const [
-    shippingAddress,
-    setShippingAddress,
-  ] = useState("");
+  const [shippingAddress, setShippingAddress] = useState("");
 
-  const [
-    isConfirmationOpen,
-    setIsConfirmationOpen,
-  ] = useState(false);
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
 
-  const [
-    confirmationAccepted,
-    setConfirmationAccepted,
-  ] = useState(false);
+  const [confirmationAccepted, setConfirmationAccepted] = useState(false);
 
   const [purchaseResult, setPurchaseResult] =
-    useState<CreateCustomerCheckoutOrderResult | null>(
-      null,
-    );
+    useState<CreateCustomerCheckoutOrderResult | null>(null);
 
-  const [isLoading, setIsLoading] =
-    useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [isSubmitting, setIsSubmitting] =
-    useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [loadError, setLoadError] =
-    useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const [formError, setFormError] =
-    useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
-  const checkoutPath =
-    `/produk/${encodeURIComponent(
+  const checkoutPath = `/produk/${encodeURIComponent(
+    sku,
+  )}/checkout?quantity=${requestedQuantity}`;
+
+  const loadCheckout = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError(null);
+
+    const result = await getCustomerCheckoutPreview({
       sku,
-    )}/checkout?quantity=${requestedQuantity}`;
+      quantity: requestedQuantity,
+    });
 
-  const loadCheckout =
-    useCallback(async () => {
-      setIsLoading(true);
-      setLoadError(null);
+    if (!result.success || !result.data) {
+      const errorCode = String(result.error ?? "");
 
-      const result =
-        await getCustomerCheckoutPreview({
-          sku,
-          quantity: requestedQuantity,
-        });
-
-      if (!result.success || !result.data) {
-        const errorCode = String(
-          result.error ?? "",
+      if (errorCode.includes("UNAUTHENTICATED")) {
+        router.replace(
+          `/auth/login?redirect=${encodeURIComponent(checkoutPath)}`,
         );
 
-        if (
-          errorCode.includes(
-            "UNAUTHENTICATED",
-          )
-        ) {
-          router.replace(
-            `/auth/login?redirect=${encodeURIComponent(
-              checkoutPath,
-            )}`,
-          );
-
-          return;
-        }
-
-        setLoadError(
-          getSecureCheckoutErrorMessage(
-            result.error,
-          ),
-        );
-
-        setIsLoading(false);
         return;
       }
 
-      const data = result.data;
+      setLoadError(getSecureCheckoutErrorMessage(result.error));
 
-      setCheckout(data);
-
-      setReceiverName(
-        data.profile.fullName,
-      );
-
-      setPhoneNumber(
-        data.profile.phoneNumber ?? "",
-      );
-
-      setShippingAddress(
-        data.profile.shippingAddress ?? "",
-      );
-
-      setSelectedPaymentMethod(
-        data.availablePaymentMethods[0] ??
-          null,
-      );
-
-      setStep("form");
       setIsLoading(false);
-    }, [
-      checkoutPath,
-      requestedQuantity,
-      router,
-      sku,
-    ]);
+      return;
+    }
+
+    const data = result.data;
+
+    setCheckout(data);
+
+    setReceiverName(data.profile.fullName);
+
+    setPhoneNumber(data.profile.phoneNumber ?? "");
+
+    setShippingAddress(data.profile.shippingAddress ?? "");
+
+    setSelectedPaymentMethod(data.availablePaymentMethods[0] ?? null);
+
+    setStep("form");
+    setIsLoading(false);
+  }, [checkoutPath, requestedQuantity, router, sku]);
 
   useEffect(() => {
     void loadCheckout();
@@ -199,106 +134,78 @@ export default function CustomerProductCheckout({
       return;
     }
 
-    const previousOverflow =
-      document.body.style.overflow;
+    const previousOverflow = document.body.style.overflow;
 
-    document.body.style.overflow =
-      "hidden";
+    document.body.style.overflow = "hidden";
 
     return () => {
-      document.body.style.overflow =
-        previousOverflow;
+      document.body.style.overflow = previousOverflow;
     };
   }, [isConfirmationOpen]);
 
   function handleReview() {
     setFormError(null);
 
-    const normalizedName =
-      receiverName.trim();
+    const normalizedName = receiverName.trim();
 
-    const normalizedPhone =
-      phoneNumber.trim();
+    const normalizedPhone = phoneNumber.trim();
 
-    const normalizedAddress =
-      shippingAddress.trim();
+    const normalizedAddress = shippingAddress.trim();
 
     if (normalizedName.length < 2) {
-      setFormError(
-        "Nama penerima minimal 2 karakter.",
-      );
+      setFormError("Nama penerima minimal 2 karakter.");
 
       return;
     }
 
     if (normalizedName.length > 120) {
-      setFormError(
-        "Nama penerima terlalu panjang.",
-      );
+      setFormError("Nama penerima terlalu panjang.");
 
       return;
     }
 
     if (normalizedPhone.length > 30) {
-      setFormError(
-        "Nomor telepon terlalu panjang.",
-      );
+      setFormError("Nomor telepon terlalu panjang.");
 
       return;
     }
 
     if (normalizedAddress.length < 10) {
-      setFormError(
-        "Alamat pengiriman minimal 10 karakter.",
-      );
+      setFormError("Alamat pengiriman minimal 10 karakter.");
 
       return;
     }
 
     if (normalizedAddress.length > 1000) {
-      setFormError(
-        "Alamat pengiriman terlalu panjang.",
-      );
+      setFormError("Alamat pengiriman terlalu panjang.");
 
       return;
     }
 
     if (!selectedPaymentMethod) {
-      setFormError(
-        "Pilih metode pembayaran.",
-      );
+      setFormError("Pilih metode pembayaran.");
 
       return;
     }
 
-    if (
-      selectedPaymentMethod === "coin" &&
-      !checkout?.hasEnoughCoinBalance
-    ) {
-      setFormError(
-        "Saldo coin Anda tidak mencukupi.",
-      );
+    if (selectedPaymentMethod === "coin" && !checkout?.hasEnoughCoinBalance) {
+      setFormError("Saldo coin Anda tidak mencukupi.");
 
       return;
     }
 
     if (
       checkout?.reward?.productBonus &&
-      !checkout.reward.productBonus
-        .hasEnoughStock
+      !checkout.reward.productBonus.hasEnoughStock
     ) {
-      setFormError(
-        "Stok produk bonus tidak mencukupi.",
-      );
+      setFormError("Stok produk bonus tidak mencukupi.");
 
       return;
     }
 
     setReceiverName(normalizedName);
     setPhoneNumber(normalizedPhone);
-    setShippingAddress(
-      normalizedAddress,
-    );
+    setShippingAddress(normalizedAddress);
 
     setStep("review");
   }
@@ -310,18 +217,12 @@ export default function CustomerProductCheckout({
   }
 
   async function handlePurchase() {
-    if (
-      !checkout ||
-      !selectedPaymentMethod ||
-      isSubmitting
-    ) {
+    if (!checkout || !selectedPaymentMethod || isSubmitting) {
       return;
     }
 
     if (!confirmationAccepted) {
-      setFormError(
-        "Centang persetujuan transaksi sebelum melanjutkan.",
-      );
+      setFormError("Centang persetujuan transaksi sebelum melanjutkan.");
 
       return;
     }
@@ -331,40 +232,28 @@ export default function CustomerProductCheckout({
 
     try {
       const checkoutToken =
-        checkoutTokenRef.current ??
-        globalThis.crypto.randomUUID();
+        checkoutTokenRef.current ?? globalThis.crypto.randomUUID();
 
-      checkoutTokenRef.current =
-        checkoutToken;
+      checkoutTokenRef.current = checkoutToken;
 
-      const result =
-        await createCustomerCheckoutOrder(
-          {
-            productId:
-              checkout.product.id,
+      const result = await createCustomerCheckoutOrder({
+        productId: checkout.product.id,
 
-            quantity:
-              checkout.quantity,
+        quantity: checkout.quantity,
 
-            receiverName,
-            phoneNumber,
-            shippingAddress,
+        receiverName,
+        phoneNumber,
+        shippingAddress,
 
-            paymentMethod:
-              selectedPaymentMethod,
+        paymentMethod: selectedPaymentMethod,
 
-            checkoutToken,
+        checkoutToken,
 
-            confirmationAccepted: true,
-          },
-        );
+        confirmationAccepted: true,
+      });
 
       if (!result.success || !result.data) {
-        setFormError(
-          getSecureCheckoutErrorMessage(
-            result.error,
-          ),
-        );
+        setFormError(getSecureCheckoutErrorMessage(result.error));
 
         return;
       }
@@ -375,14 +264,9 @@ export default function CustomerProductCheckout({
 
       router.refresh();
     } catch (error) {
-      console.error(
-        "[CustomerProductCheckout] Purchase error:",
-        error,
-      );
+      console.error("[CustomerProductCheckout] Purchase error:", error);
 
-      setFormError(
-        "Checkout belum dapat diproses. Silakan coba kembali.",
-      );
+      setFormError("Checkout belum dapat diproses. Silakan coba kembali.");
     } finally {
       setIsSubmitting(false);
     }
@@ -395,24 +279,14 @@ export default function CustomerProductCheckout({
   if (loadError || !checkout) {
     return (
       <CheckoutLoadError
-        message={
-          loadError ??
-          "Data checkout tidak tersedia."
-        }
+        message={loadError ?? "Data checkout tidak tersedia."}
         onRetry={loadCheckout}
       />
     );
   }
 
-  if (
-    step === "success" &&
-    purchaseResult
-  ) {
-    return (
-      <CheckoutSuccess
-        result={purchaseResult}
-      />
-    );
+  if (step === "success" && purchaseResult) {
+    return <CheckoutSuccess result={purchaseResult} />;
   }
 
   return (
@@ -430,25 +304,13 @@ export default function CustomerProductCheckout({
               checkout={checkout}
               receiverName={receiverName}
               phoneNumber={phoneNumber}
-              shippingAddress={
-                shippingAddress
-              }
-              selectedPaymentMethod={
-                selectedPaymentMethod
-              }
+              shippingAddress={shippingAddress}
+              selectedPaymentMethod={selectedPaymentMethod}
               errorMessage={formError}
-              onReceiverNameChange={
-                setReceiverName
-              }
-              onPhoneNumberChange={
-                setPhoneNumber
-              }
-              onShippingAddressChange={
-                setShippingAddress
-              }
-              onPaymentMethodChange={
-                setSelectedPaymentMethod
-              }
+              onReceiverNameChange={setReceiverName}
+              onPhoneNumberChange={setPhoneNumber}
+              onShippingAddressChange={setShippingAddress}
+              onPaymentMethodChange={setSelectedPaymentMethod}
               onReview={handleReview}
             />
           ) : (
@@ -456,29 +318,21 @@ export default function CustomerProductCheckout({
               checkout={checkout}
               receiverName={receiverName}
               phoneNumber={phoneNumber}
-              shippingAddress={
-                shippingAddress
-              }
-              paymentMethod={
-                selectedPaymentMethod
-              }
+              shippingAddress={shippingAddress}
+              paymentMethod={selectedPaymentMethod}
               errorMessage={formError}
               onBack={() => {
                 setFormError(null);
                 setStep("form");
               }}
-              onConfirm={
-                openFinalConfirmation
-              }
+              onConfirm={openFinalConfirmation}
             />
           )}
         </section>
 
         <CheckoutSummary
           checkout={checkout}
-          paymentMethod={
-            selectedPaymentMethod
-          }
+          paymentMethod={selectedPaymentMethod}
         />
       </div>
 
@@ -487,25 +341,15 @@ export default function CustomerProductCheckout({
           <FinalConfirmationModal
             checkout={checkout}
             receiverName={receiverName}
-            shippingAddress={
-              shippingAddress
-            }
-            paymentMethod={
-              selectedPaymentMethod
-            }
-            confirmationAccepted={
-              confirmationAccepted
-            }
+            shippingAddress={shippingAddress}
+            paymentMethod={selectedPaymentMethod}
+            confirmationAccepted={confirmationAccepted}
             isSubmitting={isSubmitting}
             errorMessage={formError}
-            onConfirmationChange={
-              setConfirmationAccepted
-            }
+            onConfirmationChange={setConfirmationAccepted}
             onClose={() => {
               if (!isSubmitting) {
-                setIsConfirmationOpen(
-                  false,
-                );
+                setIsConfirmationOpen(false);
                 setFormError(null);
               }
             }}
@@ -536,22 +380,12 @@ function CheckoutForm({
   receiverName: string;
   phoneNumber: string;
   shippingAddress: string;
-  selectedPaymentMethod:
-    | CustomerCheckoutPaymentMethod
-    | null;
+  selectedPaymentMethod: CustomerCheckoutPaymentMethod | null;
   errorMessage: string | null;
-  onReceiverNameChange: (
-    value: string,
-  ) => void;
-  onPhoneNumberChange: (
-    value: string,
-  ) => void;
-  onShippingAddressChange: (
-    value: string,
-  ) => void;
-  onPaymentMethodChange: (
-    value: CustomerCheckoutPaymentMethod,
-  ) => void;
+  onReceiverNameChange: (value: string) => void;
+  onPhoneNumberChange: (value: string) => void;
+  onShippingAddressChange: (value: string) => void;
+  onPaymentMethodChange: (value: CustomerCheckoutPaymentMethod) => void;
   onReview: () => void;
 }) {
   return (
@@ -559,9 +393,7 @@ function CheckoutForm({
       <div className="flex items-center gap-3 text-brand-emerald">
         <ShieldCheck className="size-4" />
 
-        <p className="text-xs font-bold uppercase">
-          Secure Checkout
-        </p>
+        <p className="text-xs font-bold uppercase">Secure Checkout</p>
       </div>
 
       <h1 className="mt-5 font-display text-4xl font-medium tracking-[-0.045em] text-brand-black sm:text-5xl">
@@ -569,8 +401,8 @@ function CheckoutForm({
       </h1>
 
       <p className="mt-4 max-w-xl text-sm leading-6 text-muted-moss">
-        Isi data pengiriman dan pilih metode
-        pembayaran sebelum melakukan review.
+        Isi data pengiriman dan pilih metode pembayaran sebelum melakukan
+        review.
       </p>
 
       <div className="mt-8 space-y-5">
@@ -581,9 +413,7 @@ function CheckoutForm({
           maxLength={120}
           placeholder="Nama lengkap penerima"
           required
-          onChange={
-            onReceiverNameChange
-          }
+          onChange={onReceiverNameChange}
         />
 
         <CheckoutInput
@@ -593,9 +423,7 @@ function CheckoutForm({
           maxLength={30}
           placeholder="Contoh: 081234567890"
           type="tel"
-          onChange={
-            onPhoneNumberChange
-          }
+          onChange={onPhoneNumberChange}
         />
 
         <div>
@@ -604,10 +432,7 @@ function CheckoutForm({
             className="text-xs font-bold text-brand-black"
           >
             Alamat Pengiriman
-            <span className="text-red-600">
-              {" "}
-              *
-            </span>
+            <span className="text-red-600"> *</span>
           </label>
 
           <textarea
@@ -617,9 +442,7 @@ function CheckoutForm({
             value={shippingAddress}
             placeholder="Masukkan alamat lengkap pengiriman"
             onChange={(event) => {
-              onShippingAddressChange(
-                event.target.value,
-              );
+              onShippingAddressChange(event.target.value);
             }}
             className="
               mt-3 w-full resize-none
@@ -639,78 +462,47 @@ function CheckoutForm({
       </div>
 
       <div className="mt-9">
-        <p className="text-xs font-bold text-brand-black">
-          Metode Pembayaran
-        </p>
+        <p className="text-xs font-bold text-brand-black">Metode Pembayaran</p>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {checkout.availablePaymentMethods.includes(
-            "qris",
-          ) && (
+          {checkout.availablePaymentMethods.includes("qris") && (
             <PaymentMethodOption
               method="qris"
-              selected={
-                selectedPaymentMethod ===
-                "qris"
-              }
+              selected={selectedPaymentMethod === "qris"}
               title="QRIS"
               description="Bayar menggunakan aplikasi bank atau dompet digital."
               amount={
-                checkout.totalPriceIdr !==
-                null
-                  ? formatIdr(
-                      checkout.totalPriceIdr,
-                    )
+                checkout.totalPriceIdr !== null
+                  ? formatIdr(checkout.totalPriceIdr)
                   : "-"
               }
-              onSelect={
-                onPaymentMethodChange
-              }
+              onSelect={onPaymentMethodChange}
             />
           )}
 
-          {checkout.availablePaymentMethods.includes(
-            "coin",
-          ) && (
+          {checkout.availablePaymentMethods.includes("coin") && (
             <PaymentMethodOption
               method="coin"
-              selected={
-                selectedPaymentMethod ===
-                "coin"
-              }
-              disabled={
-                !checkout.hasEnoughCoinBalance
-              }
+              selected={selectedPaymentMethod === "coin"}
+              disabled={!checkout.hasEnoughCoinBalance}
               title="Coin"
               description={`Saldo tersedia ${formatCoin(
-                checkout.profile
-                  .totalPoints,
+                checkout.profile.totalPoints,
               )}.`}
               amount={
-                checkout.totalPriceCoin !==
-                null
-                  ? formatCoin(
-                      checkout.totalPriceCoin,
-                    )
+                checkout.totalPriceCoin !== null
+                  ? formatCoin(checkout.totalPriceCoin)
                   : "-"
               }
-              onSelect={
-                onPaymentMethodChange
-              }
+              onSelect={onPaymentMethodChange}
             />
           )}
         </div>
       </div>
 
-      <CheckoutRewardCard
-        checkout={checkout}
-      />
+      <CheckoutRewardCard checkout={checkout} />
 
-      {errorMessage && (
-        <CheckoutErrorMessage
-          message={errorMessage}
-        />
-      )}
+      {errorMessage && <CheckoutErrorMessage message={errorMessage} />}
 
       <button
         type="button"
@@ -726,7 +518,6 @@ function CheckoutForm({
         "
       >
         Review Pesanan
-
         <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
       </button>
     </>
@@ -748,14 +539,9 @@ function PaymentMethodOption({
   title: string;
   description: string;
   amount: string;
-  onSelect: (
-    method: CustomerCheckoutPaymentMethod,
-  ) => void;
+  onSelect: (method: CustomerCheckoutPaymentMethod) => void;
 }) {
-  const Icon =
-    method === "qris"
-      ? QrCode
-      : Coins;
+  const Icon = method === "qris" ? QrCode : Coins;
 
   return (
     <button
@@ -797,17 +583,13 @@ function PaymentMethodOption({
 
       <Icon className="size-5 text-brand-emerald" />
 
-      <p className="mt-5 text-sm font-bold text-brand-black">
-        {title}
-      </p>
+      <p className="mt-5 text-sm font-bold text-brand-black">{title}</p>
 
       <p className="mt-2 text-[10px] leading-4 text-muted-moss">
         {description}
       </p>
 
-      <p className="mt-5 text-xs font-bold text-brand-forest">
-        {amount}
-      </p>
+      <p className="mt-5 text-xs font-bold text-brand-forest">{amount}</p>
     </button>
   );
 }
@@ -826,9 +608,7 @@ function CheckoutReview({
   receiverName: string;
   phoneNumber: string;
   shippingAddress: string;
-  paymentMethod:
-    | CustomerCheckoutPaymentMethod
-    | null;
+  paymentMethod: CustomerCheckoutPaymentMethod | null;
   errorMessage: string | null;
   onBack: () => void;
   onConfirm: () => void;
@@ -838,9 +618,7 @@ function CheckoutReview({
       <div className="flex items-center gap-3 text-brand-emerald">
         <CheckCircle2 className="size-4" />
 
-        <p className="text-xs font-bold uppercase">
-          Review Pesanan
-        </p>
+        <p className="text-xs font-bold uppercase">Review Pesanan</p>
       </div>
 
       <h1 className="mt-5 font-display text-4xl font-medium tracking-[-0.045em] text-brand-black sm:text-5xl">
@@ -848,16 +626,11 @@ function CheckoutReview({
       </h1>
 
       <p className="mt-4 text-sm leading-6 text-muted-moss">
-        Periksa seluruh detail sebelum membuka
-        konfirmasi transaksi akhir.
+        Periksa seluruh detail sebelum membuka konfirmasi transaksi akhir.
       </p>
 
       <div className="mt-8 space-y-4">
-        <ReviewFact
-          icon={UserRound}
-          label="Penerima"
-          value={receiverName}
-        />
+        <ReviewFact icon={UserRound} label="Penerima" value={receiverName} />
 
         <ReviewFact
           icon={MapPin}
@@ -872,35 +645,19 @@ function CheckoutReview({
         />
 
         <ReviewFact
-          icon={
-            paymentMethod === "coin"
-              ? Coins
-              : QrCode
-          }
+          icon={paymentMethod === "coin" ? Coins : QrCode}
           label="Pembayaran"
           value={
             paymentMethod === "coin"
-              ? `Coin — ${formatCoin(
-                  checkout.totalPriceCoin ??
-                    0,
-                )}`
-              : `QRIS — ${formatIdr(
-                  checkout.totalPriceIdr ??
-                    0,
-                )}`
+              ? `Coin — ${formatCoin(checkout.totalPriceCoin ?? 0)}`
+              : `QRIS — ${formatIdr(checkout.totalPriceIdr ?? 0)}`
           }
         />
       </div>
 
-      <CheckoutRewardCard
-        checkout={checkout}
-      />
+      <CheckoutRewardCard checkout={checkout} />
 
-      {errorMessage && (
-        <CheckoutErrorMessage
-          message={errorMessage}
-        />
-      )}
+      {errorMessage && <CheckoutErrorMessage message={errorMessage} />}
 
       <div className="mt-8 grid gap-3 sm:grid-cols-2">
         <button
@@ -959,26 +716,18 @@ function FinalConfirmationModal({
   checkout: CustomerCheckoutPreview;
   receiverName: string;
   shippingAddress: string;
-  paymentMethod:
-    | CustomerCheckoutPaymentMethod
-    | null;
+  paymentMethod: CustomerCheckoutPaymentMethod | null;
   confirmationAccepted: boolean;
   isSubmitting: boolean;
   errorMessage: string | null;
-  onConfirmationChange: (
-    value: boolean,
-  ) => void;
+  onConfirmationChange: (value: boolean) => void;
   onClose: () => void;
   onConfirm: () => void;
 }) {
   const paymentText =
     paymentMethod === "coin"
-      ? formatCoin(
-          checkout.totalPriceCoin ?? 0,
-        )
-      : formatIdr(
-          checkout.totalPriceIdr ?? 0,
-        );
+      ? formatCoin(checkout.totalPriceCoin ?? 0)
+      : formatIdr(checkout.totalPriceIdr ?? 0);
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-brand-black/65 px-4 py-8 backdrop-blur-sm">
@@ -1011,44 +760,28 @@ function FinalConfirmationModal({
             value={`${checkout.quantity}× ${checkout.product.name}`}
           />
 
-          <ConfirmationRow
-            label="Penerima"
-            value={receiverName}
-          />
+          <ConfirmationRow label="Penerima" value={receiverName} />
 
-          <ConfirmationRow
-            label="Alamat"
-            value={shippingAddress}
-          />
+          <ConfirmationRow label="Alamat" value={shippingAddress} />
 
           <ConfirmationRow
             label="Metode"
-            value={
-              paymentMethod === "coin"
-                ? "Coin"
-                : "QRIS"
-            }
+            value={paymentMethod === "coin" ? "Coin" : "QRIS"}
           />
 
-          <ConfirmationRow
-            label="Total"
-            value={paymentText}
-            last
-          />
+          <ConfirmationRow label="Total" value={paymentText} last />
         </div>
 
         {paymentMethod === "qris" && (
           <p className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800">
-            Pesanan akan dibuat dengan status
-            menunggu pembayaran. Stok akan
+            Pesanan akan dibuat dengan status menunggu pembayaran. Stok akan
             direservasi selama 30 menit.
           </p>
         )}
 
         {paymentMethod === "coin" && (
           <p className="mt-5 rounded-xl border border-brand-lime bg-brand-lime/15 px-4 py-3 text-xs leading-5 text-brand-forest">
-            Coin akan langsung dipotong setelah
-            transaksi dikonfirmasi.
+            Coin akan langsung dipotong setelah transaksi dikonfirmasi.
           </p>
         )}
 
@@ -1058,33 +791,22 @@ function FinalConfirmationModal({
             checked={confirmationAccepted}
             disabled={isSubmitting}
             onChange={(event) => {
-              onConfirmationChange(
-                event.target.checked,
-              );
+              onConfirmationChange(event.target.checked);
             }}
             className="mt-0.5 size-4 accent-brand-forest"
           />
 
           <span className="text-xs leading-5 text-brand-black">
-            Saya sudah memeriksa produk, jumlah,
-            alamat, metode pembayaran, dan total
-            transaksi. Saya menyetujui pembuatan
-            pesanan ini.
+            Saya sudah memeriksa produk, jumlah, alamat, metode pembayaran, dan
+            total transaksi. Saya menyetujui pembuatan pesanan ini.
           </span>
         </label>
 
-        {errorMessage && (
-          <CheckoutErrorMessage
-            message={errorMessage}
-          />
-        )}
+        {errorMessage && <CheckoutErrorMessage message={errorMessage} />}
 
         <button
           type="button"
-          disabled={
-            isSubmitting ||
-            !confirmationAccepted
-          }
+          disabled={isSubmitting || !confirmationAccepted}
           onClick={onConfirm}
           className="
             mt-6 flex w-full
@@ -1126,27 +848,19 @@ function CheckoutSummary({
   paymentMethod,
 }: {
   checkout: CustomerCheckoutPreview;
-  paymentMethod:
-    | CustomerCheckoutPaymentMethod
-    | null;
+  paymentMethod: CustomerCheckoutPaymentMethod | null;
 }) {
   const totalPayment =
     paymentMethod === "coin"
-      ? formatCoin(
-          checkout.totalPriceCoin ?? 0,
-        )
-      : formatIdr(
-          checkout.totalPriceIdr ?? 0,
-        );
+      ? formatCoin(checkout.totalPriceCoin ?? 0)
+      : formatIdr(checkout.totalPriceIdr ?? 0);
 
   return (
     <aside className="self-start rounded-2xl border border-line-trace bg-canvas-pure p-6 lg:sticky lg:top-24">
       <div className="flex items-center gap-3 text-brand-emerald">
         <ShoppingBag className="size-4" />
 
-        <h2 className="text-xs font-bold uppercase">
-          Ringkasan Pesanan
-        </h2>
+        <h2 className="text-xs font-bold uppercase">Ringkasan Pesanan</h2>
       </div>
 
       <div className="mt-7 rounded-xl bg-canvas-warm p-5">
@@ -1155,14 +869,11 @@ function CheckoutSummary({
         </p>
 
         <p className="mt-2 text-xs text-muted-moss">
-          {checkout.product.brandName} ·{" "}
-          {checkout.product.categoryName}
+          {checkout.product.brandName} · {checkout.product.categoryName}
         </p>
 
         <div className="mt-5 flex items-center justify-between border-t border-line-trace pt-4 text-xs">
-          <span className="text-muted-moss">
-            Jumlah
-          </span>
+          <span className="text-muted-moss">Jumlah</span>
 
           <span className="font-bold text-brand-black">
             {checkout.quantity}
@@ -1171,9 +882,7 @@ function CheckoutSummary({
       </div>
 
       <div className="mt-5 rounded-xl bg-brand-lime p-6 text-brand-forest">
-        <p className="text-[10px] uppercase opacity-70">
-          Total Pembayaran
-        </p>
+        <p className="text-[10px] uppercase opacity-70">Total Pembayaran</p>
 
         <p className="mt-7 font-display text-4xl font-medium tracking-[-0.05em]">
           {totalPayment}
@@ -1184,16 +893,12 @@ function CheckoutSummary({
         <div className="mt-5 space-y-3 text-xs">
           <SummaryRow
             label="Saldo coin"
-            value={formatCoin(
-              checkout.profile.totalPoints,
-            )}
+            value={formatCoin(checkout.profile.totalPoints)}
           />
 
           <SummaryRow
             label="Coin digunakan"
-            value={formatCoin(
-              checkout.totalPriceCoin ?? 0,
-            )}
+            value={formatCoin(checkout.totalPriceCoin ?? 0)}
           />
 
           <SummaryRow
@@ -1201,10 +906,7 @@ function CheckoutSummary({
             value={formatCoin(
               Math.max(
                 0,
-                checkout.profile
-                  .totalPoints -
-                  (checkout.totalPriceCoin ??
-                    0),
+                checkout.profile.totalPoints - (checkout.totalPriceCoin ?? 0),
               ),
             )}
             strong
@@ -1212,10 +914,7 @@ function CheckoutSummary({
         </div>
       )}
 
-      <CheckoutRewardCard
-        checkout={checkout}
-        compact
-      />
+      <CheckoutRewardCard checkout={checkout} compact />
     </aside>
   );
 }
@@ -1233,11 +932,9 @@ function CheckoutRewardCard({
     return null;
   }
 
-  const hasProductBonus =
-    Boolean(reward.productBonus);
+  const hasProductBonus = Boolean(reward.productBonus);
 
-  const hasCoinReward =
-    reward.totalCoinReward > 0;
+  const hasCoinReward = reward.totalCoinReward > 0;
 
   return (
     <div
@@ -1257,35 +954,23 @@ function CheckoutRewardCard({
           </p>
 
           <div className="mt-3 space-y-2">
-            {hasProductBonus &&
-              reward.productBonus && (
-                <p className="text-xs font-bold text-brand-black">
-                  {
-                    reward.productBonus
-                      .totalQuantity
-                  }
-                  ×{" "}
-                  {
-                    reward.productBonus
-                      .productName
-                  }
-                </p>
-              )}
+            {hasProductBonus && reward.productBonus && (
+              <p className="text-xs font-bold text-brand-black">
+                {reward.productBonus.totalQuantity}×{" "}
+                {reward.productBonus.productName}
+              </p>
+            )}
 
             {hasCoinReward && (
               <p className="text-xs font-bold text-brand-black">
-                +{" "}
-                {formatCoin(
-                  reward.totalCoinReward,
-                )}
+                + {formatCoin(reward.totalCoinReward)}
               </p>
             )}
           </div>
 
           <p className="mt-3 text-[10px] leading-4 text-muted-moss">
-            Produk bonus otomatis masuk pesanan.
-            Bonus coin diberikan setelah pesanan
-            selesai.
+            Produk bonus otomatis masuk pesanan. Bonus coin diberikan setelah
+            pesanan selesai.
           </p>
         </div>
       </div>
@@ -1303,8 +988,7 @@ function CheckoutSuccess({
     .slice(0, 8)
     .toUpperCase();
 
-  const isCoinPayment =
-    result.paymentMethod === "coin";
+  const isCoinPayment = result.paymentMethod === "coin";
 
   return (
     <section className="mx-auto max-w-2xl rounded-3xl border border-line-trace bg-canvas-pure px-6 py-14 text-center sm:px-10">
@@ -1313,9 +997,7 @@ function CheckoutSuccess({
       </div>
 
       <p className="mt-7 text-xs font-bold uppercase text-brand-emerald">
-        {isCoinPayment
-          ? "Pembayaran Coin Berhasil"
-          : "Pesanan Berhasil Dibuat"}
+        {isCoinPayment ? "Pembayaran Coin Berhasil" : "Pesanan Berhasil Dibuat"}
       </p>
 
       <h1 className="mt-4 font-display text-4xl font-medium tracking-[-0.045em] text-brand-black sm:text-5xl">
@@ -1331,44 +1013,30 @@ function CheckoutSuccess({
       <div className="mt-8 rounded-2xl bg-canvas-warm p-6">
         <SummaryRow
           label="Metode pembayaran"
-          value={
-            isCoinPayment
-              ? "Coin"
-              : "QRIS"
-          }
+          value={isCoinPayment ? "Coin" : "QRIS"}
         />
 
         <SummaryRow
           label="Total"
           value={
             isCoinPayment
-              ? formatCoin(
-                  result.amountCoin,
-                )
-              : formatIdr(
-                  result.amountIdr,
-                )
+              ? formatCoin(result.amountCoin)
+              : formatIdr(result.amountIdr)
           }
         />
 
         <SummaryRow
           label="Bonus coin setelah selesai"
-          value={formatCoin(
-            result.pointsEarned,
-          )}
+          value={formatCoin(result.pointsEarned)}
           strong
         />
       </div>
 
-      {!isCoinPayment &&
-        result.expiresAt && (
-          <p className="mt-5 text-xs text-amber-700">
-            Batas pembayaran:{" "}
-            {formatDateTime(
-              result.expiresAt,
-            )}
-          </p>
-        )}
+      {!isCoinPayment && result.expiresAt && (
+        <p className="mt-5 text-xs text-amber-700">
+          Batas pembayaran: {formatDateTime(result.expiresAt)}
+        </p>
+      )}
 
       <div className="mt-8 grid gap-3 sm:grid-cols-2">
         <Link
@@ -1379,10 +1047,15 @@ function CheckoutSuccess({
         </Link>
 
         <Link
-          href="/dashboard/orders"
+          href={
+            isCoinPayment
+              ? "/dashboard/orders"
+              : `/dashboard/orders/${result.orderId}/payment`
+          }
           className="flex items-center justify-center gap-2 rounded-md bg-brand-forest px-6 py-4 text-xs font-bold text-white transition hover:bg-brand-black"
         >
-          Lihat Pesanan
+          {isCoinPayment ? "Lihat Pesanan" : "Bayar Sekarang"}
+
           <ArrowRight className="size-4" />
         </Link>
       </div>
@@ -1411,18 +1084,10 @@ function CheckoutInput({
 }) {
   return (
     <div>
-      <label
-        htmlFor={id}
-        className="text-xs font-bold text-brand-black"
-      >
+      <label htmlFor={id} className="text-xs font-bold text-brand-black">
         {label}
 
-        {required && (
-          <span className="text-red-600">
-            {" "}
-            *
-          </span>
-        )}
+        {required && <span className="text-red-600"> *</span>}
       </label>
 
       <input
@@ -1464,9 +1129,7 @@ function ReviewFact({
       <div className="flex items-center gap-2 text-muted-moss">
         <Icon className="size-4" />
 
-        <span className="text-[10px] font-medium uppercase">
-          {label}
-        </span>
+        <span className="text-[10px] font-medium uppercase">{label}</span>
       </div>
 
       <p className="mt-3 text-sm font-medium leading-6 text-brand-black">
@@ -1493,9 +1156,7 @@ function ConfirmationRow({
         ${last ? "" : "border-b border-line-trace"}
       `}
     >
-      <span className="text-xs text-muted-moss">
-        {label}
-      </span>
+      <span className="text-xs text-muted-moss">{label}</span>
 
       <span className="max-w-[65%] text-right text-xs font-bold text-brand-black">
         {value}
@@ -1515,9 +1176,7 @@ function SummaryRow({
 }) {
   return (
     <div className="flex items-center justify-between gap-4 border-b border-line-trace py-3 last:border-b-0">
-      <span className="text-xs text-muted-moss">
-        {label}
-      </span>
+      <span className="text-xs text-muted-moss">{label}</span>
 
       <span
         className={
@@ -1532,11 +1191,7 @@ function SummaryRow({
   );
 }
 
-function CheckoutErrorMessage({
-  message,
-}: {
-  message: string;
-}) {
+function CheckoutErrorMessage({ message }: { message: string }) {
   return (
     <div
       role="alert"
@@ -1576,9 +1231,7 @@ function CheckoutLoadError({
         Checkout tidak tersedia
       </h1>
 
-      <p className="mt-3 text-xs text-muted-moss">
-        {message}
-      </p>
+      <p className="mt-3 text-xs text-muted-moss">{message}</p>
 
       <button
         type="button"
@@ -1593,20 +1246,15 @@ function CheckoutLoadError({
   );
 }
 
-function formatDateTime(
-  value: string,
-): string {
+function formatDateTime(value: string): string {
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
     return "Tidak tersedia";
   }
 
-  return new Intl.DateTimeFormat(
-    "id-ID",
-    {
-      dateStyle: "medium",
-      timeStyle: "short",
-    },
-  ).format(date);
+  return new Intl.DateTimeFormat("id-ID", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
 }

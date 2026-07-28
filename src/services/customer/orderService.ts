@@ -6,6 +6,7 @@ import type { BaseResponse } from "@/types/common";
 import type {
   CustomerOrder,
   CustomerOrderItem,
+  CustomerOrderPayment,
   CustomerOrderStatus,
 } from "@/types/customerOrder";
 
@@ -30,6 +31,25 @@ const CUSTOMER_ORDER_SELECT = `
     coins_redeemed_snapshot,
     is_bonus_claimed,
     created_at
+  ),
+
+  order_payments (
+    id,
+    payment_method,
+    payment_status,
+    amount_idr,
+    amount_coin,
+    provider,
+    provider_reference,
+    proof_url,
+    expires_at,
+    submitted_at,
+    paid_at,
+    failed_at,
+    refunded_at,
+    expired_at,
+    created_at,
+    updated_at
   )
 ` as const;
 
@@ -37,9 +57,16 @@ const customerOrderTypeQuery = supabase
   .from("orders")
   .select(CUSTOMER_ORDER_SELECT);
 
-type CustomerOrderQueryRow = QueryData<
-  typeof customerOrderTypeQuery
->[number];
+type CustomerOrderQueryRow = QueryData<typeof customerOrderTypeQuery>[number];
+
+type CustomerOrderPaymentRelation = NonNullable<
+  CustomerOrderQueryRow["order_payments"]
+>;
+
+type CustomerOrderPaymentQueryRow =
+  CustomerOrderPaymentRelation extends Array<infer Item>
+    ? Item
+    : CustomerOrderPaymentRelation;
 
 /**
  * Mengambil seluruh pesanan customer yang sedang login.
@@ -47,9 +74,7 @@ type CustomerOrderQueryRow = QueryData<
  * Filter user_id tetap diberikan secara eksplisit,
  * selain proteksi RLS pada database.
  */
-export async function getMyOrders(): Promise<
-  BaseResponse<CustomerOrder[]>
-> {
+export async function getMyOrders(): Promise<BaseResponse<CustomerOrder[]>> {
   try {
     const {
       data: { user },
@@ -90,36 +115,98 @@ export async function getMyOrders(): Promise<
   }
 }
 
-function mapCustomerOrder(
-  row: CustomerOrderQueryRow,
-): CustomerOrder {
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/**
+ * Mengambil satu pesanan milik customer yang sedang login.
+ *
+ * Filter user_id tetap diberikan walaupun database
+ * sudah dilindungi oleh RLS.
+ */
+export async function getMyOrderById(
+  orderId: string,
+): Promise<BaseResponse<CustomerOrder>> {
+  try {
+    const normalizedOrderId = orderId.trim();
+
+    if (!normalizedOrderId || !UUID_PATTERN.test(normalizedOrderId)) {
+      return {
+        success: false,
+        error: "INVALID_ORDER_ID",
+      };
+    }
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return {
+        success: false,
+        error: "UNAUTHENTICATED",
+      };
+    }
+
+    const { data, error } = await supabase
+      .from("orders")
+      .select(CUSTOMER_ORDER_SELECT)
+      .eq("id", normalizedOrderId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (error) {
+      return {
+        success: false,
+        error: translateSupabaseError(error),
+      };
+    }
+
+    if (!data) {
+      return {
+        success: false,
+        error: "ORDER_NOT_FOUND",
+      };
+    }
+
+    return {
+      success: true,
+      data: mapCustomerOrder(data),
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: translateSupabaseError(error),
+    };
+  }
+}
+
+function mapCustomerOrder(row: CustomerOrderQueryRow): CustomerOrder {
+  const payment = unwrapSingleRelation(row.order_payments);
+
   return {
     id: row.id,
-    status:
-      row.order_status as CustomerOrderStatus,
+    status: row.order_status,
 
     receiverName: row.receiver_name,
     phoneNumber: row.phone_number,
     shippingAddress: row.shipping_address,
 
-    totalPriceIdr: toNonNegativeNumber(
-      row.total_price_idr,
-    ),
+    totalPriceIdr: toNonNegativeNumber(row.total_price_idr),
 
-    totalCoinsRedeemed: toNonNegativeNumber(
-      row.total_coins_redeemed,
-    ),
+    totalCoinsRedeemed: toNonNegativeNumber(row.total_coins_redeemed),
 
-    pointsEarned: toNonNegativeNumber(
-      row.points_earned,
-    ),
+    pointsEarned: toNonNegativeNumber(row.points_earned),
 
     createdAt: row.created_at,
     updatedAt: row.updated_at,
 
-    items: (row.order_items ?? []).map(
-      mapCustomerOrderItem,
-    ),
+    payment: payment
+      ? mapCustomerOrderPayment(payment as CustomerOrderPaymentQueryRow)
+      : null,
+
+    items: (row.order_items ?? []).map(mapCustomerOrderItem),
   };
 }
 
@@ -129,36 +216,48 @@ function mapCustomerOrderItem(
   return {
     id: row.id,
     productId: row.product_id,
-
-    productName:
-      row.product_name_snapshot,
-
-    priceIdr: toNonNegativeNumber(
-      row.price_snapshot_idr,
-    ),
-
-    quantity: toNonNegativeInteger(
-      row.quantity,
-    ),
-
-    coinsRedeemed: toNonNegativeNumber(
-      row.coins_redeemed_snapshot,
-    ),
-
-    isBonusClaimed:
-      row.is_bonus_claimed,
-
+    productName: row.product_name_snapshot,
+    priceIdr: toNonNegativeNumber(row.price_snapshot_idr),
+    quantity: toNonNegativeInteger(row.quantity),
+    coinsRedeemed: toNonNegativeNumber(row.coins_redeemed_snapshot),
+    isBonusClaimed: row.is_bonus_claimed,
     createdAt: row.created_at,
   };
 }
 
-function toNonNegativeNumber(
-  value: unknown,
-): number {
-  const parsed =
-    typeof value === "number"
-      ? value
-      : Number(value);
+function mapCustomerOrderPayment(
+  row: CustomerOrderPaymentQueryRow,
+): CustomerOrderPayment {
+  return {
+    id: row.id,
+
+    method: row.payment_method,
+    status: row.payment_status,
+
+    amountIdr: toNonNegativeNumber(row.amount_idr),
+
+    amountCoin: toNonNegativeNumber(row.amount_coin),
+
+    provider: normalizeOptionalText(row.provider),
+
+    providerReference: normalizeOptionalText(row.provider_reference),
+
+    proofUrl: normalizeOptionalText(row.proof_url),
+
+    expiresAt: row.expires_at,
+    submittedAt: row.submitted_at,
+    paidAt: row.paid_at,
+    failedAt: row.failed_at,
+    refundedAt: row.refunded_at,
+    expiredAt: row.expired_at,
+
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function toNonNegativeNumber(value: unknown): number {
+  const parsed = typeof value === "number" ? value : Number(value);
 
   if (!Number.isFinite(parsed)) {
     return 0;
@@ -167,10 +266,22 @@ function toNonNegativeNumber(
   return Math.max(0, parsed);
 }
 
-function toNonNegativeInteger(
-  value: unknown,
-): number {
-  return Math.floor(
-    toNonNegativeNumber(value),
-  );
+function toNonNegativeInteger(value: unknown): number {
+  return Math.floor(toNonNegativeNumber(value));
+}
+
+function unwrapSingleRelation<T>(value: T | T[] | null | undefined): T | null {
+  if (Array.isArray(value)) {
+    return value[0] ?? null;
+  }
+
+  return value ?? null;
+}
+
+function normalizeOptionalText(
+  value: string | null | undefined,
+): string | null {
+  const normalized = value?.trim();
+
+  return normalized || null;
 }

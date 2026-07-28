@@ -1,11 +1,9 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import {
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
-import {
+  ArrowRight,
   CalendarDays,
   Coins,
   MapPin,
@@ -14,23 +12,16 @@ import {
   RefreshCw,
   ShoppingBag,
 } from "lucide-react";
-
+import CustomerOrderPaymentCard from "@/components/dashboard/CustomerOrderPaymentCard";
 import { getMyOrders } from "@/services/customer";
-import type {
-  CustomerOrder,
-  CustomerOrderStatus,
-} from "@/types/customerOrder";
+import type { CustomerOrder, CustomerOrderStatus } from "@/types/customerOrder";
 
 export default function CustomerOrdersSection() {
-  const [orders, setOrders] = useState<
-    CustomerOrder[]
-  >([]);
+  const [orders, setOrders] = useState<CustomerOrder[]>([]);
 
-  const [isLoading, setIsLoading] =
-    useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [errorMessage, setErrorMessage] =
-    useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const loadOrders = useCallback(async () => {
     setIsLoading(true);
@@ -41,19 +32,17 @@ export default function CustomerOrdersSection() {
 
       if (!result.success) {
         setOrders([]);
-        setErrorMessage(
-          "Pesanan belum dapat dimuat.",
-        );
+        setErrorMessage("Pesanan belum dapat dimuat.");
 
         return;
       }
 
       setOrders(result.data ?? []);
-    } catch {
+    } catch (error) {
+      console.error("[CustomerOrdersSection] Failed to load orders:", error);
+
       setOrders([]);
-      setErrorMessage(
-        "Terjadi kesalahan saat memuat pesanan.",
-      );
+      setErrorMessage("Terjadi kesalahan saat memuat pesanan.");
     } finally {
       setIsLoading(false);
     }
@@ -68,12 +57,7 @@ export default function CustomerOrdersSection() {
   }
 
   if (errorMessage) {
-    return (
-      <OrdersError
-        message={errorMessage}
-        onRetry={loadOrders}
-      />
-    );
+    return <OrdersError message={errorMessage} onRetry={loadOrders} />;
   }
 
   if (orders.length === 0) {
@@ -83,30 +67,24 @@ export default function CustomerOrdersSection() {
   return (
     <section className="mt-10 space-y-5">
       {orders.map((order) => (
-        <CustomerOrderCard
-          key={order.id}
-          order={order}
-        />
+        <CustomerOrderCard key={order.id} order={order} />
       ))}
     </section>
   );
 }
 
-function CustomerOrderCard({
-  order,
-}: {
-  order: CustomerOrder;
-}) {
-  const status = getOrderStatusMeta(
-    order.status,
+function CustomerOrderCard({ order }: { order: CustomerOrder }) {
+  const status = getOrderStatusMeta(order.status);
+
+  const totalItemQuantity = order.items.reduce(
+    (total, item) => total + item.quantity,
+    0,
   );
 
-  const totalItemQuantity =
-    order.items.reduce(
-      (total, item) =>
-        total + item.quantity,
-      0,
-    );
+  const paymentTotal =
+    order.payment?.method === "coin"
+      ? `${formatNumber(order.payment.amountCoin)} coin`
+      : formatCurrency(order.payment?.amountIdr ?? order.totalPriceIdr);
 
   return (
     <article className="overflow-hidden rounded-3xl border border-line-trace bg-canvas-pure">
@@ -132,14 +110,9 @@ function CustomerOrderCard({
           </div>
 
           <div className="mt-3 flex items-center gap-2 text-xs text-muted-moss">
-            <CalendarDays
-              className="size-4"
-              strokeWidth={1.8}
-            />
+            <CalendarDays className="size-4" strokeWidth={1.8} />
 
-            <span>
-              {formatDate(order.createdAt)}
-            </span>
+            <span>{formatDate(order.createdAt)}</span>
           </div>
         </div>
 
@@ -149,9 +122,7 @@ function CustomerOrderCard({
           </p>
 
           <p className="mt-2 font-display text-2xl font-medium tracking-tight text-brand-black">
-            {formatCurrency(
-              order.totalPriceIdr,
-            )}
+            {paymentTotal}
           </p>
         </div>
       </div>
@@ -165,8 +136,7 @@ function CustomerOrderCard({
               </h2>
 
               <p className="mt-2 text-xs text-muted-moss">
-                {totalItemQuantity} item dari{" "}
-                {order.items.length} produk
+                {totalItemQuantity} item dari {order.items.length} produk
               </p>
             </div>
 
@@ -178,71 +148,73 @@ function CustomerOrderCard({
                 text-brand-forest
               "
             >
-              <Package
-                className="size-5"
-                strokeWidth={1.8}
-              />
+              <Package className="size-5" strokeWidth={1.8} />
             </div>
           </div>
 
           {order.items.length === 0 ? (
             <div className="mt-6 rounded-2xl bg-canvas-warm px-5 py-8 text-center">
               <p className="text-xs text-muted-moss">
-                Detail produk pada pesanan ini
-                tidak tersedia.
+                Detail produk pada pesanan ini tidak tersedia.
               </p>
             </div>
           ) : (
             <div className="mt-6 divide-y divide-line-trace">
-              {order.items.map((item) => (
-                <div
-                  key={item.id}
-                  className="
-                    flex flex-col gap-4 py-5
-                    first:pt-0 last:pb-0
-                    sm:flex-row
-                    sm:items-center
-                    sm:justify-between
-                  "
-                >
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-medium text-brand-black">
-                        {item.productName}
-                      </p>
+              {order.items.map((item) => {
+                const itemAmount = getOrderItemAmount({
+                  order,
+                  item,
+                });
 
-                      {item.isBonusClaimed && (
-                        <span
-                          className="
-                            rounded-full
-                            bg-brand-lime/50
-                            px-2.5 py-1
-                            text-[9px] font-bold
-                            uppercase
-                            text-brand-forest
-                          "
-                        >
-                          Produk Bonus
-                        </span>
-                      )}
+                const itemDescription = getOrderItemDescription({
+                  order,
+                  item,
+                });
+
+                return (
+                  <div
+                    key={item.id}
+                    className="
+                        flex flex-col gap-4 py-5
+                        first:pt-0 last:pb-0
+                        sm:flex-row
+                        sm:items-center
+                        sm:justify-between
+                      "
+                  >
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-medium text-brand-black">
+                          {item.productName}
+                        </p>
+
+                        {item.isBonusClaimed && (
+                          <span
+                            className="
+                                rounded-full
+                                bg-brand-lime/50
+                                px-2.5 py-1
+                                text-[9px]
+                                font-bold uppercase
+                                text-brand-forest
+                              "
+                          >
+                            Produk Bonus
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="mt-2 text-xs text-muted-moss">
+                        {itemDescription}
+                      </p>
                     </div>
 
-                    <p className="mt-2 text-xs text-muted-moss">
-                      {item.quantity} ×{" "}
-                      {formatCurrency(
-                        item.priceIdr,
-                      )}
+                    <p className="shrink-0 text-sm font-bold text-brand-black">
+                      {itemAmount}
                     </p>
                   </div>
-
-                  <p className="shrink-0 text-sm font-bold text-brand-black">
-                    {formatCurrency(
-                      item.priceIdr *
-                        item.quantity,
-                    )}
-                  </p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -262,41 +234,83 @@ function CustomerOrderCard({
             <OrderFact
               icon={Phone}
               label="Nomor Telepon"
-              value={
-                order.phoneNumber ||
-                "Belum tersedia"
-              }
+              value={order.phoneNumber || "Belum tersedia"}
             />
 
             <OrderFact
               icon={MapPin}
               label="Alamat"
-              value={
-                order.shippingAddress
-              }
+              value={order.shippingAddress}
             />
           </div>
 
           <div className="mt-7 border-t border-line-trace pt-6">
             <OrderAmountRow
               label="Coin Digunakan"
-              value={`${formatNumber(
-                order.totalCoinsRedeemed,
-              )} coin`}
+              value={`${formatNumber(order.totalCoinsRedeemed)} coin`}
               icon
             />
 
             <OrderAmountRow
-              label="Poin Diperoleh"
-              value={`${formatNumber(
-                order.pointsEarned,
-              )} poin`}
+              label="Bonus Coin"
+              value={`${formatNumber(order.pointsEarned)} coin`}
             />
+
+            {order.pointsEarned > 0 && order.status !== "complete" && (
+              <p className="mt-2 text-[10px] leading-4 text-muted-moss">
+                Bonus coin akan masuk setelah pesanan selesai.
+              </p>
+            )}
           </div>
+
+          <CustomerOrderPaymentCard payment={order.payment} />
+          <Link
+            href={`/dashboard/orders/${order.id}`}
+            className="group mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-brand-forest px-5 py-3.5 text-xs font-bold text-white transition hover:bg-brand-black"
+          >
+            Lihat Detail
+            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+          </Link>
         </div>
       </div>
     </article>
   );
+}
+
+function getOrderItemAmount({
+  order,
+  item,
+}: {
+  order: CustomerOrder;
+  item: CustomerOrder["items"][number];
+}): string {
+  if (item.isBonusClaimed) {
+    return "Bonus";
+  }
+
+  if (order.payment?.method === "coin") {
+    return `${formatNumber(item.coinsRedeemed)} coin`;
+  }
+
+  return formatCurrency(item.priceIdr * item.quantity);
+}
+
+function getOrderItemDescription({
+  order,
+  item,
+}: {
+  order: CustomerOrder;
+  item: CustomerOrder["items"][number];
+}): string {
+  if (item.isBonusClaimed) {
+    return `${item.quantity} produk bonus otomatis`;
+  }
+
+  if (order.payment?.method === "coin") {
+    return `${item.quantity} produk · pembayaran coin`;
+  }
+
+  return `${item.quantity} × ${formatCurrency(item.priceIdr)}`;
 }
 
 function OrderFact({
@@ -312,16 +326,14 @@ function OrderFact({
     <div className="flex items-start gap-3">
       <div
         className="
-          mt-0.5 flex size-9 shrink-0
-          items-center justify-center
-          rounded-lg bg-canvas-warm
+          mt-0.5 flex size-9
+          shrink-0 items-center
+          justify-center rounded-lg
+          bg-canvas-warm
           text-muted-moss
         "
       >
-        <Icon
-          className="size-4"
-          strokeWidth={1.8}
-        />
+        <Icon className="size-4" strokeWidth={1.8} />
       </div>
 
       <div className="min-w-0">
@@ -329,7 +341,7 @@ function OrderFact({
           {label}
         </p>
 
-        <p className="mt-1 text-xs font-medium leading-5 text-brand-black">
+        <p className="mt-1 break-words text-xs font-medium leading-5 text-brand-black">
           {value}
         </p>
       </div>
@@ -350,18 +362,13 @@ function OrderAmountRow({
     <div className="flex items-center justify-between gap-4 py-2">
       <div className="flex items-center gap-2 text-xs text-muted-moss">
         {icon && (
-          <Coins
-            className="size-4 text-brand-emerald"
-            strokeWidth={1.8}
-          />
+          <Coins className="size-4 text-brand-emerald" strokeWidth={1.8} />
         )}
 
         <span>{label}</span>
       </div>
 
-      <span className="text-xs font-bold text-brand-black">
-        {value}
-      </span>
+      <span className="text-xs font-bold text-brand-black">{value}</span>
     </div>
   );
 }
@@ -388,37 +395,31 @@ function OrderStatusBadge({
   );
 }
 
-function getOrderStatusMeta(
-  status: CustomerOrderStatus,
-) {
+function getOrderStatusMeta(status: CustomerOrderStatus) {
   switch (status) {
     case "complete":
       return {
         label: "Selesai",
-        className:
-          "bg-brand-lime/50 text-brand-forest",
+        className: "bg-brand-lime/50 text-brand-forest",
       };
 
     case "cancelled":
       return {
         label: "Dibatalkan",
-        className:
-          "bg-red-50 text-red-700",
+        className: "bg-red-50 text-red-700",
       };
 
     case "rejected":
       return {
         label: "Ditolak",
-        className:
-          "bg-orange-50 text-orange-700",
+        className: "bg-orange-50 text-orange-700",
       };
 
     case "pending":
     default:
       return {
         label: "Diproses",
-        className:
-          "bg-brand-emerald/10 text-brand-emerald",
+        className: "bg-brand-emerald/10 text-brand-emerald",
       };
   }
 }
@@ -459,18 +460,13 @@ function OrdersError({
         px-6 py-12 text-center
       "
     >
-      <RefreshCw
-        className="size-9 text-muted-moss/50"
-        strokeWidth={1.5}
-      />
+      <RefreshCw className="size-9 text-muted-moss/50" strokeWidth={1.5} />
 
       <h2 className="mt-5 font-display text-2xl font-medium text-brand-black">
         Pesanan gagal dimuat
       </h2>
 
-      <p className="mt-2 text-xs text-muted-moss">
-        {message}
-      </p>
+      <p className="mt-2 text-xs text-muted-moss">{message}</p>
 
       <button
         type="button"
@@ -516,10 +512,7 @@ function EmptyOrders() {
           text-brand-forest
         "
       >
-        <ShoppingBag
-          className="size-6"
-          strokeWidth={1.6}
-        />
+        <ShoppingBag className="size-6" strokeWidth={1.6} />
       </div>
 
       <h2 className="mt-6 font-display text-2xl font-medium text-brand-black">
@@ -527,28 +520,20 @@ function EmptyOrders() {
       </h2>
 
       <p className="mt-2 max-w-md text-xs leading-5 text-muted-moss">
-        Pesanan produk yang Anda buat akan
-        muncul dan dapat dipantau melalui
+        Pesanan produk yang Anda buat akan muncul dan dapat dipantau melalui
         halaman ini.
       </p>
     </section>
   );
 }
 
-function formatOrderCode(
-  orderId: string,
-): string {
-  const shortId = orderId
-    .replaceAll("-", "")
-    .slice(0, 8)
-    .toUpperCase();
+function formatOrderCode(orderId: string): string {
+  const shortId = orderId.replaceAll("-", "").slice(0, 8).toUpperCase();
 
   return `ORD-${shortId}`;
 }
 
-function formatDate(
-  value: string | null,
-): string {
+function formatDate(value: string | null): string {
   if (!value) {
     return "Tanggal tidak tersedia";
   }
@@ -559,38 +544,25 @@ function formatDate(
     return "Tanggal tidak tersedia";
   }
 
-  return new Intl.DateTimeFormat(
-    "id-ID",
-    {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    },
-  ).format(date);
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
 }
 
-function formatCurrency(
-  value: number,
-): string {
-  return new Intl.NumberFormat(
-    "id-ID",
-    {
-      style: "currency",
-      currency: "IDR",
-      maximumFractionDigits: 0,
-    },
-  ).format(value);
+function formatCurrency(value: number): string {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(value);
 }
 
-function formatNumber(
-  value: number,
-): string {
-  return new Intl.NumberFormat(
-    "id-ID",
-    {
-      maximumFractionDigits: 2,
-    },
-  ).format(value);
+function formatNumber(value: number): string {
+  return new Intl.NumberFormat("id-ID", {
+    maximumFractionDigits: 0,
+  }).format(value);
 }
