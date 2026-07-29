@@ -1,4 +1,4 @@
-import type { WorkshopRegistrationStatus } from "@/enums/enum";
+import type { WorkshopRegistrationStatus } from "@/enums/enums";
 
 export type WorkshopRegistrationErrorCode =
   | "UNAUTHENTICATED"

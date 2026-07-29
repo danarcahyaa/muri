@@ -8,7 +8,7 @@ import {
 
 import DetailCard from "@/components/ui/detail/DetailCard";
 import DetailInfoItem from "@/components/ui/detail/DetailInfoItem";
-import { buildTraceabilityHref } from "@/lib/product-detail";
+import { buildTraceabilityHref } from "@/lib/productDetail";
 
 interface ProductTraceabilityCardProps {
   sku: string;

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { AlertCircle, ArrowLeft, Leaf } from "lucide-react";
 
 import { supabase } from "@/lib/supabaseClient";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/components/ui/Spinner";
 import { syncGoogleUser } from "@/services/common/userService";
 import { translateSupabaseError } from "@/lib/supabaseError";
 

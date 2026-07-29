@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import RequireWasteProviderAuth from "@/components/auth/RequireWasteProviderAuth";
 import { WasteProviderSidebar } from "@/components/waste-providers/Sidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/Sidebar";
 
 type WasteProviderDashboardLayoutProps = {
   children: ReactNode;

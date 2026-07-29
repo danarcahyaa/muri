@@ -4,7 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/Dialog";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import {
@@ -13,17 +13,17 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/Select";
 import {
   WastePostItem,
   FabricCategoryItem,
   WasteInput,
 } from "@/types/wasteProvider";
-import { WastePostStatus, MediaType } from "@/enums/enum";
+import { WastePostStatus, MediaType } from "@/enums/enums";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { MediaUpload } from "@/components/ui/MediaUpload";
 import type { MediaItem } from "@/types/common";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/components/ui/Spinner";
 
 import { formatThousand, parseThousand } from "@/lib/formatter";
 
@@ -69,7 +69,7 @@ export function WasteDialogForm({
       setStatus(post.status);
       setMedia(
         post.media_list && post.media_list.length > 0
-          ? post.media_list.map((m: any, idx: number) => ({
+          ? post.media_list.map((m, idx: number) => ({
               id: `existing-${idx}`,
               url: m.url,
               type: m.type,
@@ -156,8 +156,9 @@ export function WasteDialogForm({
         media,
       });
       onOpenChange(false);
-    } catch (err: any) {
-      setError(err.message || "Gagal menyimpan data limbah.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Gagal menyimpan data limbah.";
+      setError(message);
     } finally {
       setIsSubmitting(false);
     }

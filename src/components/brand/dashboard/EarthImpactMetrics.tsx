@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { Sprout, Leaf, Droplets } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/Skeleton";
 import type { BrandDashboardStats } from "@/services/brand-fashion/dashboardService";
 
 export interface EarthImpactMetricsProps {

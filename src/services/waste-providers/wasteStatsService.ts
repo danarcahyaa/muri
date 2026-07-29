@@ -9,9 +9,12 @@ export async function getTotalWasteWeight(
   providerId: string
 ): Promise<BaseResponse<number>> {
   try {
-    const { data, error } = await (supabase.rpc as any)("get_total_waste_weight", {
-      provider_id: providerId,
-    });
+    const { data, error } = await (
+      supabase.rpc as unknown as (
+        fn: string,
+        args: Record<string, unknown>
+      ) => Promise<{ data: number | null; error: unknown }>
+    )("get_total_waste_weight", { provider_id: providerId });
 
     if (error) {
       return {

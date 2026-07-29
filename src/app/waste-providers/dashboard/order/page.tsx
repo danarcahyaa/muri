@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactElement } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import { PurchaseToolbar } from "@/components/waste-providers/orders/PurchaseToolbar";
 import { PurchaseTable } from "@/components/waste-providers/orders/PurchaseTable";
 import { PurchaseDetailDialog } from "@/components/waste-providers/orders/PurchaseDetailDialog";

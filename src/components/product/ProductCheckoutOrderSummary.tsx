@@ -1,6 +1,6 @@
 import { ShoppingBag } from "lucide-react";
 
-import { formatIdr } from "@/lib/product-detail";
+import { formatIdr } from "@/lib/productDetail";
 import type { CustomerCheckoutData } from "@/types/customerCheckout";
 
 interface ProductCheckoutOrderSummaryProps {

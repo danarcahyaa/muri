@@ -3,15 +3,15 @@
 import { type ReactElement, useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Checkbox } from "@/components/ui/Checkbox";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/components/ui/Popover";
 import { Search, SlidersHorizontal, RotateCcw, Check } from "lucide-react";
 import type { SourcingFilterInput } from "@/types/sourcing";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/Badge";
 import { formatCurrencyIDR, formatThousand, parseThousand } from "@/lib/formatter";
 
 interface SourcingToolbarProps {

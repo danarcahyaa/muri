@@ -11,7 +11,7 @@ import {
   XCircle,
 } from "lucide-react";
 
-import { formatCoin, formatIdr } from "@/lib/product-detail";
+import { formatCoin, formatIdr } from "@/lib/productDetail";
 import type {
   CustomerOrderPayment,
   CustomerOrderPaymentStatus,
@@ -54,7 +54,7 @@ export default function CustomerOrderPaymentCard({
 
   if (!payment) {
     return (
-      <div className="mt-7 rounded-2xl border border-line-trace bg-canvas-warm p-5">
+      <div className="mt-7 rounded-xl border border-line-trace bg-canvas-warm p-5">
         <p className="text-[10px] font-bold uppercase text-muted-moss">
           Pembayaran
         </p>
@@ -71,7 +71,7 @@ export default function CustomerOrderPaymentCard({
   const PaymentIcon = payment.method === "coin" ? Coins : QrCode;
 
   return (
-    <div className="mt-7 rounded-2xl border border-line-trace bg-canvas-warm p-5">
+    <div className="mt-7 rounded-xl border border-line-trace bg-canvas-warm p-5">
       <div className="flex items-start justify-between gap-5">
         <div className="flex items-start gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-canvas-pure text-brand-emerald">

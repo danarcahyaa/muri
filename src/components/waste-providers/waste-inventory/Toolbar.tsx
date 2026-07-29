@@ -11,7 +11,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSeparator,
   DropdownMenuCheckboxItem,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/DropdownMenu";
 import { Search, Plus, ArrowUp, ArrowDown, ChevronDown } from "lucide-react";
 
 interface ToolbarProps {

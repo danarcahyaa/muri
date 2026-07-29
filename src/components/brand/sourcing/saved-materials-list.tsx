@@ -2,9 +2,9 @@
 
 import { type ReactElement } from "react";
 import { SavedMaterialCard } from "./saved-material-card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { Bookmark, PanelRightClose } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/Badge";
 import type { SavedWastePostItem } from "@/types/sourcing";
 
 interface SavedMaterialsListProps {

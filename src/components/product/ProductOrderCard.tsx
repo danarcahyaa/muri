@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 import { useProductOrder } from "@/hooks/product/useProductOrder";
-import { formatCoin, formatIdr } from "@/lib/product-detail";
+import { formatCoin, formatIdr } from "@/lib/productDetail";
 import type {
   ProductBonusSummary,
   ProductPaymentOption,

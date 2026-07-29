@@ -14,7 +14,7 @@ import type { IndonesiaProvince } from "@/types/common";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { RegionSelect } from "@/components/ui/RegionSelect";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { useRegisterForm } from "@/hooks/waste-providers/useRegisterForm";
 
 interface RegisterFormProps {

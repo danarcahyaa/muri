@@ -1,9 +1,24 @@
 import { supabase } from "@/lib/supabaseClient";
 import { translateSupabaseError } from "@/lib/supabaseError";
 import { BaseResponse } from "@/types/common";
-import { WastePostStatus, MediaType } from "@/enums/enum";
+import { WastePostStatus, MediaType } from "@/enums/enums";
 import { WastePostItem, WasteInput, WasteFilterInput } from "@/types/wasteProvider";
 import { uploadMediaFile } from "./wasteMediaService";
+
+interface DbWastePostRow {
+  id: string;
+  custom_fabric_name: string | null;
+  details_and_conditions: string;
+  fabric_category_id: number;
+  fabric_categories: { name: string } | null;
+  minimum_order_kg: number;
+  price_per_kg: number;
+  status: string;
+  weight_kg: number;
+  created_at: string | null;
+  waste_post_media?: { media_url: string; media_type: string }[] | null;
+  waste_batches?: { batch_code: string; origin_city: string }[] | null;
+}
 
 /**
  * Fetches all waste posts for a specific provider.
@@ -51,7 +66,7 @@ export async function getWastePosts(
 
     // Apply status filters (only if it doesn't include 'all')
     if (filters?.statuses && filters.statuses.length > 0 && !filters.statuses.includes("all")) {
-      query = query.in("status", filters.statuses as any);
+      query = query.in("status", filters.statuses as unknown as WastePostStatus[]);
     }
 
     const sortBy = filters?.sortBy || "created_at";
@@ -66,7 +81,8 @@ export async function getWastePosts(
       };
     }
 
-    const posts: WastePostItem[] = (data || []).map((post: any) => {
+    const rawPosts = (data || []) as unknown as DbWastePostRow[];
+    const posts: WastePostItem[] = rawPosts.map((post) => {
       // Calculate carbon and water saved mock metrics based on weight (e.g. 1 kg fabric saves ~2.5kg CO2 and ~10L water)
       const weight = post.weight_kg || 0;
       const carbon = parseFloat((weight * 2.5).toFixed(1));
@@ -84,7 +100,7 @@ export async function getWastePosts(
         weight_kg: weight,
         created_at: post.created_at,
         media_url: post.waste_post_media?.[0]?.media_url || undefined,
-        media_list: (post.waste_post_media || []).map((m: any) => ({
+        media_list: (post.waste_post_media || []).map((m) => ({
           url: m.media_url,
           type: m.media_type as MediaType,
         })),
@@ -228,10 +244,10 @@ export async function createWastePost(
     return {
       success: true,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     return {
       success: false,
-      error: error.message || translateSupabaseError(error),
+      error: translateSupabaseError(error),
     };
   }
 }
@@ -310,10 +326,10 @@ export async function updateWastePost(
     return {
       success: true,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     return {
       success: false,
-      error: error.message || translateSupabaseError(error),
+      error: translateSupabaseError(error),
     };
   }
 }

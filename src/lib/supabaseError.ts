@@ -5,7 +5,14 @@
  * @param error The error object from Supabase (AuthError, PostgrestError, or generic Error)
  * @returns A user-friendly Indonesian error message string
  */
-export function translateSupabaseError(error: any): string {
+interface SupabaseLikeError {
+  status?: number;
+  statusCode?: number;
+  message?: string;
+  code?: string;
+}
+
+export function translateSupabaseError(error: unknown): string {
   if (!error) return "Terjadi kesalahan yang tidak diketahui.";
 
   // If it's a string, just return it
@@ -13,10 +20,11 @@ export function translateSupabaseError(error: any): string {
     return error;
   }
 
+  const errObj = error as SupabaseLikeError;
   // Extract common error indicators
-  const status = error.status || (error as any).statusCode;
-  const message = error.message || "";
-  const code = error.code || "";
+  const status = errObj.status || errObj.statusCode;
+  const message = errObj.message || "";
+  const code = errObj.code || "";
 
   // Handle Postgres Database Errors (PostgrestError)
   if (code && typeof code === "string" && !isNaN(Number(code))) {

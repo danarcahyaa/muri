@@ -6,12 +6,12 @@ import { id as localeId } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar } from "@/components/ui/Calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/components/ui/Popover";
 
 interface DatePickerInputProps {
   /** Selected date value (Date object or undefined) */

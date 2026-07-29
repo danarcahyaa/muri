@@ -6,14 +6,14 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/Dialog";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Textarea";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { DatePickerInput } from "@/components/ui/DatePickerInput";
 import { BannerUpload } from "@/components/ui/BannerUpload";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/components/ui/Spinner";
 import { useWorkshopCreate } from "@/hooks/brand/useWorkshopCreate";
 
 interface WorkshopCreateDialogProps {

@@ -3,12 +3,12 @@
 import * as React from "react";
 import { toast } from "sonner";
 
-import { MediaType } from "@/enums/enum";
+import { MediaType } from "@/enums/enums";
 import {
   getFileFingerprint,
   MEDIA_TYPES,
   validateFile,
-} from "@/lib/file-validation";
+} from "@/lib/fileValidation";
 import type { MediaItem } from "@/types/common";
 
 interface UseMediaFilesOptions {

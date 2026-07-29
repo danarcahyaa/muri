@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useBrandDashboard } from "@/hooks/brand/useBrandDashboard";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 
 import { BrandDashboardHeader } from "@/components/brand/dashboard/BrandDashboardHeader";
 import { BrandKPICards } from "@/components/brand/dashboard/BrandKPICards";

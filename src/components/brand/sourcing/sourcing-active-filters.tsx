@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/Badge";
 import { X } from "lucide-react";
 import { formatCurrencyIDR, formatWeightKg } from "@/lib/formatter";
 import type { SourcingFilterInput } from "@/types/sourcing";

@@ -1,6 +1,6 @@
 import { useState, useEffect, type ReactElement } from "react";
 import { Clock, CheckCircle2, XCircle, Ban } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { getPurchaseMetrics } from "@/services/waste-providers/purchaseService";
 
 interface PurchaseSummaryMetricsProps {

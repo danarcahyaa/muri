@@ -1,7 +1,7 @@
-import { MediaType } from "@/enums/enum";
+import { MediaType } from "@/enums/enums";
 import { WastePostItem } from "./wasteProvider";
 
-export interface BaseResponse<T = any> {
+export interface BaseResponse<T = unknown> {
   success: boolean;
   message?: string;
   data?: T | null;

@@ -10,7 +10,7 @@ import {
 } from "@/services/waste-providers/purchaseService";
 import type { WastePurchaseItem } from "@/types/wasteProvider";
 import type { UseWastePurchasesReturn } from "@/types/hooks";
-import { ALL_STATUSES } from "@/constants/constant";
+import { ALL_STATUSES } from "@/constants/constants";
 
 const PAGE_SIZE = 5;
 

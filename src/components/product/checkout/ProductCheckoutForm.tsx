@@ -1,75 +1,73 @@
 "use client";
 
-import { ArrowRight, Gift, UserRound } from "lucide-react";
-
-import type { CustomerCheckoutData } from "@/types/customerCheckout";
+import { ArrowRight, Check, Coins, QrCode, ShieldCheck } from "lucide-react";
+import { formatCoin, formatIdr } from "@/lib/productDetail";
+import type {
+  CustomerCheckoutPaymentMethod,
+  CustomerCheckoutPreview,
+} from "@/types/customerCheckout";
 
 interface ProductCheckoutFormProps {
-  checkout: CustomerCheckoutData;
+  checkout: CustomerCheckoutPreview;
   receiverName: string;
-  onReceiverNameChange: (value: string) => void;
   phoneNumber: string;
-  onPhoneNumberChange: (value: string) => void;
   shippingAddress: string;
-  onShippingAddressChange: (value: string) => void;
-  claimBonus: boolean;
-  onClaimBonusChange: (value: boolean) => void;
+  selectedPaymentMethod: CustomerCheckoutPaymentMethod | null;
   errorMessage: string | null;
+  onReceiverNameChange: (value: string) => void;
+  onPhoneNumberChange: (value: string) => void;
+  onShippingAddressChange: (value: string) => void;
+  onPaymentMethodChange: (value: CustomerCheckoutPaymentMethod) => void;
   onReview: () => void;
 }
 
 export default function ProductCheckoutForm({
   checkout,
   receiverName,
-  onReceiverNameChange,
   phoneNumber,
-  onPhoneNumberChange,
   shippingAddress,
-  onShippingAddressChange,
-  claimBonus,
-  onClaimBonusChange,
+  selectedPaymentMethod,
   errorMessage,
+  onReceiverNameChange,
+  onPhoneNumberChange,
+  onShippingAddressChange,
+  onPaymentMethodChange,
   onReview,
 }: ProductCheckoutFormProps) {
   return (
     <>
       <div className="flex items-center gap-3 text-brand-emerald">
-        <UserRound className="size-4" strokeWidth={2} />
-
-        <p className="text-xs font-bold uppercase">
-          Informasi Pengiriman
-        </p>
+        <ShieldCheck className="size-4" />
+        <p className="text-xs font-bold uppercase">Secure Checkout</p>
       </div>
 
       <h1 className="mt-5 font-display text-4xl font-medium tracking-[-0.045em] text-brand-black sm:text-5xl">
-        Selesaikan Pesanan
+        Informasi Pesanan
       </h1>
 
       <p className="mt-4 max-w-xl text-sm leading-6 text-muted-moss">
-        Pastikan nama penerima, nomor telepon, dan alamat pengiriman sudah
-        benar.
+        Isi data pengiriman dan pilih metode pembayaran sebelum melakukan review.
       </p>
 
       <div className="mt-8 space-y-5">
-        <CheckoutField
+        <CheckoutInput
           id="receiver-name"
           label="Nama Penerima"
           value={receiverName}
-          onChange={onReceiverNameChange}
-          placeholder="Nama lengkap penerima"
-          minLength={2}
           maxLength={120}
+          placeholder="Nama lengkap penerima"
           required
+          onChange={onReceiverNameChange}
         />
 
-        <CheckoutField
+        <CheckoutInput
           id="phone-number"
           label="Nomor Telepon"
           value={phoneNumber}
-          onChange={onPhoneNumberChange}
-          placeholder="Contoh: 081234567890"
           maxLength={30}
+          placeholder="Contoh: 081234567890"
           type="tel"
+          onChange={onPhoneNumberChange}
         />
 
         <div>
@@ -77,45 +75,73 @@ export default function ProductCheckoutForm({
             htmlFor="shipping-address"
             className="text-xs font-bold text-brand-black"
           >
-            Alamat Pengiriman <span className="text-red-600">*</span>
+            Alamat Pengiriman<span className="text-red-600"> *</span>
           </label>
 
           <textarea
             id="shipping-address"
+            rows={5}
+            maxLength={1000}
             value={shippingAddress}
+            placeholder="Masukkan alamat lengkap pengiriman"
             onChange={(event) => {
               onShippingAddressChange(event.target.value);
             }}
-            rows={5}
-            minLength={10}
-            maxLength={1000}
-            required
-            aria-required="true"
-            placeholder="Masukkan alamat lengkap pengiriman"
             className="
-              mt-3 w-full resize-none rounded-xl
-              border border-line-trace bg-canvas-pure
-              px-4 py-3 text-sm text-brand-black
+              mt-3 w-full resize-none
+              rounded-xl border
+              border-line-trace
+              bg-canvas-pure
+              px-4 py-3
+              text-sm text-brand-black
               outline-none transition
               placeholder:text-muted-moss/60
               focus:border-brand-emerald
-              focus:ring-2 focus:ring-brand-emerald/10
+              focus:ring-2
+              focus:ring-brand-emerald/10
             "
           />
-
-          <p className="mt-2 text-[10px] text-muted-moss">
-            Minimal 10 karakter.
-          </p>
         </div>
       </div>
 
-      {checkout.bonus && (
-        <BonusClaimOption
-          checkout={checkout}
-          claimBonus={claimBonus}
-          onChange={onClaimBonusChange}
-        />
-      )}
+      <div className="mt-9">
+        <p className="text-xs font-bold text-brand-black">Metode Pembayaran</p>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {checkout.availablePaymentMethods.includes("qris") && (
+            <PaymentMethodOption
+              method="qris"
+              selected={selectedPaymentMethod === "qris"}
+              title="QRIS"
+              description="Bayar menggunakan aplikasi bank atau dompet digital."
+              amount={
+                checkout.totalPriceIdr !== null
+                  ? formatIdr(checkout.totalPriceIdr)
+                  : "-"
+              }
+              onSelect={onPaymentMethodChange}
+            />
+          )}
+
+          {checkout.availablePaymentMethods.includes("coin") && (
+            <PaymentMethodOption
+              method="coin"
+              selected={selectedPaymentMethod === "coin"}
+              disabled={!checkout.hasEnoughCoinBalance}
+              title="Coin"
+              description={`Saldo tersedia ${formatCoin(
+                checkout.profile.totalPoints,
+              )}.`}
+              amount={
+                checkout.totalPriceCoin !== null
+                  ? formatCoin(checkout.totalPriceCoin)
+                  : "-"
+              }
+              onSelect={onPaymentMethodChange}
+            />
+          )}
+        </div>
+      </div>
 
       {errorMessage && <CheckoutErrorMessage message={errorMessage} />}
 
@@ -123,44 +149,41 @@ export default function ProductCheckoutForm({
         type="button"
         onClick={onReview}
         className="
-          group mt-8 flex w-full items-center
-          justify-center gap-3 rounded-md
-          bg-brand-forest px-6 py-4
+          group mt-8 flex w-full
+          items-center justify-center
+          gap-3 rounded-md
+          bg-brand-forest
+          px-6 py-4
           text-xs font-bold text-white
           transition hover:bg-brand-black
         "
       >
         Review Pesanan
-
         <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
       </button>
     </>
   );
 }
 
-interface CheckoutFieldProps {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-  minLength?: number;
-  maxLength: number;
-  type?: "text" | "tel";
-  required?: boolean;
-}
-
-function CheckoutField({
+function CheckoutInput({
   id,
   label,
   value,
-  onChange,
   placeholder,
-  minLength,
   maxLength,
   type = "text",
   required = false,
-}: CheckoutFieldProps) {
+  onChange,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  placeholder: string;
+  maxLength: number;
+  type?: "text" | "tel";
+  required?: boolean;
+  onChange: (value: string) => void;
+}) {
   return (
     <div>
       <label htmlFor={id} className="text-xs font-bold text-brand-black">
@@ -172,10 +195,7 @@ function CheckoutField({
         id={id}
         type={type}
         value={value}
-        minLength={minLength}
         maxLength={maxLength}
-        required={required}
-        aria-required={required || undefined}
         placeholder={placeholder}
         onChange={(event) => {
           onChange(event.target.value);
@@ -188,87 +208,76 @@ function CheckoutField({
           outline-none transition
           placeholder:text-muted-moss/60
           focus:border-brand-emerald
-          focus:ring-2 focus:ring-brand-emerald/10
+          focus:ring-2
+          focus:ring-brand-emerald/10
         "
       />
     </div>
   );
 }
 
-function BonusClaimOption({
-  checkout,
-  claimBonus,
-  onChange,
+function PaymentMethodOption({
+  method,
+  selected,
+  disabled = false,
+  title,
+  description,
+  amount,
+  onSelect,
 }: {
-  checkout: CustomerCheckoutData;
-  claimBonus: boolean;
-  onChange: (value: boolean) => void;
+  method: CustomerCheckoutPaymentMethod;
+  selected: boolean;
+  disabled?: boolean;
+  title: string;
+  description: string;
+  amount: string;
+  onSelect: (method: CustomerCheckoutPaymentMethod) => void;
 }) {
-  const bonus = checkout.bonus;
-
-  if (!bonus) {
-    return null;
-  }
+  const Icon = method === "qris" ? QrCode : Coins;
 
   return (
-    <div className="mt-8 rounded-2xl border border-brand-lime bg-brand-lime/15 p-5">
-      <div className="flex items-start gap-4">
-        <Gift className="mt-1 size-5 shrink-0 text-brand-emerald" />
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={() => {
+        onSelect(method);
+      }}
+      className={`
+        relative rounded-2xl border
+        p-5 text-left transition
+        ${
+          selected
+            ? `
+                border-brand-forest
+                bg-brand-lime/20
+              `
+            : `
+                border-line-trace
+                bg-canvas-pure
+                hover:border-brand-emerald
+              `
+        }
+        ${
+          disabled
+            ? `
+                cursor-not-allowed
+                opacity-45
+              `
+            : ""
+        }
+      `}
+    >
+      {selected && (
+        <span className="absolute right-4 top-4 flex size-5 items-center justify-center rounded-full bg-brand-forest text-white">
+          <Check className="size-3" />
+        </span>
+      )}
 
-        <div className="min-w-0 flex-1">
-          <p className="text-xs font-bold uppercase text-brand-emerald">
-            Bonus Produk
-          </p>
-
-          <p className="mt-2 text-sm font-bold text-brand-black">
-            {bonus.totalQuantity}× {bonus.productName}
-          </p>
-
-          <p className="mt-2 text-xs leading-5 text-muted-moss">
-            Membutuhkan {bonus.totalCoinCost} coin. Saldo Anda{" "}
-            {checkout.profile.totalPoints} coin.
-          </p>
-
-          {!bonus.hasEnoughStock && (
-            <p className="mt-3 text-xs font-medium text-red-700">
-              Stok produk bonus tidak mencukupi.
-            </p>
-          )}
-
-          {bonus.hasEnoughStock && !bonus.hasEnoughPoints && (
-            <p className="mt-3 text-xs font-medium text-red-700">
-              Coin Anda belum mencukupi.
-            </p>
-          )}
-
-          <label
-            className={`
-              mt-5 flex items-center gap-3 rounded-xl
-              border px-4 py-3
-              ${
-                bonus.canClaim
-                  ? "cursor-pointer border-line-trace bg-canvas-pure"
-                  : "cursor-not-allowed border-line-trace bg-canvas-warm opacity-60"
-              }
-            `}
-          >
-            <input
-              type="checkbox"
-              checked={claimBonus && bonus.canClaim}
-              disabled={!bonus.canClaim}
-              onChange={(event) => {
-                onChange(event.target.checked);
-              }}
-              className="size-4 accent-brand-forest"
-            />
-
-            <span className="text-xs font-bold text-brand-black">
-              Klaim bonus dengan coin
-            </span>
-          </label>
-        </div>
-      </div>
-    </div>
+      <Icon className="size-5 text-brand-emerald" />
+      <p className="mt-5 text-sm font-bold text-brand-black">{title}</p>
+      <p className="mt-2 text-[10px] leading-4 text-muted-moss">{description}</p>
+      <p className="mt-5 text-xs font-bold text-brand-forest">{amount}</p>
+    </button>
   );
 }
 

@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { BackLink } from "@/components/ui/BackLink";
 import { AuthFooterLink } from "@/components/ui/AuthFooterLink";
 

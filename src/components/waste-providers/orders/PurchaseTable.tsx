@@ -6,11 +6,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/Table";
 import { Eye } from "lucide-react";
 import { WastePurchaseItem } from "@/types/wasteProvider";
 import { formatWeightKg, formatIndonesianDate, formatCurrencyIDR } from "@/lib/formatter";
-import { OrderStatus as PurchaseStatus } from "@/enums/enum";
+import { OrderStatus as PurchaseStatus } from "@/enums/enums";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import { TableActionButton } from "@/components/ui/TableActionButton";

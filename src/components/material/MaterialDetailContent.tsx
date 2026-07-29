@@ -13,7 +13,7 @@ import MaterialVisualCard from "@/components/material/MaterialVisualCard";
 import RichTextContent from "@/components/ui/RichTextContent";
 import DetailCard from "@/components/ui/detail/DetailCard";
 import DetailInfoItem from "@/components/ui/detail/DetailInfoItem";
-import { formatDate, formatWeight } from "@/lib/material-detail";
+import { formatDate, formatWeight } from "@/lib/materialDetail";
 import type { MaterialDetailItem } from "@/types/material";
 
 interface MaterialDetailContentProps {

@@ -1,15 +1,15 @@
 "use client";
 
 import { useState, useRef, useEffect, type ReactElement } from "react";
-import { useSourcingMaterials } from "@/hooks/use-sourcing-materials";
-import { useSavedMaterials } from "@/hooks/use-saved-materials";
-import { SourcingToolbar } from "@/components/brand/sourcing/sourcing-toolbar";
+import { useSourcingMaterials } from "@/hooks/useSourcingMaterials";
+import { useSavedMaterials } from "@/hooks/useSavedMaterials";
+import { SourcingToolbar } from "@/components/brand/sourcing/SourcingToolbar";
 import { SourcingActiveFilters } from "@/components/brand/sourcing/sourcing-active-filters";
 import { SourcingEmptyState } from "@/components/brand/sourcing/sourcing-empty-state";
 import { SourcingSkeletonGrid } from "@/components/brand/sourcing/sourcing-skeleton-grid";
 import { MaterialCard } from "@/components/brand/sourcing/material-card";
 import { SavedMaterialsList } from "@/components/brand/sourcing/saved-materials-list";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/Sheet";
 import { Bookmark, Loader2 } from "lucide-react";
 
 export default function BrandSourcingSearchPage(): ReactElement {

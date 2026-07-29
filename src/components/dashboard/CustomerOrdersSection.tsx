@@ -3,25 +3,30 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  ArrowRight,
   CalendarDays,
-  Coins,
-  MapPin,
+  Eye,
   Package,
-  Phone,
+  QrCode,
   RefreshCw,
   ShoppingBag,
 } from "lucide-react";
-import CustomerOrderPaymentCard from "@/components/dashboard/CustomerOrderPaymentCard";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/Table";
 import { getMyOrders } from "@/services/customer";
 import type { CustomerOrder, CustomerOrderStatus } from "@/types/customerOrder";
+import CustomerOrderDetailModal from "./orders/CustomerOrderDetailModal";
 
 export default function CustomerOrdersSection() {
   const [orders, setOrders] = useState<CustomerOrder[]>([]);
-
   const [isLoading, setIsLoading] = useState(true);
-
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<CustomerOrder | null>(null);
 
   const loadOrders = useCallback(async () => {
     setIsLoading(true);
@@ -33,14 +38,12 @@ export default function CustomerOrdersSection() {
       if (!result.success) {
         setOrders([]);
         setErrorMessage("Pesanan belum dapat dimuat.");
-
         return;
       }
 
       setOrders(result.data ?? []);
     } catch (error) {
       console.error("[CustomerOrdersSection] Failed to load orders:", error);
-
       setOrders([]);
       setErrorMessage("Terjadi kesalahan saat memuat pesanan.");
     } finally {
@@ -65,333 +68,161 @@ export default function CustomerOrdersSection() {
   }
 
   return (
-    <section className="mt-10 space-y-5">
-      {orders.map((order) => (
-        <CustomerOrderCard key={order.id} order={order} />
-      ))}
-    </section>
-  );
-}
-
-function CustomerOrderCard({ order }: { order: CustomerOrder }) {
-  const status = getOrderStatusMeta(order.status);
-
-  const totalItemQuantity = order.items.reduce(
-    (total, item) => total + item.quantity,
-    0,
-  );
-
-  const paymentTotal =
-    order.payment?.method === "coin"
-      ? `${formatNumber(order.payment.amountCoin)} coin`
-      : formatCurrency(order.payment?.amountIdr ?? order.totalPriceIdr);
-
-  return (
-    <article className="overflow-hidden rounded-3xl border border-line-trace bg-canvas-pure">
-      <div
-        className="
-          flex flex-col gap-5
-          border-b border-line-trace
-          px-6 py-6
-          sm:flex-row sm:items-center
-          sm:justify-between sm:px-8
-        "
-      >
-        <div>
-          <div className="flex flex-wrap items-center gap-3">
-            <p className="font-display text-xl font-medium tracking-tight text-brand-black">
-              {formatOrderCode(order.id)}
+    <>
+      <section className="mt-8 overflow-hidden rounded-3xl border border-line-trace bg-canvas-pure">
+        <div className="flex items-center justify-between border-b border-line-trace px-6 py-5 sm:px-8">
+          <div>
+            <h2 className="font-display text-xl font-medium text-brand-black">
+              Daftar Pesanan ({orders.length})
+            </h2>
+            <p className="mt-1 text-xs text-muted-moss">
+              Klik pada tombol detail untuk melihat rincian lengkap pesanan.
             </p>
-
-            <OrderStatusBadge
-              label={status.label}
-              className={status.className}
-            />
           </div>
 
-          <div className="mt-3 flex items-center gap-2 text-xs text-muted-moss">
-            <CalendarDays className="size-4" strokeWidth={1.8} />
-
-            <span>{formatDate(order.createdAt)}</span>
-          </div>
+          <button
+            type="button"
+            onClick={() => void loadOrders()}
+            className="inline-flex items-center justify-center gap-1.5 rounded-md border border-line-trace px-3.5 py-2 text-xs font-bold text-brand-black transition hover:border-brand-forest"
+          >
+            <RefreshCw className="size-3.5" />
+            Muat Ulang
+          </button>
         </div>
 
-        <div className="sm:text-right">
-          <p className="text-[10px] font-medium uppercase tracking-wide text-muted-moss">
-            Total Pembayaran
-          </p>
-
-          <p className="mt-2 font-display text-2xl font-medium tracking-tight text-brand-black">
-            {paymentTotal}
-          </p>
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="border-b border-line-trace p-6 sm:p-8 lg:border-b-0 lg:border-r">
-          <div className="flex items-center justify-between gap-5">
-            <div>
-              <h2 className="font-display text-xl font-medium text-brand-black">
+        <Table>
+          <TableHeader className="bg-canvas-warm/60">
+            <TableRow className="border-line-trace">
+              <TableHead className="py-4 pl-6 text-xs font-bold uppercase tracking-wider text-muted-moss sm:pl-8">
+                Kode & Tanggal
+              </TableHead>
+              <TableHead className="py-4 text-xs font-bold uppercase tracking-wider text-muted-moss">
                 Produk Pesanan
-              </h2>
+              </TableHead>
+              <TableHead className="py-4 text-xs font-bold uppercase tracking-wider text-muted-moss">
+                Total Pembayaran
+              </TableHead>
+              <TableHead className="py-4 text-xs font-bold uppercase tracking-wider text-muted-moss">
+                Status Pesanan
+              </TableHead>
+              <TableHead className="py-4 pr-6 text-right text-xs font-bold uppercase tracking-wider text-muted-moss sm:pr-8">
+                Aksi
+              </TableHead>
+            </TableRow>
+          </TableHeader>
 
-              <p className="mt-2 text-xs text-muted-moss">
-                {totalItemQuantity} item dari {order.items.length} produk
-              </p>
-            </div>
+          <TableBody className="divide-y divide-line-trace">
+            {orders.map((order) => {
+              const statusMeta = getOrderStatusMeta(order.status);
+              const firstItem = order.items[0];
+              const remainingCount = order.items.length - 1;
+              const paymentTotal =
+                order.payment?.method === "coin"
+                  ? `${formatNumber(order.payment.amountCoin)} coin`
+                  : formatCurrency(order.payment?.amountIdr ?? order.totalPriceIdr);
 
-            <div
-              className="
-                flex size-11 items-center
-                justify-center rounded-xl
-                bg-brand-lime/40
-                text-brand-forest
-              "
-            >
-              <Package className="size-5" strokeWidth={1.8} />
-            </div>
-          </div>
-
-          {order.items.length === 0 ? (
-            <div className="mt-6 rounded-2xl bg-canvas-warm px-5 py-8 text-center">
-              <p className="text-xs text-muted-moss">
-                Detail produk pada pesanan ini tidak tersedia.
-              </p>
-            </div>
-          ) : (
-            <div className="mt-6 divide-y divide-line-trace">
-              {order.items.map((item) => {
-                const itemAmount = getOrderItemAmount({
-                  order,
-                  item,
-                });
-
-                const itemDescription = getOrderItemDescription({
-                  order,
-                  item,
-                });
-
-                return (
-                  <div
-                    key={item.id}
-                    className="
-                        flex flex-col gap-4 py-5
-                        first:pt-0 last:pb-0
-                        sm:flex-row
-                        sm:items-center
-                        sm:justify-between
-                      "
-                  >
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-medium text-brand-black">
-                          {item.productName}
-                        </p>
-
-                        {item.isBonusClaimed && (
-                          <span
-                            className="
-                                rounded-full
-                                bg-brand-lime/50
-                                px-2.5 py-1
-                                text-[9px]
-                                font-bold uppercase
-                                text-brand-forest
-                              "
-                          >
-                            Produk Bonus
-                          </span>
-                        )}
+              return (
+                <TableRow
+                  key={order.id}
+                  className="border-line-trace transition-colors hover:bg-canvas-warm/40"
+                >
+                  {/* Order ID & Date */}
+                  <TableCell className="py-5 pl-6 sm:pl-8">
+                    <div>
+                      <span className="font-display text-sm font-bold text-brand-black">
+                        {formatOrderCode(order.id)}
+                      </span>
+                      <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-moss">
+                        <CalendarDays className="size-3.5 shrink-0" />
+                        <span>{formatDate(order.createdAt)}</span>
                       </div>
+                    </div>
+                  </TableCell>
 
-                      <p className="mt-2 text-xs text-muted-moss">
-                        {itemDescription}
+                  {/* Product Summary */}
+                  <TableCell className="py-5">
+                    {firstItem ? (
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Package className="size-4 shrink-0 text-brand-emerald" />
+                          <span className="text-xs font-bold text-brand-black line-clamp-1">
+                            {firstItem.productName}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-[11px] text-muted-moss">
+                          {firstItem.quantity} produk
+                          {remainingCount > 0 && (
+                            <span className="ml-1 font-semibold text-brand-forest">
+                              +{remainingCount} produk lainnya
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-muted-moss">
+                        Tanpa detail item
+                      </span>
+                    )}
+                  </TableCell>
+
+                  {/* Total Payment */}
+                  <TableCell className="py-5">
+                    <div>
+                      <span className="font-display text-sm font-bold text-brand-black">
+                        {paymentTotal}
+                      </span>
+                      <p className="mt-0.5 text-[10px] text-muted-moss">
+                        Metode: {order.payment?.method === "coin" ? "Coin" : "QRIS"}
                       </p>
                     </div>
+                  </TableCell>
 
-                    <p className="shrink-0 text-sm font-bold text-brand-black">
-                      {itemAmount}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                  {/* Status Badge */}
+                  <TableCell className="py-5">
+                    <span
+                      className={`inline-flex rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide ${statusMeta.className}`}
+                    >
+                      {statusMeta.label}
+                    </span>
+                  </TableCell>
 
-        <div className="p-6 sm:p-8">
-          <h2 className="font-display text-xl font-medium text-brand-black">
-            Informasi Pengiriman
-          </h2>
+                  {/* Actions */}
+                  <TableCell className="py-5 pr-6 text-right sm:pr-8">
+                    <div className="flex items-center justify-end gap-2">
+                      {order.payment?.status === "waiting_payment" && (
+                        <Link
+                          href={`/dashboard/orders/${order.id}/payment`}
+                          className="inline-flex items-center gap-1.5 rounded-md bg-brand-forest px-3 py-2 text-xs font-bold text-white transition hover:bg-brand-black"
+                        >
+                          <QrCode className="size-3.5" />
+                          Bayar
+                        </Link>
+                      )}
 
-          <div className="mt-6 space-y-5">
-            <OrderFact
-              icon={ShoppingBag}
-              label="Penerima"
-              value={order.receiverName}
-            />
+                      <button
+                        type="button"
+                        onClick={() => setSelectedOrder(order)}
+                        className="inline-flex items-center gap-1.5 rounded-md border border-line-trace bg-canvas-pure px-3 py-2 text-xs font-bold text-brand-black transition hover:border-brand-forest hover:bg-canvas-warm"
+                      >
+                        <Eye className="size-3.5 text-brand-emerald" />
+                        Detail
+                      </button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </section>
 
-            <OrderFact
-              icon={Phone}
-              label="Nomor Telepon"
-              value={order.phoneNumber || "Belum tersedia"}
-            />
-
-            <OrderFact
-              icon={MapPin}
-              label="Alamat"
-              value={order.shippingAddress}
-            />
-          </div>
-
-          <div className="mt-7 border-t border-line-trace pt-6">
-            <OrderAmountRow
-              label="Coin Digunakan"
-              value={`${formatNumber(order.totalCoinsRedeemed)} coin`}
-              icon
-            />
-
-            <OrderAmountRow
-              label="Bonus Coin"
-              value={`${formatNumber(order.pointsEarned)} coin`}
-            />
-
-            {order.pointsEarned > 0 && order.status !== "complete" && (
-              <p className="mt-2 text-[10px] leading-4 text-muted-moss">
-                Bonus coin akan masuk setelah pesanan selesai.
-              </p>
-            )}
-          </div>
-
-          <CustomerOrderPaymentCard payment={order.payment} />
-          <Link
-            href={`/dashboard/orders/${order.id}`}
-            className="group mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-brand-forest px-5 py-3.5 text-xs font-bold text-white transition hover:bg-brand-black"
-          >
-            Lihat Detail
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-          </Link>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function getOrderItemAmount({
-  order,
-  item,
-}: {
-  order: CustomerOrder;
-  item: CustomerOrder["items"][number];
-}): string {
-  if (item.isBonusClaimed) {
-    return "Bonus";
-  }
-
-  if (order.payment?.method === "coin") {
-    return `${formatNumber(item.coinsRedeemed)} coin`;
-  }
-
-  return formatCurrency(item.priceIdr * item.quantity);
-}
-
-function getOrderItemDescription({
-  order,
-  item,
-}: {
-  order: CustomerOrder;
-  item: CustomerOrder["items"][number];
-}): string {
-  if (item.isBonusClaimed) {
-    return `${item.quantity} produk bonus otomatis`;
-  }
-
-  if (order.payment?.method === "coin") {
-    return `${item.quantity} produk · pembayaran coin`;
-  }
-
-  return `${item.quantity} × ${formatCurrency(item.priceIdr)}`;
-}
-
-function OrderFact({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof ShoppingBag;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex items-start gap-3">
-      <div
-        className="
-          mt-0.5 flex size-9
-          shrink-0 items-center
-          justify-center rounded-lg
-          bg-canvas-warm
-          text-muted-moss
-        "
-      >
-        <Icon className="size-4" strokeWidth={1.8} />
-      </div>
-
-      <div className="min-w-0">
-        <p className="text-[9px] font-medium uppercase tracking-wide text-muted-moss">
-          {label}
-        </p>
-
-        <p className="mt-1 break-words text-xs font-medium leading-5 text-brand-black">
-          {value}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function OrderAmountRow({
-  label,
-  value,
-  icon = false,
-}: {
-  label: string;
-  value: string;
-  icon?: boolean;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-4 py-2">
-      <div className="flex items-center gap-2 text-xs text-muted-moss">
-        {icon && (
-          <Coins className="size-4 text-brand-emerald" strokeWidth={1.8} />
-        )}
-
-        <span>{label}</span>
-      </div>
-
-      <span className="text-xs font-bold text-brand-black">{value}</span>
-    </div>
-  );
-}
-
-function OrderStatusBadge({
-  label,
-  className,
-}: {
-  label: string;
-  className: string;
-}) {
-  return (
-    <span
-      className={`
-        inline-flex rounded-full
-        px-3 py-2
-        text-[9px] font-bold
-        uppercase tracking-wide
-        ${className}
-      `}
-    >
-      {label}
-    </span>
+      {/* Detail Modal */}
+      <CustomerOrderDetailModal
+        order={selectedOrder}
+        isOpen={Boolean(selectedOrder)}
+        onClose={() => setSelectedOrder(null)}
+      />
+    </>
   );
 }
 
@@ -402,19 +233,16 @@ function getOrderStatusMeta(status: CustomerOrderStatus) {
         label: "Selesai",
         className: "bg-brand-lime/50 text-brand-forest",
       };
-
     case "cancelled":
       return {
         label: "Dibatalkan",
         className: "bg-red-50 text-red-700",
       };
-
     case "rejected":
       return {
         label: "Ditolak",
         className: "bg-orange-50 text-orange-700",
       };
-
     case "pending":
     default:
       return {
@@ -426,18 +254,13 @@ function getOrderStatusMeta(status: CustomerOrderStatus) {
 
 function OrdersSkeleton() {
   return (
-    <section className="mt-10 space-y-5">
-      {[0, 1].map((item) => (
-        <div
-          key={item}
-          className="
-            min-h-[360px] animate-pulse
-            rounded-3xl
-            border border-line-trace
-            bg-canvas-warm
-          "
-        />
-      ))}
+    <section className="mt-8 rounded-3xl border border-line-trace bg-canvas-pure p-6">
+      <div className="h-6 w-48 animate-pulse rounded-md bg-canvas-warm" />
+      <div className="mt-6 space-y-3">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="h-16 animate-pulse rounded-xl bg-canvas-warm" />
+        ))}
+      </div>
     </section>
   );
 }
@@ -450,40 +273,16 @@ function OrdersError({
   onRetry: () => Promise<void>;
 }) {
   return (
-    <section
-      className="
-        mt-10 flex min-h-72
-        flex-col items-center
-        justify-center rounded-3xl
-        border border-line-trace
-        bg-canvas-pure
-        px-6 py-12 text-center
-      "
-    >
-      <RefreshCw className="size-9 text-muted-moss/50" strokeWidth={1.5} />
-
+    <section className="mt-8 flex min-h-72 flex-col items-center justify-center rounded-3xl border border-line-trace bg-canvas-pure px-6 py-12 text-center">
+      <RefreshCw className="size-9 text-muted-moss/50" />
       <h2 className="mt-5 font-display text-2xl font-medium text-brand-black">
         Pesanan gagal dimuat
       </h2>
-
       <p className="mt-2 text-xs text-muted-moss">{message}</p>
-
       <button
         type="button"
-        onClick={() => {
-          void onRetry();
-        }}
-        className="
-          mt-6 inline-flex
-          items-center gap-2
-          rounded-md
-          bg-brand-forest
-          px-5 py-3
-          text-xs font-bold
-          text-white
-          transition
-          hover:bg-brand-black
-        "
+        onClick={() => void onRetry()}
+        className="mt-6 inline-flex items-center gap-2 rounded-md bg-brand-forest px-5 py-3 text-xs font-bold text-white transition hover:bg-brand-black"
       >
         <RefreshCw className="size-4" />
         Coba Lagi
@@ -494,34 +293,15 @@ function OrdersError({
 
 function EmptyOrders() {
   return (
-    <section
-      className="
-        mt-10 flex min-h-72
-        flex-col items-center
-        justify-center rounded-3xl
-        border border-line-trace
-        bg-canvas-pure
-        px-6 py-12 text-center
-      "
-    >
-      <div
-        className="
-          flex size-14 items-center
-          justify-center rounded-2xl
-          bg-brand-lime/40
-          text-brand-forest
-        "
-      >
-        <ShoppingBag className="size-6" strokeWidth={1.6} />
+    <section className="mt-8 flex min-h-72 flex-col items-center justify-center rounded-3xl border border-line-trace bg-canvas-pure px-6 py-12 text-center">
+      <div className="flex size-14 items-center justify-center rounded-2xl bg-brand-lime/40 text-brand-forest">
+        <ShoppingBag className="size-6" />
       </div>
-
       <h2 className="mt-6 font-display text-2xl font-medium text-brand-black">
         Belum ada pesanan
       </h2>
-
       <p className="mt-2 max-w-md text-xs leading-5 text-muted-moss">
-        Pesanan produk yang Anda buat akan muncul dan dapat dipantau melalui
-        halaman ini.
+        Pesanan produk yang Anda buat akan muncul dan dapat dipantau melalui halaman ini.
       </p>
     </section>
   );
@@ -529,27 +309,17 @@ function EmptyOrders() {
 
 function formatOrderCode(orderId: string): string {
   const shortId = orderId.replaceAll("-", "").slice(0, 8).toUpperCase();
-
   return `ORD-${shortId}`;
 }
 
 function formatDate(value: string | null): string {
-  if (!value) {
-    return "Tanggal tidak tersedia";
-  }
-
+  if (!value) return "Tanggal tidak tersedia";
   const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return "Tanggal tidak tersedia";
-  }
-
+  if (Number.isNaN(date.getTime())) return "Tanggal tidak tersedia";
   return new Intl.DateTimeFormat("id-ID", {
     day: "numeric",
-    month: "long",
+    month: "short",
     year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
   }).format(date);
 }
 

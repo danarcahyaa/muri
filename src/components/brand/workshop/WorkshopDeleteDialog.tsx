@@ -9,9 +9,9 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogCancel,
-} from "@/components/ui/alert-dialog";
+} from "@/components/ui/AlertDialog";
 import { Button } from "@/components/ui/Button";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/components/ui/Spinner";
 import { deleteWorkshop } from "@/services/brand-fashion/workshopService";
 import type { BrandWorkshopItem } from "@/types/brandWorkshop";
 import { AlertTriangle } from "lucide-react";

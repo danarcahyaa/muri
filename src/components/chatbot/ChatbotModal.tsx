@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { useChatbot } from "@/hooks/chatbot/useChatbot";
 
 import { ChatComposer } from "./ChatComposer";

@@ -1,20 +1,20 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
 import { Film } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MediaGalleryItem } from "@/types/common";
 
 
 interface MediaGalleryViewerProps {
-  media: string | MediaGalleryItem[] | null | undefined;
+  media: string | MediaGalleryItem[] | { url: string; type: string }[] | string[] | null | undefined;
   className?: string;
 }
 
-const parseMedia = (rawMedia: string | MediaGalleryItem[] | null | undefined): MediaGalleryItem[] => {
+const parseMedia = (rawMedia: string | MediaGalleryItem[] | { url: string; type: string }[] | string[] | null | undefined): MediaGalleryItem[] => {
   if (!rawMedia) return [];
   
-  let parsed: any = rawMedia;
+  let parsed: unknown = rawMedia;
   if (typeof rawMedia === "string") {
     try {
       parsed = JSON.parse(rawMedia);
@@ -26,7 +26,7 @@ const parseMedia = (rawMedia: string | MediaGalleryItem[] | null | undefined): M
   
   if (!Array.isArray(parsed)) return [];
   
-  return parsed.map((item: any) => {
+  return parsed.map((item: unknown) => {
     if (typeof item === "string") {
       const isVideo = /\.(mp4|webm|ogg|mov|avi|m4v)($|\?)/i.test(item);
       return {
@@ -34,10 +34,11 @@ const parseMedia = (rawMedia: string | MediaGalleryItem[] | null | undefined): M
         type: isVideo ? ("video" as const) : ("image" as const)
       };
     }
-    if (item && typeof item === "object" && item.url) {
+    if (item && typeof item === "object" && "url" in item) {
+      const obj = item as { url: string; type?: string };
       return {
-        url: item.url,
-        type: item.type === "video" ? ("video" as const) : ("image" as const)
+        url: obj.url,
+        type: obj.type === "video" ? ("video" as const) : ("image" as const)
       };
     }
     return null;

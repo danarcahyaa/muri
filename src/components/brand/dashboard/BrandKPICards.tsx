@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { formatWeightKg } from "@/lib/formatter";
 import type { BrandDashboardStats } from "@/services/brand-fashion/dashboardService";
 

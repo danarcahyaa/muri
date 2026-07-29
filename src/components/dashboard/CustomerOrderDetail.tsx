@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 
 import CustomerOrderPaymentCard from "@/components/dashboard/CustomerOrderPaymentCard";
-import { formatCoin, formatIdr } from "@/lib/product-detail";
+import { formatCoin, formatIdr } from "@/lib/productDetail";
 import { getMyOrderById } from "@/services/customer";
 import type { CustomerOrder, CustomerOrderStatus } from "@/types/customerOrder";
 

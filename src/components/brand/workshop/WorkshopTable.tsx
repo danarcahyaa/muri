@@ -8,7 +8,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/Table";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { TableActionButton } from "@/components/ui/TableActionButton";

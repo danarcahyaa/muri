@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import CustomerProductCheckout from "@/components/product/CustomerProductCheckout";
-import { decodeProductSlug } from "@/lib/product-detail";
+import { decodeProductSlug } from "@/lib/productDetail";
 
 interface ProductCheckoutPageProps {
   params: Promise<{

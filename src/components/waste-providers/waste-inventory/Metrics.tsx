@@ -1,5 +1,5 @@
 import { useState, useEffect, type ReactElement } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { formatWeightKg } from "@/lib/formatter";
 import { getWastePostsCount, getTotalWasteWeight } from "@/services/waste-providers/wasteService";
 

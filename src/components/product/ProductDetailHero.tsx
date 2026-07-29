@@ -10,7 +10,7 @@ import {
   formatCoin,
   formatIdr,
   formatProductPaymentOption,
-} from "@/lib/product-detail";
+} from "@/lib/productDetail";
 import type {
   ProductPaymentOption,
 } from "@/types/product";

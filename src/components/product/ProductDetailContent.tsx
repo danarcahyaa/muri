@@ -10,7 +10,7 @@ import ProductVisualCard from "@/components/product/ProductVisualCard";
 import DetailCard from "@/components/ui/detail/DetailCard";
 import DetailInfoItem from "@/components/ui/detail/DetailInfoItem";
 import RichTextContent from "@/components/ui/RichTextContent";
-import { formatDecimal } from "@/lib/product-detail";
+import { formatDecimal } from "@/lib/productDetail";
 import type { ProductDetailItem } from "@/types/product";
 
 interface ProductDetailContentProps {

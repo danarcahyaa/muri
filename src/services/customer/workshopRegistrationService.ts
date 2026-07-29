@@ -1,6 +1,6 @@
 import type { QueryData } from "@supabase/supabase-js";
 
-import { WorkshopRegistrationStatus } from "@/enums/enum";
+import { WorkshopRegistrationStatus } from "@/enums/enums";
 import { supabase } from "@/lib/supabaseClient";
 import { translateSupabaseError } from "@/lib/supabaseError";
 import type { BaseResponse } from "@/types/common";

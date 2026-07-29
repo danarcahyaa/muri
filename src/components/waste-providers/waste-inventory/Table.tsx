@@ -6,7 +6,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/Table";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import { TableActionButton } from "@/components/ui/TableActionButton";
@@ -19,15 +19,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/components/ui/AlertDialog";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/ui/Tooltip";
 import { WastePostItem } from "@/types/wasteProvider";
-import { WastePostStatus } from "@/enums/enum";
+import { WastePostStatus } from "@/enums/enums";
 import { Eye, Archive, Trash2, PencilOff } from "lucide-react";
 import {
   formatWeightKg,

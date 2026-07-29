@@ -4,7 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/Dialog";
 import { MediaGalleryViewer } from "@/components/ui/MediaGalleryViewer";
 import { formatWeightKg, formatIndonesianDate } from "@/lib/formatter";
 import type { WasteBatchItem } from "@/types/wasteProvider";

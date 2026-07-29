@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import { WasteBatchMetrics } from "@/components/waste-providers/waste-batch/Metrics";
 import { WasteBatchToolbar } from "@/components/waste-providers/waste-batch/Toolbar";
 import { WasteBatchTable } from "@/components/waste-providers/waste-batch/Table";

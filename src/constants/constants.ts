@@ -1,4 +1,4 @@
-import { OrderStatus as PurchaseStatus, WastePostStatus } from "@/enums/enum";
+import { OrderStatus as PurchaseStatus, WastePostStatus } from "@/enums/enums";
 import { WorkshopPublishStatusFilter } from "@/types/brandWorkshop";
 
 export const ALL_CATEGORIES = ["Katun", "Denim", "Linen", "Rayon", "Polyester", "Sutra", "Sintetis", "Campuran"];

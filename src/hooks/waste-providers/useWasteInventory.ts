@@ -13,7 +13,7 @@ import {
 } from "@/services/waste-providers/wasteService";
 import type { WastePostItem, FabricCategoryItem, WasteInput } from "@/types/wasteProvider";
 import type { UseWasteInventoryReturn } from "@/types/hooks";
-import { ALL_CATEGORIES, ALL_WASTE_STATUSES } from "@/constants/constant";
+import { ALL_CATEGORIES, ALL_WASTE_STATUSES } from "@/constants/constants";
 
 export function useWasteInventory(): UseWasteInventoryReturn {
   const { user } = useAuth();

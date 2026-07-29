@@ -26,7 +26,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from "@/components/ui/Sidebar";
 import { useAuth } from "@/components/auth/AuthProvider";
 
 const wasteProviderNavigation = [

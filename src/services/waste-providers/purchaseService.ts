@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabaseClient";
 import { translateSupabaseError } from "@/lib/supabaseError";
 import { BaseResponse } from "@/types/common";
-import { OrderStatus as PurchaseStatus } from "@/enums/enum";
+import { OrderStatus as PurchaseStatus } from "@/enums/enums";
 import { WastePurchaseItem, PurchaseListResponse, PurchaseMetricsResponse } from "@/types/wasteProvider";
 
 /**
@@ -26,7 +26,12 @@ export async function getWastePurchases(
       ? (Array.isArray(options.statusFilter) ? options.statusFilter : [options.statusFilter]).filter((s) => s !== "all")
       : null;
 
-    const { data, error } = await (supabase as any).rpc("get_waste_purchases_rpc", {
+    const { data, error } = await (
+      supabase.rpc as unknown as (
+        fn: string,
+        args: Record<string, unknown>
+      ) => Promise<{ data: { result_row: WastePurchaseItem }[] | null; error: unknown }>
+    )("get_waste_purchases_rpc", {
       p_provider_id: providerId,
       p_search_query: options.searchQuery || null,
       p_status_filter: statuses && statuses.length > 0 ? statuses : null,
@@ -41,7 +46,8 @@ export async function getWastePurchases(
       };
     }
 
-    const allPurchases = (data || []).map((row: any) => row.result_row) as WastePurchaseItem[];
+    const rawRows = (data || []) as unknown as { result_row: WastePurchaseItem }[];
+    const allPurchases = rawRows.map((row) => row.result_row);
 
     const sortedPurchases = allPurchases.sort((a, b) => {
       const aPending = a.purchase_status === PurchaseStatus.PENDING ? 0 : 1;

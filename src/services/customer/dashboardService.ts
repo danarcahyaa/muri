@@ -1,4 +1,4 @@
-import { EntityRole } from "@/enums/enum";
+import { EntityRole } from "@/enums/enums";
 import { supabase } from "@/lib/supabaseClient";
 import { translateSupabaseError } from "@/lib/supabaseError";
 import type { BaseResponse } from "@/types/common";

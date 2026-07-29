@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactElement } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import {
   AlertDialog,
   AlertDialogPortal,
@@ -11,7 +11,7 @@ import {
   AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
-} from "@/components/ui/alert-dialog";
+} from "@/components/ui/AlertDialog";
 import { WasteSummaryMetrics } from "@/components/waste-providers/waste-inventory/Metrics";
 import { WasteTableToolbar } from "@/components/waste-providers/waste-inventory/Toolbar";
 import { WasteDataTable } from "@/components/waste-providers/waste-inventory/Table";

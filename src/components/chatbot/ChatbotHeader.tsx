@@ -5,7 +5,7 @@ import {
   DialogClose,
   DialogDescription,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/Dialog";
 
 import { ChatbotAvatar } from "./ChatbotAvatar";
 

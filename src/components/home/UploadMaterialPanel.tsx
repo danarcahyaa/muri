@@ -8,7 +8,7 @@ import { FileDropzone } from "@/components/ui/file-upload";
 import {
   MATERIAL_IMAGE_TYPES,
   validateFile,
-} from "@/lib/file-validation";
+} from "@/lib/fileValidation";
 
 interface UploadMaterialPanelProps {
   inputId: string;

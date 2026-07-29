@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { formatCurrencyIDR, formatWeightKg } from "@/lib/formatter";
 import { DashboardStatsData } from "@/types/wasteProvider";
 

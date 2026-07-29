@@ -1,5 +1,5 @@
-import { TableRow, TableCell } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
+import { TableRow, TableCell } from "@/components/ui/Table";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 interface TableSkeletonProps {
   columnsCount: number;

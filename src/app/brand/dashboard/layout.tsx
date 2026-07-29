@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import RequireBrandAuth from "@/components/auth/RequireBrandAuth";
 import { BrandSidebar } from "@/components/brand/BrandSidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/Sidebar";
 
 type BrandDashboardLayoutProps = {
   children: ReactNode;

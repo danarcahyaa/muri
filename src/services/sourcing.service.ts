@@ -7,6 +7,25 @@ import type {
   SavedWastePostItem,
 } from "@/types/sourcing";
 
+interface DbSourcingMedia {
+  media_url: string;
+  media_type: string;
+}
+
+interface DbSourcingRow {
+  id: string;
+  custom_fabric_name: string | null;
+  details_and_conditions: string | null;
+  minimum_order_kg: number;
+  price_per_kg: number;
+  weight_kg: number;
+  status: string;
+  created_at: string;
+  fabric_categories: { name: string } | null;
+  waste_providers: { company_name: string } | null;
+  waste_post_media: DbSourcingMedia[] | null;
+}
+
 /**
  * Fetches active waste posts for brand sourcing based on filter criteria.
  *
@@ -63,10 +82,11 @@ export async function getWastePosts(
       };
     }
 
-    let items: SourcingWastePostItem[] = (data || []).map((row: any) => {
+    const rawRows = (data || []) as unknown as DbSourcingRow[];
+    let items: SourcingWastePostItem[] = rawRows.map((row) => {
       const mediaList = row.waste_post_media || [];
       const firstImage =
-        mediaList.find((m: any) => m.media_type === "image")?.media_url ||
+        mediaList.find((m) => m.media_type === "image")?.media_url ||
         mediaList[0]?.media_url ||
         null;
 
@@ -125,11 +145,19 @@ export async function getWastePosts(
  * @param brandId Auth User ID of the brand
  * @returns Array of SavedWastePostItem
  */
+interface DbSavedRow {
+  id: string;
+  brand_id: string;
+  waste_post_id: string;
+  created_at: string;
+  waste_posts: DbSourcingRow | null;
+}
+
 export async function getSavedWastePosts(
   brandId: string
 ): Promise<BaseResponse<SavedWastePostItem[]>> {
   try {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from("saved_waste_posts")
       .select(
         `
@@ -170,11 +198,12 @@ export async function getSavedWastePosts(
       };
     }
 
-    const savedItems: SavedWastePostItem[] = (data || []).map((row: any) => {
-      const wp = row.waste_posts || {};
-      const mediaList = wp.waste_post_media || [];
+    const rawSaved = (data || []) as unknown as DbSavedRow[];
+    const savedItems: SavedWastePostItem[] = rawSaved.map((row) => {
+      const wp = row.waste_posts;
+      const mediaList = wp?.waste_post_media || [];
       const firstImage =
-        mediaList.find((m: any) => m.media_type === "image")?.media_url ||
+        mediaList.find((m: DbSourcingMedia) => m.media_type === "image")?.media_url ||
         mediaList[0]?.media_url ||
         null;
 
@@ -184,20 +213,20 @@ export async function getSavedWastePosts(
         wastePostId: row.waste_post_id,
         createdAt: row.created_at,
         wastePost: {
-          id: wp.id || row.waste_post_id,
+          id: wp?.id || row.waste_post_id,
           customFabricName:
-            wp.custom_fabric_name ||
-            wp.fabric_categories?.name ||
+            wp?.custom_fabric_name ||
+            wp?.fabric_categories?.name ||
             "Limbah Kain Perca",
-          categoryName: wp.fabric_categories?.name || "Lainnya",
-          pricePerKg: Number(wp.price_per_kg) || 0,
-          minimumOrderKg: Number(wp.minimum_order_kg) || 0,
-          weightKg: Number(wp.weight_kg) || 0,
-          detailsAndConditions: wp.details_and_conditions || "",
-          status: wp.status || "active",
-          providerName: wp.waste_providers?.company_name || "Waste Provider",
+          categoryName: wp?.fabric_categories?.name || "Lainnya",
+          pricePerKg: Number(wp?.price_per_kg) || 0,
+          minimumOrderKg: Number(wp?.minimum_order_kg) || 0,
+          weightKg: Number(wp?.weight_kg) || 0,
+          detailsAndConditions: wp?.details_and_conditions || "",
+          status: wp?.status || "active",
+          providerName: wp?.waste_providers?.company_name || "Waste Provider",
           imageUrl: firstImage,
-          createdAt: wp.created_at,
+          createdAt: wp?.created_at ?? null,
           isSaved: true,
           savedId: row.id,
         },
@@ -227,7 +256,7 @@ export async function saveWastePost(
   wastePostId: string
 ): Promise<BaseResponse<string>> {
   try {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from("saved_waste_posts")
       .insert({
         brand_id: brandId,
@@ -245,7 +274,7 @@ export async function saveWastePost(
 
     return {
       success: true,
-      data: data.id,
+      data: (data as { id: string }).id,
     };
   } catch (error) {
     return {
@@ -266,7 +295,7 @@ export async function unsaveWastePost(
   wastePostId: string
 ): Promise<BaseResponse<boolean>> {
   try {
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("saved_waste_posts")
       .delete()
       .eq("brand_id", brandId)

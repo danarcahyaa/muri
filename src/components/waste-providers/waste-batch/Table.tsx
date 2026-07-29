@@ -6,7 +6,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/Table";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import { TableActionButton } from "@/components/ui/TableActionButton";
 import {
@@ -14,7 +14,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/ui/Tooltip";
 import { WasteBatchItem } from "@/types/wasteProvider";
 import { Eye } from "lucide-react";
 import { formatWeightKg, formatIndonesianDate } from "@/lib/formatter";

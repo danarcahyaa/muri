@@ -11,7 +11,7 @@ import {
   Field,
   FieldDescription,
   FieldLabel,
-} from "@/components/ui/field";
+} from "@/components/ui/Field";
 import {
   FileDropzone,
   FileInput,
@@ -21,7 +21,7 @@ import {
   BANNER_IMAGE_TYPES,
   formatFileSize,
   validateFile,
-} from "@/lib/file-validation";
+} from "@/lib/fileValidation";
 import { cn } from "@/lib/utils";
 
 const MAX_SIZE_MB = 5;

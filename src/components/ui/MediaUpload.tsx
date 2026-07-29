@@ -10,9 +10,9 @@ import {
   Field,
   FieldDescription,
   FieldLabel,
-} from "@/components/ui/field";
+} from "@/components/ui/Field";
 import { FileDropzone } from "@/components/ui/file-upload";
-import { MediaType } from "@/enums/enum";
+import { MediaType } from "@/enums/enums";
 import { useMediaFiles } from "@/hooks/useMediaFiles";
 import { cn } from "@/lib/utils";
 import type { MediaItem } from "@/types/common";

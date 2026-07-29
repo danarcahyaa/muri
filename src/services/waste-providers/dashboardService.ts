@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabaseClient";
 import { translateSupabaseError } from "@/lib/supabaseError";
 import { DashboardStatsResponse } from "@/types/wasteProvider";
-import { OrderStatus as PurchaseStatus, WastePostStatus } from "@/enums/enum";
+import { OrderStatus as PurchaseStatus, WastePostStatus } from "@/enums/enums";
 
 /**
  * Fetches waste provider dashboard statistics.

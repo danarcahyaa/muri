@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Coins } from "lucide-react";
 
-import { formatIdr } from "@/lib/product-detail";
+import { formatIdr } from "@/lib/productDetail";
 import type { PurchaseCustomerProductResult } from "@/types/customerCheckout";
 
 export default function ProductCheckoutSuccess({

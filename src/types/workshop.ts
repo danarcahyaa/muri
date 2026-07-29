@@ -1,4 +1,4 @@
-export type { WorkshopRegistrationStatus } from "@/enums/enum";
+export type { WorkshopRegistrationStatus } from "@/enums/enums";
 
 export interface WorkshopCatalogItem {
   id: string;

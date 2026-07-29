@@ -5,13 +5,13 @@ import * as React from "react";
 import {
   Combobox,
   type ComboboxOption,
-} from "@/components/ui/combobox";
+} from "@/components/ui/Combobox";
 import {
   Field,
   FieldDescription,
   FieldError,
   FieldLabel,
-} from "@/components/ui/field";
+} from "@/components/ui/Field";
 import { cn } from "@/lib/utils";
 
 export interface RegionSelectProps {

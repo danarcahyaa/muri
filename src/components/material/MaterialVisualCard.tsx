@@ -1,6 +1,6 @@
 import { ImageOff, Leaf } from "lucide-react";
 
-import { formatMaterialStatus } from "@/lib/material-detail";
+import { formatMaterialStatus } from "@/lib/materialDetail";
 import type { MaterialDetailItem } from "@/types/material";
 
 interface MaterialVisualCardProps {

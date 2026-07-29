@@ -8,10 +8,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/DropdownMenu";
 import { Search, ChevronDown, Check, Plus } from "lucide-react";
 import type { WorkshopPublishStatusFilter } from "@/types/brandWorkshop";
-import { WORKSHOP_STATUS_OPTIONS } from "@/constants/constant";
+import { WORKSHOP_STATUS_OPTIONS } from "@/constants/constants";
 
 interface WorkshopToolbarProps {
   localSearch: string;

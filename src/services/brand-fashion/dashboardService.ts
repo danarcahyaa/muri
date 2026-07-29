@@ -24,10 +24,12 @@ export async function getBrandDashboardStats(
     let totalDistributedWaste = 0;
 
     // Attempt RPC call first
-    const { data: rpcWaste, error: rpcWasteError } = await supabase.rpc(
-      "get_brand_total_waste_saved" as any,
-      { p_brand_id: brandId }
-    );
+    const { data: rpcWaste, error: rpcWasteError } = await (
+      supabase.rpc as unknown as (
+        fn: string,
+        args: Record<string, unknown>
+      ) => Promise<{ data: number | null; error: unknown }>
+    )("get_brand_total_waste_saved", { p_brand_id: brandId });
 
     if (!rpcWasteError && typeof rpcWaste === "number") {
       totalDistributedWaste = rpcWaste;
@@ -98,10 +100,12 @@ export async function getBrandDashboardStats(
     let totalOrdersCount = 0;
 
     // Attempt RPC call first for incoming orders
-    const { data: rpcOrders, error: rpcOrdersError } = await supabase.rpc(
-      "get_brand_incoming_orders_count" as any,
-      { p_brand_id: brandId }
-    );
+    const { data: rpcOrders, error: rpcOrdersError } = await (
+      supabase.rpc as unknown as (
+        fn: string,
+        args: Record<string, unknown>
+      ) => Promise<{ data: number | null; error: unknown }>
+    )("get_brand_incoming_orders_count", { p_brand_id: brandId });
 
     if (!rpcOrdersError && typeof rpcOrders === "number") {
       totalOrdersCount = rpcOrders;

@@ -4,10 +4,10 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/Dialog";
 import { WastePurchaseItem } from "@/types/wasteProvider";
 import { formatWeightKg, formatIndonesianDate, formatCurrencyIDR } from "@/lib/formatter";
-import { OrderStatus as PurchaseStatus } from "@/enums/enum";
+import { OrderStatus as PurchaseStatus } from "@/enums/enums";
 import { StatusBadge, BadgeVariant } from "@/components/ui/StatusBadge";
 import { MediaGalleryViewer } from "@/components/ui/MediaGalleryViewer";
 import { Button } from "@/components/ui/Button";

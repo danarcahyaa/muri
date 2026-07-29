@@ -7,7 +7,7 @@ import { DashboardStatsData } from "@/types/wasteProvider";
 import { WasteSummaryHeading } from "@/components/waste-providers/summary/Heading";
 import { WasteSummaryStats } from "@/components/waste-providers/summary/Stats";
 import { StartSellingCTA } from "@/components/waste-providers/summary/StartSellingCTA";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 
 export default function WasteProviderDashboardPage() {
   const { user } = useAuth();

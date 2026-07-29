@@ -1,5 +1,5 @@
 import { BaseResponse, MediaItem } from "./common";
-import { WastePostStatus, MediaType } from "@/enums/enum";
+import { WastePostStatus, MediaType } from "@/enums/enums";
 export interface WasteProviderRegisterInput {
   companyName: string;
   email: string;
@@ -91,7 +91,7 @@ export interface WastePurchaseItem {
   final_price_idr: number;
   weight_bought_kg: number;
   purchase_status: string;
-  media_urls_snapshot: any;
+  media_urls_snapshot: { url: string; type: string }[] | string[] | null;
   waste_post_id: string;
   created_at: string;
   updated_at: string;

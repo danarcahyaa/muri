@@ -6,7 +6,7 @@ import Link from "next/link";
 import { AlertCircle, ArrowLeft, CheckCircle2, Leaf, Mail } from "lucide-react";
 import { toast } from "sonner";
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { requestPasswordReset } from "@/services/customer/auth/authService";

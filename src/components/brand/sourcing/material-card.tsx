@@ -1,8 +1,8 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
 import { Bookmark, Store } from "lucide-react";
 import { formatCurrencyIDR, formatWeightKg } from "@/lib/formatter";
 import type { SourcingWastePostItem } from "@/types/sourcing";

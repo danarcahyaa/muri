@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 const inputVariants = cva(
   `
     w-full min-w-0 box-border
-    rounded-sm border
+    rounded-xl border
     font-body
     outline-none
 

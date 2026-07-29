@@ -7,7 +7,7 @@ import Header from "@/components/layout/Header";
 import ProductDetailContent from "@/components/product/ProductDetailContent";
 import ProductDetailHero from "@/components/product/ProductDetailHero";
 import ProductOrderSidebar from "@/components/product/ProductOrderSidebar";
-import { decodeProductSlug } from "@/lib/product-detail";
+import { decodeProductSlug } from "@/lib/productDetail";
 import { sanitizeRichTextAsPlainHtml } from "@/lib/richText";
 import { getProductBySku } from "@/services/product";
 
