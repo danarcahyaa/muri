@@ -8,7 +8,7 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-border bg-card text-card-foreground",
+        default: "border-line-trace bg-canvas-pure text-brand-black",
 
         destructive:
           "border-error-rust/20 bg-error-rust/[0.05] text-error-rust *:data-[slot=alert-description]:text-error-rust *:[svg]:text-error-rust",

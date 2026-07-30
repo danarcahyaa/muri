@@ -27,7 +27,7 @@ export function QrisPanel({ imageUrl, amount, paymentStatus }: QrisPanelProps) {
       </p>
 
       {canShowQris ? (
-        <div className="mt-7 mx-auto max-w-md rounded-3xl border border-line-trace bg-white p-5">
+        <div className="mt-7 mx-auto max-w-md rounded-3xl border border-brand-black/15 bg-white p-5">
           <img
             src={imageUrl}
             alt="Kode pembayaran QRIS"

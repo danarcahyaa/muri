@@ -148,7 +148,7 @@ export default function CustomerQrisPayment({
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[520px] items-center justify-center rounded-3xl border border-line-trace bg-canvas-pure">
+      <div className="flex min-h-[520px] items-center justify-center rounded-3xl border border-brand-black/15 bg-canvas-pure">
         <div className="text-center">
           <LoaderCircle className="mx-auto size-8 animate-spin text-brand-emerald" />
           <p className="mt-4 text-xs text-muted-moss">Menyiapkan pembayaran QRIS...</p>
@@ -159,7 +159,7 @@ export default function CustomerQrisPayment({
 
   if (errorMessage || !order || !order.payment) {
     return (
-      <section className="flex min-h-[420px] flex-col items-center justify-center rounded-3xl border border-line-trace bg-canvas-pure px-6 py-12 text-center">
+      <section className="flex min-h-[420px] flex-col items-center justify-center rounded-3xl border border-brand-black/15 bg-canvas-pure px-6 py-12 text-center">
         <RefreshCw className="size-9 text-muted-moss/50" />
         <h1 className="mt-5 font-display text-3xl font-medium text-brand-black">
           Pembayaran Tidak Tersedia
@@ -189,7 +189,7 @@ export default function CustomerQrisPayment({
         Kembali ke Detail Pesanan
       </Link>
 
-      <section className="mt-7 overflow-hidden rounded-3xl border border-line-trace bg-canvas-pure">
+      <section className="mt-7 overflow-hidden rounded-3xl border border-brand-black/15 bg-canvas-pure">
         <header className="border-b border-line-trace px-6 py-7 sm:px-8">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
             <div>
@@ -228,7 +228,7 @@ export default function CustomerQrisPayment({
             {actionMessage && (
               <div
                 role="status"
-                className="mt-5 rounded-xl border border-line-trace bg-canvas-warm px-4 py-3 text-xs leading-5 text-brand-black"
+                className="mt-5 rounded-xl border border-brand-black/15 bg-canvas-warm px-4 py-3 text-xs leading-5 text-brand-black"
               >
                 {actionMessage}
               </div>

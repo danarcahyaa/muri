@@ -24,6 +24,9 @@ import {
   formatOrderCode,
 } from "./FulfillmentOrderCard";
 
+import { Button } from "@/components/ui/Button";
+import { OrderProgressBar } from "@/components/ui/OrderProgressBar";
+
 interface BrandOrderDetailModalProps {
   order: BrandFulfillmentOrder | null;
   isOpen: boolean;
@@ -54,15 +57,19 @@ export function BrandOrderDetailModal({
 
   return (
     <div
-      onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in-0"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in-0 cursor-pointer"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-line-trace bg-canvas-pure"
+        className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-line-trace bg-canvas-pure cursor-default"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-line-trace px-6 py-5 sm:px-8">
+        <div className="flex shrink-0 items-center justify-between border-b border-line-trace px-6 py-5 sm:px-8">
           <div className="flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-lg bg-brand-lime/40 text-brand-forest">
               <ShoppingBag className="size-5" />
@@ -88,14 +95,16 @@ export function BrandOrderDetailModal({
             type="button"
             onClick={onClose}
             aria-label="Tutup modal"
-            className="flex size-9 items-center justify-center rounded-full bg-canvas-warm text-brand-black transition hover:bg-line-trace"
+            className="flex size-8 items-center justify-center rounded-full bg-canvas-warm text-brand-black transition hover:bg-line-trace cursor-pointer"
           >
             <X className="size-4" />
           </button>
         </div>
 
         {/* Content Body */}
-        <div className="space-y-6 overflow-y-auto p-6 sm:p-8">
+        <div className="space-y-6 sm:space-y-7 overflow-y-auto p-6 sm:p-8">
+          {/* Order Progress Step Bar */}
+          <OrderProgressBar status={order.orderStatus} />
           {/* Customer & Shipping Details */}
           <div>
             <div className="flex items-center gap-2 text-xs font-bold uppercase text-brand-black">
@@ -103,7 +112,7 @@ export function BrandOrderDetailModal({
               <span>Data Penerima & Alamat Pengiriman</span>
             </div>
 
-            <div className="mt-3 space-y-2.5 rounded-xl border border-line-trace bg-canvas-warm/30 p-4">
+            <div className="mt-3 space-y-2.5 rounded-lg border border-line-trace bg-canvas-warm/50 p-4">
               <DetailFact icon={User} label="Nama Customer / Penerima" value={order.receiverName} />
               <DetailFact
                 icon={Phone}
@@ -132,7 +141,7 @@ export function BrandOrderDetailModal({
               <span>Item Pesanan ({totalItemQuantity} item)</span>
             </div>
 
-            <div className="mt-3 divide-y divide-line-trace rounded-xl border border-line-trace bg-canvas-warm/30 p-4">
+            <div className="mt-3 divide-y divide-line-trace rounded-lg border border-line-trace bg-canvas-warm/50 p-4">
               {order.items.map((item) => (
                 <div
                   key={item.id}
@@ -179,7 +188,7 @@ export function BrandOrderDetailModal({
               <span>Ringkasan Pembayaran Brand</span>
             </div>
 
-            <div className="mt-3 space-y-2 rounded-xl border border-line-trace bg-canvas-warm/30 p-4">
+            <div className="mt-3 space-y-2 rounded-lg border border-line-trace bg-canvas-warm/50 p-4">
               <DetailRow
                 label="Metode Pembayaran"
                 value={order.paymentMethod === "coin" ? "Coin" : "QRIS"}
@@ -208,74 +217,74 @@ export function BrandOrderDetailModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line-trace bg-canvas-warm px-6 py-4 sm:px-8">
+        <div className="shrink-0 flex flex-wrap items-center justify-between gap-3 border-t border-line-trace bg-canvas-warm/55 px-6 py-4 sm:px-8">
           <p className="text-[10px] text-muted-moss">
             ID: <span className="font-mono text-brand-black">{order.orderId}</span>
           </p>
 
           <div className="flex flex-wrap items-center gap-2">
             {order.orderStatus === "pending" && (
-              <button
-                type="button"
+              <Button
+                variant="default"
+                size="md"
                 onClick={() => {
                   onClose();
                   onAction(order, "start_processing");
                 }}
-                className="inline-flex items-center gap-1.5 rounded-sm bg-brand-forest px-4 py-2 text-xs font-bold text-white transition hover:bg-brand-black"
               >
                 Mulai Proses Order
-              </button>
+              </Button>
             )}
 
             {order.orderStatus === "processing" && (
-              <button
-                type="button"
+              <Button
+                variant="default"
+                size="md"
                 onClick={() => {
                   onClose();
                   onAction(order, "mark_shipped");
                 }}
-                className="inline-flex items-center gap-1.5 rounded-sm bg-brand-forest px-4 py-2 text-xs font-bold text-white transition hover:bg-brand-black"
               >
                 <Truck className="size-3.5" />
                 Input Resi & Kirim
-              </button>
+              </Button>
             )}
 
             {order.orderStatus === "shipped" && (
-              <button
-                type="button"
+              <Button
+                variant="default"
+                size="md"
                 onClick={() => {
                   onClose();
                   onAction(order, "complete_order");
                 }}
-                className="inline-flex items-center gap-1.5 rounded-sm bg-brand-forest px-4 py-2 text-xs font-bold text-white transition hover:bg-brand-black"
               >
                 <CheckCircle2 className="size-3.5" />
                 Selesaikan Pesanan
-              </button>
+              </Button>
             )}
 
             {(order.orderStatus === "pending" || order.orderStatus === "processing") && (
-              <button
-                type="button"
+              <Button
+                variant="outline-destructive"
+                size="md"
                 onClick={() => {
                   onClose();
                   onAction(order, "cancel_refund");
                 }}
-                className="inline-flex items-center gap-1.5 rounded-sm border border-red-200 bg-red-50 px-4 py-2 text-xs font-bold text-red-700 transition hover:bg-red-100"
               >
                 <XCircle className="size-3.5" />
                 Batalkan / Refund
-              </button>
+              </Button>
             )}
 
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="md"
               onClick={onClose}
-              className="rounded-sm border border-line-trace bg-canvas-pure px-4 py-2 text-xs font-bold text-brand-black transition hover:border-brand-forest"
             >
               Tutup
-            </button>
+            </Button>
           </div>
         </div>
       </div>

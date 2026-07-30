@@ -1,3 +1,4 @@
+import * as React from "react";
 import { Button as ButtonPrimitive } from "@base-ui/react/button";
 import { cva, type VariantProps } from "class-variance-authority";
 
@@ -203,18 +204,18 @@ const buttonVariants = cva(
 
       size: {
         default: "h-12 gap-2 px-5",
-        xs: "h-7 gap-1 px-2.5 text-[11px]",
-        sm: "h-9 gap-1.5 px-4 text-xs",
+        xs: "h-8 gap-1 px-3 text-xs",
+        sm: "h-10 gap-1.5 px-4 text-xs",
         md: "h-12 gap-2 px-5 text-xs",
         lg: "h-14 gap-2.5 px-8 text-sm",
 
         auth: "h-12 gap-2 px-5 text-xs",
 
-        icon: "size-12",
-        "icon-xs": "size-7",
-        "icon-sm": "size-9",
-        "icon-md": "size-12",
-        "icon-lg": "size-14",
+        icon: "size-12 p-0 aspect-square flex items-center justify-center",
+        "icon-xs": "size-8 p-0 aspect-square flex items-center justify-center",
+        "icon-sm": "size-10 p-0 aspect-square flex items-center justify-center",
+        "icon-md": "size-12 p-0 aspect-square flex items-center justify-center",
+        "icon-lg": "size-14 p-0 aspect-square flex items-center justify-center",
       },
     },
 
@@ -239,22 +240,42 @@ function Button({
   fullWidth = false,
   children,
   disabled,
+  nativeButton,
   ...props
 }: ButtonProps) {
   const currentSize = size ?? "default";
+  const childrenArray = React.Children.toArray(children);
+  const isOnlyIcon =
+    childrenArray.length === 1 &&
+    React.isValidElement(childrenArray[0]) &&
+    !loading;
+
+  const resolvedSize = isOnlyIcon
+    ? (currentSize === "xs"
+        ? "icon-xs"
+        : currentSize === "sm"
+          ? "icon-sm"
+          : currentSize === "lg"
+            ? "icon-lg"
+            : "icon-md")
+    : currentSize;
 
   const isIconButton =
-    typeof currentSize === "string" && currentSize.startsWith("icon");
+    typeof resolvedSize === "string" && resolvedSize.startsWith("icon");
+
+  const resolvedNativeButton =
+    nativeButton ?? (props.render ? false : true);
 
   return (
     <ButtonPrimitive
       data-slot="button"
       disabled={disabled || loading}
       aria-busy={loading || undefined}
+      nativeButton={resolvedNativeButton}
       className={cn(
         buttonVariants({
           variant,
-          size: currentSize,
+          size: resolvedSize,
         }),
         fullWidth && "w-full",
         className,

@@ -104,7 +104,7 @@ export function BannerUpload({
             onFilesSelected={handleFilesSelected}
           />
 
-          <div className="group relative w-full overflow-hidden rounded-sm border border-line-trace/60 bg-canvas-warm/20">
+          <div className="group relative w-full overflow-hidden rounded-sm border border-brand-black/15/60 bg-canvas-warm/20">
             <img
               src={previewUrl}
               alt="Preview banner workshop"

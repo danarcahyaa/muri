@@ -40,7 +40,7 @@ export function WasteBatchMetrics({ providerId }: BatchMetricsProps): ReactEleme
 
   return (
     <div className="grid gap-5 sm:grid-cols-2">
-      <article className="flex min-h-32 flex-col rounded-lg border border-line-trace bg-canvas-pure p-6">
+      <article className="flex min-h-32 flex-col rounded-lg border border-brand-black/15 bg-canvas-pure p-6">
         <p className="text-[11px] font-medium uppercase text-muted-moss">
           Total Jejak
         </p>
@@ -58,7 +58,7 @@ export function WasteBatchMetrics({ providerId }: BatchMetricsProps): ReactEleme
         </div>
       </article>
 
-      <article className="flex min-h-32 flex-col rounded-lg border border-line-trace bg-canvas-pure p-6">
+      <article className="flex min-h-32 flex-col rounded-lg border border-brand-black/15 bg-canvas-pure p-6">
         <p className="text-[11px] font-medium uppercase text-muted-moss">
           Total Berat Tercatat
         </p>

@@ -135,7 +135,7 @@ export default function CustomerOrderLifecyclePanel({
 
   if (isLoading) {
     return (
-      <section className="rounded-3xl border border-line-trace bg-canvas-pure p-8">
+      <section className="rounded-3xl border border-brand-black/15 bg-canvas-pure p-8">
         <div className="flex min-h-48 items-center justify-center">
           <LoaderCircle className="size-7 animate-spin text-brand-emerald" />
         </div>
@@ -145,7 +145,7 @@ export default function CustomerOrderLifecyclePanel({
 
   if (errorMessage || !lifecycle) {
     return (
-      <section className="rounded-3xl border border-line-trace bg-canvas-pure p-8 text-center">
+      <section className="rounded-3xl border border-brand-black/15 bg-canvas-pure p-8 text-center">
         <RefreshCw className="mx-auto size-7 text-muted-moss" />
         <p className="mt-4 text-xs text-muted-moss">
           {errorMessage ?? "Status pesanan tidak tersedia."}
@@ -166,7 +166,7 @@ export default function CustomerOrderLifecyclePanel({
     lifecycle.orderStatus === "rejected";
 
   return (
-    <section className="rounded-3xl border border-line-trace bg-canvas-pure p-6 sm:p-8">
+    <section className="rounded-3xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase text-brand-emerald">
@@ -256,7 +256,7 @@ export default function CustomerOrderLifecyclePanel({
             </p>
           </div>
 
-          <div className="rounded-2xl border border-line-trace bg-canvas-warm p-5">
+          <div className="rounded-2xl border border-brand-black/15 bg-canvas-warm p-5">
             <Leaf className="size-5 text-brand-emerald" />
             <p className="mt-3 text-[9px] font-bold uppercase text-muted-moss">
               Dampak Pesanan
@@ -283,7 +283,7 @@ export default function CustomerOrderLifecyclePanel({
       )}
 
       {actionMessage && (
-        <div className="mt-5 rounded-xl border border-line-trace bg-canvas-warm px-4 py-3 text-xs text-brand-black">
+        <div className="mt-5 rounded-xl border border-brand-black/15 bg-canvas-warm px-4 py-3 text-xs text-brand-black">
           {actionMessage}
         </div>
       )}
@@ -321,7 +321,7 @@ export default function CustomerOrderLifecyclePanel({
                 setShowCancel(false);
                 setCancelReason("");
               }}
-              className="rounded-md border border-line-trace bg-white px-5 py-3 text-xs font-bold text-brand-black"
+              className="rounded-md border border-brand-black/15 bg-white px-5 py-3 text-xs font-bold text-brand-black"
             >
               Kembali
             </button>

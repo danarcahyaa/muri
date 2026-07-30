@@ -138,7 +138,7 @@ export default function AIMaterialSection() {
         <div
           className="
             mt-16 overflow-hidden rounded-3xl
-            border border-line-trace bg-canvas-pure
+            border border-brand-black/15 bg-canvas-pure
             xl:grid
             xl:grid-cols-[minmax(0,3fr)_minmax(420px,2fr)]
           "

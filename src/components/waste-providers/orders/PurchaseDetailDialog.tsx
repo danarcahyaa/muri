@@ -77,7 +77,7 @@ export function PurchaseDetailDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md bg-canvas-pure border border-line-trace max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-md bg-canvas-pure border border-line-trace rounded-xl max-h-[90vh] overflow-y-auto p-6">
           <DialogHeader>
             <DialogTitle className="font-display text-lg font-bold text-brand-black pr-6">
               Detail Transaksi Pesanan
@@ -123,7 +123,7 @@ export function PurchaseDetailDialog({
             </div>
 
             {/* Pricing Grid */}
-            <div className="bg-canvas-warm/30 rounded-sm border border-line-trace/60 p-3 space-y-2 mt-4">
+            <div className="bg-canvas-warm/50 rounded-lg border border-line-trace p-4 space-y-2 mt-4">
               <div className="flex justify-between">
                 <span className="text-muted-moss">Harga per Kg</span>
                 <span className="font-medium">{formatCurrencyIDR(purchase.original_price_per_kg)}/kg</span>
@@ -134,27 +134,27 @@ export function PurchaseDetailDialog({
                 <span className="font-medium">{formatWeightKg(purchase.weight_bought_kg)}</span>
               </div>
 
-              <div className="border-t border-line-trace/60 my-1 pt-1.5 flex justify-between">
+              <div className="border-t border-line-trace my-1 pt-2 flex justify-between">
                 <span className="font-bold text-muted-moss">Total Pembayaran</span>
-                <span className="font-bold text-sm">{formatCurrencyIDR(purchase.final_price_idr)}</span>
+                <span className="font-bold text-sm text-brand-forest">{formatCurrencyIDR(purchase.final_price_idr)}</span>
               </div>
             </div>
 
             {purchase.purchase_status === PurchaseStatus.PENDING && (
-              <div className="flex gap-2.5 justify-end pt-4 border-t border-line-trace/40 mt-4">
+              <div className="flex gap-3 justify-end pt-4 border-t border-line-trace mt-4">
                 <Button
                   onClick={() => setPendingReject(true)}
                   disabled={isProcessing}
                   variant="outline-destructive"
-                  size="sm"
+                  size="md"
                 >
                   Tolak Pesanan
                 </Button>
                 <Button
                   onClick={() => setPendingConfirm(true)}
                   disabled={isProcessing}
-                  variant="solid-black"
-                  size="sm"
+                  variant="default"
+                  size="md"
                 >
                   Konfirmasi Pesanan
                 </Button>

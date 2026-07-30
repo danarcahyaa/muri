@@ -120,7 +120,7 @@ export function MediaGalleryViewer({ media, className }: MediaGalleryViewerProps
       {/* Thumbnail Trigger Box */}
       <div 
         onClick={() => setIsOpen(true)}
-        className="relative w-12 h-12 aspect-square rounded overflow-hidden border border-line-trace/60 bg-canvas-warm/50 flex items-center justify-center cursor-pointer hover:border-brand-emerald/80 hover:ring-1 hover:ring-brand-emerald/20 transition-all"
+        className="relative w-12 h-12 aspect-square rounded overflow-hidden border border-brand-black/15/60 bg-canvas-warm/50 flex items-center justify-center cursor-pointer hover:border-brand-emerald/80 hover:ring-1 hover:ring-brand-emerald/20 transition-all"
         title={`Lihat lampiran media (${totalCount} file)`}
       >
         {firstMedia.type === "video" ? (
@@ -156,7 +156,7 @@ export function MediaGalleryViewer({ media, className }: MediaGalleryViewerProps
 
       {/* Modal Dialog Viewer */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-2xl bg-canvas-pure border border-line-trace max-h-[90vh] overflow-y-auto p-5">
+        <DialogContent className="sm:max-w-2xl bg-canvas-pure border border-brand-black/15 max-h-[90vh] overflow-y-auto p-5">
           <DialogHeader>
             <DialogTitle className="font-display text-lg font-bold text-brand-black pr-6">
               Lampiran Media ({totalCount})
@@ -174,7 +174,7 @@ export function MediaGalleryViewer({ media, className }: MediaGalleryViewerProps
                 onMouseMove={handleMouseMove}
                 style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
                 className={cn(
-                  "relative w-full h-[320px] md:h-[400px] rounded-sm border border-line-trace/60 bg-canvas-warm/30 overflow-auto select-none",
+                  "relative w-full h-[320px] md:h-[400px] rounded-sm border border-brand-black/15/60 bg-canvas-warm/30 overflow-auto select-none",
                   activeMedia.type === "video" 
                     ? "flex items-center justify-center cursor-default" 
                     : isDragging 

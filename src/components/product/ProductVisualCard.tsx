@@ -14,7 +14,7 @@ export default function ProductVisualCard({
   bonusText,
 }: ProductVisualCardProps) {
   return (
-    <article className="rounded-2xl border border-line-trace bg-canvas-pure p-5 sm:p-7">
+    <article className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-5 sm:p-7">
       <div
         className="
           relative flex aspect-[16/7.2]

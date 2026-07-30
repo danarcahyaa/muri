@@ -18,7 +18,7 @@ export default function DetailCard({
 }: DetailCardProps) {
   return (
     <section
-      className={`rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8 ${className}`}
+      className={`rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8 ${className}`}
     >
       <div className="flex items-center gap-3 text-brand-emerald">
         <Icon className="size-4" strokeWidth={2} />

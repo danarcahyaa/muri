@@ -169,7 +169,7 @@ export default function BrandQrisVerificationSection() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="flex flex-col justify-between rounded-2xl border border-line-trace bg-canvas-pure p-6 space-y-4"
+              className="flex flex-col justify-between rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 space-y-4"
             >
               <div className="flex items-center justify-between">
                 <Skeleton className="h-4 w-28" />
@@ -207,7 +207,7 @@ export default function BrandQrisVerificationSection() {
           <button
             type="button"
             onClick={() => { void loadQueue(); }}
-            className="inline-flex items-center justify-center gap-2 rounded-md border border-line-trace px-5 py-3 text-xs font-bold text-brand-black transition hover:border-brand-forest"
+            className="inline-flex items-center justify-center gap-2 rounded-md border border-brand-black/15 px-5 py-3 text-xs font-bold text-brand-black transition hover:border-brand-forest"
           >
             <RefreshCw className="size-4" />
             Muat Ulang
@@ -224,7 +224,7 @@ export default function BrandQrisVerificationSection() {
         )}
 
         {errorMessage ? (
-          <div className="mt-8 flex min-h-[300px] flex-col items-center justify-center rounded-3xl border border-line-trace bg-canvas-pure p-6 text-center">
+          <div className="mt-8 flex min-h-[300px] flex-col items-center justify-center rounded-3xl border border-brand-black/15 bg-canvas-pure p-6 text-center">
             <RefreshCw className="size-8 text-muted-moss/40" />
             <p className="mt-4 text-sm font-medium text-brand-black">{errorMessage}</p>
             <button
@@ -236,7 +236,7 @@ export default function BrandQrisVerificationSection() {
             </button>
           </div>
         ) : queue.length === 0 ? (
-          <div className="mt-8 flex min-h-[300px] flex-col items-center justify-center rounded-3xl border border-line-trace bg-canvas-pure p-6 text-center">
+          <div className="mt-8 flex min-h-[300px] flex-col items-center justify-center rounded-3xl border border-brand-black/15 bg-canvas-pure p-6 text-center">
             <p className="text-sm font-medium text-brand-black">Antrean Kosong</p>
             <p className="mt-2 text-xs text-muted-moss">
               Tidak ada pembayaran QRIS yang membutuhkan verifikasi saat ini.

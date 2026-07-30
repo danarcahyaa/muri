@@ -155,7 +155,7 @@ function ModeButton({
       className={`inline-flex items-center justify-center rounded-full px-6 py-4 text-xs font-bold transition ${
         active
           ? "bg-brand-black text-white"
-          : "border border-line-trace bg-canvas-pure text-brand-black hover:bg-canvas-warm"
+          : "border border-brand-black/15 bg-canvas-pure text-brand-black hover:bg-canvas-warm"
       }`}
     >
       {children}

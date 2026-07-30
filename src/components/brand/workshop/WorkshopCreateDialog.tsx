@@ -48,8 +48,8 @@ export function WorkshopCreateDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md sm:max-w-3xl bg-canvas-pure border border-line-trace rounded-lg w-full max-h-[95vh] flex flex-col overflow-hidden sm:p-6 p-3">
-        <DialogHeader>
+      <DialogContent className="max-w-md sm:max-w-3xl bg-canvas-pure border border-line-trace rounded-xl w-full max-h-[95vh] flex flex-col overflow-hidden p-0">
+        <DialogHeader className="px-6 py-5 border-b border-line-trace">
           <DialogTitle className="font-display text-2xl font-bold tracking-tight text-brand-black">
             Buat Workshop Baru
           </DialogTitle>
@@ -57,17 +57,17 @@ export function WorkshopCreateDialog({
 
         <form
           onSubmit={onSubmit}
-          className="flex flex-col flex-1 overflow-hidden mt-2 gap-0"
+          className="flex flex-col flex-1 overflow-hidden"
         >
           {/* Error Banner */}
           {submitError && (
-            <div className="rounded bg-error-rust/[0.06] border border-error-rust/20 p-3 text-xs text-error-rust font-medium mb-4">
+            <div className="mx-6 mt-4 rounded bg-error-rust/[0.06] border border-error-rust/20 p-3 text-xs text-error-rust font-medium">
               {submitError}
             </div>
           )}
 
           {/* Scrollable Form Fields */}
-          <div className="flex-1 overflow-y-auto space-y-4 px-1.5 pr-3 pb-4">
+          <div className="flex-1 overflow-y-auto space-y-4 p-6 sm:p-8">
 
             {/* Judul */}
             <div className="space-y-2.5">
@@ -250,22 +250,24 @@ export function WorkshopCreateDialog({
           </div>
 
           {/* Sticky Footer */}
-          <div className="pt-4 border-t border-line-trace/30 flex gap-2 justify-end bg-canvas-pure mt-auto pb-1 px-1">
+          <div className="shrink-0 flex items-center justify-end gap-3 border-t border-line-trace bg-canvas-warm/55 px-6 py-4 sm:px-8">
             <Button
               type="button"
               variant="outline"
+              size="md"
               onClick={handleClose}
               disabled={isSubmitting}
             >
               Batal
             </Button>
             <Button
-              variant="solid-black"
+              variant="default"
+              size="md"
               type="submit"
               disabled={isSubmitting || descriptionLength > 200}
-              className="min-w-20 flex items-center justify-center"
+              loading={isSubmitting}
             >
-              {isSubmitting ? <Spinner /> : "Simpan"}
+              Simpan
             </Button>
           </div>
         </form>

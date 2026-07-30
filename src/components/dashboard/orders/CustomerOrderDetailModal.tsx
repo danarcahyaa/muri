@@ -23,6 +23,9 @@ import {
 import type { CustomerOrder, CustomerOrderStatus } from "@/types/customerOrder";
 import type { CustomerOrderLifecycle } from "@/types/customerOrderLifecycle";
 
+import { Button } from "@/components/ui/Button";
+import { OrderProgressBar } from "@/components/ui/OrderProgressBar";
+
 interface CustomerOrderDetailModalProps {
   order: CustomerOrder | null;
   isOpen: boolean;
@@ -110,10 +113,20 @@ export default function CustomerOrderDetailModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in-0">
-      <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-line-trace bg-canvas-pure">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in-0 cursor-pointer"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-line-trace bg-canvas-pure cursor-default"
+      >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-line-trace px-6 py-5 sm:px-8">
+        <div className="flex shrink-0 items-center justify-between border-b border-line-trace px-6 py-5 sm:px-8">
           <div className="flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-lg bg-brand-lime/40 text-brand-forest">
               <ShoppingBag className="size-5" />
@@ -139,31 +152,33 @@ export default function CustomerOrderDetailModal({
             type="button"
             onClick={onClose}
             aria-label="Tutup modal"
-            className="flex size-9 items-center justify-center rounded-full bg-canvas-warm text-brand-black transition hover:bg-line-trace"
+            className="flex size-8 items-center justify-center rounded-full bg-canvas-warm text-brand-black transition hover:bg-line-trace cursor-pointer"
           >
             <X className="size-4" />
           </button>
         </div>
 
         {/* Content Body */}
-        <div className="space-y-6 overflow-y-auto p-6 sm:p-8">
+        <div className="space-y-6 sm:space-y-7 overflow-y-auto p-6 sm:p-8">
+          {/* Order Progress Step Bar */}
+          <OrderProgressBar status={currentStatus} />
           {/* Feedback Banners */}
           {successMessage && (
-            <div className="flex items-center gap-2 rounded-xl border border-brand-lime bg-brand-lime/20 px-4 py-3 text-xs font-medium text-brand-forest">
+            <div className="flex items-center gap-2 rounded-lg border border-brand-lime bg-brand-lime/20 px-4 py-3 text-xs font-medium text-brand-forest">
               <CheckCircle2 className="size-4 shrink-0" />
               <span>{successMessage}</span>
             </div>
           )}
 
           {errorMessage && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
               {errorMessage}
             </div>
           )}
 
           {/* Shipped Status Action Alert */}
           {isShipped && !successMessage && (
-            <div className="flex flex-col gap-3 rounded-xl border border-brand-emerald/30 bg-brand-emerald/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 rounded-lg border border-brand-emerald/30 bg-brand-emerald/10 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2.5 text-brand-forest">
                 <Truck className="size-5 shrink-0 text-brand-emerald" />
                 <div>
@@ -174,24 +189,16 @@ export default function CustomerOrderDetailModal({
                 </div>
               </div>
 
-              <button
-                type="button"
+              <Button
+                variant="default"
+                size="sm"
                 disabled={isConfirmingDelivery}
+                loading={isConfirmingDelivery}
                 onClick={() => void handleConfirmDelivery()}
-                className="inline-flex items-center justify-center gap-1.5 rounded-sm bg-brand-forest px-4 py-2 text-xs font-bold text-white transition hover:bg-brand-black disabled:opacity-50"
               >
-                {isConfirmingDelivery ? (
-                  <>
-                    <LoaderCircle className="size-3.5 animate-spin" />
-                    Memproses...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="size-3.5" />
-                    Konfirmasi Diterima
-                  </>
-                )}
-              </button>
+                <CheckCircle2 className="size-3.5" />
+                Konfirmasi Diterima
+              </Button>
             </div>
           )}
 
@@ -203,11 +210,11 @@ export default function CustomerOrderDetailModal({
             </div>
 
             {order.items.length === 0 ? (
-              <div className="mt-3 rounded-xl bg-canvas-warm px-4 py-6 text-center text-xs text-muted-moss">
+              <div className="mt-3 rounded-lg bg-canvas-warm px-4 py-6 text-center text-xs text-muted-moss">
                 Detail produk tidak tersedia.
               </div>
             ) : (
-              <div className="mt-3 divide-y divide-line-trace rounded-xl border border-line-trace bg-canvas-warm/30 p-4">
+              <div className="mt-3 divide-y divide-line-trace rounded-lg border border-line-trace bg-canvas-warm/50 p-4">
                 {order.items.map((item) => {
                   const itemAmount = getOrderItemAmount({ order, item });
                   const itemDescription = getOrderItemDescription({ order, item });
@@ -250,7 +257,7 @@ export default function CustomerOrderDetailModal({
               <span>Informasi Pengiriman & Resi</span>
             </div>
 
-            <div className="mt-3 space-y-2.5 rounded-xl border border-line-trace bg-canvas-warm/30 p-4">
+            <div className="mt-3 space-y-2.5 rounded-lg border border-line-trace bg-canvas-warm/50 p-4">
               <DetailFact icon={User} label="Penerima" value={order.receiverName} />
               <DetailFact
                 icon={Phone}
@@ -279,7 +286,7 @@ export default function CustomerOrderDetailModal({
               <span>Ringkasan Pembayaran & Coin</span>
             </div>
 
-            <div className="mt-3 space-y-2 rounded-xl border border-line-trace bg-canvas-warm/30 p-4">
+            <div className="mt-3 space-y-2 rounded-lg border border-line-trace bg-canvas-warm/50 p-4">
               <DetailRow
                 label="Metode Pembayaran"
                 value={order.payment?.method === "coin" ? "Coin" : "QRIS"}
@@ -312,29 +319,32 @@ export default function CustomerOrderDetailModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between border-t border-line-trace bg-canvas-warm px-6 py-4 sm:px-8">
+        <div className="shrink-0 flex items-center justify-between border-t border-line-trace bg-canvas-warm/55 px-6 py-4 sm:px-8">
           <p className="text-[10px] text-muted-moss">
             ID: <span className="font-mono text-brand-black">{order.id}</span>
           </p>
 
           <div className="flex items-center gap-3">
             {order.payment?.status === "waiting_payment" && (
-              <Link
-                href={`/dashboard/orders/${order.id}/payment`}
-                className="inline-flex items-center gap-1.5 rounded-sm bg-brand-forest px-4 py-2.5 text-xs font-bold text-white transition hover:bg-brand-black"
-              >
-                <QrCode className="size-3.5" />
-                Bayar QRIS Sekarang
-              </Link>
+              <Button
+                variant="default"
+                size="md"
+                render={
+                  <Link href={`/dashboard/orders/${order.id}/payment`}>
+                    <QrCode className="size-3.5" />
+                    Bayar QRIS Sekarang
+                  </Link>
+                }
+              />
             )}
 
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="md"
               onClick={onClose}
-              className="rounded-sm border border-line-trace bg-canvas-pure px-4 py-2.5 text-xs font-bold text-brand-black transition hover:border-brand-forest"
             >
               Tutup
-            </button>
+            </Button>
           </div>
         </div>
       </div>

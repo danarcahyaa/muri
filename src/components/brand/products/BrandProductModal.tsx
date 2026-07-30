@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { LoaderCircle, Package, X } from "lucide-react";
 
+import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import {
@@ -138,12 +139,16 @@ export function BrandProductModal({
 
   return (
     <div
-      onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in-0"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in-0 cursor-pointer"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-line-trace bg-canvas-pure"
+        className="relative flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-xl border border-line-trace bg-canvas-pure cursor-default"
       >
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b border-line-trace px-6 py-5 sm:px-8">
@@ -165,7 +170,7 @@ export function BrandProductModal({
             type="button"
             onClick={onClose}
             aria-label="Tutup modal"
-            className="flex size-9 items-center justify-center rounded-full bg-canvas-warm text-brand-black transition hover:bg-line-trace"
+            className="flex size-8 items-center justify-center rounded-full bg-canvas-warm text-brand-black transition hover:bg-line-trace cursor-pointer"
           >
             <X className="size-4" />
           </button>
@@ -317,28 +322,23 @@ export function BrandProductModal({
           </div>
 
           {/* Footer */}
-          <div className="shrink-0 flex items-center justify-end gap-3 border-t border-line-trace px-6 py-4 sm:px-8">
-            <button
-              type="button"
+          <div className="shrink-0 flex items-center justify-end gap-3 border-t border-line-trace bg-canvas-warm/55 px-6 py-4 sm:px-8">
+            <Button
+              variant="outline"
+              size="md"
               onClick={onClose}
-              className="rounded-sm border border-line-trace bg-canvas-pure px-4 py-2 text-xs font-bold text-brand-black transition hover:border-brand-forest hover:bg-canvas-warm"
             >
               Batal
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="default"
+              size="md"
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex items-center gap-1.5 rounded-sm bg-brand-forest px-5 py-2 text-xs font-bold text-white transition hover:bg-brand-black disabled:opacity-50"
+              loading={isSubmitting}
             >
-              {isSubmitting ? (
-                <>
-                  <LoaderCircle className="size-3.5 animate-spin" />
-                  Menyimpan...
-                </>
-              ) : (
-                "Simpan Produk"
-              )}
-            </button>
+              Simpan Produk
+            </Button>
           </div>
         </form>
       </div>

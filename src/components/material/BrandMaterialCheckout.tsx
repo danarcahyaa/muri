@@ -86,7 +86,7 @@ export default function BrandMaterialCheckout({
 
   if (materialError || !material) {
     return (
-      <div className="mx-auto max-w-lg rounded-2xl border border-line-trace bg-canvas-pure p-8 text-center font-body shadow-sm">
+      <div className="mx-auto max-w-lg rounded-2xl border border-brand-black/15 bg-canvas-pure p-8 text-center font-body shadow-sm">
         <h2 className="font-display text-xl font-bold text-brand-black">
           Batch Material Tidak Ditemukan
         </h2>
@@ -190,13 +190,13 @@ export default function BrandMaterialCheckout({
         {/* Form Inputs Left (2 Cols) */}
         <div className="space-y-6 lg:col-span-2">
           {/* Material Summary Card */}
-          <section className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8">
+          <section className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8">
             <div className="flex items-center gap-2 text-xs font-bold uppercase text-brand-emerald">
               <Package className="size-4" />
               <span>Detail Batch Material</span>
             </div>
 
-            <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-line-trace bg-canvas-warm/40 p-4">
+            <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-brand-black/15 bg-canvas-warm/40 p-4">
               <div>
                 <span className="inline-flex rounded-full bg-brand-lime/60 px-2.5 py-0.5 text-[9px] font-bold uppercase text-brand-forest">
                   {activeMaterial.categoryName}
@@ -240,7 +240,7 @@ export default function BrandMaterialCheckout({
           </section>
 
           {/* Shipping & Recipient Details */}
-          <section className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8 space-y-5">
+          <section className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8 space-y-5">
             <div className="flex items-center gap-2 text-xs font-bold uppercase text-brand-emerald">
               <MapPin className="size-4" />
               <span>Data Penerima & Alamat Pengiriman Brand</span>
@@ -298,7 +298,7 @@ export default function BrandMaterialCheckout({
           </section>
 
           {/* Payment Method Selector */}
-          <section className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8 space-y-4">
+          <section className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8 space-y-4">
             <div className="flex items-center gap-2 text-xs font-bold uppercase text-brand-emerald">
               <QrCode className="size-4" />
               <span>Metode Pembayaran</span>
@@ -329,7 +329,7 @@ export default function BrandMaterialCheckout({
 
         {/* Order Summary Right (1 Col Sticky) */}
         <div className="space-y-6">
-          <section className="sticky top-24 rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8 space-y-6 shadow-sm">
+          <section className="sticky top-24 rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8 space-y-6 shadow-sm">
             <h3 className="font-display text-lg font-bold text-brand-black border-b border-line-trace pb-4">
               Ringkasan Pembayaran
             </h3>

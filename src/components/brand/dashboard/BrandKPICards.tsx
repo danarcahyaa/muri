@@ -46,7 +46,7 @@ export function BrandKPICards({ stats, showSkeleton }: BrandKPICardsProps): Reac
             {showSkeleton ? (
               <Skeleton className="h-10 w-28 bg-white/20" />
             ) : (
-              `${carbonSaved.toFixed(1)} Kg`
+              formatWeightKg(carbonSaved)
             )}
           </div>
           <p className="mt-2 text-xs text-white/50">

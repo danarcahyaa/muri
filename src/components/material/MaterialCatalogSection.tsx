@@ -63,7 +63,7 @@ export default function MaterialCatalogSection({
               placeholder="Cari material kain"
               className="
                 h-12 w-full rounded-sm
-                border border-line-trace
+                border border-brand-black/15
                 bg-transparent px-5 pr-12
                 font-body text-xs
                 text-brand-black
@@ -90,7 +90,7 @@ export default function MaterialCatalogSection({
           <div
             className="
               flex overflow-x-auto rounded-sm
-              border border-line-trace p-1
+              border border-brand-black/15 p-1
             "
             aria-label="Filter lokasi material"
           >
@@ -132,7 +132,7 @@ export default function MaterialCatalogSection({
               className="
                 h-12 w-full min-w-44
                 appearance-none rounded-sm
-                border border-line-trace
+                border border-brand-black/15
                 bg-canvas-pure px-5 pr-11
                 text-xs font-medium
                 text-brand-black
@@ -232,7 +232,7 @@ function MaterialCard({ material }: MaterialCardProps) {
     <article
       className="
         group overflow-hidden rounded-2xl
-        border border-line-trace
+        border border-brand-black/15
         bg-canvas-pure p-4
         transition duration-300
         hover:-translate-y-1

@@ -58,7 +58,7 @@ export function SavedMaterialsList({
         {isLoading ? (
           /* Loading Skeleton */
           Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-3 p-3 border border-line-trace/40 rounded-lg">
+            <div key={i} className="flex items-center gap-3 p-3 border border-brand-black/15/40 rounded-lg">
               <Skeleton className="size-16 rounded-md shrink-0" />
               <div className="flex-1 space-y-2">
                 <Skeleton className="h-3 w-3/4" />

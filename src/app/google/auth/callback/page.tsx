@@ -133,7 +133,7 @@ export default function AuthCallbackPage() {
     <main className="relative isolate flex min-h-svh items-center justify-center overflow-hidden bg-canvas-warm p-6 selection:bg-brand-lime/30">
       <CallbackBackground />
 
-      <section className="relative z-10 w-full max-w-md overflow-hidden rounded-3xl border border-line-trace bg-canvas-pure">
+      <section className="relative z-10 w-full max-w-md overflow-hidden rounded-3xl border border-brand-black/15 bg-canvas-pure">
         <div className="p-7 text-center sm:p-10">
           {/* Logo */}
           <button

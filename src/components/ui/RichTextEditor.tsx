@@ -167,7 +167,7 @@ export function RichTextEditor({
         `
           flex w-full flex-col
           overflow-hidden rounded-sm
-          border border-line-trace
+          border border-brand-black/15
           bg-transparent text-sm
           transition-all
 

@@ -60,7 +60,7 @@ export default function ProductCatalogToolbar({
             placeholder="Cari produk, brand, kategori, atau SKU"
             className="
               h-12 w-full rounded-sm
-              border border-line-trace
+              border border-brand-black/15
               bg-transparent px-5 pr-12
               font-body text-xs text-brand-black
               outline-none transition
@@ -86,7 +86,7 @@ export default function ProductCatalogToolbar({
         <div
           className="
             flex max-w-full overflow-x-auto
-            rounded-sm border border-line-trace p-1
+            rounded-sm border border-brand-black/15 p-1
           "
           aria-label="Filter brand produk"
         >
@@ -186,7 +186,7 @@ function SelectField({
         className="
           h-12 w-full min-w-44
           appearance-none rounded-sm
-          border border-line-trace
+          border border-brand-black/15
           bg-canvas-pure px-5 pr-11
           text-xs font-medium text-brand-black
           outline-none transition

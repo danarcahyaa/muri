@@ -22,7 +22,7 @@ export default function ProductCheckoutOrderSummary({
       : formatIdr(checkout.totalPriceIdr ?? 0);
 
   return (
-    <aside className="self-start rounded-2xl border border-line-trace bg-canvas-pure p-6 lg:sticky lg:top-24">
+    <aside className="self-start rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 lg:sticky lg:top-24">
       <div className="flex items-center gap-3 text-brand-emerald">
         <ShoppingBag className="size-4" />
         <h2 className="text-xs font-bold uppercase">Ringkasan Pesanan</h2>

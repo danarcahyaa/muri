@@ -115,7 +115,7 @@ export default function TraceabilitySection() {
           </div>
         </div>
 
-        <div className="mt-16 overflow-hidden rounded-3xl border border-line-trace bg-canvas-pure lg:grid lg:grid-cols-5">
+        <div className="mt-16 overflow-hidden rounded-3xl border border-brand-black/15 bg-canvas-pure lg:grid lg:grid-cols-5">
           <TracingInput
             batchId={batchId}
             status={status}

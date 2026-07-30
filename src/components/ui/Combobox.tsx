@@ -69,7 +69,7 @@ function Combobox({
         className={cn(
           `
             group/combobox flex h-12 w-full items-center justify-between gap-3
-            rounded-sm border border-line-trace bg-transparent px-5
+            rounded-sm border border-brand-black/15 bg-transparent px-5
             text-left font-body text-xs text-brand-black shadow-none outline-none
 
             transition-[background-color,border-color,color,box-shadow]
@@ -121,7 +121,7 @@ function Combobox({
             className={cn(
               `
                 w-[var(--anchor-width)] min-w-56 overflow-hidden
-                rounded-sm border border-line-trace bg-canvas-pure
+                rounded-sm border border-brand-black/15 bg-canvas-pure
                 text-brand-black shadow-md outline-none
 
                 data-open:animate-in
@@ -144,7 +144,7 @@ function Combobox({
 
                 <ComboboxPrimitive.Input
                   placeholder={searchPlaceholder}
-                  className="h-10 w-full rounded-sm border border-line-trace bg-transparent pl-9 pr-9 font-body text-xs text-brand-black outline-none placeholder:text-muted-moss/60 focus:border-brand-emerald focus:ring-2 focus:ring-brand-emerald/10"
+                  className="h-10 w-full rounded-sm border border-brand-black/15 bg-transparent pl-9 pr-9 font-body text-xs text-brand-black outline-none placeholder:text-muted-moss/60 focus:border-brand-emerald focus:ring-2 focus:ring-brand-emerald/10"
                 />
 
                 {clearable ? (

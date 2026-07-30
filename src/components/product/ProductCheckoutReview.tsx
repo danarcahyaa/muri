@@ -91,7 +91,7 @@ export default function ProductCheckoutReview({
           onClick={onBack}
           className="
             flex items-center justify-center gap-2
-            rounded-md border border-line-trace
+            rounded-md border border-brand-black/15
             px-6 py-4 text-xs font-bold
             text-brand-black transition
             hover:border-brand-forest

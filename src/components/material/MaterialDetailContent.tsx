@@ -126,7 +126,7 @@ export default function MaterialDetailContent({
         <div
           className="
             grid items-center gap-6 rounded-2xl
-            border border-line-trace p-6
+            border border-brand-black/15 p-6
             sm:grid-cols-[72px_minmax(0,1fr)] sm:p-7
           "
         >

@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { formatCoin } from "@/lib/productDetail";
 import { supabase } from "@/lib/supabaseClient";
+import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Skeleton } from "@/components/ui/Skeleton";
 import {
@@ -155,7 +156,7 @@ export default function CustomerProfileSection() {
   return (
     <div className="mt-8 space-y-8">
       {/* Profile Overview Header Card */}
-      <section className="overflow-hidden rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8">
+      <section className="overflow-hidden rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-5">
             {/* Avatar Initials */}
@@ -192,7 +193,7 @@ export default function CustomerProfileSection() {
           {/* Coin Balance Shortcut Card */}
           <Link
             href="/dashboard/points"
-            className="flex items-center gap-4 rounded-xl border border-line-trace bg-canvas-warm p-4 transition hover:border-brand-emerald hover:bg-canvas-warm/80 sm:w-auto"
+            className="flex items-center gap-4 rounded-xl border border-brand-black/15 bg-canvas-warm p-4 transition hover:border-brand-emerald hover:bg-canvas-warm/80 sm:w-auto"
           >
             <div className="flex size-11 items-center justify-center rounded-lg bg-brand-lime/50 text-brand-forest">
               <Coins className="size-5" />
@@ -233,7 +234,7 @@ export default function CustomerProfileSection() {
       {/* Profile Form & Settings Section */}
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Main Edit Form */}
-        <section className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8 lg:col-span-2">
+        <section className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8 lg:col-span-2">
           <div className="flex items-center justify-between border-b border-line-trace pb-5">
             <div>
               <h3 className="font-display text-xl font-medium text-brand-black">
@@ -327,7 +328,7 @@ export default function CustomerProfileSection() {
                   disabled={isSaving}
                   className="
                     w-full resize-none rounded-sm
-                    border border-line-trace bg-transparent
+                    border border-brand-black/15 bg-transparent
                     px-4 py-3 pr-11
                     font-body text-xs text-brand-black shadow-none
                     outline-none transition
@@ -347,23 +348,16 @@ export default function CustomerProfileSection() {
 
             {/* Save Button */}
             <div className="pt-2">
-              <button
+              <Button
                 type="submit"
                 disabled={isSaving}
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-brand-forest px-6 py-3.5 text-xs font-bold text-white transition hover:bg-brand-black disabled:cursor-not-allowed disabled:opacity-60"
+                loading={isSaving}
+                variant="default"
+                size="md"
               >
-                {isSaving ? (
-                  <>
-                    <LoaderCircle className="size-4 animate-spin" />
-                    Menyimpan...
-                  </>
-                ) : (
-                  <>
-                    <Save className="size-4" />
-                    Simpan Perubahan
-                  </>
-                )}
-              </button>
+                <Save className="size-4" />
+                Simpan Perubahan
+              </Button>
             </div>
           </form>
         </section>
@@ -371,7 +365,7 @@ export default function CustomerProfileSection() {
         {/* Side Panel: Security & Account Actions */}
         <div className="space-y-6">
           {/* Security Card */}
-          <section className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8">
+          <section className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8">
             <h3 className="font-display text-xl font-medium text-brand-black">
               Keamanan Akun
             </h3>
@@ -380,18 +374,22 @@ export default function CustomerProfileSection() {
             </p>
 
             <div className="mt-5 space-y-3">
-              <Link
-                href="/forgot-password"
-                className="flex items-center gap-3 rounded-sm border border-line-trace bg-canvas-warm px-4 py-3 text-xs font-bold text-brand-black transition hover:border-brand-forest hover:bg-canvas-warm/80"
-              >
-                <KeyRound className="size-4 text-brand-emerald" />
-                <span>Atur Ulang Kata Sandi</span>
-              </Link>
+              <Button
+                variant="outline"
+                size="md"
+                fullWidth
+                render={
+                  <Link href="/forgot-password">
+                    <KeyRound className="size-4 text-brand-emerald" />
+                    <span>Atur Ulang Kata Sandi</span>
+                  </Link>
+                }
+              />
             </div>
           </section>
 
           {/* Account Actions Card */}
-          <section className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8">
+          <section className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8">
             <h3 className="font-display text-xl font-medium text-brand-black">
               Aksi Akun
             </h3>
@@ -400,19 +398,17 @@ export default function CustomerProfileSection() {
             </p>
 
             <div className="mt-5">
-              <button
-                type="button"
+              <Button
+                variant="outline-destructive"
+                size="md"
+                fullWidth
                 disabled={isLoggingOut}
+                loading={isLoggingOut}
                 onClick={() => void handleLogout()}
-                className="flex w-full items-center justify-center gap-2 rounded-sm border border-red-200 bg-red-50 px-5 py-3 text-xs font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-50"
               >
-                {isLoggingOut ? (
-                  <LoaderCircle className="size-4 animate-spin" />
-                ) : (
-                  <LogOut className="size-4" />
-                )}
+                <LogOut className="size-4" />
                 Keluar dari Akun
-              </button>
+              </Button>
             </div>
           </section>
         </div>
@@ -431,7 +427,7 @@ function StatBox({
   value: string;
 }) {
   return (
-    <div className="flex items-center gap-4 rounded-xl border border-line-trace bg-canvas-pure p-5">
+    <div className="flex items-center gap-4 rounded-xl border border-brand-black/15 bg-canvas-pure p-5">
       <div className="flex size-11 items-center justify-center rounded-lg bg-brand-lime/35 text-brand-forest">
         <Icon className="size-5" />
       </div>
@@ -446,7 +442,7 @@ function StatBox({
 function ProfileSkeleton() {
   return (
     <div className="mt-8 space-y-8">
-      <div className="flex items-center justify-between rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8">
+      <div className="flex items-center justify-between rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8">
         <div className="flex items-center gap-5">
           <Skeleton className="size-16 rounded-xl sm:size-20" />
           <div className="space-y-2">
@@ -458,7 +454,7 @@ function ProfileSkeleton() {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
-        <div className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8 lg:col-span-2 space-y-6">
+        <div className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8 lg:col-span-2 space-y-6">
           <Skeleton className="h-6 w-48" />
           <div className="space-y-4">
             <Skeleton className="h-11 w-full rounded-sm" />
@@ -468,11 +464,11 @@ function ProfileSkeleton() {
           </div>
         </div>
         <div className="space-y-6">
-          <div className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8 space-y-4">
+          <div className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8 space-y-4">
             <Skeleton className="h-6 w-36" />
             <Skeleton className="h-12 w-full rounded-xl" />
           </div>
-          <div className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8 space-y-4">
+          <div className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8 space-y-4">
             <Skeleton className="h-6 w-36" />
             <Skeleton className="h-12 w-full rounded-md" />
           </div>
@@ -490,7 +486,7 @@ function ProfileError({
   onRetry: () => Promise<void>;
 }) {
   return (
-    <section className="mt-8 flex min-h-72 flex-col items-center justify-center rounded-2xl border border-line-trace bg-canvas-pure px-6 py-12 text-center">
+    <section className="mt-8 flex min-h-72 flex-col items-center justify-center rounded-2xl border border-brand-black/15 bg-canvas-pure px-6 py-12 text-center">
       <RefreshCw className="size-9 text-muted-moss/50" />
       <h2 className="mt-5 font-display text-2xl font-medium text-brand-black">
         Gagal Memuat Profil

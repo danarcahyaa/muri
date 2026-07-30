@@ -13,6 +13,7 @@ import {
   ToggleRight,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import {
@@ -127,7 +128,7 @@ export default function BrandProductsSection() {
     <>
       <section className="mt-8">
         {/* Single Unified White Card Container (Matching Screenshot 2 Layout) */}
-        <div className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8">
+        <div className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8">
           {/* Card Header */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -143,7 +144,7 @@ export default function BrandProductsSection() {
               <button
                 type="button"
                 onClick={() => void loadProducts()}
-                className="inline-flex items-center justify-center gap-2 rounded-sm border border-line-trace bg-canvas-pure px-4 py-2 text-xs font-bold text-brand-black transition hover:border-brand-forest hover:bg-canvas-warm"
+                className="inline-flex items-center justify-center gap-2 rounded-sm border border-brand-black/15 bg-canvas-pure px-4 py-2 text-xs font-bold text-brand-black transition hover:border-brand-forest hover:bg-canvas-warm"
               >
                 <RefreshCw className="size-3.5" />
                 Muat Ulang
@@ -198,7 +199,7 @@ export default function BrandProductsSection() {
           </div>
 
           {/* Table Container */}
-          <div className="mt-6 overflow-hidden rounded-xl border border-line-trace bg-canvas-pure">
+          <div className="mt-6 overflow-hidden rounded-xl border border-brand-black/15 bg-canvas-pure">
             {errorMessage ? (
               <div className="flex min-h-[260px] flex-col items-center justify-center p-6 text-center">
                 <RefreshCw className="size-7 text-muted-moss/40" />
@@ -222,103 +223,108 @@ export default function BrandProductsSection() {
                 </p>
               </div>
             ) : (
-              <Table>
-                <TableHeader className="bg-canvas-warm/60">
-                  <TableRow className="border-line-trace">
-                    <TableHead className="pl-6 sm:pl-8">PRODUK & SKU</TableHead>
-                    <TableHead>KATEGORI</TableHead>
-                    <TableHead>HARGA (IDR / COIN)</TableHead>
-                    <TableHead>STOK</TableHead>
-                    <TableHead>STATUS</TableHead>
-                    <TableHead className="pr-6 text-right sm:pr-8">AKSI</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody className="divide-y divide-line-trace">
-                  {isLoading ? (
-                    <TableSkeleton columnsCount={6} rowsCount={5} />
-                  ) : (
-                    paginatedProducts.map((prod) => (
-                      <TableRow
-                        key={prod.id}
-                        className="border-line-trace transition-colors hover:bg-canvas-warm/40"
-                      >
-                        <TableCell className="py-4 pl-6 sm:pl-8">
-                          <p className="text-xs font-bold text-brand-black">{prod.name}</p>
-                          <p className="mt-0.5 font-mono text-[11px] text-muted-moss">
-                            SKU: {prod.sku}
-                          </p>
-                        </TableCell>
-
-                        <TableCell className="py-4 text-xs text-brand-black">
-                          {prod.categoryName}
-                        </TableCell>
-
-                        <TableCell className="py-4">
-                          <p className="text-xs font-bold text-brand-black">
-                            {formatIdr(prod.priceIdr)}
-                          </p>
-                          {prod.priceCoin && (
-                            <p className="mt-0.5 text-[11px] text-brand-forest">
-                              atau {formatCoin(prod.priceCoin)} coin
+              <div className="overflow-x-auto muri-scrollbar w-full min-w-0">
+                <Table className="min-w-[650px]">
+                  <TableHeader className="bg-canvas-warm/60">
+                    <TableRow className="border-line-trace">
+                      <TableHead className="pl-6 sm:pl-8">PRODUK & SKU</TableHead>
+                      <TableHead>KATEGORI</TableHead>
+                      <TableHead>HARGA (IDR / COIN)</TableHead>
+                      <TableHead>STOK</TableHead>
+                      <TableHead>STATUS</TableHead>
+                      <TableHead className="pr-6 text-right sm:pr-8">AKSI</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody className="divide-y divide-line-trace">
+                    {isLoading ? (
+                      <TableSkeleton columnsCount={6} rowsCount={5} />
+                    ) : (
+                      paginatedProducts.map((prod) => (
+                        <TableRow
+                          key={prod.id}
+                          className="border-line-trace transition-colors hover:bg-canvas-warm/40"
+                        >
+                          <TableCell className="py-4 pl-6 sm:pl-8">
+                            <p className="text-xs font-bold text-brand-black">{prod.name}</p>
+                            <p className="mt-0.5 font-mono text-[11px] text-muted-moss">
+                              SKU: {prod.sku}
                             </p>
-                          )}
-                        </TableCell>
+                          </TableCell>
 
-                        <TableCell className="py-4">
-                          <span
-                            className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                              prod.stock <= 5
-                                ? "bg-amber-100 text-amber-800"
-                                : "bg-canvas-warm text-brand-black"
-                            }`}
-                          >
-                            {prod.stock} unit
-                          </span>
-                        </TableCell>
+                          <TableCell className="py-4 text-xs text-brand-black">
+                            {prod.categoryName}
+                          </TableCell>
 
-                        <TableCell className="py-4">
-                          <span
-                            className={`inline-flex rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide ${
-                              prod.status === "published"
-                                ? "bg-brand-lime/50 text-brand-forest"
-                                : "bg-canvas-warm text-muted-moss"
-                            }`}
-                          >
-                            {prod.status === "published" ? "Published" : "Draft"}
-                          </span>
-                        </TableCell>
+                          <TableCell className="py-4">
+                            <p className="text-xs font-bold text-brand-black">
+                              {formatIdr(prod.priceIdr)}
+                            </p>
+                            {prod.priceCoin && (
+                              <p className="mt-0.5 text-[11px] text-brand-forest">
+                                atau {formatCoin(prod.priceCoin)} coin
+                              </p>
+                            )}
+                          </TableCell>
 
-                        <TableCell className="py-4 pr-6 text-right sm:pr-8">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              type="button"
-                              onClick={() => handleOpenEditModal(prod)}
-                              title="Edit Produk"
-                              className="inline-flex items-center gap-1 rounded-sm border border-line-trace bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest hover:bg-canvas-warm"
+                          <TableCell className="py-4">
+                            <span
+                              className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                                prod.stock <= 5
+                                  ? "bg-amber-100 text-amber-800"
+                                  : "bg-canvas-warm text-brand-black"
+                              }`}
                             >
-                              <Edit2 className="size-3.5 text-brand-emerald" />
-                              Edit
-                            </button>
+                              {prod.stock} unit
+                            </span>
+                          </TableCell>
 
-                            <button
-                              type="button"
-                              onClick={() => void handleToggleStatus(prod)}
-                              title={prod.status === "published" ? "Jadikan Draft" : "Publikasikan"}
-                              className="inline-flex items-center gap-1 rounded-sm border border-line-trace bg-canvas-pure px-2.5 py-1.5 text-xs font-bold text-muted-moss transition hover:border-brand-forest hover:text-brand-black"
+                          <TableCell className="py-4">
+                            <span
+                              className={`inline-flex rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide ${
+                                prod.status === "published"
+                                  ? "bg-brand-lime/50 text-brand-forest"
+                                  : "bg-canvas-warm text-muted-moss"
+                              }`}
                             >
-                              {prod.status === "published" ? (
-                                <ToggleRight className="size-4 text-brand-forest" />
-                              ) : (
-                                <ToggleLeft className="size-4" />
-                              )}
-                            </button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+                              {prod.status === "published" ? "Published" : "Draft"}
+                            </span>
+                          </TableCell>
+
+                          <TableCell className="py-4 pr-6 text-right sm:pr-8">
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                size="icon-sm"
+                                onClick={() => handleOpenEditModal(prod)}
+                                title="Edit Produk"
+                              >
+                                <Edit2 className="size-3.5 text-brand-emerald" />
+                              </Button>
+
+                              <Button
+                                variant="outline"
+                                size="icon-sm"
+                                onClick={() => void handleToggleStatus(prod)}
+                                title={
+                                  prod.status === "published"
+                                    ? "Jadikan Draft"
+                                    : "Publikasikan"
+                                }
+                              >
+                                {prod.status === "published" ? (
+                                  <ToggleRight className="size-4 text-brand-forest" />
+                                ) : (
+                                  <ToggleLeft className="size-4" />
+                                )}
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </div>
 
@@ -335,7 +341,7 @@ export default function BrandProductsSection() {
                   type="button"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                  className="inline-flex items-center gap-1 rounded-sm border border-line-trace bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:opacity-40"
+                  className="inline-flex items-center gap-1 rounded-sm border border-brand-black/15 bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:opacity-40"
                 >
                   <ChevronLeft className="size-3.5" />
                   Sebelumnya
@@ -349,7 +355,7 @@ export default function BrandProductsSection() {
                   type="button"
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                  className="inline-flex items-center gap-1 rounded-sm border border-line-trace bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:opacity-40"
+                  className="inline-flex items-center gap-1 rounded-sm border border-brand-black/15 bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:opacity-40"
                 >
                   Berikutnya
                   <ChevronRight className="size-3.5" />
@@ -389,7 +395,7 @@ function FilterTabButton({
         ${
           active
             ? "bg-brand-forest text-white"
-            : "border border-line-trace bg-canvas-pure text-brand-black hover:border-brand-forest hover:bg-canvas-warm"
+            : "border border-brand-black/15 bg-canvas-pure text-brand-black hover:border-brand-forest hover:bg-canvas-warm"
         }
       `}
     >

@@ -52,7 +52,7 @@ export default function ProductHero() {
 
           <aside
             className="
-              rounded-2xl border border-line-trace
+              rounded-2xl border border-brand-black/15
               bg-canvas-pure p-7 sm:p-8
             "
           >

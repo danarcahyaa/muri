@@ -35,7 +35,7 @@ export function SourcingActiveFilters({
       </span>
 
       {filters.searchQuery && (
-        <Badge variant="secondary" className="gap-1 font-medium bg-canvas-pure border border-line-trace">
+        <Badge variant="secondary" className="gap-1 font-medium bg-canvas-pure border border-brand-black/15">
           <span>Kata Kunci: "{filters.searchQuery}"</span>
           <button
             type="button"
@@ -51,7 +51,7 @@ export function SourcingActiveFilters({
       )}
 
       {filters.minPrice !== undefined && (
-        <Badge variant="secondary" className="gap-1 font-medium bg-canvas-pure border border-line-trace">
+        <Badge variant="secondary" className="gap-1 font-medium bg-canvas-pure border border-brand-black/15">
           <span>&gt; {formatCurrencyIDR(filters.minPrice)}</span>
           <button
             type="button"
@@ -66,7 +66,7 @@ export function SourcingActiveFilters({
       )}
 
       {filters.maxPrice !== undefined && (
-        <Badge variant="secondary" className="gap-1 font-medium bg-canvas-pure border border-line-trace">
+        <Badge variant="secondary" className="gap-1 font-medium bg-canvas-pure border border-brand-black/15">
           <span>&lt; {formatCurrencyIDR(filters.maxPrice)}</span>
           <button
             type="button"
@@ -81,7 +81,7 @@ export function SourcingActiveFilters({
       )}
 
       {filters.minOrderKg !== undefined && (
-        <Badge variant="secondary" className="gap-1 font-medium bg-canvas-pure border border-line-trace">
+        <Badge variant="secondary" className="gap-1 font-medium bg-canvas-pure border border-brand-black/15">
           <span>Maks Min. Beli: {formatWeightKg(filters.minOrderKg)}</span>
           <button
             type="button"
@@ -99,7 +99,7 @@ export function SourcingActiveFilters({
         <Badge
           key={cat}
           variant="secondary"
-          className="gap-1 font-medium bg-canvas-pure border border-line-trace"
+          className="gap-1 font-medium bg-canvas-pure border border-brand-black/15"
         >
           <span>{cat}</span>
           <button

@@ -7,6 +7,7 @@ import {
   ChevronLeft,
   ChevronRight,
   CreditCard,
+  Eye,
   Factory,
   Package,
   QrCode,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import {
   Table,
@@ -28,6 +30,7 @@ import {
 import { formatIdr } from "@/lib/productDetail";
 import { getBrandMaterialOrders } from "@/services/material";
 import type { MaterialOrder, MaterialOrderStatus } from "@/types/materialOrder";
+import MaterialPurchaseDetailModal from "./MaterialPurchaseDetailModal";
 
 type FilterTab = "all" | "processing" | "shipped" | "completed";
 
@@ -35,6 +38,7 @@ const ITEMS_PER_PAGE = 5;
 
 export default function BrandMaterialPurchasesSection() {
   const [orders, setOrders] = useState<MaterialOrder[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<MaterialOrder | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<FilterTab>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -89,7 +93,7 @@ export default function BrandMaterialPurchasesSection() {
 
   return (
     <section className="mt-8 font-body">
-      <div className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8">
+      <div className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -104,7 +108,7 @@ export default function BrandMaterialPurchasesSection() {
           <button
             type="button"
             onClick={() => void loadOrders()}
-            className="inline-flex items-center justify-center gap-2 rounded-sm border border-line-trace bg-canvas-pure px-4 py-2 text-xs font-bold text-brand-black transition hover:border-brand-forest hover:bg-canvas-warm"
+            className="inline-flex items-center justify-center gap-2 rounded-sm border border-brand-black/15 bg-canvas-pure px-4 py-2 text-xs font-bold text-brand-black transition hover:border-brand-forest hover:bg-canvas-warm"
           >
             <RefreshCw className="size-3.5" />
             Muat Ulang
@@ -148,7 +152,7 @@ export default function BrandMaterialPurchasesSection() {
         </div>
 
         {/* Table Container */}
-        <div className="mt-6 overflow-hidden rounded-xl border border-line-trace bg-canvas-pure">
+        <div className="mt-6 overflow-hidden rounded-xl border border-brand-black/15 bg-canvas-pure">
           {!isLoading && paginatedOrders.length === 0 ? (
             <div className="flex min-h-[260px] flex-col items-center justify-center p-6 text-center">
               <CreditCard className="size-8 text-muted-moss/40" />
@@ -232,15 +236,21 @@ export default function BrandMaterialPurchasesSection() {
 
                         {/* Resi & Action */}
                         <TableCell className="py-4 pr-6 text-right sm:pr-8">
-                          <div>
-                            {order.trackingNumber ? (
-                              <p className="flex items-center justify-end gap-1 font-mono text-xs font-bold text-brand-forest">
+                          <div className="flex items-center justify-end gap-2">
+                            {order.trackingNumber && (
+                              <p className="hidden sm:flex items-center gap-1 font-mono text-xs font-bold text-brand-forest">
                                 <Truck className="size-3.5" />
                                 {order.trackingNumber}
                               </p>
-                            ) : (
-                              <p className="text-[11px] text-muted-moss">Belum ada resi</p>
                             )}
+                            <Button
+                              variant="outline"
+                              size="icon-sm"
+                              onClick={() => setSelectedOrder(order)}
+                              title="Lihat Detail Pembelian Material"
+                            >
+                              <Eye className="size-3.5 text-brand-emerald" />
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -268,7 +278,7 @@ export default function BrandMaterialPurchasesSection() {
                 type="button"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                className="inline-flex items-center gap-1 rounded-sm border border-line-trace bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:opacity-40"
+                className="inline-flex items-center gap-1 rounded-sm border border-brand-black/15 bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:opacity-40"
               >
                 <ChevronLeft className="size-3.5" />
                 Sebelumnya
@@ -282,7 +292,7 @@ export default function BrandMaterialPurchasesSection() {
                 type="button"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                className="inline-flex items-center gap-1 rounded-sm border border-line-trace bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:opacity-40"
+                className="inline-flex items-center gap-1 rounded-sm border border-brand-black/15 bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:opacity-40"
               >
                 Berikutnya
                 <ChevronRight className="size-3.5" />
@@ -291,6 +301,12 @@ export default function BrandMaterialPurchasesSection() {
           </div>
         )}
       </div>
+
+      <MaterialPurchaseDetailModal
+        order={selectedOrder}
+        isOpen={Boolean(selectedOrder)}
+        onClose={() => setSelectedOrder(null)}
+      />
     </section>
   );
 }
@@ -313,7 +329,7 @@ function FilterTabButton({
         ${
           active
             ? "bg-brand-forest text-white"
-            : "border border-line-trace bg-canvas-pure text-brand-black hover:border-brand-forest hover:bg-canvas-warm"
+            : "border border-brand-black/15 bg-canvas-pure text-brand-black hover:border-brand-forest hover:bg-canvas-warm"
         }
       `}
     >

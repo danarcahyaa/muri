@@ -25,7 +25,7 @@ function DashboardHeading() {
           </span>
         </div>
 
-        <h1 className="font-display text-5xl font-medium leading-none tracking-[-0.05em] text-brand-black sm:text-6xl">
+        <h1 className="font-display text-5xl font-medium leading-none tracking-[-0.04em] text-brand-black sm:text-6xl">
           Aktivitas Anda
         </h1>
 

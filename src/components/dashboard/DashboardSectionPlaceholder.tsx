@@ -17,7 +17,7 @@ export default function DashboardSectionPlaceholder({
 }: DashboardSectionPlaceholderProps) {
   return (
     <div className="mx-auto w-full max-w-[1320px] px-5 py-10 sm:px-6 lg:px-8 lg:py-14">
-      <div className="rounded-3xl border border-line-trace bg-canvas-pure p-7 sm:p-10">
+      <div className="rounded-3xl border border-brand-black/15 bg-canvas-pure p-7 sm:p-10">
         <div className="flex size-12 items-center justify-center rounded-2xl bg-brand-lime/50 text-brand-forest">
           <Icon
             className="size-5"

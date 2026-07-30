@@ -39,7 +39,7 @@ export function ProductCheckoutConfirmationModal({
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 px-4 py-8 backdrop-blur-xs animate-in fade-in-0">
-      <div className="max-h-full w-full max-w-xl overflow-y-auto rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8">
+      <div className="max-h-full w-full max-w-xl overflow-y-auto rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8">
         <div className="flex items-start justify-between gap-5">
           <div>
             <p className="text-xs font-bold uppercase text-brand-emerald">
@@ -62,7 +62,7 @@ export function ProductCheckoutConfirmationModal({
           </button>
         </div>
 
-        <div className="mt-7 rounded-xl border border-line-trace bg-canvas-warm/40 p-5">
+        <div className="mt-7 rounded-xl border border-brand-black/15 bg-canvas-warm/40 p-5">
           <ConfirmationRow
             label="Produk"
             value={`${checkout.quantity}× ${checkout.product.name}`}
@@ -89,7 +89,7 @@ export function ProductCheckoutConfirmationModal({
           </p>
         )}
 
-        <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-xl border border-line-trace bg-canvas-warm/20 p-4">
+        <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-xl border border-brand-black/15 bg-canvas-warm/20 p-4">
           <input
             type="checkbox"
             checked={confirmationAccepted}

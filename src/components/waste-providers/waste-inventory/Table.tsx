@@ -159,7 +159,7 @@ export function WasteDataTable({
       </AlertDialog>
 
       {/* Table */}
-      <div className="w-full bg-canvas-pure border border-line-trace rounded-lg overflow-hidden">
+      <div className="w-full bg-canvas-pure border border-brand-black/15 rounded-lg overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-canvas-warm/50 border-b border-line-trace/60">
@@ -337,7 +337,7 @@ export function WasteDataTable({
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="inline-flex h-8 items-center justify-center rounded border border-line-trace bg-canvas-pure px-3 text-xs font-semibold text-brand-black hover:bg-canvas-warm disabled:opacity-50 disabled:hover:bg-canvas-pure transition-colors"
+                className="inline-flex h-8 items-center justify-center rounded border border-brand-black/15 bg-canvas-pure px-3 text-xs font-semibold text-brand-black hover:bg-canvas-warm disabled:opacity-50 disabled:hover:bg-canvas-pure transition-colors"
               >
                 Sebelumnya
               </button>
@@ -346,7 +346,7 @@ export function WasteDataTable({
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
-                className="inline-flex h-8 items-center justify-center rounded border border-line-trace bg-canvas-pure px-3 text-xs font-semibold text-brand-black hover:bg-canvas-warm disabled:opacity-50 disabled:hover:bg-canvas-pure transition-colors"
+                className="inline-flex h-8 items-center justify-center rounded border border-brand-black/15 bg-canvas-pure px-3 text-xs font-semibold text-brand-black hover:bg-canvas-warm disabled:opacity-50 disabled:hover:bg-canvas-pure transition-colors"
               >
                 Selanjutnya
               </button>

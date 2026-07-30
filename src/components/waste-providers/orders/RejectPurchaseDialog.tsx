@@ -22,7 +22,7 @@ export function RejectPurchaseDialog({
 }: RejectPurchaseDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="bg-canvas-pure border border-line-trace font-body max-w-sm">
+      <AlertDialogContent className="bg-canvas-pure border border-brand-black/15 font-body max-w-sm">
         <AlertDialogHeader>
           <AlertDialogTitle className="font-display font-bold text-brand-black text-base">
             Tolak Pesanan

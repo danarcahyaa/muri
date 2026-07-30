@@ -365,7 +365,7 @@ export default function BrandRegisterContent() {
                 {links.map((link, index) => (
                   <div
                     key={index}
-                    className="space-y-2 rounded-sm border border-line-trace bg-canvas-warm/30 p-3"
+                    className="space-y-2 rounded-sm border border-brand-black/15 bg-canvas-warm/30 p-3"
                   >
                     <Input
                       type="text"

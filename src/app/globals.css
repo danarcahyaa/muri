@@ -150,101 +150,26 @@
   }
 }
 
-html, .muri-scrollbar {
+/* Slim Custom Scrollbar Globally */
+*, html, body, .muri-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #c9d4c8 transparent;
+  scrollbar-color: rgba(194, 201, 198, 0.5) transparent;
 }
 
-html::-webkit-scrollbar {
-  width: 6px;
-}
-
-html::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-html::-webkit-scrollbar-thumb {
-  background-color: #c9d4c8;
-  border-radius: 9999px;
-}
-
-html::-webkit-scrollbar-thumb:hover {
-  background-color: #aebcad;
-}
-
-@keyframes muri-scan-vertical {
-  0% {
-    top: 12%;
-    opacity: 0.7;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    top: calc(100% - 12%);
-    opacity: 0.75;
-  }
-}
-
-@keyframes muri-scan-glow {
-  0% {
-    background: linear-gradient(
-      to bottom,
-      transparent 0%,
-      rgba(200, 241, 105, 0.03) 35%,
-      rgba(200, 241, 105, 0.1) 50%,
-      rgba(200, 241, 105, 0.03) 65%,
-      transparent 100%
-    );
-    transform: translateY(-32%);
-  }
-  100% {
-    background: linear-gradient(
-      to bottom,
-      transparent 0%,
-      rgba(200, 241, 105, 0.03) 35%,
-      rgba(200, 241, 105, 0.1) 50%,
-      rgba(200, 241, 105, 0.03) 65%,
-      transparent 100%
-    );
-    transform: translateY(32%);
-  }
-}
-
-.ai-scan-line {
-  animation: muri-scan-vertical 1.8s ease-in-out infinite alternate;
-}
-
-.ai-scan-glow {
-  animation: muri-scan-glow 1.8s ease-in-out infinite alternate;
-}
-
-/* Global Form Label Spacing */
-label:not(.inline-flex):not(.flex):not(.sr-only):not([class*="mb-"]) {
-  display: block;
-  margin-bottom: 0.5rem;
-}
-
-/* Slim Custom Scrollbar Utility */
-.muri-scrollbar::-webkit-scrollbar {
+*::-webkit-scrollbar, html::-webkit-scrollbar, body::-webkit-scrollbar, .muri-scrollbar::-webkit-scrollbar {
   width: 4px;
   height: 4px;
 }
 
-.muri-scrollbar::-webkit-scrollbar-track {
+*::-webkit-scrollbar-track, html::-webkit-scrollbar-track, body::-webkit-scrollbar-track, .muri-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.muri-scrollbar::-webkit-scrollbar-thumb {
+*::-webkit-scrollbar-thumb, html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb, .muri-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(194, 201, 198, 0.5);
   border-radius: 9999px;
 }
 
-.muri-scrollbar::-webkit-scrollbar-thumb:hover {
+*::-webkit-scrollbar-thumb:hover, html::-webkit-scrollbar-thumb:hover, body::-webkit-scrollbar-thumb:hover, .muri-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #1C6B52;
-}
-
-.muri-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(194, 201, 198, 0.5) transparent;
 }

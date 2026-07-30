@@ -11,7 +11,7 @@ export default function MaterialVisualCard({
   material,
 }: MaterialVisualCardProps) {
   return (
-    <section className="rounded-2xl border border-line-trace bg-canvas-pure p-4 sm:p-7">
+    <section className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-4 sm:p-7">
       <div className="flex flex-wrap items-center justify-between gap-4 px-1 pb-5">
         <div className="flex items-center gap-3 text-brand-emerald">
           <Leaf className="size-4" strokeWidth={2} />

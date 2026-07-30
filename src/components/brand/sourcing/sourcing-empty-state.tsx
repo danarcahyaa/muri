@@ -13,7 +13,7 @@ export function SourcingEmptyState({
   onResetFilters,
 }: SourcingEmptyStateProps): ReactElement {
   return (
-    <div className="flex flex-col items-center justify-center p-12 text-center bg-canvas-pure border border-line-trace rounded-md space-y-3 font-body">
+    <div className="flex flex-col items-center justify-center p-12 text-center bg-canvas-pure border border-brand-black/15 rounded-md space-y-3 font-body">
       <div className="size-12 rounded-full bg-canvas-warm flex items-center justify-center text-muted-moss">
         <SearchX className="size-6" />
       </div>

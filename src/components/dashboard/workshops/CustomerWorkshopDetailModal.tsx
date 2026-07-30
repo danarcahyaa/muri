@@ -14,6 +14,7 @@ import {
 import { WorkshopRegistrationStatus } from "@/enums/enums";
 import { formatWorkshopDate, formatWorkshopTime } from "@/lib/workshop";
 import type { CustomerWorkshopHistoryItem } from "@/types/customerWorkshop";
+import { Button } from "@/components/ui/Button";
 
 interface CustomerWorkshopDetailModalProps {
   item: CustomerWorkshopHistoryItem | null;
@@ -34,8 +35,15 @@ export default function CustomerWorkshopDetailModal({
   const statusMeta = getStatusMeta(item.status);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in-0">
-      <div className="relative flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-line-trace bg-canvas-pure">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in-0 cursor-pointer"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div className="relative flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-xl border border-line-trace bg-canvas-pure cursor-default">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-line-trace px-6 py-5 sm:px-8">
           <div className="flex items-center gap-3">
@@ -63,14 +71,14 @@ export default function CustomerWorkshopDetailModal({
             type="button"
             onClick={onClose}
             aria-label="Tutup modal"
-            className="flex size-9 items-center justify-center rounded-full bg-canvas-warm text-brand-black transition hover:bg-line-trace"
+            className="flex size-8 items-center justify-center rounded-full bg-canvas-warm text-brand-black transition hover:bg-line-trace cursor-pointer"
           >
             <X className="size-4" />
           </button>
         </div>
 
         {/* Content Body */}
-        <div className="space-y-6 overflow-y-auto p-6 sm:p-8">
+        <div className="space-y-4 overflow-y-auto p-6 sm:p-8">
           {/* Workshop Main Info */}
           {workshop ? (
             <>
@@ -84,7 +92,7 @@ export default function CustomerWorkshopDetailModal({
               </div>
 
               {/* Speaker Card */}
-              <div className="flex items-center gap-3 rounded-xl border border-line-trace bg-canvas-warm/40 p-4">
+              <div className="flex items-center gap-3 rounded-lg border border-line-trace bg-canvas-warm/50 p-4">
                 <div className="flex size-10 items-center justify-center rounded-full bg-brand-emerald/10 text-brand-emerald">
                   <User className="size-5" />
                 </div>
@@ -99,7 +107,7 @@ export default function CustomerWorkshopDetailModal({
               </div>
 
               {/* Schedule & Location */}
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3.5 sm:grid-cols-2">
                 <DetailFactCard
                   icon={CalendarDays}
                   label="Tanggal Pelaksanaan"
@@ -120,7 +128,7 @@ export default function CustomerWorkshopDetailModal({
               </div>
 
               {/* Fee / Points */}
-              <div className="flex items-center justify-between rounded-xl border border-line-trace bg-canvas-warm/40 p-4 text-xs">
+              <div className="flex items-center justify-between rounded-lg border border-line-trace bg-canvas-warm/50 p-4 text-xs">
                 <div className="flex items-center gap-2 text-muted-moss">
                   <Coins className="size-4 text-brand-emerald" />
                   <span>Biaya / Poin Digunakan</span>
@@ -131,30 +139,33 @@ export default function CustomerWorkshopDetailModal({
               </div>
             </>
           ) : (
-            <div className="rounded-xl bg-canvas-warm p-6 text-center text-xs text-muted-moss">
+            <div className="rounded-lg bg-canvas-warm p-6 text-center text-xs text-muted-moss">
               Detail workshop tidak tersedia atau sudah dihapus.
             </div>
           )}
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between border-t border-line-trace bg-canvas-warm px-6 py-4 sm:px-8">
-          <button
-            type="button"
+        <div className="flex items-center justify-between border-t border-line-trace bg-canvas-warm/55 px-6 py-4 sm:px-8">
+          <Button
+            variant="outline"
+            size="md"
             onClick={onClose}
-            className="rounded-md border border-line-trace bg-canvas-pure px-4 py-2.5 text-xs font-bold text-brand-black transition hover:border-brand-forest"
           >
             Tutup
-          </button>
+          </Button>
 
           {workshop && (
-            <Link
-              href={`/edukasi/workshop/${workshop.id}`}
-              className="inline-flex items-center gap-2 rounded-md bg-brand-forest px-4 py-2.5 text-xs font-bold text-white transition hover:bg-brand-black"
-            >
-              Buka Halaman Workshop
-              <ArrowRight className="size-4" />
-            </Link>
+            <Button
+              variant="default"
+              size="md"
+              render={
+                <Link href={`/edukasi/workshop/${workshop.id}`}>
+                  Buka Halaman Workshop
+                  <ArrowRight className="size-4" />
+                </Link>
+              }
+            />
           )}
         </div>
       </div>
@@ -172,7 +183,7 @@ function DetailFactCard({
   value: string;
 }) {
   return (
-    <div className="rounded-xl border border-line-trace bg-canvas-warm/40 p-4">
+    <div className="rounded-lg border border-line-trace bg-canvas-warm/50 p-4">
       <div className="flex items-center gap-1.5 text-muted-moss">
         <Icon className="size-3.5 shrink-0" />
         <span className="text-[9px] uppercase tracking-wide">{label}</span>

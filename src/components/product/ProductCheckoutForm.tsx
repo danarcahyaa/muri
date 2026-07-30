@@ -94,7 +94,7 @@ export default function ProductCheckoutForm({
             placeholder="Masukkan alamat lengkap pengiriman"
             className="
               mt-3 w-full resize-none rounded-xl
-              border border-line-trace bg-canvas-pure
+              border border-brand-black/15 bg-canvas-pure
               px-4 py-3 text-sm text-brand-black
               outline-none transition
               placeholder:text-muted-moss/60
@@ -182,7 +182,7 @@ function CheckoutField({
         }}
         className="
           mt-3 w-full rounded-xl
-          border border-line-trace
+          border border-brand-black/15
           bg-canvas-pure px-4 py-3
           text-sm text-brand-black
           outline-none transition

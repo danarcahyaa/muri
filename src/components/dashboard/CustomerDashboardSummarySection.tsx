@@ -132,7 +132,7 @@ function ImpactSummary({
   ];
 
   return (
-    <section className="mt-10 overflow-hidden rounded-3xl border border-line-trace bg-canvas-pure">
+    <section className="mt-10 overflow-hidden rounded-3xl border border-brand-black/15 bg-canvas-pure">
       <div className="grid lg:grid-cols-3">
         {metrics.map((metric) => (
           <ImpactMetricCard
@@ -313,7 +313,7 @@ function ActivityMetricCard({
   const Icon = metric.icon;
 
   return (
-    <article className="flex min-h-40 flex-col rounded-2xl border border-line-trace bg-canvas-pure p-6">
+    <article className="flex min-h-40 flex-col rounded-2xl border border-brand-black/15 bg-canvas-pure p-6">
       <div className="flex items-start justify-between gap-4">
         <p className="text-[11px] font-medium uppercase text-muted-moss">
           {metric.label}
@@ -343,7 +343,7 @@ function ActivityMetricCard({
 function DashboardSummarySkeleton() {
   return (
     <>
-      <section className="mt-10 overflow-hidden rounded-3xl border border-line-trace bg-canvas-pure">
+      <section className="mt-10 overflow-hidden rounded-3xl border border-brand-black/15 bg-canvas-pure">
         <div className="grid lg:grid-cols-3">
           {[0, 1, 2].map((item) => (
             <div
@@ -367,7 +367,7 @@ function DashboardSummarySkeleton() {
         {[0, 1, 2, 3].map((item) => (
           <div
             key={item}
-            className="flex min-h-40 flex-col rounded-2xl border border-line-trace bg-canvas-pure p-6"
+            className="flex min-h-40 flex-col rounded-2xl border border-brand-black/15 bg-canvas-pure p-6"
           >
             <div className="flex items-center justify-between">
               <Skeleton className="h-3.5 w-24" />
@@ -392,7 +392,7 @@ function DashboardSummaryError({
   onRetry: () => Promise<void>;
 }) {
   return (
-    <section className="mt-10 flex min-h-64 flex-col items-center justify-center rounded-3xl border border-line-trace bg-canvas-pure px-6 py-12 text-center">
+    <section className="mt-10 flex min-h-64 flex-col items-center justify-center rounded-3xl border border-brand-black/15 bg-canvas-pure px-6 py-12 text-center">
       <RefreshCw
         className="size-9 text-muted-moss/50"
         strokeWidth={1.5}

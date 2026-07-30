@@ -22,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/Table";
+import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
@@ -119,11 +120,11 @@ export default function CustomerWorkshopHistorySection() {
   }, [currentPage, filteredHistory]);
 
   return (
-    <section className="mt-8 overflow-hidden rounded-2xl border border-line-trace bg-canvas-pure">
+    <section className="mt-8 overflow-hidden rounded-2xl border border-brand-black/15 bg-canvas-pure">
       {/* Section Header */}
       <div className="flex items-center justify-between border-b border-line-trace px-6 py-5 sm:px-8">
         <div>
-          <h2 className="font-display text-xl font-medium text-brand-black">
+          <h2 className="font-display text-xl font-bold text-brand-black">
             Riwayat Workshop ({history.length})
           </h2>
           <p className="mt-1 text-xs text-muted-moss">
@@ -174,7 +175,7 @@ export default function CustomerWorkshopHistorySection() {
                     className={`rounded-sm px-3 py-1.5 text-xs font-bold transition ${
                       active
                         ? "bg-brand-forest text-white"
-                        : "bg-canvas-pure border border-line-trace text-brand-black hover:border-brand-forest"
+                        : "bg-canvas-pure border border-brand-black/15 text-brand-black hover:border-brand-forest"
                     }`}
                   >
                     {tab.label}
@@ -197,129 +198,131 @@ export default function CustomerWorkshopHistorySection() {
             </div>
           ) : (
             <>
-              <Table>
-                <TableHeader className="bg-canvas-warm/60">
-                  <TableRow className="border-line-trace">
-                    <TableHead className="py-3.5 pl-6 text-xs font-bold uppercase tracking-wider text-muted-moss sm:pl-8">
-                      Workshop & Pemateri
-                    </TableHead>
-                    <TableHead className="py-3.5 text-xs font-bold uppercase tracking-wider text-muted-moss">
-                      Jadwal & Waktu
-                    </TableHead>
-                    <TableHead className="py-3.5 text-xs font-bold uppercase tracking-wider text-muted-moss">
-                      Lokasi
-                    </TableHead>
-                    <TableHead className="py-3.5 text-xs font-bold uppercase tracking-wider text-muted-moss">
-                      Biaya / Poin
-                    </TableHead>
-                    <TableHead className="py-3.5 text-xs font-bold uppercase tracking-wider text-muted-moss">
-                      Status
-                    </TableHead>
-                    <TableHead className="py-3.5 pr-6 text-right text-xs font-bold uppercase tracking-wider text-muted-moss sm:pr-8">
-                      Aksi
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
+              <div className="overflow-x-auto muri-scrollbar w-full min-w-0">
+                <Table className="min-w-[650px]">
+                  <TableHeader className="bg-canvas-warm/60">
+                    <TableRow className="border-line-trace">
+                      <TableHead className="py-3.5 pl-6 text-xs font-bold uppercase tracking-wider text-muted-moss sm:pl-8">
+                        Workshop & Pemateri
+                      </TableHead>
+                      <TableHead className="py-3.5 text-xs font-bold uppercase tracking-wider text-muted-moss">
+                        Jadwal & Waktu
+                      </TableHead>
+                      <TableHead className="py-3.5 text-xs font-bold uppercase tracking-wider text-muted-moss">
+                        Lokasi
+                      </TableHead>
+                      <TableHead className="py-3.5 text-xs font-bold uppercase tracking-wider text-muted-moss">
+                        Biaya / Poin
+                      </TableHead>
+                      <TableHead className="py-3.5 text-xs font-bold uppercase tracking-wider text-muted-moss">
+                        Status
+                      </TableHead>
+                      <TableHead className="py-3.5 pr-6 text-right text-xs font-bold uppercase tracking-wider text-muted-moss sm:pr-8">
+                        Aksi
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
 
-                <TableBody className="divide-y divide-line-trace">
-                  {paginatedHistory.map((item) => {
-                    const workshop = item.workshop;
-                    const statusMeta = getStatusMeta(item.status);
+                  <TableBody className="divide-y divide-line-trace">
+                    {paginatedHistory.map((item) => {
+                      const workshop = item.workshop;
+                      const statusMeta = getStatusMeta(item.status);
 
-                    return (
-                      <TableRow
-                        key={item.id}
-                        className="border-line-trace transition-colors hover:bg-canvas-warm/40"
-                      >
-                        {/* Title & Speaker */}
-                        <TableCell className="py-4 pl-6 sm:pl-8">
-                          {workshop ? (
-                            <div>
-                              <p className="font-display text-sm font-bold text-brand-black line-clamp-1">
-                                {workshop.title}
-                              </p>
-                              <p className="mt-1 text-xs font-semibold text-brand-emerald">
-                                {workshop.speakerName}
-                              </p>
-                            </div>
-                          ) : (
-                            <span className="text-xs text-muted-moss">
-                              Workshop tidak tersedia
-                            </span>
-                          )}
-                        </TableCell>
-
-                        {/* Schedule */}
-                        <TableCell className="py-4">
-                          {workshop ? (
-                            <div>
-                              <div className="flex items-center gap-1.5 text-xs text-brand-black">
-                                <CalendarDays className="size-3.5 shrink-0 text-muted-moss" />
-                                <span>{formatWorkshopDate(workshop.heldAt)}</span>
+                      return (
+                        <TableRow
+                          key={item.id}
+                          className="border-line-trace transition-colors hover:bg-canvas-warm/40"
+                        >
+                          {/* Title & Speaker */}
+                          <TableCell className="py-4 pl-6 sm:pl-8">
+                            {workshop ? (
+                              <div>
+                                <p className="font-display text-sm font-bold text-brand-black line-clamp-1">
+                                  {workshop.title}
+                                </p>
+                                <p className="mt-1 text-xs font-semibold text-brand-emerald">
+                                  {workshop.speakerName}
+                                </p>
                               </div>
-                              <p className="mt-1 text-[11px] text-muted-moss">
-                                {formatWorkshopTime(workshop.heldAt)}
-                              </p>
-                            </div>
-                          ) : (
-                            <span className="text-xs text-muted-moss">-</span>
-                          )}
-                        </TableCell>
+                            ) : (
+                              <span className="text-xs text-muted-moss">
+                                Workshop tidak tersedia
+                              </span>
+                            )}
+                          </TableCell>
 
-                        {/* Location */}
-                        <TableCell className="py-4">
-                          {workshop ? (
-                            <div className="flex items-center gap-1.5 max-w-[200px]">
-                              <MapPin className="size-3.5 shrink-0 text-muted-moss" />
-                              <span className="text-xs text-brand-black truncate">
-                                {workshop.location}
+                          {/* Schedule */}
+                          <TableCell className="py-4">
+                            {workshop ? (
+                              <div>
+                                <div className="flex items-center gap-1.5 text-xs text-brand-black">
+                                  <CalendarDays className="size-3.5 shrink-0 text-muted-moss" />
+                                  <span>{formatWorkshopDate(workshop.heldAt)}</span>
+                                </div>
+                                <p className="mt-1 text-[11px] text-muted-moss">
+                                  {formatWorkshopTime(workshop.heldAt)}
+                                </p>
+                              </div>
+                            ) : (
+                              <span className="text-xs text-muted-moss">-</span>
+                            )}
+                          </TableCell>
+
+                          {/* Location */}
+                          <TableCell className="py-4">
+                            {workshop ? (
+                              <div className="flex items-center gap-1.5 max-w-[200px]">
+                                <MapPin className="size-3.5 shrink-0 text-muted-moss" />
+                                <span className="text-xs text-brand-black truncate">
+                                  {workshop.location}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-xs text-muted-moss">-</span>
+                            )}
+                          </TableCell>
+
+                          {/* Points Spent */}
+                          <TableCell className="py-4">
+                            <div className="inline-flex items-center gap-1 text-xs font-bold text-brand-forest">
+                              <Coins className="size-3.5" />
+                              <span>
+                                {item.pointsSpent === 0
+                                  ? "Gratis"
+                                  : `${item.pointsSpent} poin`}
                               </span>
                             </div>
-                          ) : (
-                            <span className="text-xs text-muted-moss">-</span>
-                          )}
-                        </TableCell>
+                          </TableCell>
 
-                        {/* Points Spent */}
-                        <TableCell className="py-4">
-                          <div className="inline-flex items-center gap-1 text-xs font-bold text-brand-forest">
-                            <Coins className="size-3.5" />
-                            <span>
-                              {item.pointsSpent === 0
-                                ? "Gratis"
-                                : `${item.pointsSpent} poin`}
+                          {/* Status */}
+                          <TableCell className="py-4">
+                            <span
+                              className={`inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase ${statusMeta.className}`}
+                            >
+                              {statusMeta.label}
                             </span>
-                          </div>
-                        </TableCell>
+                          </TableCell>
 
-                        {/* Status */}
-                        <TableCell className="py-4">
-                          <span
-                            className={`inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase ${statusMeta.className}`}
-                          >
-                            {statusMeta.label}
-                          </span>
-                        </TableCell>
-
-                        {/* Actions */}
-                        <TableCell className="py-4 pr-6 text-right sm:pr-8">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedItem(item)}
-                            className="inline-flex items-center gap-1.5 rounded-sm border border-line-trace bg-canvas-pure px-3 py-2 text-xs font-bold text-brand-black transition hover:border-brand-forest hover:bg-canvas-warm"
-                          >
-                            <Eye className="size-3.5 text-brand-emerald" />
-                            Detail
-                          </button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                          {/* Actions */}
+                          <TableCell className="py-4 pr-6 text-right sm:pr-8">
+                            <Button
+                              variant="outline"
+                              size="icon-sm"
+                              onClick={() => setSelectedItem(item)}
+                              title="Lihat Detail Workshop"
+                            >
+                              <Eye className="size-3.5 text-brand-emerald" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
 
               {/* Pagination Controls */}
-              <div className="flex items-center justify-between border-t border-line-trace bg-canvas-warm/30 px-6 py-4 sm:px-8">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-line-trace bg-canvas-warm/30 px-6 py-4 sm:px-8">
                 <p className="text-xs text-muted-moss">
                   Menampilkan{" "}
                   <span className="font-bold text-brand-black">
@@ -344,7 +347,7 @@ export default function CustomerWorkshopHistorySection() {
                     type="button"
                     disabled={currentPage <= 1}
                     onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                    className="inline-flex items-center gap-1 rounded-sm border border-line-trace bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:cursor-not-allowed disabled:opacity-40"
+                    className="inline-flex items-center gap-1 rounded-sm border border-brand-black/15 bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     <ChevronLeft className="size-3.5" />
                     Sebelumnya
@@ -360,7 +363,7 @@ export default function CustomerWorkshopHistorySection() {
                     onClick={() =>
                       setCurrentPage((prev) => Math.min(totalPages, prev + 1))
                     }
-                    className="inline-flex items-center gap-1 rounded-sm border border-line-trace bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:cursor-not-allowed disabled:opacity-40"
+                    className="inline-flex items-center gap-1 rounded-sm border border-brand-black/15 bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Berikutnya
                     <ChevronRight className="size-3.5" />

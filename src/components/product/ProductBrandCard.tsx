@@ -23,7 +23,7 @@ export default function ProductBrandCard({
       title="Tentang Brand"
       icon={Store}
     >
-      <div className="grid gap-6 rounded-2xl border border-line-trace p-6 sm:grid-cols-[72px_minmax(0,1fr)] sm:p-7">
+      <div className="grid gap-6 rounded-2xl border border-brand-black/15 p-6 sm:grid-cols-[72px_minmax(0,1fr)] sm:p-7">
         <div className="flex size-[72px] items-center justify-center rounded-full bg-brand-lime font-display text-3xl font-semibold text-brand-forest">
           {brand.name.charAt(0).toUpperCase() || "M"}
         </div>

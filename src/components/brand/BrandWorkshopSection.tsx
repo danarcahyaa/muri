@@ -15,6 +15,7 @@ import {
   Users,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import {
@@ -103,7 +104,7 @@ export default function BrandWorkshopSection() {
     <>
       <section className="mt-8 font-body">
         {/* Single Unified White Card Container */}
-        <div className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8">
+        <div className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8">
           {/* Card Header */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -119,7 +120,7 @@ export default function BrandWorkshopSection() {
               <button
                 type="button"
                 onClick={() => void refresh()}
-                className="inline-flex items-center justify-center gap-2 rounded-sm border border-line-trace bg-canvas-pure px-4 py-2 text-xs font-bold text-brand-black transition hover:border-brand-forest hover:bg-canvas-warm"
+                className="inline-flex items-center justify-center gap-2 rounded-sm border border-brand-black/15 bg-canvas-pure px-4 py-2 text-xs font-bold text-brand-black transition hover:border-brand-forest hover:bg-canvas-warm"
               >
                 <RefreshCw className="size-3.5" />
                 Muat Ulang
@@ -174,7 +175,7 @@ export default function BrandWorkshopSection() {
           </div>
 
           {/* Table Container */}
-          <div className="mt-6 overflow-hidden rounded-xl border border-line-trace bg-canvas-pure">
+          <div className="mt-6 overflow-hidden rounded-xl border border-brand-black/15 bg-canvas-pure">
             {!isLoading && paginatedWorkshops.length === 0 ? (
               <div className="flex min-h-[260px] flex-col items-center justify-center p-6 text-center">
                 <Hammer className="size-8 text-muted-moss/40" />
@@ -186,106 +187,107 @@ export default function BrandWorkshopSection() {
                 </p>
               </div>
             ) : (
-              <Table>
-                <TableHeader className="bg-canvas-warm/60">
-                  <TableRow className="border-line-trace">
-                    <TableHead className="w-14 pl-6 text-center sm:pl-8">NO</TableHead>
-                    <TableHead>JUDUL WORKSHOP</TableHead>
-                    <TableHead>PEMBICARA</TableHead>
-                    <TableHead>KUOTA / PENDAFTAR</TableHead>
-                    <TableHead>STATUS</TableHead>
-                    <TableHead className="pr-6 text-right sm:pr-8">AKSI</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody className="divide-y divide-line-trace">
-                  {isLoading ? (
-                    <TableSkeleton columnsCount={6} rowsCount={5} />
-                  ) : (
-                    paginatedWorkshops.map((item, index) => (
-                      <TableRow
-                        key={item.id}
-                        className="border-line-trace transition-colors hover:bg-canvas-warm/40"
-                      >
-                        {/* No */}
-                        <TableCell className="w-14 pl-6 text-center font-mono text-xs font-medium text-muted-moss sm:pl-8">
-                          {startIndex + index + 1}
-                        </TableCell>
+              <div className="overflow-x-auto muri-scrollbar w-full min-w-0">
+                <Table className="min-w-[650px]">
+                  <TableHeader className="bg-canvas-warm/60">
+                    <TableRow className="border-line-trace">
+                      <TableHead className="w-14 pl-6 text-center sm:pl-8">NO</TableHead>
+                      <TableHead>JUDUL WORKSHOP</TableHead>
+                      <TableHead>PEMBICARA</TableHead>
+                      <TableHead>KUOTA / PENDAFTAR</TableHead>
+                      <TableHead>STATUS</TableHead>
+                      <TableHead className="pr-6 text-right sm:pr-8">AKSI</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody className="divide-y divide-line-trace">
+                    {isLoading ? (
+                      <TableSkeleton columnsCount={6} rowsCount={5} />
+                    ) : (
+                      paginatedWorkshops.map((item, index) => (
+                        <TableRow
+                          key={item.id}
+                          className="border-line-trace transition-colors hover:bg-canvas-warm/40"
+                        >
+                          {/* No */}
+                          <TableCell className="w-14 pl-6 text-center font-mono text-xs font-medium text-muted-moss sm:pl-8">
+                            {startIndex + index + 1}
+                          </TableCell>
 
-                        {/* Title & Description */}
-                        <TableCell className="py-4">
-                          <div className="max-w-xs">
-                            <p className="font-display text-xs font-bold text-brand-black line-clamp-1">
-                              {item.title}
-                            </p>
-                            <p className="mt-0.5 text-[11px] text-muted-moss line-clamp-1">
-                              {item.description || "Tanpa deskripsi"}
-                            </p>
-                          </div>
-                        </TableCell>
+                          {/* Title & Description */}
+                          <TableCell className="py-4">
+                            <div className="max-w-xs">
+                              <p className="font-display text-xs font-bold text-brand-black line-clamp-1">
+                                {item.title}
+                              </p>
+                              <p className="mt-0.5 text-[11px] text-muted-moss line-clamp-1">
+                                {item.description || "Tanpa deskripsi"}
+                              </p>
+                            </div>
+                          </TableCell>
 
-                        {/* Speaker */}
-                        <TableCell className="py-4">
-                          <div>
-                            <p className="text-xs font-bold text-brand-black">
-                              {item.speakerName}
-                            </p>
-                            <p className="mt-0.5 text-[11px] text-muted-moss">
-                              {item.speakerRole || "Pembicara"}
-                            </p>
-                          </div>
-                        </TableCell>
+                          {/* Speaker */}
+                          <TableCell className="py-4">
+                            <div>
+                              <p className="text-xs font-bold text-brand-black">
+                                {item.speakerName}
+                              </p>
+                              <p className="mt-0.5 text-[11px] text-muted-moss">
+                                {item.speakerRole || "Pembicara"}
+                              </p>
+                            </div>
+                          </TableCell>
 
-                        {/* Quota */}
-                        <TableCell className="py-4">
-                          <div className="flex items-center gap-1.5 text-xs text-brand-black">
-                            <Users className="size-3.5 text-brand-emerald shrink-0" />
-                            <span className="font-bold">
-                              {item.registeredCount} / {item.quota} peserta
+                          {/* Quota */}
+                          <TableCell className="py-4">
+                            <div className="flex items-center gap-1.5 text-xs text-brand-black">
+                              <Users className="size-3.5 text-brand-emerald shrink-0" />
+                              <span className="font-bold">
+                                {item.registeredCount} / {item.quota} peserta
+                              </span>
+                            </div>
+                          </TableCell>
+
+                          {/* Status */}
+                          <TableCell className="py-4">
+                            <span
+                              className={`inline-flex rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide ${
+                                item.isPublished
+                                  ? "bg-brand-lime/50 text-brand-forest"
+                                  : "bg-canvas-warm text-muted-moss"
+                              }`}
+                            >
+                              {item.isPublished ? "Dipublikasi" : "Draft"}
                             </span>
-                          </div>
-                        </TableCell>
+                          </TableCell>
 
-                        {/* Status */}
-                        <TableCell className="py-4">
-                          <span
-                            className={`inline-flex rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide ${
-                              item.isPublished
-                                ? "bg-brand-lime/50 text-brand-forest"
-                                : "bg-canvas-warm text-muted-moss"
-                            }`}
-                          >
-                            {item.isPublished ? "Dipublikasi" : "Draft"}
-                          </span>
-                        </TableCell>
+                          {/* Actions */}
+                          <TableCell className="py-4 pr-6 text-right sm:pr-8">
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                size="icon-sm"
+                                onClick={() => handleViewDetail(item)}
+                                title="Lihat & Edit Detail Workshop"
+                              >
+                                <Edit2 className="size-3.5 text-brand-emerald" />
+                              </Button>
 
-                        {/* Actions */}
-                        <TableCell className="py-4 pr-6 text-right sm:pr-8">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              type="button"
-                              onClick={() => handleViewDetail(item)}
-                              title="Lihat & Edit Detail"
-                              className="inline-flex items-center gap-1 rounded-sm border border-line-trace bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest hover:bg-canvas-warm"
-                            >
-                              <Edit2 className="size-3.5 text-brand-emerald" />
-                              Detail
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteClick(item)}
-                              title="Hapus Workshop"
-                              className="inline-flex items-center gap-1 rounded-sm border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-bold text-red-700 transition hover:bg-red-100"
-                            >
-                              <Trash2 className="size-3.5" />
-                            </button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+                              <Button
+                                variant="outline-destructive"
+                                size="icon-sm"
+                                onClick={() => handleDeleteClick(item)}
+                                title="Hapus Workshop"
+                              >
+                                <Trash2 className="size-3.5" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </div>
 
@@ -306,7 +308,7 @@ export default function BrandWorkshopSection() {
                   type="button"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                  className="inline-flex items-center gap-1 rounded-sm border border-line-trace bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:opacity-40"
+                  className="inline-flex items-center gap-1 rounded-sm border border-brand-black/15 bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:opacity-40"
                 >
                   <ChevronLeft className="size-3.5" />
                   Sebelumnya
@@ -320,7 +322,7 @@ export default function BrandWorkshopSection() {
                   type="button"
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                  className="inline-flex items-center gap-1 rounded-sm border border-line-trace bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:opacity-40"
+                  className="inline-flex items-center gap-1 rounded-sm border border-brand-black/15 bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:opacity-40"
                 >
                   Berikutnya
                   <ChevronRight className="size-3.5" />
@@ -375,7 +377,7 @@ function FilterTabButton({
         ${
           active
             ? "bg-brand-forest text-white"
-            : "border border-line-trace bg-canvas-pure text-brand-black hover:border-brand-forest hover:bg-canvas-warm"
+            : "border border-brand-black/15 bg-canvas-pure text-brand-black hover:border-brand-forest hover:bg-canvas-warm"
         }
       `}
     >

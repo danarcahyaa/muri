@@ -48,7 +48,7 @@ export function WorkshopToolbar({
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <button className="flex w-full items-center justify-between gap-1.5 rounded-sm border border-line-trace bg-canvas-pure py-2 pr-4 pl-4 text-xs h-12 transition-colors outline-none select-none focus:border-brand-emerald focus:ring-2 focus:ring-brand-emerald/10 text-brand-black cursor-pointer">
+                <button className="flex w-full items-center justify-between gap-1.5 rounded-sm border border-brand-black/15 bg-canvas-pure py-2 pr-4 pl-4 text-xs h-12 transition-colors outline-none select-none focus:border-brand-emerald focus:ring-2 focus:ring-brand-emerald/10 text-brand-black cursor-pointer">
                   <div className="flex-1 text-left min-w-0 pr-1 truncate">
                     {currentStatusLabel}
                   </div>

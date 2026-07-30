@@ -48,7 +48,7 @@ export default function MaterialOrderCard({
   return (
     <aside
       className="
-        rounded-2xl border border-line-trace
+        rounded-2xl border border-brand-black/15
         bg-canvas-pure p-6 sm:p-7
       "
     >
@@ -69,7 +69,7 @@ export default function MaterialOrderCard({
             </p>
           </div>
 
-          <div className="flex items-center rounded-lg border border-line-trace bg-canvas-pure p-1">
+          <div className="flex items-center rounded-lg border border-brand-black/15 bg-canvas-pure p-1">
             <button
               type="button"
               aria-label="Kurangi volume"

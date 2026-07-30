@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import { Sprout, Leaf, Droplets } from "lucide-react";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { formatWeightKg } from "@/lib/formatter";
 import type { BrandDashboardStats } from "@/services/brand-fashion/dashboardService";
 
 export interface EarthImpactMetricsProps {
@@ -38,7 +39,7 @@ export function EarthImpactMetrics({ stats, showSkeleton }: EarthImpactMetricsPr
               </div>
             </div>
             <p className="font-display text-3xl font-medium tracking-tight text-brand-black mt-3 sm:text-4xl">
-              {showSkeleton ? <Skeleton className="h-7 w-24" /> : `${carbonSaved.toFixed(1)} Kg`}
+              {showSkeleton ? <Skeleton className="h-7 w-24" /> : formatWeightKg(carbonSaved)}
             </p>
           </div>
           <p className="text-[10px] text-muted-moss mt-3">Mengurangi emisi karbon gas rumah kaca global.</p>

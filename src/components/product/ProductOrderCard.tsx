@@ -76,7 +76,7 @@ export default function ProductOrderCard({
 
   const hasCoinReward = totalBonusCoinReward > 0;
   return (
-    <div className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-7">
+    <div className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-7">
       <div className="flex items-center gap-3 text-brand-emerald">
         <ShoppingBag className="size-4" strokeWidth={2} />
 
@@ -102,7 +102,7 @@ export default function ProductOrderCard({
           </p>
         </div>
 
-        <div className="mt-5 inline-flex items-center overflow-hidden rounded-lg border border-line-trace bg-canvas-pure">
+        <div className="mt-5 inline-flex items-center overflow-hidden rounded-lg border border-brand-black/15 bg-canvas-pure">
           <button
             type="button"
             onClick={decreaseQuantity}

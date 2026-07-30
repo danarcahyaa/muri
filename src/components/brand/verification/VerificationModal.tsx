@@ -43,7 +43,7 @@ export function VerificationModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="max-h-full w-full max-w-5xl overflow-y-auto rounded-2xl border border-line-trace bg-canvas-pure shadow-none"
+        className="max-h-full w-full max-w-5xl overflow-y-auto rounded-2xl border border-brand-black/15 bg-canvas-pure shadow-none"
       >
         <header className="sticky top-0 z-10 flex items-start justify-between gap-5 border-b border-line-trace bg-canvas-pure px-6 py-6 sm:px-8">
           <div>
@@ -77,7 +77,7 @@ export function VerificationModal({
                 <LoaderCircle className="size-8 animate-spin text-brand-emerald" />
               </div>
             ) : signedProofUrl ? (
-              <div className="mt-5 rounded-xl border border-line-trace bg-white p-4">
+              <div className="mt-5 rounded-xl border border-brand-black/15 bg-white p-4">
                 <img
                   src={signedProofUrl}
                   alt="Bukti pembayaran QRIS customer"
@@ -115,7 +115,7 @@ export function VerificationModal({
               </p>
             </div>
 
-            <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-xl border border-line-trace p-4">
+            <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-xl border border-brand-black/15 p-4">
               <input
                 type="checkbox"
                 checked={reviewConfirmed}
@@ -148,7 +148,7 @@ export function VerificationModal({
                 onChange={(event) => {
                   onNoteChange(event.target.value);
                 }}
-                className="mt-3 w-full resize-none rounded-sm border border-line-trace bg-transparent px-4 py-3 font-body text-xs text-brand-black outline-none focus-visible:border-brand-emerald"
+                className="mt-3 w-full resize-none rounded-sm border border-brand-black/15 bg-transparent px-4 py-3 font-body text-xs text-brand-black outline-none focus-visible:border-brand-emerald"
               />
 
               <p className="mt-2 text-right text-[9px] text-muted-moss">

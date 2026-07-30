@@ -46,7 +46,7 @@ export function WorkshopTable({
   const columnCount = 6;
 
   return (
-    <div className="w-full bg-canvas-pure border border-line-trace rounded-xl overflow-hidden font-body">
+    <div className="w-full bg-canvas-pure border border-brand-black/15 rounded-xl overflow-hidden font-body">
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -175,7 +175,7 @@ export function WorkshopTable({
               size="sm"
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1}
-              className="inline-flex h-8 items-center justify-center rounded border border-line-trace bg-canvas-pure px-3 text-xs font-semibold text-brand-black hover:bg-canvas-warm disabled:opacity-50 disabled:hover:bg-canvas-pure transition-colors"
+              className="inline-flex h-8 items-center justify-center rounded border border-brand-black/15 bg-canvas-pure px-3 text-xs font-semibold text-brand-black hover:bg-canvas-warm disabled:opacity-50 disabled:hover:bg-canvas-pure transition-colors"
             >
               <ChevronLeft className="size-4 mr-1" />
               Sebelumnya
@@ -185,7 +185,7 @@ export function WorkshopTable({
               size="sm"
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="inline-flex h-8 items-center justify-center rounded border border-line-trace bg-canvas-pure px-3 text-xs font-semibold text-brand-black hover:bg-canvas-warm disabled:opacity-50 disabled:hover:bg-canvas-pure transition-colors"
+              className="inline-flex h-8 items-center justify-center rounded border border-brand-black/15 bg-canvas-pure px-3 text-xs font-semibold text-brand-black hover:bg-canvas-warm disabled:opacity-50 disabled:hover:bg-canvas-pure transition-colors"
             >
               Selanjutnya
               <ChevronRight className="size-4 ml-1" />

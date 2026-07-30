@@ -11,7 +11,7 @@ export function BrandDashboardHeader({ fullName }: BrandDashboardHeaderProps): R
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <div>
-        <h1 className="font-display text-4xl font-bold leading-none tracking-[-0.04em] text-brand-black sm:text-5xl">
+        <h1 className="font-display text-4xl font-medium leading-none tracking-[-0.04em] text-brand-black sm:text-5xl">
           Halo, {fullName || "Brand Partner"}
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-muted-moss max-w-xl">

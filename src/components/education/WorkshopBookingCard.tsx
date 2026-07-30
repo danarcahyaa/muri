@@ -37,7 +37,7 @@ export default function WorkshopBookingCard({
   return (
     <aside
       className="
-        self-start rounded-2xl border border-line-trace
+        self-start rounded-2xl border border-brand-black/15
         bg-canvas-pure p-6 sm:p-7
         lg:sticky lg:top-24
       "
@@ -232,7 +232,7 @@ export default function WorkshopBookingCard({
             max-h-[calc(100dvh-3rem)]
             overflow-y-auto
             rounded-2xl
-            border border-line-trace
+            border border-brand-black/15
             bg-canvas-pure
             p-6 shadow-2xl
             sm:p-8

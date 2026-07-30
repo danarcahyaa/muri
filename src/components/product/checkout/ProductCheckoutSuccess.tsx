@@ -20,7 +20,7 @@ export default function ProductCheckoutSuccess({
   const isCoinPayment = result.paymentMethod === "coin";
 
   return (
-    <section className="mx-auto max-w-2xl rounded-3xl border border-line-trace bg-canvas-pure px-6 py-14 text-center sm:px-10">
+    <section className="mx-auto max-w-2xl rounded-3xl border border-brand-black/15 bg-canvas-pure px-6 py-14 text-center sm:px-10">
       <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-brand-lime text-brand-forest">
         <CheckCircle2 className="size-7" />
       </div>
@@ -68,7 +68,7 @@ export default function ProductCheckoutSuccess({
       <div className="mt-8 grid gap-3 sm:grid-cols-2">
         <Link
           href="/produk"
-          className="flex items-center justify-center rounded-md border border-line-trace px-6 py-4 text-xs font-bold text-brand-black transition hover:border-brand-forest"
+          className="flex items-center justify-center rounded-md border border-brand-black/15 px-6 py-4 text-xs font-bold text-brand-black transition hover:border-brand-forest"
         >
           Belanja Lagi
         </Link>

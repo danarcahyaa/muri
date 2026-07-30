@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Clock3,
   Coins,
+  ExternalLink,
   QrCode,
   RefreshCw,
   ShieldCheck,
@@ -54,7 +55,7 @@ export default function CustomerOrderPaymentCard({
 
   if (!payment) {
     return (
-      <div className="mt-7 rounded-xl border border-line-trace bg-canvas-warm p-5">
+      <div className="mt-4 rounded-lg border border-line-trace bg-canvas-warm/50 p-4 sm:p-5">
         <p className="text-[10px] font-bold uppercase text-muted-moss">
           Pembayaran
         </p>
@@ -71,10 +72,10 @@ export default function CustomerOrderPaymentCard({
   const PaymentIcon = payment.method === "coin" ? Coins : QrCode;
 
   return (
-    <div className="mt-7 rounded-xl border border-line-trace bg-canvas-warm p-5">
+    <div className="mt-4 rounded-lg border border-line-trace bg-canvas-warm/50 p-4 sm:p-5">
       <div className="flex items-start justify-between gap-5">
         <div className="flex items-start gap-3">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-canvas-pure text-brand-emerald">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-canvas-pure text-brand-emerald border border-line-trace">
             <PaymentIcon className="size-4" strokeWidth={1.8} />
           </div>
 
@@ -91,7 +92,7 @@ export default function CustomerOrderPaymentCard({
 
         <span
           className={`
-            rounded-full px-3 py-2
+            rounded-full px-3 py-1.5
             text-[9px] font-bold
             uppercase tracking-wide
             ${status.className}
@@ -101,7 +102,7 @@ export default function CustomerOrderPaymentCard({
         </span>
       </div>
 
-      <div className="mt-5 border-t border-line-trace pt-5">
+      <div className="mt-4 border-t border-line-trace pt-4 space-y-2">
         <PaymentRow
           label="Jumlah Pembayaran"
           value={
@@ -132,8 +133,25 @@ export default function CustomerOrderPaymentCard({
           />
         )}
 
-        {payment.proofUrl && (
-          <PaymentRow label="File Bukti" value="Tersimpan" />
+        {payment.method === "qris" && (
+          <div className="flex items-center justify-between gap-4 py-1">
+            <span className="text-[10px] text-muted-moss">File Bukti</span>
+            {payment.proofUrl ? (
+              <a
+                href={payment.proofUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-[10px] font-bold text-brand-forest hover:underline"
+              >
+                Lihat Bukti Foto
+                <ExternalLink className="size-3" />
+              </a>
+            ) : (
+              <span className="text-[10px] font-bold text-brand-forest">
+                {payment.status === "waiting_verification" ? "Tersimpan (Verifikasi)" : "Belum diunggah"}
+              </span>
+            )}
+          </div>
         )}
 
         {payment.expiredAt && (

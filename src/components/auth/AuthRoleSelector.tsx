@@ -395,7 +395,7 @@ function RoleCard({
       href={href}
       className="
         group flex min-h-72 flex-col
-        rounded-sm border border-line-trace
+        rounded-sm border border-brand-black/15
         bg-canvas-pure p-7
         transition duration-300
 

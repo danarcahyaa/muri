@@ -56,7 +56,7 @@ export function FulfillmentActionModal({
     >
       <section
         onClick={(e) => e.stopPropagation()}
-        className="max-h-full w-full max-w-xl overflow-y-auto rounded-2xl border border-line-trace bg-canvas-pure shadow-none"
+        className="max-h-full w-full max-w-xl overflow-y-auto rounded-2xl border border-brand-black/15 bg-canvas-pure shadow-none"
       >
         <header className="flex items-start justify-between gap-5 border-b border-line-trace px-6 py-6 sm:px-8">
           <div>
@@ -79,7 +79,7 @@ export function FulfillmentActionModal({
         </header>
 
         <div className="p-6 sm:p-8">
-          <div className="rounded-xl border border-line-trace bg-canvas-warm/40 p-5">
+          <div className="rounded-xl border border-brand-black/15 bg-canvas-warm/40 p-5">
             <SummaryRow label="Penerima" value={order.receiverName} />
             <SummaryRow
               label="Pembayaran"
@@ -120,7 +120,7 @@ export function FulfillmentActionModal({
                 disabled={isUpdating}
                 onChange={(event) => onShippingNoteChange(event.target.value)}
                 placeholder="Catatan opsional untuk pengiriman"
-                className="mt-3 w-full resize-none rounded-sm border border-line-trace bg-transparent px-4 py-3 font-body text-xs text-brand-black outline-none focus-visible:border-brand-emerald"
+                className="mt-3 w-full resize-none rounded-sm border border-brand-black/15 bg-transparent px-4 py-3 font-body text-xs text-brand-black outline-none focus-visible:border-brand-emerald"
               />
             </Field>
           )}
@@ -152,7 +152,7 @@ export function FulfillmentActionModal({
             </>
           )}
 
-          <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-xl border border-line-trace bg-canvas-warm/20 p-4">
+          <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-xl border border-brand-black/15 bg-canvas-warm/20 p-4">
             <input
               type="checkbox"
               checked={confirmed}

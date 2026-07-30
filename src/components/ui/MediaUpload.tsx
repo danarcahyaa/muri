@@ -87,7 +87,7 @@ export function MediaUpload({
           {value.map((item) => (
             <div
               key={item.id}
-              className="group relative flex aspect-square items-center justify-center overflow-hidden rounded-sm border border-line-trace/60 bg-muted/20"
+              className="group relative flex aspect-square items-center justify-center overflow-hidden rounded-sm border border-brand-black/15/60 bg-muted/20"
             >
               {item.type === MediaType.IMAGE ? (
                 <img

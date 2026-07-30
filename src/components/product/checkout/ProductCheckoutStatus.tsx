@@ -5,7 +5,7 @@ import { LoaderCircle, RefreshCw } from "lucide-react";
 export function ProductCheckoutLoading() {
   return (
     <div
-      className="flex min-h-[480px] items-center justify-center rounded-3xl border border-line-trace bg-canvas-pure"
+      className="flex min-h-[480px] items-center justify-center rounded-3xl border border-brand-black/15 bg-canvas-pure"
       role="status"
       aria-live="polite"
     >
@@ -28,7 +28,7 @@ export function ProductCheckoutLoadError({
   onRetry: () => Promise<void>;
 }) {
   return (
-    <div className="flex min-h-[420px] flex-col items-center justify-center rounded-3xl border border-line-trace bg-canvas-pure px-6 text-center">
+    <div className="flex min-h-[420px] flex-col items-center justify-center rounded-3xl border border-brand-black/15 bg-canvas-pure px-6 text-center">
       <RefreshCw className="size-9 text-muted-moss/50" />
 
       <h1 className="mt-5 font-display text-3xl font-medium text-brand-black">

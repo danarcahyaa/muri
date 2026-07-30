@@ -120,7 +120,7 @@ export default function ProductDetailHero({
             )}
           </div>
 
-          <aside className="rounded-2xl border border-line-trace bg-canvas-pure p-7 sm:p-8">
+          <aside className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-7 sm:p-8">
             <div className="flex items-center gap-3">
               <WalletCards
                 className="size-4 text-brand-emerald"

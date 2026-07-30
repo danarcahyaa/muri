@@ -48,7 +48,7 @@ export function DateRangePicker({
             className={cn(
               `
                 flex items-center text-left justify-start box-border
-                rounded-sm border border-line-trace
+                rounded-sm border border-brand-black/15
                 bg-canvas-pure px-4 h-12 text-xs font-semibold
                 transition-colors duration-200
                 text-brand-black w-full sm:w-[260px]

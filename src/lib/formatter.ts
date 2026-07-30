@@ -26,7 +26,7 @@ export function formatCurrencyIDR(value: number): string {
  * @returns Formatted weight string (e.g. "2.400 Kg")
  */
 export function formatWeightKg(value: number): string {
-  return `${value.toLocaleString("id-ID")} Kg`;
+  return `${value.toLocaleString("id-ID")} kg`;
 }
 
 /**

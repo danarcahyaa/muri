@@ -30,7 +30,7 @@ export function WasteBatchDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg p-6 bg-canvas-pure border border-line-trace max-h-[95vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-lg p-6 bg-canvas-pure border border-brand-black/15 max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-display text-xl font-bold text-brand-black pr-6">
             Detail Jejak Limbah

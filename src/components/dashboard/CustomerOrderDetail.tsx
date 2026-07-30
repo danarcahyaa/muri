@@ -110,7 +110,7 @@ function OrderDetailContent({ order }: { order: CustomerOrder }) {
         Kembali ke Pesanan
       </Link>
 
-      <section className="mt-7 overflow-hidden rounded-3xl border border-line-trace bg-canvas-pure">
+      <section className="mt-7 overflow-hidden rounded-3xl border border-brand-black/15 bg-canvas-pure">
         <header className="border-b border-line-trace px-6 py-7 sm:px-8">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div>
@@ -260,7 +260,7 @@ function OrderItemsSection({
           </p>
         </div>
       ) : (
-        <div className="mt-6 divide-y divide-line-trace rounded-2xl border border-line-trace px-5">
+        <div className="mt-6 divide-y divide-line-trace rounded-2xl border border-brand-black/15 px-5">
           {items.map((item) => {
             const itemAmount = getOrderItemAmount({
               order,
@@ -476,7 +476,7 @@ function SummaryRow({
 
 function OrderDetailLoading() {
   return (
-    <div className="flex min-h-[520px] items-center justify-center rounded-3xl border border-line-trace bg-canvas-pure">
+    <div className="flex min-h-[520px] items-center justify-center rounded-3xl border border-brand-black/15 bg-canvas-pure">
       <div className="text-center">
         <LoaderCircle className="mx-auto size-8 animate-spin text-brand-emerald" />
 
@@ -494,7 +494,7 @@ function OrderDetailError({
   onRetry: () => Promise<void>;
 }) {
   return (
-    <section className="flex min-h-[420px] flex-col items-center justify-center rounded-3xl border border-line-trace bg-canvas-pure px-6 py-12 text-center">
+    <section className="flex min-h-[420px] flex-col items-center justify-center rounded-3xl border border-brand-black/15 bg-canvas-pure px-6 py-12 text-center">
       <RefreshCw className="size-9 text-muted-moss/50" strokeWidth={1.5} />
 
       <h1 className="mt-5 font-display text-3xl font-medium text-brand-black">
@@ -508,7 +508,7 @@ function OrderDetailError({
       <div className="mt-7 flex flex-wrap justify-center gap-3">
         <Link
           href="/dashboard/orders"
-          className="inline-flex items-center gap-2 rounded-md border border-line-trace px-5 py-3 text-xs font-bold text-brand-black transition hover:border-brand-forest"
+          className="inline-flex items-center gap-2 rounded-md border border-brand-black/15 px-5 py-3 text-xs font-bold text-brand-black transition hover:border-brand-forest"
         >
           <ArrowLeft className="size-4" />
           Kembali

@@ -50,7 +50,7 @@ export default function WorkshopDetailContent({
         <div
           className="
             grid items-center gap-5 rounded-2xl
-            border border-line-trace p-5
+            border border-brand-black/15 p-5
             sm:grid-cols-[72px_minmax(0,1fr)]
             sm:gap-6 sm:p-7
           "
@@ -109,7 +109,7 @@ export default function WorkshopDetailContent({
           />
         </div>
 
-        <div className="mt-5 rounded-xl border border-line-trace p-5 sm:p-6">
+        <div className="mt-5 rounded-xl border border-brand-black/15 p-5 sm:p-6">
           <div className="flex gap-4">
             <MapPin className="mt-0.5 size-5 shrink-0 text-brand-emerald" />
 
@@ -148,7 +148,7 @@ export default function WorkshopDetailContent({
 
 function WorkshopVisual() {
   return (
-    <section className="rounded-2xl border border-line-trace bg-canvas-pure p-4 sm:p-7">
+    <section className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-4 sm:p-7">
       <div
         className="
           relative flex aspect-[16/7.2]

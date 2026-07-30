@@ -15,7 +15,7 @@ export default function PurchasedMaterialList({
   onSelect,
 }: PurchasedMaterialListProps) {
   return (
-    <div className="h-[320px] min-w-0 overflow-hidden rounded-2xl border border-line-trace bg-canvas-warm/25 p-4 sm:h-[340px]">
+    <div className="h-[320px] min-w-0 overflow-hidden rounded-2xl border border-brand-black/15 bg-canvas-warm/25 p-4 sm:h-[340px]">
       <div className="flex items-center gap-3">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-lime text-brand-black">
           <PackageSearch className="size-5" strokeWidth={1.8} />

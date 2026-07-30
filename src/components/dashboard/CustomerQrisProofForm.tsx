@@ -237,7 +237,7 @@ export default function CustomerQrisProofForm({
 
   return (
     <div className="mt-7">
-      <div className="rounded-2xl border border-line-trace bg-canvas-warm p-5">
+      <div className="rounded-2xl border border-brand-black/15 bg-canvas-warm p-5">
         <div className="flex items-center gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-canvas-pure text-brand-emerald">
             <FileImage
@@ -304,7 +304,7 @@ export default function CustomerQrisProofForm({
             />
           </label>
         ) : (
-          <div className="relative mt-5 overflow-hidden rounded-2xl border border-line-trace bg-canvas-pure p-3">
+          <div className="relative mt-5 overflow-hidden rounded-2xl border border-brand-black/15 bg-canvas-pure p-3">
             {previewUrl && (
               <img
                 src={previewUrl}

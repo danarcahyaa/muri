@@ -99,7 +99,7 @@ function WorkshopCard({ workshop }: WorkshopCardProps) {
       className="
         group flex flex-col
         overflow-hidden rounded-2xl
-        border border-line-trace
+        border border-brand-black/15
         bg-canvas-pure p-4
         transition duration-300
 

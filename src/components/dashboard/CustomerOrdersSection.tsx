@@ -24,6 +24,7 @@ import {
 import { Input } from "@/components/ui/Input";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
+import { Button } from "@/components/ui/Button";
 import { getMyOrders } from "@/services/customer";
 import type { CustomerOrder, CustomerOrderStatus } from "@/types/customerOrder";
 import CustomerOrderDetailModal from "./orders/CustomerOrderDetailModal";
@@ -126,11 +127,11 @@ export default function CustomerOrdersSection() {
 
   return (
     <>
-      <section className="mt-8 overflow-hidden rounded-2xl border border-line-trace bg-canvas-pure">
+      <section className="mt-8 overflow-hidden rounded-2xl border border-brand-black/15 bg-canvas-pure">
         {/* Section Header */}
         <div className="flex flex-col gap-4 border-b border-line-trace px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <div>
-            <h2 className="font-display text-xl font-medium text-brand-black">
+            <h2 className="font-display text-xl font-bold text-brand-black">
               Daftar Pesanan ({orders.length})
             </h2>
             <p className="mt-1 text-xs text-muted-moss">
@@ -141,7 +142,7 @@ export default function CustomerOrdersSection() {
           <button
             type="button"
             onClick={() => void loadOrders()}
-            className="inline-flex items-center justify-center gap-1.5 rounded-sm border border-line-trace px-3.5 py-2 text-xs font-bold text-brand-black transition hover:border-brand-forest"
+            className="inline-flex items-center justify-center gap-1.5 rounded-sm border border-brand-black/15 px-3.5 py-2 text-xs font-bold text-brand-black transition hover:border-brand-forest"
           >
             <RefreshCw className="size-3.5" />
             Muat Ulang
@@ -174,7 +175,7 @@ export default function CustomerOrdersSection() {
                   className={`rounded-sm px-3 py-1.5 text-xs font-bold transition ${
                     active
                       ? "bg-brand-forest text-white"
-                      : "bg-canvas-pure border border-line-trace text-brand-black hover:border-brand-forest"
+                      : "bg-canvas-pure border border-brand-black/15 text-brand-black hover:border-brand-forest"
                   }`}
                 >
                   {tab.label}
@@ -299,23 +300,26 @@ export default function CustomerOrdersSection() {
                       <TableCell className="py-4 pr-6 text-right sm:pr-8">
                         <div className="flex items-center justify-end gap-2">
                           {order.payment?.status === "waiting_payment" && (
-                            <Link
-                              href={`/dashboard/orders/${order.id}/payment`}
-                              className="inline-flex items-center gap-1.5 rounded-sm bg-brand-forest px-3 py-2 text-xs font-bold text-white transition hover:bg-brand-black"
-                            >
-                              <QrCode className="size-3.5" />
-                              Bayar
-                            </Link>
+                            <Button
+                              variant="default"
+                              size="icon-sm"
+                              title="Bayar QRIS Sekarang"
+                              render={
+                                <Link href={`/dashboard/orders/${order.id}/payment`}>
+                                  <QrCode className="size-3.5" />
+                                </Link>
+                              }
+                            />
                           )}
 
-                          <button
-                            type="button"
+                          <Button
+                            variant="outline"
+                            size="icon-sm"
                             onClick={() => setSelectedOrder(order)}
-                            className="inline-flex items-center gap-1.5 rounded-sm border border-line-trace bg-canvas-pure px-3 py-2 text-xs font-bold text-brand-black transition hover:border-brand-forest hover:bg-canvas-warm"
+                            title="Lihat Detail Pesanan"
                           >
                             <Eye className="size-3.5 text-brand-emerald" />
-                            Detail
-                          </button>
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -350,7 +354,7 @@ export default function CustomerOrdersSection() {
                   type="button"
                   disabled={currentPage <= 1}
                   onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                  className="inline-flex items-center gap-1 rounded-sm border border-line-trace bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex items-center gap-1 rounded-sm border border-brand-black/15 bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <ChevronLeft className="size-3.5" />
                   Sebelumnya
@@ -366,7 +370,7 @@ export default function CustomerOrdersSection() {
                   onClick={() =>
                     setCurrentPage((prev) => Math.min(totalPages, prev + 1))
                   }
-                  className="inline-flex items-center gap-1 rounded-sm border border-line-trace bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex items-center gap-1 rounded-sm border border-brand-black/15 bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Berikutnya
                   <ChevronRight className="size-3.5" />
@@ -421,7 +425,7 @@ function getOrderStatusMeta(status: CustomerOrderStatus) {
 
 function OrdersSkeleton() {
   return (
-    <section className="mt-8 overflow-hidden rounded-2xl border border-line-trace bg-canvas-pure">
+    <section className="mt-8 overflow-hidden rounded-2xl border border-brand-black/15 bg-canvas-pure">
       <div className="flex items-center justify-between border-b border-line-trace px-6 py-5 sm:px-8">
         <div>
           <Skeleton className="h-6 w-48" />
@@ -475,7 +479,7 @@ function OrdersError({
   onRetry: () => Promise<void>;
 }) {
   return (
-    <section className="mt-8 flex min-h-72 flex-col items-center justify-center rounded-2xl border border-line-trace bg-canvas-pure px-6 py-12 text-center">
+    <section className="mt-8 flex min-h-72 flex-col items-center justify-center rounded-2xl border border-brand-black/15 bg-canvas-pure px-6 py-12 text-center">
       <RefreshCw className="size-9 text-muted-moss/50" />
       <h2 className="mt-5 font-display text-2xl font-medium text-brand-black">
         Pesanan gagal dimuat
@@ -495,7 +499,7 @@ function OrdersError({
 
 function EmptyOrders() {
   return (
-    <section className="mt-8 flex min-h-72 flex-col items-center justify-center rounded-2xl border border-line-trace bg-canvas-pure px-6 py-12 text-center">
+    <section className="mt-8 flex min-h-72 flex-col items-center justify-center rounded-2xl border border-brand-black/15 bg-canvas-pure px-6 py-12 text-center">
       <div className="flex size-14 items-center justify-center rounded-xl bg-brand-lime/40 text-brand-forest">
         <ShoppingBag className="size-6" />
       </div>
