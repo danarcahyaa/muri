@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { LoaderCircle, X } from "lucide-react";
+import { Input } from "@/components/ui/Input";
 import { formatCoin, formatIdr } from "@/lib/productDetail";
 import type { BrandFulfillmentOrder } from "@/types/brandOrderFulfillment";
 import {
@@ -49,8 +50,14 @@ export function FulfillmentActionModal({
   const isCancel = action === "cancel_refund";
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-brand-black/70 px-4 py-8 backdrop-blur-sm">
-      <section className="max-h-full w-full max-w-xl overflow-y-auto rounded-3xl bg-canvas-pure shadow-2xl">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 px-4 py-8 backdrop-blur-xs animate-in fade-in-0"
+    >
+      <section
+        onClick={(e) => e.stopPropagation()}
+        className="max-h-full w-full max-w-xl overflow-y-auto rounded-2xl border border-line-trace bg-canvas-pure shadow-none"
+      >
         <header className="flex items-start justify-between gap-5 border-b border-line-trace px-6 py-6 sm:px-8">
           <div>
             <p className="text-xs font-bold uppercase text-brand-emerald">
@@ -65,14 +72,14 @@ export function FulfillmentActionModal({
             disabled={isUpdating}
             onClick={onClose}
             aria-label="Tutup dialog"
-            className="flex size-10 items-center justify-center rounded-full bg-canvas-warm text-brand-black transition hover:bg-line-trace"
+            className="flex size-9 items-center justify-center rounded-full bg-canvas-warm text-brand-black transition hover:bg-line-trace"
           >
             <X className="size-4" />
           </button>
         </header>
 
         <div className="p-6 sm:p-8">
-          <div className="rounded-2xl bg-canvas-warm p-5">
+          <div className="rounded-xl border border-line-trace bg-canvas-warm/40 p-5">
             <SummaryRow label="Penerima" value={order.receiverName} />
             <SummaryRow
               label="Pembayaran"
@@ -92,13 +99,15 @@ export function FulfillmentActionModal({
 
           {isShipping && (
             <Field label="Nomor Resi" count={`${trackingNumber.length}/120`}>
-              <input
-                value={trackingNumber}
-                maxLength={120}
-                disabled={isUpdating}
-                onChange={(event) => onTrackingNumberChange(event.target.value)}
-                className="mt-3 w-full rounded-xl border border-line-trace bg-white px-4 py-3 text-sm text-brand-black outline-none focus:border-brand-emerald"
-              />
+              <div className="mt-3">
+                <Input
+                  value={trackingNumber}
+                  maxLength={120}
+                  disabled={isUpdating}
+                  onChange={(event) => onTrackingNumberChange(event.target.value)}
+                  placeholder="Masukkan nomor resi pengiriman"
+                />
+              </div>
             </Field>
           )}
 
@@ -107,10 +116,11 @@ export function FulfillmentActionModal({
               <textarea
                 value={shippingNote}
                 maxLength={1000}
-                rows={5}
+                rows={4}
                 disabled={isUpdating}
                 onChange={(event) => onShippingNoteChange(event.target.value)}
-                className="mt-3 w-full resize-none rounded-xl border border-line-trace bg-white px-4 py-3 text-sm text-brand-black outline-none focus:border-brand-emerald"
+                placeholder="Catatan opsional untuk pengiriman"
+                className="mt-3 w-full resize-none rounded-sm border border-line-trace bg-transparent px-4 py-3 font-body text-xs text-brand-black outline-none focus-visible:border-brand-emerald"
               />
             </Field>
           )}
@@ -130,24 +140,25 @@ export function FulfillmentActionModal({
                 <textarea
                   value={cancellationReason}
                   maxLength={1000}
-                  rows={5}
+                  rows={4}
                   disabled={isUpdating}
                   onChange={(event) =>
                     onCancellationReasonChange(event.target.value)
                   }
-                  className="mt-3 w-full resize-none rounded-xl border border-red-200 bg-white px-4 py-3 text-sm text-brand-black outline-none focus:border-red-500"
+                  placeholder="Masukkan alasan pembatalan"
+                  className="mt-3 w-full resize-none rounded-sm border border-red-200 bg-transparent px-4 py-3 font-body text-xs text-brand-black outline-none focus-visible:border-red-500"
                 />
               </Field>
             </>
           )}
 
-          <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-xl border border-line-trace p-4">
+          <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-xl border border-line-trace bg-canvas-warm/20 p-4">
             <input
               type="checkbox"
               checked={confirmed}
               disabled={isUpdating}
               onChange={(event) => onConfirmedChange(event.target.checked)}
-              className="mt-0.5 size-4 accent-brand-forest"
+              className="mt-0.5 size-4 rounded-sm accent-brand-forest"
             />
             <span className="text-xs leading-5 text-brand-black">
               {getConfirmationText(action)}
@@ -164,7 +175,7 @@ export function FulfillmentActionModal({
             type="button"
             disabled={isUpdating || !confirmed}
             onClick={onSubmit}
-            className={`mt-7 flex w-full items-center justify-center gap-3 rounded-md px-6 py-4 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-50 ${
+            className={`mt-7 flex w-full items-center justify-center gap-3 rounded-sm px-6 py-4 text-xs font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-50 ${
               isCancel ? "bg-red-700 hover:bg-red-800" : "bg-brand-forest hover:bg-brand-black"
             }`}
           >

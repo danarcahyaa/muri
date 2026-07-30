@@ -70,8 +70,8 @@ export function WorkshopCreateDialog({
           <div className="flex-1 overflow-y-auto space-y-4 px-1.5 pr-3 pb-4">
 
             {/* Judul */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-brand-black/70">
+            <div className="space-y-2.5">
+              <label className="block mb-2 text-xs font-semibold text-brand-black/70">
                 Judul Workshop
               </label>
               <Input
@@ -95,8 +95,8 @@ export function WorkshopCreateDialog({
 
             {/* Nama Narasumber & Jabatan */}
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-brand-black/70">
+              <div className="space-y-2.5">
+                <label className="block mb-2 text-xs font-semibold text-brand-black/70">
                   Nama Narasumber
                 </label>
                 <Input
@@ -108,8 +108,8 @@ export function WorkshopCreateDialog({
                   required
                 />
               </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-brand-black/70">
+              <div className="space-y-2.5">
+                <label className="block mb-2 text-xs font-semibold text-brand-black/70">
                   Jabatan Narasumber
                 </label>
                 <Input
@@ -124,8 +124,8 @@ export function WorkshopCreateDialog({
             </div>
 
             {/* Lokasi */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-brand-black/70">
+            <div className="space-y-2.5">
+              <label className="block mb-2 text-xs font-semibold text-brand-black/70">
                 Lokasi
               </label>
               <Input
@@ -140,8 +140,8 @@ export function WorkshopCreateDialog({
 
             {/* Kuota & Biaya Poin */}
             <div className="grid gap-4 grid-cols-2">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-brand-black/70">
+              <div className="space-y-2.5">
+                <label className="block mb-2 text-xs font-semibold text-brand-black/70">
                   Kuota Peserta
                 </label>
                 <Input
@@ -155,9 +155,9 @@ export function WorkshopCreateDialog({
                   required
                 />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-brand-black/70">
+                  <label className="block mb-2 text-xs font-semibold text-brand-black/70">
                     Biaya Poin
                   </label>
                   <span className="text-[10px] text-muted-moss font-medium">
@@ -178,8 +178,8 @@ export function WorkshopCreateDialog({
 
             {/* Tanggal Pelaksanaan (shadcn Calendar) & Jam Mulai */}
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-brand-black/70">
+              <div className="space-y-2.5">
+                <label className="block mb-2 text-xs font-semibold text-brand-black/70">
                   Tanggal Pelaksanaan
                 </label>
                 <DatePickerInput
@@ -191,8 +191,8 @@ export function WorkshopCreateDialog({
                   fromDate={new Date()}
                 />
               </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-brand-black/70">
+              <div className="space-y-2.5">
+                <label className="block mb-2 text-xs font-semibold text-brand-black/70">
                   Jam Mulai
                 </label>
                 <Input
@@ -207,7 +207,7 @@ export function WorkshopCreateDialog({
             </div>
 
             {/* Deskripsi Singkat */}
-            <div className="space-y-1.5">
+            <div className="space-y-2.5">
               <div className="flex justify-between items-center">
                 <label className="text-xs font-semibold text-brand-black/70">
                   Deskripsi Singkat

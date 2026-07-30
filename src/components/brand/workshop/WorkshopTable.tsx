@@ -46,7 +46,7 @@ export function WorkshopTable({
   const columnCount = 6;
 
   return (
-    <div className="w-full bg-canvas-pure border border-line-trace rounded-md overflow-hidden font-body">
+    <div className="w-full bg-canvas-pure border border-line-trace rounded-xl overflow-hidden font-body">
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>

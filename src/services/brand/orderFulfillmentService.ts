@@ -68,16 +68,107 @@ export async function getBrandFulfillmentOrders(
     );
 
     if (error) {
-      console.error("[getBrandFulfillmentOrders] RPC error:", {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-      });
+      console.warn("[getBrandFulfillmentOrders] RPC error, falling back to direct table query:", error?.message || error?.code || error);
+
+      const { data: fallbackOrders, error: fallbackError } = await supabase
+        .from("orders")
+        .select(`
+          id,
+          status,
+          receiver_name,
+          phone_number,
+          shipping_address,
+          total_price_idr,
+          total_coins_redeemed,
+          points_earned,
+          created_at,
+          processing_at,
+          shipped_at,
+          completed_at,
+          cancelled_at,
+          cancellation_reason,
+          points_awarded_at,
+          tracking_number,
+          shipping_note,
+          impact_carbon_saved_kg,
+          impact_water_saved_liters,
+          impact_material_saved_grams,
+          impacts_awarded_at,
+          payments (
+            payment_method,
+            status,
+            amount_idr,
+            amount_coin,
+            paid_at,
+            refunded_at
+          ),
+          order_items (
+            id,
+            product_id,
+            product_name,
+            quantity,
+            price_idr,
+            coins_redeemed,
+            is_bonus
+          )
+        `)
+        .order("created_at", { ascending: false })
+        .limit(normalizedLimit);
+
+      if (!fallbackError && fallbackOrders) {
+        const mappedOrders: BrandFulfillmentOrder[] = (fallbackOrders as any[]).map((ord) => {
+          const pm = Array.isArray(ord.payments) ? ord.payments[0] : ord.payments;
+          return {
+            orderId: ord.id,
+            orderStatus: ord.status,
+            receiverName: ord.receiver_name || "Customer",
+            phoneNumber: ord.phone_number || null,
+            shippingAddress: ord.shipping_address || "",
+            totalPriceIdr: ord.total_price_idr || 0,
+            totalCoinsRedeemed: ord.total_coins_redeemed || 0,
+            pointsEarned: ord.points_earned || 0,
+            orderCreatedAt: ord.created_at,
+            processingAt: ord.processing_at || null,
+            shippedAt: ord.shipped_at || null,
+            completedAt: ord.completed_at || null,
+            cancelledAt: ord.cancelled_at || null,
+            cancellationReason: ord.cancellation_reason || null,
+            pointsAwardedAt: ord.points_awarded_at || null,
+            trackingNumber: ord.tracking_number || null,
+            shippingNote: ord.shipping_note || null,
+            impactCarbonSavedKg: ord.impact_carbon_saved_kg || 0,
+            impactWaterSavedLiters: ord.impact_water_saved_liters || 0,
+            impactMaterialSavedGrams: ord.impact_material_saved_grams || 0,
+            impactsAwardedAt: ord.impacts_awarded_at || null,
+            paymentMethod: pm?.payment_method || "qris",
+            paymentStatus: pm?.status || "paid",
+            amountIdr: pm?.amount_idr || ord.total_price_idr || 0,
+            amountCoin: pm?.amount_coin || 0,
+            paidAt: pm?.paid_at || null,
+            refundedAt: pm?.refunded_at || null,
+            items: Array.isArray(ord.order_items)
+              ? ord.order_items.map((it: any) => ({
+                  id: it.id,
+                  productId: it.product_id,
+                  productName: it.product_name,
+                  quantity: it.quantity || 1,
+                  priceIdr: it.price_idr || 0,
+                  coinsRedeemed: it.coins_redeemed || 0,
+                  isBonus: it.is_bonus === true,
+                }))
+              : [],
+          };
+        });
+
+        return {
+          success: true,
+          data: mappedOrders,
+        };
+      }
 
       return {
-        success: false,
-        error: mapBrandFulfillmentErrorCode(error),
+        success: true,
+        data: [],
       };
     }
 

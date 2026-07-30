@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
+import { Skeleton } from "@/components/ui/Skeleton";
 import {
   getCustomerDashboardSummary,
 } from "@/services/customer";
@@ -347,15 +348,17 @@ function DashboardSummarySkeleton() {
           {[0, 1, 2].map((item) => (
             <div
               key={item}
-              className="
-                min-h-[230px] animate-pulse
-                border-b border-line-trace
-                bg-canvas-warm
-                last:border-b-0
-                lg:border-b-0 lg:border-r
-                lg:last:border-r-0
-              "
-            />
+              className="flex min-h-[230px] flex-col border-b border-line-trace p-7 last:border-b-0 sm:p-9 lg:border-b-0 lg:border-r lg:last:border-r-0"
+            >
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="size-10 rounded-full" />
+              </div>
+              <div className="mt-auto pt-10">
+                <Skeleton className="h-12 w-36" />
+                <Skeleton className="mt-4 h-4 w-48" />
+              </div>
+            </div>
           ))}
         </div>
       </section>
@@ -364,8 +367,17 @@ function DashboardSummarySkeleton() {
         {[0, 1, 2, 3].map((item) => (
           <div
             key={item}
-            className="min-h-40 animate-pulse rounded-2xl bg-canvas-warm"
-          />
+            className="flex min-h-40 flex-col rounded-2xl border border-line-trace bg-canvas-pure p-6"
+          >
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-3.5 w-24" />
+              <Skeleton className="size-9 rounded-lg" />
+            </div>
+            <div className="mt-auto pt-8">
+              <Skeleton className="h-8 w-20" />
+              <Skeleton className="mt-2 h-3 w-16" />
+            </div>
+          </div>
         ))}
       </section>
     </>

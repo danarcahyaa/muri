@@ -145,7 +145,7 @@ export default function MaterialOrderCard({
 
       {canOrder ? (
         <Link
-          href={loginHref}
+          href={`/material/${encodeURIComponent(slug)}/checkout?quantity=${normalizedQuantity}`}
           className="
             group mt-6 flex w-full items-center
             justify-center gap-3 rounded-sm
@@ -155,7 +155,7 @@ export default function MaterialOrderCard({
             hover:bg-brand-black
           "
         >
-          Detail &amp; Ajukan Penawaran
+          Beli &amp; Ajukan Pembelian Material
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
         </Link>
       ) : (

@@ -38,8 +38,8 @@ export function ProductCheckoutConfirmationModal({
       : formatIdr(checkout.totalPriceIdr ?? 0);
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-brand-black/65 px-4 py-8 backdrop-blur-sm">
-      <div className="max-h-full w-full max-w-xl overflow-y-auto rounded-3xl bg-canvas-pure p-6 shadow-2xl sm:p-8">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 px-4 py-8 backdrop-blur-xs animate-in fade-in-0">
+      <div className="max-h-full w-full max-w-xl overflow-y-auto rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8">
         <div className="flex items-start justify-between gap-5">
           <div>
             <p className="text-xs font-bold uppercase text-brand-emerald">
@@ -56,13 +56,13 @@ export function ProductCheckoutConfirmationModal({
             disabled={isSubmitting}
             onClick={onClose}
             aria-label="Tutup konfirmasi"
-            className="flex size-10 shrink-0 items-center justify-center rounded-full bg-canvas-warm text-brand-black transition hover:bg-line-trace"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full bg-canvas-warm text-brand-black transition hover:bg-line-trace"
           >
             <X className="size-4" />
           </button>
         </div>
 
-        <div className="mt-7 rounded-2xl bg-canvas-warm p-5">
+        <div className="mt-7 rounded-xl border border-line-trace bg-canvas-warm/40 p-5">
           <ConfirmationRow
             label="Produk"
             value={`${checkout.quantity}× ${checkout.product.name}`}
@@ -89,7 +89,7 @@ export function ProductCheckoutConfirmationModal({
           </p>
         )}
 
-        <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-xl border border-line-trace p-4">
+        <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-xl border border-line-trace bg-canvas-warm/20 p-4">
           <input
             type="checkbox"
             checked={confirmationAccepted}
@@ -97,7 +97,7 @@ export function ProductCheckoutConfirmationModal({
             onChange={(event) => {
               onConfirmationChange(event.target.checked);
             }}
-            className="mt-0.5 size-4 accent-brand-forest"
+            className="mt-0.5 size-4 rounded-sm accent-brand-forest"
           />
 
           <span className="text-xs leading-5 text-brand-black">
@@ -122,7 +122,7 @@ export function ProductCheckoutConfirmationModal({
           className="
             mt-6 flex w-full
             items-center justify-center
-            gap-3 rounded-md
+            gap-3 rounded-sm
             bg-brand-forest
             px-6 py-4
             text-xs font-bold

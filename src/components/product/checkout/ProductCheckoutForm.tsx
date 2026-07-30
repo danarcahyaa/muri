@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowRight, Check, Coins, QrCode, ShieldCheck } from "lucide-react";
+import { ArrowRight, Check, Coins, Phone, QrCode, ShieldCheck, User } from "lucide-react";
+import { Input } from "@/components/ui/Input";
 import { formatCoin, formatIdr } from "@/lib/productDetail";
 import type {
   CustomerCheckoutPaymentMethod,
@@ -50,37 +51,48 @@ export default function ProductCheckoutForm({
       </p>
 
       <div className="mt-8 space-y-5">
-        <CheckoutInput
-          id="receiver-name"
-          label="Nama Penerima"
-          value={receiverName}
-          maxLength={120}
-          placeholder="Nama lengkap penerima"
-          required
-          onChange={onReceiverNameChange}
-        />
+        <div className="space-y-2.5">
+          <label htmlFor="receiver-name" className="block mb-2 text-xs font-bold text-brand-black">
+            Nama Penerima<span className="text-red-600"> *</span>
+          </label>
+          <Input
+            id="receiver-name"
+            type="text"
+            required
+            maxLength={120}
+            value={receiverName}
+            onChange={(e) => onReceiverNameChange(e.target.value)}
+            placeholder="Nama lengkap penerima"
+            endIcon={<User className="size-4 text-muted-moss/60" strokeWidth={1.7} />}
+          />
+        </div>
 
-        <CheckoutInput
-          id="phone-number"
-          label="Nomor Telepon"
-          value={phoneNumber}
-          maxLength={30}
-          placeholder="Contoh: 081234567890"
-          type="tel"
-          onChange={onPhoneNumberChange}
-        />
+        <div className="space-y-2.5">
+          <label htmlFor="phone-number" className="block mb-2 text-xs font-bold text-brand-black">
+            Nomor Telepon
+          </label>
+          <Input
+            id="phone-number"
+            type="tel"
+            maxLength={30}
+            value={phoneNumber}
+            onChange={(e) => onPhoneNumberChange(e.target.value)}
+            placeholder="Contoh: 081234567890"
+            endIcon={<Phone className="size-4 text-muted-moss/60" strokeWidth={1.7} />}
+          />
+        </div>
 
-        <div>
+        <div className="space-y-2.5">
           <label
             htmlFor="shipping-address"
-            className="text-xs font-bold text-brand-black"
+            className="block mb-2 text-xs font-bold text-brand-black"
           >
             Alamat Pengiriman<span className="text-red-600"> *</span>
           </label>
 
           <textarea
             id="shipping-address"
-            rows={5}
+            rows={4}
             maxLength={1000}
             value={shippingAddress}
             placeholder="Masukkan alamat lengkap pengiriman"
@@ -88,17 +100,17 @@ export default function ProductCheckoutForm({
               onShippingAddressChange(event.target.value);
             }}
             className="
-              mt-3 w-full resize-none
-              rounded-xl border
+              w-full resize-none
+              rounded-sm border
               border-line-trace
-              bg-canvas-pure
+              bg-transparent
               px-4 py-3
-              text-sm text-brand-black
-              outline-none transition
-              placeholder:text-muted-moss/60
-              focus:border-brand-emerald
-              focus:ring-2
-              focus:ring-brand-emerald/10
+              font-body text-xs text-brand-black
+              shadow-none outline-none transition
+              placeholder:text-xs placeholder:text-muted-moss/60
+              focus-visible:border-brand-emerald
+              focus-visible:ring-2
+              focus-visible:ring-brand-emerald/10
             "
           />
         </div>
@@ -151,68 +163,17 @@ export default function ProductCheckoutForm({
         className="
           group mt-8 flex w-full
           items-center justify-center
-          gap-3 rounded-md
+          gap-3 rounded-sm
           bg-brand-forest
           px-6 py-4
           text-xs font-bold text-white
           transition hover:bg-brand-black
         "
       >
-        Review Pesanan
+        Lanjut ke Review
         <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
       </button>
     </>
-  );
-}
-
-function CheckoutInput({
-  id,
-  label,
-  value,
-  placeholder,
-  maxLength,
-  type = "text",
-  required = false,
-  onChange,
-}: {
-  id: string;
-  label: string;
-  value: string;
-  placeholder: string;
-  maxLength: number;
-  type?: "text" | "tel";
-  required?: boolean;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div>
-      <label htmlFor={id} className="text-xs font-bold text-brand-black">
-        {label}
-        {required && <span className="text-red-600"> *</span>}
-      </label>
-
-      <input
-        id={id}
-        type={type}
-        value={value}
-        maxLength={maxLength}
-        placeholder={placeholder}
-        onChange={(event) => {
-          onChange(event.target.value);
-        }}
-        className="
-          mt-3 w-full rounded-xl
-          border border-line-trace
-          bg-canvas-pure px-4 py-3
-          text-sm text-brand-black
-          outline-none transition
-          placeholder:text-muted-moss/60
-          focus:border-brand-emerald
-          focus:ring-2
-          focus:ring-brand-emerald/10
-        "
-      />
-    </div>
   );
 }
 
@@ -243,7 +204,7 @@ function PaymentMethodOption({
         onSelect(method);
       }}
       className={`
-        relative rounded-2xl border
+        relative rounded-xl border
         p-5 text-left transition
         ${
           selected

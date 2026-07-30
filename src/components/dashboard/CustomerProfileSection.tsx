@@ -22,6 +22,7 @@ import {
 import { formatCoin } from "@/lib/productDetail";
 import { supabase } from "@/lib/supabaseClient";
 import { Input } from "@/components/ui/Input";
+import { Skeleton } from "@/components/ui/Skeleton";
 import {
   getCustomerDashboardSummary,
 } from "@/services/customer/dashboardService";
@@ -260,8 +261,8 @@ export default function CustomerProfileSection() {
             )}
 
             {/* Email (Readonly Auth Input) */}
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-xs font-bold text-brand-black">
+            <div className="space-y-2.5">
+              <label htmlFor="email" className="block mb-2 text-xs font-bold text-brand-black">
                 Alamat Email
               </label>
               <Input
@@ -279,8 +280,8 @@ export default function CustomerProfileSection() {
             </div>
 
             {/* Full Name (Auth-styled Input) */}
-            <div className="space-y-2">
-              <label htmlFor="full-name" className="text-xs font-bold text-brand-black">
+            <div className="space-y-2.5">
+              <label htmlFor="full-name" className="block mb-2 text-xs font-bold text-brand-black">
                 Nama Lengkap<span className="text-red-600"> *</span>
               </label>
               <Input
@@ -296,8 +297,8 @@ export default function CustomerProfileSection() {
             </div>
 
             {/* Phone Number (Auth-styled Input) */}
-            <div className="space-y-2">
-              <label htmlFor="phone-number" className="text-xs font-bold text-brand-black">
+            <div className="space-y-2.5">
+              <label htmlFor="phone-number" className="block mb-2 text-xs font-bold text-brand-black">
                 Nomor Telepon
               </label>
               <Input
@@ -312,8 +313,8 @@ export default function CustomerProfileSection() {
             </div>
 
             {/* Default Shipping Address */}
-            <div className="space-y-2">
-              <label htmlFor="shipping-address" className="text-xs font-bold text-brand-black">
+            <div className="space-y-2.5">
+              <label htmlFor="shipping-address" className="block mb-2 text-xs font-bold text-brand-black">
                 Alamat Pengiriman Utama
               </label>
               <div className="relative">
@@ -325,7 +326,7 @@ export default function CustomerProfileSection() {
                   placeholder="Masukkan alamat pengiriman lengkap Anda"
                   disabled={isSaving}
                   className="
-                    w-full resize-none rounded-xl
+                    w-full resize-none rounded-sm
                     border border-line-trace bg-transparent
                     px-4 py-3 pr-11
                     font-body text-xs text-brand-black shadow-none
@@ -381,7 +382,7 @@ export default function CustomerProfileSection() {
             <div className="mt-5 space-y-3">
               <Link
                 href="/forgot-password"
-                className="flex items-center gap-3 rounded-xl border border-line-trace bg-canvas-warm p-4 text-xs font-bold text-brand-black transition hover:border-brand-forest hover:bg-canvas-warm/80"
+                className="flex items-center gap-3 rounded-sm border border-line-trace bg-canvas-warm px-4 py-3 text-xs font-bold text-brand-black transition hover:border-brand-forest hover:bg-canvas-warm/80"
               >
                 <KeyRound className="size-4 text-brand-emerald" />
                 <span>Atur Ulang Kata Sandi</span>
@@ -403,7 +404,7 @@ export default function CustomerProfileSection() {
                 type="button"
                 disabled={isLoggingOut}
                 onClick={() => void handleLogout()}
-                className="flex w-full items-center justify-center gap-2 rounded-md border border-red-200 bg-red-50 px-5 py-3.5 text-xs font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-sm border border-red-200 bg-red-50 px-5 py-3 text-xs font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-50"
               >
                 {isLoggingOut ? (
                   <LoaderCircle className="size-4 animate-spin" />
@@ -431,7 +432,7 @@ function StatBox({
 }) {
   return (
     <div className="flex items-center gap-4 rounded-xl border border-line-trace bg-canvas-pure p-5">
-      <div className="flex size-11 items-center justify-center rounded-lg bg-canvas-warm text-brand-emerald">
+      <div className="flex size-11 items-center justify-center rounded-lg bg-brand-lime/35 text-brand-forest">
         <Icon className="size-5" />
       </div>
       <div>
@@ -445,10 +446,37 @@ function StatBox({
 function ProfileSkeleton() {
   return (
     <div className="mt-8 space-y-8">
-      <div className="h-32 animate-pulse rounded-2xl bg-canvas-warm" />
+      <div className="flex items-center justify-between rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8">
+        <div className="flex items-center gap-5">
+          <Skeleton className="size-16 rounded-xl sm:size-20" />
+          <div className="space-y-2">
+            <Skeleton className="h-7 w-48" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+        </div>
+        <Skeleton className="hidden h-20 w-44 rounded-xl sm:block" />
+      </div>
+
       <div className="grid gap-8 lg:grid-cols-3">
-        <div className="h-96 animate-pulse rounded-2xl bg-canvas-warm lg:col-span-2" />
-        <div className="h-64 animate-pulse rounded-2xl bg-canvas-warm" />
+        <div className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8 lg:col-span-2 space-y-6">
+          <Skeleton className="h-6 w-48" />
+          <div className="space-y-4">
+            <Skeleton className="h-11 w-full rounded-sm" />
+            <Skeleton className="h-11 w-full rounded-sm" />
+            <Skeleton className="h-11 w-full rounded-sm" />
+            <Skeleton className="h-28 w-full rounded-sm" />
+          </div>
+        </div>
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8 space-y-4">
+            <Skeleton className="h-6 w-36" />
+            <Skeleton className="h-12 w-full rounded-xl" />
+          </div>
+          <div className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8 space-y-4">
+            <Skeleton className="h-6 w-36" />
+            <Skeleton className="h-12 w-full rounded-md" />
+          </div>
+        </div>
       </div>
     </div>
   );

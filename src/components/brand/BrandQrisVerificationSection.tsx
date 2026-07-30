@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { LoaderCircle, RefreshCw } from "lucide-react";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 import {
   getBrandPaymentProofSignedUrl,
@@ -163,12 +164,27 @@ export default function BrandQrisVerificationSection() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[480px] items-center justify-center rounded-3xl border border-line-trace bg-canvas-pure">
-        <div className="text-center">
-          <LoaderCircle className="mx-auto size-8 animate-spin text-brand-emerald" />
-          <p className="mt-4 text-xs text-muted-moss">Memuat antrean verifikasi...</p>
+      <section className="mt-8">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="flex flex-col justify-between rounded-2xl border border-line-trace bg-canvas-pure p-6 space-y-4"
+            >
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+              <Skeleton className="h-8 w-3/4" />
+              <div className="space-y-2 pt-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+              <Skeleton className="h-10 w-full rounded-sm" />
+            </div>
+          ))}
         </div>
-      </div>
+      </section>
     );
   }
 

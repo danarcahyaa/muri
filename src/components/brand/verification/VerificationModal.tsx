@@ -37,8 +37,14 @@ export function VerificationModal({
   onReject,
 }: VerificationModalProps) {
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-brand-black/70 px-4 py-8 backdrop-blur-sm">
-      <div className="max-h-full w-full max-w-5xl overflow-y-auto rounded-3xl bg-canvas-pure shadow-2xl">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 px-4 py-8 backdrop-blur-xs animate-in fade-in-0"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="max-h-full w-full max-w-5xl overflow-y-auto rounded-2xl border border-line-trace bg-canvas-pure shadow-none"
+      >
         <header className="sticky top-0 z-10 flex items-start justify-between gap-5 border-b border-line-trace bg-canvas-pure px-6 py-6 sm:px-8">
           <div>
             <p className="text-xs font-bold uppercase text-brand-emerald">
@@ -54,7 +60,7 @@ export function VerificationModal({
             disabled={isVerifying}
             onClick={onClose}
             aria-label="Tutup dialog"
-            className="flex size-10 items-center justify-center rounded-full bg-canvas-warm text-brand-black transition hover:bg-line-trace"
+            className="flex size-9 items-center justify-center rounded-full bg-canvas-warm text-brand-black transition hover:bg-line-trace"
           >
             <X className="size-4" />
           </button>
@@ -67,11 +73,11 @@ export function VerificationModal({
             </p>
 
             {isProofLoading ? (
-              <div className="mt-5 flex min-h-96 items-center justify-center rounded-2xl bg-canvas-warm">
+              <div className="mt-5 flex min-h-96 items-center justify-center rounded-xl bg-canvas-warm">
                 <LoaderCircle className="size-8 animate-spin text-brand-emerald" />
               </div>
             ) : signedProofUrl ? (
-              <div className="mt-5 rounded-2xl border border-line-trace bg-white p-4">
+              <div className="mt-5 rounded-xl border border-line-trace bg-white p-4">
                 <img
                   src={signedProofUrl}
                   alt="Bukti pembayaran QRIS customer"
@@ -79,7 +85,7 @@ export function VerificationModal({
                 />
               </div>
             ) : (
-              <div className="mt-5 flex min-h-80 items-center justify-center rounded-2xl bg-red-50 px-6 text-center">
+              <div className="mt-5 flex min-h-80 items-center justify-center rounded-xl bg-red-50 px-6 text-center">
                 <p className="text-xs text-red-700">
                   Bukti pembayaran belum dapat ditampilkan.
                 </p>
@@ -88,7 +94,7 @@ export function VerificationModal({
           </main>
 
           <aside className="p-6 sm:p-8">
-            <div className="rounded-2xl bg-brand-lime p-5 text-brand-forest">
+            <div className="rounded-xl bg-brand-lime p-5 text-brand-forest">
               <p className="text-[9px] font-bold uppercase opacity-65">
                 Nominal yang harus cocok
               </p>
@@ -117,7 +123,7 @@ export function VerificationModal({
                 onChange={(event) => {
                   onReviewConfirmedChange(event.target.checked);
                 }}
-                className="mt-0.5 size-4 accent-brand-forest"
+                className="mt-0.5 size-4 rounded-sm accent-brand-forest"
               />
               <span className="text-xs leading-5 text-brand-black">
                 Saya sudah memeriksa nama, nominal, dan bukti pembayaran.
@@ -137,12 +143,12 @@ export function VerificationModal({
                 value={verificationNote}
                 disabled={isVerifying}
                 maxLength={1000}
-                rows={5}
+                rows={4}
                 placeholder="Opsional untuk persetujuan, wajib untuk penolakan."
                 onChange={(event) => {
                   onNoteChange(event.target.value);
                 }}
-                className="mt-3 w-full resize-none rounded-xl border border-line-trace bg-canvas-pure px-4 py-3 text-sm text-brand-black outline-none focus:border-brand-emerald"
+                className="mt-3 w-full resize-none rounded-sm border border-line-trace bg-transparent px-4 py-3 font-body text-xs text-brand-black outline-none focus-visible:border-brand-emerald"
               />
 
               <p className="mt-2 text-right text-[9px] text-muted-moss">
@@ -164,7 +170,7 @@ export function VerificationModal({
                 type="button"
                 disabled={isVerifying || !signedProofUrl || !reviewConfirmed}
                 onClick={onApprove}
-                className="flex items-center justify-center gap-2 rounded-md bg-brand-forest px-5 py-4 text-xs font-bold text-white transition hover:bg-brand-black disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center justify-center gap-2 rounded-sm bg-brand-forest px-5 py-4 text-xs font-bold text-white transition hover:bg-brand-black disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isVerifying ? (
                   <LoaderCircle className="size-4 animate-spin" />
@@ -178,7 +184,7 @@ export function VerificationModal({
                 type="button"
                 disabled={isVerifying || verificationNote.trim().length < 5}
                 onClick={onReject}
-                className="flex items-center justify-center gap-2 rounded-md border border-red-200 bg-red-50 px-5 py-4 text-xs font-bold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center justify-center gap-2 rounded-sm border border-red-200 bg-red-50 px-5 py-4 text-xs font-bold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <XCircle className="size-4" />
                 Tolak Pembayaran

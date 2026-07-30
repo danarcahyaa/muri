@@ -16,7 +16,7 @@ export function EarthImpactMetrics({ stats, showSkeleton }: EarthImpactMetricsPr
   const waterSaved = stats?.waterSavedLiters ?? 0;
 
   return (
-    <section className="lg:col-span-2 rounded-lg border border-line-trace bg-canvas-pure p-6 sm:p-8 space-y-6">
+    <section className="lg:col-span-2 rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8 space-y-6">
       <div>
         <h2 className="font-display text-lg font-bold text-brand-black flex items-center gap-2">
           <Sprout className="size-5 text-brand-emerald" />
@@ -29,7 +29,7 @@ export function EarthImpactMetrics({ stats, showSkeleton }: EarthImpactMetricsPr
 
       <div className="grid gap-4 sm:grid-cols-2 pt-2">
         {/* Carbon Offset */}
-        <div className="rounded-md bg-canvas-warm/50 border border-line-trace/50 p-5 flex flex-col justify-between">
+        <div className="rounded-xl bg-canvas-warm/50 border border-line-trace/50 p-5 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <p className="text-[10px] font-bold uppercase tracking-wider text-brand-emerald">Carbon Offset</p>
@@ -37,7 +37,7 @@ export function EarthImpactMetrics({ stats, showSkeleton }: EarthImpactMetricsPr
                 <Leaf className="size-3" />
               </div>
             </div>
-            <p className="font-display text-2xl font-bold text-brand-black mt-3">
+            <p className="font-display text-3xl font-medium tracking-tight text-brand-black mt-3 sm:text-4xl">
               {showSkeleton ? <Skeleton className="h-7 w-24" /> : `${carbonSaved.toFixed(1)} Kg`}
             </p>
           </div>
@@ -45,7 +45,7 @@ export function EarthImpactMetrics({ stats, showSkeleton }: EarthImpactMetricsPr
         </div>
 
         {/* Water Saved */}
-        <div className="rounded-md bg-canvas-warm/50 border border-line-trace/50 p-5 flex flex-col justify-between">
+        <div className="rounded-xl bg-canvas-warm/50 border border-line-trace/50 p-5 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <p className="text-[10px] font-bold uppercase tracking-wider text-brand-emerald">Water Saved</p>
@@ -53,7 +53,7 @@ export function EarthImpactMetrics({ stats, showSkeleton }: EarthImpactMetricsPr
                 <Droplets className="size-3" />
               </div>
             </div>
-            <p className="font-display text-2xl font-bold text-brand-black mt-3">
+            <p className="font-display text-3xl font-medium tracking-tight text-brand-black mt-3 sm:text-4xl">
               {showSkeleton ? <Skeleton className="h-7 w-24" /> : `${waterSaved.toLocaleString("id-ID")} Liter`}
             </p>
           </div>

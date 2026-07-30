@@ -1,38 +1,72 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  ArrowRight,
-  CalendarDays,
+  CheckCircle2,
   Coins,
+  LoaderCircle,
   MapPin,
   Package,
   Phone,
   QrCode,
-  ShieldCheck,
   ShoppingBag,
+  Truck,
   User,
   X,
 } from "lucide-react";
 import CustomerOrderPaymentCard from "@/components/dashboard/CustomerOrderPaymentCard";
+import {
+  confirmCustomerOrderDelivery,
+  getCustomerOrderLifecycle,
+} from "@/services/customer";
 import type { CustomerOrder, CustomerOrderStatus } from "@/types/customerOrder";
+import type { CustomerOrderLifecycle } from "@/types/customerOrderLifecycle";
 
 interface CustomerOrderDetailModalProps {
   order: CustomerOrder | null;
   isOpen: boolean;
   onClose: () => void;
+  onOrderUpdated?: () => void;
 }
 
 export default function CustomerOrderDetailModal({
   order,
   isOpen,
   onClose,
+  onOrderUpdated,
 }: CustomerOrderDetailModalProps) {
+  const [lifecycle, setLifecycle] = useState<CustomerOrderLifecycle | null>(null);
+  const [isConfirmingDelivery, setIsConfirmingDelivery] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const loadLifecycle = useCallback(async () => {
+    if (!order) return;
+    try {
+      const res = await getCustomerOrderLifecycle(order.id);
+      if (res.success && res.data) {
+        setLifecycle(res.data);
+      }
+    } catch {
+      // Non-critical, fallback to order prop data
+    }
+  }, [order]);
+
+  useEffect(() => {
+    if (isOpen && order) {
+      void loadLifecycle();
+      setSuccessMessage(null);
+      setErrorMessage(null);
+    }
+  }, [isOpen, order, loadLifecycle]);
+
   if (!isOpen || !order) {
     return null;
   }
 
-  const statusMeta = getOrderStatusMeta(order.status);
+  const currentStatus = lifecycle?.orderStatus ?? order.status;
+  const statusMeta = getOrderStatusMeta(currentStatus as CustomerOrderStatus);
   const totalItemQuantity = order.items.reduce(
     (total, item) => total + item.quantity,
     0,
@@ -42,6 +76,38 @@ export default function CustomerOrderDetailModal({
     order.payment?.method === "coin"
       ? `${formatNumber(order.payment.amountCoin)} coin`
       : formatCurrency(order.payment?.amountIdr ?? order.totalPriceIdr);
+
+  const isShipped = currentStatus === "shipped";
+
+  async function handleConfirmDelivery() {
+    if (!order || isConfirmingDelivery) return;
+
+    setIsConfirmingDelivery(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      const res = await confirmCustomerOrderDelivery(order.id);
+
+      if (!res.success) {
+        setErrorMessage(res.error ?? "Gagal mengonfirmasi penerimaan pesanan.");
+        return;
+      }
+
+      setSuccessMessage("Pesanan berhasil dikonfirmasi selesai! Bonus coin telah dikreditkan.");
+      if (onOrderUpdated) {
+        onOrderUpdated();
+      }
+
+      setTimeout(() => {
+        void loadLifecycle();
+      }, 1000);
+    } catch {
+      setErrorMessage("Terjadi kesalahan saat mengonfirmasi penerimaan pesanan.");
+    } finally {
+      setIsConfirmingDelivery(false);
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in-0">
@@ -81,6 +147,54 @@ export default function CustomerOrderDetailModal({
 
         {/* Content Body */}
         <div className="space-y-6 overflow-y-auto p-6 sm:p-8">
+          {/* Feedback Banners */}
+          {successMessage && (
+            <div className="flex items-center gap-2 rounded-xl border border-brand-lime bg-brand-lime/20 px-4 py-3 text-xs font-medium text-brand-forest">
+              <CheckCircle2 className="size-4 shrink-0" />
+              <span>{successMessage}</span>
+            </div>
+          )}
+
+          {errorMessage && (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
+              {errorMessage}
+            </div>
+          )}
+
+          {/* Shipped Status Action Alert */}
+          {isShipped && !successMessage && (
+            <div className="flex flex-col gap-3 rounded-xl border border-brand-emerald/30 bg-brand-emerald/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2.5 text-brand-forest">
+                <Truck className="size-5 shrink-0 text-brand-emerald" />
+                <div>
+                  <p className="text-xs font-bold">Pesanan Dalam Pengiriman</p>
+                  <p className="text-[11px] text-muted-moss">
+                    Apakah paket produk sudah Anda terima dengan baik?
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                disabled={isConfirmingDelivery}
+                onClick={() => void handleConfirmDelivery()}
+                className="inline-flex items-center justify-center gap-1.5 rounded-sm bg-brand-forest px-4 py-2 text-xs font-bold text-white transition hover:bg-brand-black disabled:opacity-50"
+              >
+                {isConfirmingDelivery ? (
+                  <>
+                    <LoaderCircle className="size-3.5 animate-spin" />
+                    Memproses...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="size-3.5" />
+                    Konfirmasi Diterima
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+
           {/* Order Items */}
           <div>
             <div className="flex items-center gap-2 text-xs font-bold uppercase text-brand-black">
@@ -129,11 +243,11 @@ export default function CustomerOrderDetailModal({
             )}
           </div>
 
-          {/* Shipping Information */}
+          {/* Shipping & Tracking Information */}
           <div>
             <div className="flex items-center gap-2 text-xs font-bold uppercase text-brand-black">
               <MapPin className="size-4 text-brand-emerald" />
-              <span>Informasi Pengiriman</span>
+              <span>Informasi Pengiriman & Resi</span>
             </div>
 
             <div className="mt-3 space-y-2.5 rounded-xl border border-line-trace bg-canvas-warm/30 p-4">
@@ -148,6 +262,13 @@ export default function CustomerOrderDetailModal({
                 label="Alamat Lengkap"
                 value={order.shippingAddress}
               />
+              {lifecycle?.trackingNumber && (
+                <DetailFact
+                  icon={Truck}
+                  label="Nomor Resi / Kurir"
+                  value={lifecycle.trackingNumber}
+                />
+              )}
             </div>
           </div>
 
@@ -200,7 +321,7 @@ export default function CustomerOrderDetailModal({
             {order.payment?.status === "waiting_payment" && (
               <Link
                 href={`/dashboard/orders/${order.id}/payment`}
-                className="inline-flex items-center gap-1.5 rounded-md bg-brand-forest px-4 py-2.5 text-xs font-bold text-white transition hover:bg-brand-black"
+                className="inline-flex items-center gap-1.5 rounded-sm bg-brand-forest px-4 py-2.5 text-xs font-bold text-white transition hover:bg-brand-black"
               >
                 <QrCode className="size-3.5" />
                 Bayar QRIS Sekarang
@@ -210,7 +331,7 @@ export default function CustomerOrderDetailModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md border border-line-trace bg-canvas-pure px-4 py-2.5 text-xs font-bold text-brand-black transition hover:border-brand-forest"
+              className="rounded-sm border border-line-trace bg-canvas-pure px-4 py-2.5 text-xs font-bold text-brand-black transition hover:border-brand-forest"
             >
               Tutup
             </button>
@@ -276,6 +397,11 @@ function getOrderStatusMeta(status: CustomerOrderStatus) {
       return {
         label: "Selesai",
         className: "bg-brand-lime/50 text-brand-forest",
+      };
+    case "shipped":
+      return {
+        label: "Dikirim",
+        className: "bg-blue-50 text-blue-700 border border-blue-200",
       };
     case "cancelled":
       return {

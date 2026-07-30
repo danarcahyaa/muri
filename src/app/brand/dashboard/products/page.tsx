@@ -1,28 +1,27 @@
-import { ShoppingCart } from "lucide-react";
+import { Package } from "lucide-react";
 
-import BrandOrderFulfillmentSection from "@/components/brand/BrandOrderFulfillmentSection";
+import BrandProductsSection from "@/components/brand/BrandProductsSection";
 
-export default function BrandOrdersPage() {
+export default function BrandProductsPage() {
   return (
     <div className="mx-auto w-full max-w-[1320px] px-5 py-10 sm:px-6 lg:px-8 lg:py-14">
       {/* Page Header */}
       <div>
         <div className="flex items-center gap-2.5 text-brand-emerald">
-          <ShoppingCart className="size-4" strokeWidth={2} />
+          <Package className="size-4" strokeWidth={2} />
           <span className="text-xs font-bold uppercase tracking-tight">
             Brand Dashboard
           </span>
         </div>
         <h1 className="mt-4 font-display text-5xl font-medium leading-none tracking-[-0.05em] text-brand-black sm:text-6xl">
-          Pesanan
+          Manajemen Produk
         </h1>
         <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-moss">
-          Proses order yang sudah dibayar, kelola pengiriman, selesaikan reward,
-          atau lakukan pembatalan dan refund sebelum paket dikirim.
+          Kelola katalog produk sirkular, atur stok dan harga, serta ubah status publikasi produk toko Anda.
         </p>
       </div>
 
-      <BrandOrderFulfillmentSection />
+      <BrandProductsSection />
     </div>
   );
 }

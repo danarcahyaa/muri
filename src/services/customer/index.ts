@@ -7,3 +7,4 @@ export * from "./secureCheckoutService";
 export * from "./qrisPaymentService";
 export * from "./orderLifecycleService";
 export * from "./profileService";
+export * from "./confirmDeliveryService";

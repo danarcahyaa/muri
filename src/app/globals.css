@@ -218,3 +218,33 @@ html::-webkit-scrollbar-thumb:hover {
 .ai-scan-glow {
   animation: muri-scan-glow 1.8s ease-in-out infinite alternate;
 }
+
+/* Global Form Label Spacing */
+label:not(.inline-flex):not(.flex):not(.sr-only):not([class*="mb-"]) {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+/* Slim Custom Scrollbar Utility */
+.muri-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.muri-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.muri-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(194, 201, 198, 0.5);
+  border-radius: 9999px;
+}
+
+.muri-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #1C6B52;
+}
+
+.muri-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(194, 201, 198, 0.5) transparent;
+}

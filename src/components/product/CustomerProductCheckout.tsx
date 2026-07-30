@@ -202,7 +202,7 @@ export default function CustomerProductCheckout({
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[480px] items-center justify-center rounded-3xl border border-line-trace bg-canvas-pure">
+      <div className="flex min-h-[480px] items-center justify-center rounded-2xl border border-line-trace bg-canvas-pure">
         <div className="text-center">
           <LoaderCircle className="mx-auto size-8 animate-spin text-brand-emerald" />
           <p className="mt-4 text-xs text-muted-moss">Menyiapkan secure checkout...</p>
@@ -213,7 +213,7 @@ export default function CustomerProductCheckout({
 
   if (loadError || !checkout) {
     return (
-      <div className="flex min-h-[420px] flex-col items-center justify-center rounded-3xl border border-line-trace bg-canvas-pure px-6 text-center">
+      <div className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl border border-line-trace bg-canvas-pure px-6 text-center">
         <RefreshCw className="size-9 text-muted-moss/50" />
         <h1 className="mt-5 font-display text-3xl font-medium text-brand-black">
           Checkout tidak tersedia
@@ -222,7 +222,7 @@ export default function CustomerProductCheckout({
         <button
           type="button"
           onClick={() => { void loadCheckout(); }}
-          className="mt-6 rounded-md bg-brand-forest px-5 py-3 text-xs font-bold text-white"
+          className="mt-6 rounded-sm bg-brand-forest px-5 py-3 text-xs font-bold text-white transition hover:bg-brand-black"
         >
           Coba Lagi
         </button>
@@ -237,7 +237,7 @@ export default function CustomerProductCheckout({
   return (
     <>
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-start">
-        <section className="rounded-3xl border border-line-trace bg-canvas-pure p-6 sm:p-8">
+        <section className="rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8">
           {step === "form" ? (
             <ProductCheckoutForm
               checkout={checkout}

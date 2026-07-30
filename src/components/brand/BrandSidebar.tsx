@@ -18,18 +18,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/Sidebar";
 import { useAuth } from "@/components/auth/AuthProvider";
 
 interface NavigationItem {
@@ -82,11 +70,6 @@ const brandNavigation: NavigationGroup[] = [
   {
     groupName: "Sourcing Limbah",
     items: [
-      {
-        label: "Cari",
-        href: "/brand/dashboard/sourcing/search",
-        icon: Search,
-      },
       {
         label: "Kelola",
         href: "/brand/dashboard/sourcing/manage",
@@ -145,149 +128,70 @@ export function BrandSidebar() {
 
   return (
     <>
-      {/* Desktop full-height sidebar */}
-      <Sidebar
-        className="
-          hidden
-          border-r border-line-trace
-          bg-canvas-pure
-          [--sidebar-width:240px]
-          lg:flex
-        "
-      >
-        {/* Logo Header */}
-        <SidebarHeader
-          className="
-            shrink-0
-            border-b border-line-trace/70
-            px-6 py-5
-          "
-        >
-          <Link
-            href="/"
-            aria-label="Kembali ke beranda Muri"
-            className="
-              flex w-fit items-center gap-2.5
-              rounded-md
-              focus-visible:outline-none
-              focus-visible:ring-2
-              focus-visible:ring-brand-emerald/20
-            "
-          >
+      {/* Desktop full-height sidebar — same structure as DashboardSidebar */}
+      <aside className="hidden w-[220px] shrink-0 border-r border-line-trace bg-canvas-pure lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
+        {/* Logo */}
+        <div className="flex shrink-0 items-center gap-2.5 border-b border-line-trace/70 px-6 py-5">
+          <Link href="/" aria-label="Kembali ke beranda Muri" className="flex items-center gap-2.5">
             <Image
               src="/logo.png"
               alt="Logo Muri"
-              width={40}
-              height={40}
+              width={36}
+              height={36}
               priority
-              className="size-10 object-contain"
+              className="size-9 object-contain"
             />
-            <span className="font-display text-2xl font-medium tracking-tight text-brand-black">
+            <span className="font-display text-xl font-medium tracking-tight text-brand-black">
               Muri
             </span>
           </Link>
-        </SidebarHeader>
+        </div>
 
-        {/* Navigation Content */}
-        <SidebarContent className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+        {/* Navigation — scrollable */}
+        <div className="flex-1 overflow-y-auto muri-scrollbar p-6">
           {brandNavigation.map((group) => (
-            <SidebarGroup key={group.groupName} className="p-0">
-              <SidebarGroupLabel
-                className="
-                  mb-3 h-auto px-3 py-0
-                  text-[11px] font-medium
-                  uppercase tracking-normal
-                  text-muted-moss
-                "
-              >
+            <div key={group.groupName} className="mb-6 last:mb-0">
+              <p className="mb-3 text-[11px] font-medium uppercase text-muted-moss">
                 {group.groupName}
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu className="space-y-1.5">
-                  {group.items.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = isNavigationActive(pathname, item.href);
+              </p>
 
-                    return (
-                      <SidebarMenuItem key={item.href}>
-                        <SidebarMenuButton
-                          isActive={isActive}
-                          render={
-                            <Link
-                              href={item.href}
-                              aria-current={isActive ? "page" : undefined}
-                            />
-                          }
-                          className={`
-                            h-auto w-full
-                            justify-start gap-3
-                            rounded-md px-3 py-3
-                            text-xs font-semibold
-                            transition-colors
-                            ${
-                              isActive
-                                ? `
-                                  bg-brand-lime/65
-                                  text-brand-black
-                                  hover:bg-brand-lime/75
-                                  hover:text-brand-black
-                                `
-                                : `
-                                  text-muted-moss
-                                  hover:bg-canvas-warm
-                                  hover:text-brand-black
-                                `
-                            }
-                          `}
-                        >
-                          <Icon
-                            className="size-4 shrink-0"
-                            strokeWidth={1.8}
-                          />
-                          <span className="truncate">{item.label}</span>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    );
-                  })}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+              <nav aria-label={`Navigasi ${group.groupName}`} className="space-y-1.5">
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = isNavigationActive(pathname, item.href);
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      aria-current={isActive ? "page" : undefined}
+                      className={`flex items-center gap-3 rounded-md px-3 py-3 text-xs font-semibold transition-colors ${
+                        isActive
+                          ? "bg-brand-lime/65 text-brand-black"
+                          : "text-muted-moss hover:bg-canvas-warm hover:text-brand-black"
+                      }`}
+                    >
+                      <Icon className="size-4 shrink-0" strokeWidth={1.8} />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
           ))}
-        </SidebarContent>
+        </div>
 
-        {/* Logged-in user footer */}
-        <SidebarFooter
-          className="
-            mt-auto shrink-0
-            border-t border-line-trace/70
-            p-4
-          "
-        >
-          <div
-            className="
-              flex w-full items-center gap-3
-              rounded-xl
-              bg-canvas-warm/55
-              p-3
-            "
-          >
-            <div
-              className="
-                flex size-10 shrink-0
-                items-center justify-center
-                rounded-full
-                bg-brand-lime
-                font-display text-sm
-                font-bold text-brand-black
-              "
-            >
+        {/* User footer — always at bottom */}
+        <div className="shrink-0 border-t border-line-trace/70 p-4">
+          <div className="flex w-full items-center gap-3 rounded-xl bg-canvas-warm/55 p-3">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-lime font-display text-xs font-bold text-brand-black">
               {initial}
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-bold leading-tight text-brand-black">
                 {displayName}
               </p>
-              <p className="mt-1 truncate text-[10px] leading-none text-muted-moss">
+              <p className="mt-0.5 truncate text-[10px] leading-none text-muted-moss">
                 {user?.email || "Brand Account"}
               </p>
             </div>
@@ -297,42 +201,19 @@ export function BrandSidebar() {
               aria-label="Keluar dari akun"
               disabled={isSigningOut}
               onClick={handleSignOut}
-              className="
-                flex size-9 shrink-0
-                items-center justify-center
-                rounded-md
-                text-error-rust
-                transition-colors
-                hover:bg-error-rust/[0.08]
-                focus-visible:outline-none
-                focus-visible:ring-2
-                focus-visible:ring-error-rust/20
-                disabled:cursor-not-allowed
-                disabled:opacity-50
-              "
+              className="flex size-8 shrink-0 items-center justify-center rounded-md text-error-rust transition-colors hover:bg-error-rust/[0.08] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <LogOut className="size-4" strokeWidth={1.8} />
             </button>
           </div>
-        </SidebarFooter>
-      </Sidebar>
+        </div>
+      </aside>
 
       {/* Mobile header and navigation */}
-      <div
-        className="
-          sticky top-0 z-40
-          border-b border-line-trace
-          bg-canvas-pure
-          lg:hidden
-        "
-      >
+      <div className="sticky top-0 z-40 border-b border-line-trace bg-canvas-pure lg:hidden">
         {/* Mobile brand and account */}
         <div className="flex items-center justify-between px-4 py-3">
-          <Link
-            href="/"
-            aria-label="Kembali ke beranda Muri"
-            className="flex items-center gap-2"
-          >
+          <Link href="/" aria-label="Kembali ke beranda Muri" className="flex items-center gap-2">
             <Image
               src="/logo.png"
               alt="Logo Muri"
@@ -348,13 +229,7 @@ export function BrandSidebar() {
 
           <div className="flex items-center gap-2">
             <div
-              className="
-                flex size-9 items-center
-                justify-center rounded-full
-                bg-brand-lime
-                font-display text-xs
-                font-bold text-brand-black
-              "
+              className="flex size-9 items-center justify-center rounded-full bg-brand-lime font-display text-xs font-bold text-brand-black"
               title={displayName}
             >
               {initial}
@@ -365,18 +240,7 @@ export function BrandSidebar() {
               aria-label="Keluar dari akun"
               disabled={isSigningOut}
               onClick={handleSignOut}
-              className="
-                flex size-9 items-center
-                justify-center rounded-md
-                text-error-rust
-                transition-colors
-                hover:bg-error-rust/[0.08]
-                focus-visible:outline-none
-                focus-visible:ring-2
-                focus-visible:ring-error-rust/20
-                disabled:cursor-not-allowed
-                disabled:opacity-50
-              "
+              className="flex size-9 items-center justify-center rounded-md text-error-rust transition-colors hover:bg-error-rust/[0.08] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <LogOut className="size-4" strokeWidth={1.8} />
             </button>
@@ -386,12 +250,7 @@ export function BrandSidebar() {
         {/* Mobile horizontal navigation */}
         <nav
           aria-label="Navigasi dashboard brand mobile"
-          className="
-            flex gap-2 overflow-x-auto
-            border-t border-line-trace/60
-            px-4 py-3
-            muri-scrollbar
-          "
+          className="flex gap-2 overflow-x-auto border-t border-line-trace/60 px-4 py-3 muri-scrollbar"
         >
           {brandNavigation.flatMap((group) =>
             group.items.map((item) => {
@@ -403,26 +262,11 @@ export function BrandSidebar() {
                   key={item.href}
                   href={item.href}
                   aria-current={isActive ? "page" : undefined}
-                  className={`
-                    inline-flex shrink-0
-                    items-center gap-2
-                    rounded-md px-4 py-3
-                    text-xs font-semibold
-                    transition-colors
-                    ${
-                      isActive
-                        ? `
-                          bg-brand-lime/65
-                          text-brand-black
-                        `
-                        : `
-                          border border-line-trace
-                          text-muted-moss
-                          hover:bg-canvas-warm
-                          hover:text-brand-black
-                        `
-                    }
-                  `}
+                  className={`inline-flex shrink-0 items-center gap-2 rounded-md px-4 py-3 text-xs font-semibold transition-colors ${
+                    isActive
+                      ? "bg-brand-lime/65 text-brand-black"
+                      : "border border-line-trace text-muted-moss hover:bg-canvas-warm hover:text-brand-black"
+                  }`}
                 >
                   <Icon className="size-4 shrink-0" strokeWidth={1.8} />
                   <span>{item.label}</span>

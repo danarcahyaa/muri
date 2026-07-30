@@ -45,7 +45,7 @@ export default function DashboardSidebar() {
     <>
       {/* Desktop sidebar */}
       <aside className="hidden w-[220px] shrink-0 border-r border-line-trace bg-canvas-pure lg:sticky lg:top-16 lg:block lg:h-[calc(100svh-4rem)]">
-        <div className="p-6">
+        <div className="h-full overflow-y-auto muri-scrollbar p-6">
           <p className="mb-3 text-[11px] font-medium uppercase text-muted-moss">
             Dashboard
           </p>
