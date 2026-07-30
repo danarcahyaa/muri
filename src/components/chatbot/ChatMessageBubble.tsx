@@ -23,7 +23,7 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
         className={cn(
           "max-w-[85%] px-4 py-3",
           isAssistant
-            ? "rounded-2xl rounded-bl-md border border-brand-black/5 bg-white text-brand-black shadow-xs"
+            ? "rounded-2xl rounded-bl-md border border-brand-black/15 bg-white text-brand-black shadow-xs"
             : "rounded-2xl rounded-br-md bg-brand-forest text-white",
         )}
       >

@@ -43,7 +43,7 @@ export function ChatMessageList({
           <div className="flex items-end gap-2" aria-label="Murai sedang mengetik">
             <ChatbotAvatar compact />
 
-            <div className="rounded-2xl rounded-bl-md border border-brand-black/5 bg-white px-4 py-3 shadow-xs">
+            <div className="rounded-2xl rounded-bl-md border border-brand-black/15 bg-white px-4 py-3 shadow-xs">
               <div className="flex items-center gap-1.5" aria-hidden="true">
                 <span className="size-1 animate-bounce rounded-full bg-brand-emerald/30" />
                 <span className="size-1 animate-bounce rounded-full bg-brand-emerald/30 delay-100" />

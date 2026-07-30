@@ -27,7 +27,7 @@ export function ChatComposer({
   return (
     <form
       onSubmit={handleSubmit}
-      className="shrink-0 border-t border-brand-black/5 bg-white px-4 py-3"
+      className="shrink-0 border-t border-brand-black/15 bg-white px-4 py-3"
     >
       <div className="flex items-center gap-2">
         <label htmlFor="chat-message" className="sr-only">

@@ -7,7 +7,7 @@ import { ArrowRight, Search, Sprout } from "lucide-react";
  */
 export function StartSourcingCTA(): ReactElement {
   return (
-    <div className="overflow-hidden rounded-2xl border border-line-trace bg-gradient-to-br from-brand-forest to-brand-black p-8 text-white sm:p-10 shadow-sm relative">
+    <div className="overflow-hidden rounded-2xl border border-brand-black/15 bg-gradient-to-br from-brand-forest to-brand-black p-8 text-white sm:p-10 shadow-sm relative">
       {/* Decorative subtle background pattern */}
       <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-10 bg-[radial-gradient(#C8F169_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none hidden md:block" />
 

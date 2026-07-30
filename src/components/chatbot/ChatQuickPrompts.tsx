@@ -11,7 +11,7 @@ export function ChatQuickPrompts({
   onSelect,
 }: ChatQuickPromptsProps) {
   return (
-    <div className="shrink-0 border-t border-brand-black/5 bg-canvas-pure px-4 py-3">
+    <div className="shrink-0 border-t border-brand-black/15 bg-canvas-pure px-4 py-3">
       <div className="muri-scrollbar flex gap-2 overflow-x-auto pb-1">
         {quickPrompts.map((prompt, index) => (
           <Button

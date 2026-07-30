@@ -125,7 +125,7 @@ export default function Header() {
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-brand-black/5 bg-canvas-pure">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-brand-black/15 bg-canvas-pure">
       <div
         className="
           mx-auto grid

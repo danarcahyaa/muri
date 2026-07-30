@@ -129,9 +129,9 @@ export function BrandSidebar() {
   return (
     <>
       {/* Desktop full-height sidebar — same structure as DashboardSidebar */}
-      <aside className="hidden w-[220px] shrink-0 border-r border-line-trace bg-canvas-pure lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
+      <aside className="hidden w-[220px] shrink-0 border-r border-brand-black/15 bg-canvas-pure lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
         {/* Logo */}
-        <div className="flex shrink-0 items-center gap-2.5 border-b border-line-trace/70 px-6 py-5">
+        <div className="flex shrink-0 items-center gap-2.5 border-b border-brand-black/15 px-6 py-5">
           <Link href="/" aria-label="Kembali ke beranda Muri" className="flex items-center gap-2.5">
             <Image
               src="/logo.png"
@@ -182,7 +182,7 @@ export function BrandSidebar() {
         </div>
 
         {/* User footer — always at bottom */}
-        <div className="shrink-0 border-t border-line-trace/70 p-4">
+        <div className="shrink-0 border-t border-brand-black/15 p-4">
           <div className="flex w-full items-center gap-3 rounded-xl bg-canvas-warm/55 p-3">
             <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-lime font-display text-xs font-bold text-brand-black">
               {initial}
@@ -210,7 +210,7 @@ export function BrandSidebar() {
       </aside>
 
       {/* Mobile header and navigation */}
-      <div className="sticky top-0 z-40 border-b border-line-trace bg-canvas-pure lg:hidden">
+      <div className="sticky top-0 z-40 border-b border-brand-black/15 bg-canvas-pure lg:hidden">
         {/* Mobile brand and account */}
         <div className="flex items-center justify-between px-4 py-3">
           <Link href="/" aria-label="Kembali ke beranda Muri" className="flex items-center gap-2">
@@ -250,7 +250,7 @@ export function BrandSidebar() {
         {/* Mobile horizontal navigation */}
         <nav
           aria-label="Navigasi dashboard brand mobile"
-          className="flex gap-2 overflow-x-auto border-t border-line-trace/60 px-4 py-3 muri-scrollbar"
+          className="flex gap-2 overflow-x-auto border-t border-brand-black/15 px-4 py-3 muri-scrollbar"
         >
           {brandNavigation.flatMap((group) =>
             group.items.map((item) => {

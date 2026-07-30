@@ -19,7 +19,7 @@ export function BrandKPICards({ stats, showSkeleton }: BrandKPICardsProps): Reac
 
   return (
     <section className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-      <article className="flex min-h-[190px] flex-col justify-between rounded-2xl border border-line-trace bg-gradient-to-br from-brand-forest to-[#315F35] p-6 text-white">
+      <article className="flex min-h-[190px] flex-col justify-between rounded-2xl border border-brand-black/15 bg-gradient-to-br from-brand-forest to-[#315F35] p-6 text-white">
         <p className="text-[11px] font-medium uppercase tracking-wider text-white/60">
           Limbah Terselamatkan
         </p>
@@ -37,7 +37,7 @@ export function BrandKPICards({ stats, showSkeleton }: BrandKPICardsProps): Reac
         </div>
       </article>
 
-      <article className="flex min-h-[190px] flex-col justify-between rounded-2xl border border-line-trace/50 bg-gradient-to-br from-brand-forest to-[#315F35] p-6 text-brand-black transition">
+      <article className="flex min-h-[190px] flex-col justify-between rounded-2xl border border-brand-black/15 bg-gradient-to-br from-brand-forest to-[#315F35] p-6 text-brand-black transition">
         <p className="text-[11px] font-medium uppercase tracking-wider text-white/60">
           Emisi CO2 Terhindar
         </p>
@@ -55,7 +55,7 @@ export function BrandKPICards({ stats, showSkeleton }: BrandKPICardsProps): Reac
         </div>
       </article>
 
-      <article className="flex min-h-[190px] flex-col justify-between rounded-2xl border border-line-trace bg-canvas-pure p-6 text-brand-black transition">
+      <article className="flex min-h-[190px] flex-col justify-between rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 text-brand-black transition">
         <p className="text-[11px] font-medium uppercase tracking-wider text-muted-moss">
           Total
         </p>
@@ -73,7 +73,7 @@ export function BrandKPICards({ stats, showSkeleton }: BrandKPICardsProps): Reac
         </div>
       </article>
 
-      <article className="flex min-h-[190px] flex-col justify-between rounded-2xl border border-line-trace bg-canvas-pure p-6 text-brand-black transition">
+      <article className="flex min-h-[190px] flex-col justify-between rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 text-brand-black transition">
         <p className="text-[11px] font-medium uppercase tracking-wider text-muted-moss">
           Pesanan Masuk
         </p>

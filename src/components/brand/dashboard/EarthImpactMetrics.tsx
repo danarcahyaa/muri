@@ -16,7 +16,7 @@ export function EarthImpactMetrics({ stats, showSkeleton }: EarthImpactMetricsPr
   const waterSaved = stats?.waterSavedLiters ?? 0;
 
   return (
-    <section className="lg:col-span-2 rounded-2xl border border-line-trace bg-canvas-pure p-6 sm:p-8 space-y-6">
+    <section className="lg:col-span-2 rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8 space-y-6">
       <div>
         <h2 className="font-display text-lg font-bold text-brand-black flex items-center gap-2">
           <Sprout className="size-5 text-brand-emerald" />
@@ -29,7 +29,7 @@ export function EarthImpactMetrics({ stats, showSkeleton }: EarthImpactMetricsPr
 
       <div className="grid gap-4 sm:grid-cols-2 pt-2">
         {/* Carbon Offset */}
-        <div className="rounded-xl bg-canvas-warm/50 border border-line-trace/50 p-5 flex flex-col justify-between">
+        <div className="rounded-xl bg-canvas-warm/50 border border-brand-black/15 p-5 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <p className="text-[10px] font-bold uppercase tracking-wider text-brand-emerald">Carbon Offset</p>
@@ -45,7 +45,7 @@ export function EarthImpactMetrics({ stats, showSkeleton }: EarthImpactMetricsPr
         </div>
 
         {/* Water Saved */}
-        <div className="rounded-xl bg-canvas-warm/50 border border-line-trace/50 p-5 flex flex-col justify-between">
+        <div className="rounded-xl bg-canvas-warm/50 border border-brand-black/15 p-5 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <p className="text-[10px] font-bold uppercase tracking-wider text-brand-emerald">Water Saved</p>
