@@ -8,9 +8,11 @@ import {
   LoaderCircle,
   Minus,
   Plus,
+  ScanLine,
   ShoppingBag,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/Button";
 import { useProductOrder } from "@/hooks/product/useProductOrder";
 import { formatCoin, formatIdr } from "@/lib/productDetail";
 import type {
@@ -28,6 +30,7 @@ interface ProductOrderCardProps {
   bonusProduct: ProductBonusSummary | null;
   bonusProductQty: number;
   bonusCoinCost: number;
+  onOpenTraceability: () => void;
 }
 
 export default function ProductOrderCard({
@@ -40,6 +43,7 @@ export default function ProductOrderCard({
   bonusProduct,
   bonusProductQty,
   bonusCoinCost,
+  onOpenTraceability,
 }: ProductOrderCardProps) {
   const {
     user,
@@ -65,16 +69,10 @@ export default function ProductOrderCard({
     bonusProductQty,
   });
 
-  /*
-   * Checkout lama ditahan sampai frontend
-   * menggunakan create_customer_checkout_order.
-   */
-
   const totalBonusCoinReward = Math.max(0, bonusCoinCost) * quantity;
-
   const hasProductBonus = Boolean(bonusProduct) && totalBonusQty > 0;
-
   const hasCoinReward = totalBonusCoinReward > 0;
+
   return (
     <div className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-7">
       <div className="flex items-center gap-3 text-brand-emerald">
@@ -97,7 +95,7 @@ export default function ProductOrderCard({
             </p>
           </div>
 
-          <p className="sh``rink-0 text-[10px] text-muted-moss">
+          <p className="shrink-0 text-[10px] text-muted-moss">
             Stok {availableStock}
           </p>
         </div>
@@ -230,6 +228,17 @@ export default function ProductOrderCard({
         </Link>
       )}
 
+      <Button
+        type="button"
+        variant="outline"
+        fullWidth
+        onClick={onOpenTraceability}
+        className="mt-3"
+      >
+        <ScanLine className="size-4" />
+        Lihat Traceability
+      </Button>
+
       <p className="mt-4 text-center text-[10px] leading-relaxed text-muted-moss">
         {user
           ? "Pilih QRIS atau coin pada halaman checkout."
@@ -241,12 +250,8 @@ export default function ProductOrderCard({
 
 function DisabledCheckoutButton({ children }: { children: ReactNode }) {
   return (
-    <button
-      type="button"
-      disabled
-      className="mt-7 flex w-full cursor-not-allowed items-center justify-center rounded-sm bg-muted-moss/25 px-6 py-4 text-xs font-bold text-muted-moss"
-    >
+    <Button type="button" disabled fullWidth className="mt-7">
       {children}
-    </button>
+    </Button>
   );
 }

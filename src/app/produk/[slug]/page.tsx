@@ -112,6 +112,11 @@ export default async function ProductDetailPage({
               bonusProduct={product.bonusProduct}
               bonusProductQty={product.bonusProductQty}
               bonusCoinCost={product.bonusCoinCost}
+              productionId={product.productionId}
+              qrCodeUrl={product.qrCodeUrl}
+              brandName={product.brand.name}
+              carbonSavedKg={product.carbonSavedKg}
+              waterSavedLiter={product.waterSavedLiter}
             />
           </div>
         </section>

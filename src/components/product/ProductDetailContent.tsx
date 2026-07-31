@@ -1,11 +1,6 @@
-import {
-  Droplets,
-  Leaf,
-  ListChecks,
-} from "lucide-react";
+import { Droplets, Leaf, ListChecks } from "lucide-react";
 
 import ProductBrandCard from "@/components/product/ProductBrandCard";
-import ProductTraceabilityCard from "@/components/product/ProductTraceabilityCard";
 import ProductVisualCard from "@/components/product/ProductVisualCard";
 import DetailCard from "@/components/ui/detail/DetailCard";
 import DetailInfoItem from "@/components/ui/detail/DetailInfoItem";
@@ -60,27 +55,16 @@ export default function ProductDetailContent({
           <DetailInfoItem
             icon={Leaf}
             label="Karbon Dihemat"
-            value={`${formatDecimal(
-              product.carbonSavedKg,
-            )} kg CO₂e`}
+            value={`${formatDecimal(product.carbonSavedKg)} kg CO₂e`}
           />
 
           <DetailInfoItem
             icon={Droplets}
             label="Air Dihemat"
-            value={`${formatDecimal(
-              product.waterSavedLiter,
-              0,
-            )} liter`}
+            value={`${formatDecimal(product.waterSavedLiter, 0)} liter`}
           />
         </div>
       </DetailCard>
-
-      <ProductTraceabilityCard
-        sku={product.slug}
-        productionId={product.productionId}
-        qrCodeUrl={product.qrCodeUrl}
-      />
 
       <ProductBrandCard brand={product.brand} />
     </div>
