@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { LoaderCircle, RefreshCw } from "lucide-react";
 
+import { BackLink } from "@/components/ui/BackLink";
+import { Card, CardContent } from "@/components/ui/Card";
 import {
   createCustomerCheckoutOrder,
   getCustomerCheckoutPreview,
@@ -18,8 +18,12 @@ import type {
 
 import { ProductCheckoutConfirmationModal } from "./checkout/ProductCheckoutConfirmationModal";
 import ProductCheckoutForm from "./checkout/ProductCheckoutForm";
-import ProductCheckoutReview from "./checkout/ProductCheckoutReview";
 import ProductCheckoutOrderSummary from "./checkout/ProductCheckoutOrderSummary";
+import ProductCheckoutReview from "./checkout/ProductCheckoutReview";
+import {
+  ProductCheckoutLoading,
+  ProductCheckoutLoadError,
+} from "./checkout/ProductCheckoutStatus";
 import ProductCheckoutSuccess from "./checkout/ProductCheckoutSuccess";
 
 interface CustomerProductCheckoutProps {
@@ -59,6 +63,7 @@ export default function CustomerProductCheckout({
   const loadCheckout = useCallback(async () => {
     setIsLoading(true);
     setLoadError(null);
+    setFormError(null);
 
     const result = await getCustomerCheckoutPreview({
       sku,
@@ -67,6 +72,7 @@ export default function CustomerProductCheckout({
 
     if (!result.success || !result.data) {
       const errorCode = String(result.error ?? "");
+
       if (errorCode.includes("UNAUTHENTICATED")) {
         router.replace(
           `/auth/login?redirect=${encodeURIComponent(checkoutPath)}`,
@@ -80,6 +86,7 @@ export default function CustomerProductCheckout({
     }
 
     const data = result.data;
+
     setCheckout(data);
     setReceiverName(data.profile.fullName);
     setPhoneNumber(data.profile.phoneNumber ?? "");
@@ -93,17 +100,9 @@ export default function CustomerProductCheckout({
     void loadCheckout();
   }, [loadCheckout]);
 
-  useEffect(() => {
-    if (!isConfirmationOpen) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isConfirmationOpen]);
-
   function handleReview() {
     setFormError(null);
+
     const normalizedName = receiverName.trim();
     const normalizedPhone = phoneNumber.trim();
     const normalizedAddress = shippingAddress.trim();
@@ -112,30 +111,37 @@ export default function CustomerProductCheckout({
       setFormError("Nama penerima minimal 2 karakter.");
       return;
     }
+
     if (normalizedName.length > 120) {
       setFormError("Nama penerima terlalu panjang.");
       return;
     }
+
     if (normalizedPhone.length > 30) {
       setFormError("Nomor telepon terlalu panjang.");
       return;
     }
+
     if (normalizedAddress.length < 10) {
       setFormError("Alamat pengiriman minimal 10 karakter.");
       return;
     }
+
     if (normalizedAddress.length > 1000) {
       setFormError("Alamat pengiriman terlalu panjang.");
       return;
     }
+
     if (!selectedPaymentMethod) {
       setFormError("Pilih metode pembayaran.");
       return;
     }
+
     if (selectedPaymentMethod === "coin" && !checkout?.hasEnoughCoinBalance) {
       setFormError("Saldo coin Anda tidak mencukupi.");
       return;
     }
+
     if (
       checkout?.reward?.productBonus &&
       !checkout.reward.productBonus.hasEnoughStock
@@ -154,6 +160,13 @@ export default function CustomerProductCheckout({
     setFormError(null);
     setConfirmationAccepted(false);
     setIsConfirmationOpen(true);
+  }
+
+  function closeFinalConfirmation() {
+    if (isSubmitting) return;
+
+    setIsConfirmationOpen(false);
+    setFormError(null);
   }
 
   async function handlePurchase() {
@@ -201,32 +214,15 @@ export default function CustomerProductCheckout({
   }
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[480px] items-center justify-center rounded-2xl border border-brand-black/15 bg-canvas-pure">
-        <div className="text-center">
-          <LoaderCircle className="mx-auto size-8 animate-spin text-brand-emerald" />
-          <p className="mt-4 text-xs text-muted-moss">Menyiapkan secure checkout...</p>
-        </div>
-      </div>
-    );
+    return <ProductCheckoutLoading />;
   }
 
   if (loadError || !checkout) {
     return (
-      <div className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl border border-brand-black/15 bg-canvas-pure px-6 text-center">
-        <RefreshCw className="size-9 text-muted-moss/50" />
-        <h1 className="mt-5 font-display text-3xl font-medium text-brand-black">
-          Checkout tidak tersedia
-        </h1>
-        <p className="mt-3 text-xs text-muted-moss">{loadError ?? "Data checkout tidak tersedia."}</p>
-        <button
-          type="button"
-          onClick={() => { void loadCheckout(); }}
-          className="mt-6 rounded-sm bg-brand-forest px-5 py-3 text-xs font-bold text-white transition hover:bg-brand-black"
-        >
-          Coba Lagi
-        </button>
-      </div>
+      <ProductCheckoutLoadError
+        message={loadError ?? "Data checkout tidak tersedia."}
+        onRetry={loadCheckout}
+      />
     );
   }
 
@@ -235,66 +231,68 @@ export default function CustomerProductCheckout({
   }
 
   return (
-    <>
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-start">
-        <section className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8">
-          {step === "form" ? (
-            <ProductCheckoutForm
-              checkout={checkout}
-              receiverName={receiverName}
-              onReceiverNameChange={setReceiverName}
-              phoneNumber={phoneNumber}
-              onPhoneNumberChange={setPhoneNumber}
-              shippingAddress={shippingAddress}
-              onShippingAddressChange={setShippingAddress}
-              selectedPaymentMethod={selectedPaymentMethod}
-              onPaymentMethodChange={setSelectedPaymentMethod}
-              errorMessage={formError}
-              onReview={handleReview}
-            />
-          ) : (
-            <ProductCheckoutReview
-              checkout={checkout}
-              receiverName={receiverName}
-              phoneNumber={phoneNumber}
-              shippingAddress={shippingAddress}
-              paymentMethod={selectedPaymentMethod}
-              errorMessage={formError}
-              onBack={() => {
-                setFormError(null);
-                setStep("form");
-              }}
-              onConfirm={openFinalConfirmation}
-            />
-          )}
-        </section>
+    <div className="space-y-6">
+      <BackLink
+        href={`/produk/${checkout.product.slug}`}
+        label="Kembali ke Detail Produk"
+      />
 
-        <ProductCheckoutOrderSummary checkout={checkout} />
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-start">
+        <Card className="rounded-2xl">
+          <CardContent className="p-6 sm:p-8">
+            {step === "form" ? (
+              <ProductCheckoutForm
+                checkout={checkout}
+                receiverName={receiverName}
+                onReceiverNameChange={setReceiverName}
+                phoneNumber={phoneNumber}
+                onPhoneNumberChange={setPhoneNumber}
+                shippingAddress={shippingAddress}
+                onShippingAddressChange={setShippingAddress}
+                selectedPaymentMethod={selectedPaymentMethod}
+                onPaymentMethodChange={setSelectedPaymentMethod}
+                errorMessage={formError}
+                onReview={handleReview}
+              />
+            ) : (
+              <ProductCheckoutReview
+                checkout={checkout}
+                receiverName={receiverName}
+                phoneNumber={phoneNumber}
+                shippingAddress={shippingAddress}
+                paymentMethod={selectedPaymentMethod}
+                errorMessage={formError}
+                onBack={() => {
+                  setFormError(null);
+                  setStep("form");
+                }}
+                onConfirm={openFinalConfirmation}
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        <ProductCheckoutOrderSummary
+          checkout={checkout}
+          paymentMethod={selectedPaymentMethod}
+        />
       </div>
 
-      {isConfirmationOpen &&
-        createPortal(
-          <ProductCheckoutConfirmationModal
-            checkout={checkout}
-            receiverName={receiverName}
-            shippingAddress={shippingAddress}
-            paymentMethod={selectedPaymentMethod}
-            confirmationAccepted={confirmationAccepted}
-            isSubmitting={isSubmitting}
-            errorMessage={formError}
-            onConfirmationChange={setConfirmationAccepted}
-            onClose={() => {
-              if (!isSubmitting) {
-                setIsConfirmationOpen(false);
-                setFormError(null);
-              }
-            }}
-            onConfirm={() => {
-              void handlePurchase();
-            }}
-          />,
-          document.body,
-        )}
-    </>
+      <ProductCheckoutConfirmationModal
+        open={isConfirmationOpen}
+        checkout={checkout}
+        receiverName={receiverName}
+        shippingAddress={shippingAddress}
+        paymentMethod={selectedPaymentMethod}
+        confirmationAccepted={confirmationAccepted}
+        isSubmitting={isSubmitting}
+        errorMessage={formError}
+        onConfirmationChange={setConfirmationAccepted}
+        onClose={closeFinalConfirmation}
+        onConfirm={() => {
+          void handlePurchase();
+        }}
+      />
+    </div>
   );
 }

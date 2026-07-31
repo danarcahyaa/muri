@@ -1,43 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  CheckCircle2,
-  ChevronRight,
-  Factory,
-  LoaderCircle,
-  MapPin,
-  Package,
-  Phone,
-  QrCode,
-  ShieldAlert,
-  ShieldCheck,
-  User,
-} from "lucide-react";
+import { ShieldAlert } from "lucide-react";
 
-import { Input } from "@/components/ui/Input";
-import { Textarea } from "@/components/ui/Textarea";
-import { formatIdr } from "@/lib/productDetail";
+import MaterialCheckoutConfirmationDialog from "@/components/material/checkout/MaterialCheckoutConfirmationDialog";
+import MaterialCheckoutForm, {
+  type MaterialCheckoutFieldErrors,
+} from "@/components/material/checkout/MaterialCheckoutForm";
+import MaterialCheckoutOrderSummary from "@/components/material/checkout/MaterialCheckoutOrderSummary";
+import MaterialCheckoutReview from "@/components/material/checkout/MaterialCheckoutReview";
+import {
+  MaterialCheckoutLoading,
+  MaterialCheckoutLoadError,
+} from "@/components/material/checkout/MaterialCheckoutStatus";
+import MaterialCheckoutSuccess from "@/components/material/checkout/MaterialCheckoutSuccess";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
+import { BackLink } from "@/components/ui/BackLink";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent } from "@/components/ui/Card";
 import { createMaterialOrder, getMaterialBatchByCode } from "@/services/material";
 import { supabase } from "@/lib/supabaseClient";
 import type { MaterialDetailItem } from "@/types/material";
+import type { MaterialOrder, MaterialPaymentMethod } from "@/types/materialOrder";
 
 interface BrandMaterialCheckoutProps {
   batchCode: string;
   requestedWeightKg: number;
 }
 
-interface FieldErrors {
-  receiverName?: string;
-  phoneNumber?: string;
-  shippingAddress?: string;
-  general?: string;
-}
+type CheckoutStep = "form" | "review" | "success";
 
 export default function BrandMaterialCheckout({
   batchCode,
@@ -46,159 +39,144 @@ export default function BrandMaterialCheckout({
   const router = useRouter();
 
   const [material, setMaterial] = useState<MaterialDetailItem | null>(null);
-  const [isLoadingMaterial, setIsLoadingMaterial] = useState(true);
-  const [materialError, setMaterialError] = useState<string | null>(null);
-
+  const [step, setStep] = useState<CheckoutStep>("form");
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isCustomer, setIsCustomer] = useState(false);
-  const [checkingRole, setCheckingRole] = useState(true);
 
-  const [weightKg, setWeightKg] = useState<number>(requestedWeightKg);
+  const [weightKg, setWeightKg] = useState(requestedWeightKg);
   const [receiverName, setReceiverName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [shippingAddress, setShippingAddress] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"qris">("qris");
+  const [paymentMethod, setPaymentMethod] =
+    useState<MaterialPaymentMethod>("qris");
 
+  const [fieldErrors, setFieldErrors] =
+    useState<MaterialCheckoutFieldErrors>({});
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+  const [confirmationAccepted, setConfirmationAccepted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [orderResult, setOrderResult] = useState<MaterialOrder | null>(null);
 
-  useEffect(() => {
-    async function loadMaterialAndAuth() {
-      setIsLoadingMaterial(true);
-      setMaterialError(null);
+  const loadCheckout = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError(null);
+    setFieldErrors({});
+    setIsCustomer(false);
 
-      // Check role & auto-fill profile data
-      try {
-        const { data: authData } = await supabase.auth.getUser();
-        if (authData.user) {
-          const { data: brandData } = await supabase
-            .from("brands")
-            .select("*")
-            .eq("id", authData.user.id)
-            .maybeSingle();
+    try {
+      const { data: authData } = await supabase.auth.getUser();
 
-          if (!brandData) {
-            setIsCustomer(true);
-          } else {
-            // Auto-fill profile information
-            const defaultName = brandData.brand_name || authData.user.user_metadata?.full_name || "";
-            const defaultPhone = brandData.active_number || authData.user.user_metadata?.phone || "";
-            const defaultAddress = brandData.warehouse_address || brandData.address || "";
+      if (authData.user) {
+        const { data: brandData } = await supabase
+          .from("brands")
+          .select("*")
+          .eq("id", authData.user.id)
+          .maybeSingle();
 
-            setReceiverName((prev) => prev || defaultName);
-            setPhoneNumber((prev) => prev || defaultPhone);
-            setShippingAddress((prev) => prev || defaultAddress);
-          }
-        }
-      } catch {
-        // Continue
-      } finally {
-        setCheckingRole(false);
-      }
+        if (!brandData) {
+          setIsCustomer(true);
+        } else {
+          const defaultName =
+            brandData.brand_name ||
+            authData.user.user_metadata?.full_name ||
+            "";
+          const defaultPhone =
+            brandData.active_number ||
+            authData.user.user_metadata?.phone ||
+            "";
+          const defaultAddress =
+            brandData.warehouse_address || brandData.address || "";
 
-      const res = await getMaterialBatchByCode(batchCode);
-      if (!res.success || !res.data) {
-        setMaterialError(
-          typeof res.error === "string"
-            ? res.error
-            : "Material tidak ditemukan.",
-        );
-      } else {
-        setMaterial(res.data);
-        if (requestedWeightKg < res.data.minimumOrderKg) {
-          setWeightKg(res.data.minimumOrderKg);
+          setReceiverName((current) => current || defaultName);
+          setPhoneNumber((current) => current || defaultPhone);
+          setShippingAddress((current) => current || defaultAddress);
         }
       }
 
-      setIsLoadingMaterial(false);
+      const result = await getMaterialBatchByCode(batchCode);
+
+      if (!result.success || !result.data) {
+        setLoadError(getMaterialCheckoutErrorMessage(result.error));
+        return;
+      }
+
+      const data = result.data;
+      const normalizedWeight = Math.min(
+        data.availableWeightKg,
+        Math.max(data.minimumOrderKg, requestedWeightKg),
+      );
+
+      setMaterial(data);
+      setWeightKg(normalizedWeight);
+      setPaymentMethod("qris");
+      setStep("form");
+    } catch (error) {
+      console.error("[BrandMaterialCheckout] Load error:", error);
+      setLoadError("Checkout material belum dapat disiapkan.");
+    } finally {
+      setIsLoading(false);
     }
-
-    void loadMaterialAndAuth();
   }, [batchCode, requestedWeightKg]);
 
-  if (isLoadingMaterial || checkingRole) {
-    return (
-      <div className="flex min-h-[400px] flex-col items-center justify-center p-8 text-center font-body">
-        <LoaderCircle className="size-8 animate-spin text-brand-emerald" />
-        <p className="mt-4 text-xs font-semibold text-muted-moss">
-          Memuat rincian material sirkular...
-        </p>
-      </div>
-    );
+  useEffect(() => {
+    void loadCheckout();
+  }, [loadCheckout]);
+
+  function clearFieldError(field: keyof MaterialCheckoutFieldErrors) {
+    setFieldErrors((current) => ({ ...current, [field]: undefined }));
   }
 
-  // Restrict Customer role from accessing material purchasing
-  if (isCustomer) {
-    return (
-      <div className="mx-auto max-w-xl rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center font-body">
-        <ShieldAlert className="mx-auto size-10 text-amber-600" />
-        <h2 className="mt-3 font-display text-xl font-bold text-brand-black">
-          Khusus Akun Brand Fashion
-        </h2>
-        <p className="mt-2 text-xs leading-relaxed text-muted-moss">
-          Pembelian material sisa limbah pabrik dari Waste Provider hanya diperuntukkan bagi akun berjenis Brand Fashion. Akun Customer Anda dapat digunakan untuk membeli produk sirkular dan mendaftar workshop.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Link
-            href="/brand/register"
-            className="inline-flex items-center gap-2 rounded-sm bg-brand-forest px-5 py-3 text-xs font-bold text-white transition hover:bg-brand-black"
-          >
-            Daftar Akun Brand
-          </Link>
-          <Link
-            href="/material"
-            className="inline-flex items-center gap-2 rounded-sm border border-brand-black/15 bg-canvas-pure px-5 py-3 text-xs font-bold text-brand-black transition hover:bg-canvas-warm"
-          >
-            Lihat Katalog Sourcing
-          </Link>
-        </div>
-      </div>
-    );
+  function handleWeightChange(value: number) {
+    if (!material) return;
+
+    const nextValue = Number.isFinite(value)
+      ? Math.min(
+          material.availableWeightKg,
+          Math.max(material.minimumOrderKg, value),
+        )
+      : material.minimumOrderKg;
+
+    setWeightKg(nextValue);
+    clearFieldError("weightKg");
   }
 
-  if (materialError || !material) {
-    return (
-      <div className="mx-auto max-w-lg rounded-2xl border border-brand-black/15 bg-canvas-pure p-8 text-center font-body">
-        <h2 className="font-display text-xl font-bold text-brand-black">
-          Batch Material Tidak Ditemukan
-        </h2>
-        <p className="mt-2 text-xs text-muted-moss">
-          {materialError ?? "Material yang Anda cari tidak tersedia."}
-        </p>
-        <Link
-          href="/material"
-          className="mt-6 inline-flex items-center gap-2 rounded-sm bg-brand-forest px-5 py-3 text-xs font-bold text-white transition hover:bg-brand-black"
-        >
-          <ArrowLeft className="size-4" />
-          Kembali ke Katalog Sourcing
-        </Link>
-      </div>
-    );
-  }
+  function handleReview() {
+    if (!material) return;
 
-  const activeMaterial = material;
-  const pricePerKg = activeMaterial.pricePerKg;
-  const totalPriceIdr = weightKg * pricePerKg;
+    const normalizedName = receiverName.trim();
+    const normalizedPhone = phoneNumber.trim();
+    const normalizedAddress = shippingAddress.trim();
+    const errors: MaterialCheckoutFieldErrors = {};
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setFieldErrors({});
+    if (
+      !Number.isFinite(weightKg) ||
+      weightKg < material.minimumOrderKg ||
+      weightKg > material.availableWeightKg
+    ) {
+      errors.weightKg = `Volume harus antara ${material.minimumOrderKg}–${material.availableWeightKg} kg.`;
+    }
 
-    const errors: FieldErrors = {};
-
-    if (!receiverName.trim()) {
-      errors.receiverName = "Nama penerima wajib diisi.";
-    } else if (receiverName.trim().length < 2) {
+    if (normalizedName.length < 2) {
       errors.receiverName = "Nama penerima minimal 2 karakter.";
+    } else if (normalizedName.length > 120) {
+      errors.receiverName = "Nama penerima maksimal 120 karakter.";
     }
 
-    if (!phoneNumber.trim()) {
+    if (!normalizedPhone) {
       errors.phoneNumber = "Nomor telepon penerima wajib diisi.";
+    } else if (normalizedPhone.length > 30) {
+      errors.phoneNumber = "Nomor telepon maksimal 30 karakter.";
     }
 
-    if (!shippingAddress.trim()) {
-      errors.shippingAddress = "Alamat pengiriman wajib diisi.";
-    } else if (shippingAddress.trim().length < 10) {
+    if (normalizedAddress.length < 10) {
       errors.shippingAddress = "Alamat pengiriman minimal 10 karakter.";
+    } else if (normalizedAddress.length > 1000) {
+      errors.shippingAddress = "Alamat pengiriman maksimal 1000 karakter.";
+    }
+
+    if (!paymentMethod) {
+      errors.general = "Pilih metode pembayaran.";
     }
 
     if (Object.keys(errors).length > 0) {
@@ -206,292 +184,222 @@ export default function BrandMaterialCheckout({
       return;
     }
 
+    setReceiverName(normalizedName);
+    setPhoneNumber(normalizedPhone);
+    setShippingAddress(normalizedAddress);
+    setFieldErrors({});
+    setStep("review");
+  }
+
+  function openFinalConfirmation() {
+    setFieldErrors({});
+    setConfirmationAccepted(false);
+    setIsConfirmationOpen(true);
+  }
+
+  function closeFinalConfirmation() {
+    if (isSubmitting) return;
+
+    setIsConfirmationOpen(false);
+    setFieldErrors((current) => ({ ...current, general: undefined }));
+  }
+
+  async function handlePurchase() {
+    if (!material || isSubmitting) return;
+
+    if (!confirmationAccepted) {
+      setFieldErrors({
+        general: "Centang persetujuan transaksi sebelum melanjutkan.",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
+    setFieldErrors({});
 
     try {
-      const res = await createMaterialOrder({
-        batchCode: activeMaterial.batchCode,
+      const result = await createMaterialOrder({
+        batchCode: material.batchCode,
         weightKg,
-        receiverName: receiverName.trim(),
-        phoneNumber: phoneNumber.trim(),
-        shippingAddress: shippingAddress.trim(),
+        receiverName,
+        phoneNumber,
+        shippingAddress,
         paymentMethod,
       });
 
-      if (!res.success || !res.data) {
+      if (!result.success || !result.data) {
         setFieldErrors({
-          general:
-            typeof res.error === "string"
-              ? res.error
-              : "Gagal membuat pesanan material.",
+          general: getMaterialCheckoutErrorMessage(result.error),
         });
         return;
       }
 
-      router.push("/brand/dashboard/sourcing/purchases");
-    } catch {
+      setOrderResult(result.data);
+      setIsConfirmationOpen(false);
+      setStep("success");
+      router.refresh();
+    } catch (error) {
+      console.error("[BrandMaterialCheckout] Purchase error:", error);
       setFieldErrors({
-        general: "Terjadi kesalahan saat memproses pesanan.",
+        general: "Pesanan material belum dapat dibuat. Silakan coba kembali.",
       });
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  return (
-    <div className="font-body space-y-8">
-      {/* Breadcrumb Header */}
-      <div>
-        <div className="flex items-center gap-2 text-xs text-muted-moss">
-          <Link
-            href="/material"
-            className="transition hover:text-brand-black"
-          >
-            Sourcing Material
-          </Link>
-          <ChevronRight className="size-3" />
-          <Link
-            href={`/material/${activeMaterial.batchCode}`}
-            className="transition hover:text-brand-black"
-          >
-            {activeMaterial.batchCode}
-          </Link>
-          <ChevronRight className="size-3" />
-          <span className="font-bold text-brand-black">Checkout Material</span>
-        </div>
-        <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-brand-black sm:text-4xl">
-          Checkout Pembelian Material
-        </h1>
-        <p className="mt-2 text-xs text-muted-moss">
-          Selesaikan pengajuan pembelian material kain sirkular dari Waste Provider.
-        </p>
-      </div>
+  if (isLoading) {
+    return <MaterialCheckoutLoading />;
+  }
 
-      <div className="grid gap-8 lg:grid-cols-3">
-        {/* Form Inputs Left (2 Cols) */}
-        <div className="space-y-6 lg:col-span-2">
-          {/* Material Summary Card */}
-          <section className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase text-brand-emerald">
-              <Package className="size-4" />
-              <span>Detail Batch Material</span>
-            </div>
+  if (loadError || !material) {
+    return (
+      <MaterialCheckoutLoadError
+        message={loadError ?? "Data checkout material tidak tersedia."}
+        onRetry={loadCheckout}
+      />
+    );
+  }
 
-            <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-brand-black/15 bg-canvas-warm/40 p-4">
-              <div>
-                <span className="inline-flex rounded-full bg-brand-lime/60 px-2.5 py-0.5 text-[9px] font-bold uppercase text-brand-forest">
-                  {activeMaterial.categoryName}
-                </span>
-                <h3 className="mt-1 font-display text-base font-bold text-brand-black">
-                  {activeMaterial.title}
-                </h3>
-                <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-moss">
-                  <Factory className="size-3.5" />
-                  <span>Provider: {activeMaterial.providerName}</span>
-                </p>
-              </div>
+  if (isCustomer) {
+    return (
+      <Card className="mx-auto max-w-xl rounded-2xl">
+        <CardContent className="p-8 text-center">
+          <ShieldAlert className="mx-auto size-10 text-amber-600" />
 
-              <div className="shrink-0 text-left sm:text-right">
-                <p className="text-[10px] uppercase text-muted-moss">Harga / Kg</p>
-                <p className="font-display text-lg font-bold text-brand-forest">
-                  {formatIdr(activeMaterial.pricePerKg)}
-                </p>
-              </div>
-            </div>
+          <h1 className="mt-4 font-display text-3xl font-medium text-brand-black">
+            Khusus Akun Brand Fashion
+          </h1>
 
-            {/* Volume Adjustment */}
-            <div className="mt-5 space-y-2.5">
-              <label className="block mb-2 text-xs font-bold text-brand-black">
-                Volume Pembelian (Kilogram) <span className="text-error-rust">*</span>
-              </label>
-              <div className="flex items-center gap-3">
-                <Input
-                  type="number"
-                  min={activeMaterial.minimumOrderKg}
-                  max={activeMaterial.availableWeightKg}
-                  value={weightKg}
-                  onChange={(e) => setWeightKg(Math.max(1, Number(e.target.value)))}
-                  className="w-44"
-                />
-                <span className="text-xs text-muted-moss">
-                  Min. {activeMaterial.minimumOrderKg} kg (Stok tersedia: {activeMaterial.availableWeightKg} kg)
-                </span>
-              </div>
-            </div>
-          </section>
+          <Alert className="mt-5 border-amber-200 bg-amber-50 text-left text-amber-900">
+            <AlertTitle>Akses checkout dibatasi</AlertTitle>
+            <AlertDescription>
+              Pembelian material dari Waste Provider hanya diperuntukkan bagi
+              akun Brand Fashion. Akun Customer tetap dapat membeli produk
+              sirkular dan mendaftar workshop.
+            </AlertDescription>
+          </Alert>
 
-          {/* Shipping & Recipient Details */}
-          <section className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8 space-y-5">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase text-brand-emerald">
-              <MapPin className="size-4" />
-              <span>Data Penerima &amp; Alamat Pengiriman Brand</span>
-            </div>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <Button fullWidth render={<Link href="/brand/register" />}>
+              Daftar Akun Brand
+            </Button>
 
-            {fieldErrors.general && (
-              <p className="text-xs font-medium text-error-rust">
-                {fieldErrors.general}
-              </p>
-            )}
-
-            {/* Nama Penerima */}
-            <div className="space-y-1.5">
-              <label className="block mb-2 text-xs font-bold text-brand-black">
-                Nama Penerima / Team Sourcing <span className="text-error-rust">*</span>
-              </label>
-              <Input
-                type="text"
-                required
-                value={receiverName}
-                onChange={(e) => {
-                  setReceiverName(e.target.value);
-                  if (fieldErrors.receiverName) {
-                    setFieldErrors((prev) => ({ ...prev, receiverName: undefined }));
-                  }
-                }}
-                placeholder="Contoh: Budi Prasetyo (Team Sourcing Brand)"
-                startIcon={<User className="size-4 text-muted-moss/60" />}
-              />
-              {fieldErrors.receiverName && (
-                <p className="mt-1 text-[11px] font-medium text-error-rust">
-                  {fieldErrors.receiverName}
-                </p>
-              )}
-            </div>
-
-            {/* Phone Number */}
-            <div className="space-y-1.5">
-              <label className="block mb-2 text-xs font-bold text-brand-black">
-                Nomor Telepon Penerima <span className="text-error-rust">*</span>
-              </label>
-              <Input
-                type="tel"
-                required
-                value={phoneNumber}
-                onChange={(e) => {
-                  setPhoneNumber(e.target.value);
-                  if (fieldErrors.phoneNumber) {
-                    setFieldErrors((prev) => ({ ...prev, phoneNumber: undefined }));
-                  }
-                }}
-                placeholder="Contoh: 081234567890"
-                startIcon={<Phone className="size-4 text-muted-moss/60" />}
-              />
-              {fieldErrors.phoneNumber && (
-                <p className="mt-1 text-[11px] font-medium text-error-rust">
-                  {fieldErrors.phoneNumber}
-                </p>
-              )}
-            </div>
-
-            {/* Shipping Address */}
-            <div className="space-y-1.5">
-              <label className="block mb-2 text-xs font-bold text-brand-black">
-                Alamat Pengiriman Gudang Brand <span className="text-error-rust">*</span>
-              </label>
-              <Textarea
-                rows={3}
-                required
-                value={shippingAddress}
-                onChange={(e) => {
-                  setShippingAddress(e.target.value);
-                  if (fieldErrors.shippingAddress) {
-                    setFieldErrors((prev) => ({ ...prev, shippingAddress: undefined }));
-                  }
-                }}
-                placeholder="Masukkan alamat lengkap gudang / workshop brand Anda..."
-              />
-              {fieldErrors.shippingAddress && (
-                <p className="mt-1 text-[11px] font-medium text-error-rust">
-                  {fieldErrors.shippingAddress}
-                </p>
-              )}
-            </div>
-          </section>
-
-          {/* Payment Method Selector - Harmonized with Product Checkout */}
-          <section className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8 space-y-4">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase text-brand-emerald">
-              <QrCode className="size-4" />
-              <span>Metode Pembayaran</span>
-            </div>
-
-            <div className="mt-4 grid gap-3 sm:grid-cols-1">
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("qris")}
-                className="relative rounded-xl border border-brand-forest bg-brand-lime/20 p-5 text-left transition"
-              >
-                <span className="absolute right-4 top-4 flex size-5 items-center justify-center rounded-full bg-brand-forest text-white">
-                  <Check className="size-3" />
-                </span>
-                <QrCode className="size-5 text-brand-emerald" />
-                <p className="mt-4 text-sm font-bold text-brand-black">QRIS Standar MURI</p>
-                <p className="mt-1 text-[10px] leading-4 text-muted-moss">
-                  Bayar cepat via GoPay, OVO, ShopeePay, DANA, atau M-Banking.
-                </p>
-                <p className="mt-4 text-xs font-bold text-brand-forest">
-                  {formatIdr(totalPriceIdr)}
-                </p>
-              </button>
-            </div>
-          </section>
-        </div>
-
-        {/* Order Summary Right (1 Col Sticky, Harmonized with Product Checkout) */}
-        <div className="space-y-6">
-          <section className="sticky top-24 rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8 space-y-6">
-            <h3 className="font-display text-lg font-bold text-brand-black border-b border-line-trace pb-4">
-              Ringkasan Pembayaran
-            </h3>
-
-            <div className="space-y-3 text-xs">
-              <div className="flex items-center justify-between text-muted-moss">
-                <span>Volume Material</span>
-                <span className="font-bold text-brand-black">{weightKg} kg</span>
-              </div>
-              <div className="flex items-center justify-between text-muted-moss">
-                <span>Harga per Kg</span>
-                <span className="font-bold text-brand-black">{formatIdr(pricePerKg)}</span>
-              </div>
-              <div className="flex items-center justify-between text-muted-moss">
-                <span>Estimasi Layanan</span>
-                <span className="font-bold text-brand-forest">Gratis</span>
-              </div>
-              <div className="border-t border-line-trace pt-3 flex items-center justify-between">
-                <span className="font-bold text-brand-black">Total Pembayaran</span>
-                <span className="font-display text-xl font-bold text-brand-black">
-                  {formatIdr(totalPriceIdr)}
-                </span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              disabled={isSubmitting}
-              onClick={handleSubmit}
-              className="group mt-6 flex w-full items-center justify-center gap-3 rounded-sm bg-brand-forest px-6 py-4 text-xs font-bold text-white transition hover:bg-brand-black disabled:opacity-50 cursor-pointer"
+            <Button
+              variant="outline"
+              fullWidth
+              render={<Link href="/material" />}
             >
-              {isSubmitting ? (
-                <>
-                  <LoaderCircle className="size-4 animate-spin" />
-                  Memproses...
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="size-4" />
-                  Buat Pesanan &amp; Bayar QRIS
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                </>
-              )}
-            </button>
+              Lihat Katalog Material
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
-            <div className="flex items-center gap-2 rounded-xl bg-canvas-warm p-3 text-[10px] text-muted-moss">
-              <ShieldCheck className="size-4 shrink-0 text-brand-emerald" />
-              <span>Transaksi dilindungi oleh sistem sirkular aman MURI.</span>
-            </div>
-          </section>
-        </div>
+  if (step === "success" && orderResult) {
+    return <MaterialCheckoutSuccess result={orderResult} />;
+  }
+
+  return (
+    <div className="space-y-6">
+      <BackLink
+        href={`/material/${material.batchCode}`}
+        label="Kembali ke Detail Material"
+      />
+
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-start">
+        <Card className="rounded-2xl">
+          <CardContent className="p-6 sm:p-8">
+            {step === "form" ? (
+              <MaterialCheckoutForm
+                material={material}
+                weightKg={weightKg}
+                receiverName={receiverName}
+                phoneNumber={phoneNumber}
+                shippingAddress={shippingAddress}
+                paymentMethod={paymentMethod}
+                fieldErrors={fieldErrors}
+                onWeightChange={handleWeightChange}
+                onReceiverNameChange={(value) => {
+                  setReceiverName(value);
+                  clearFieldError("receiverName");
+                }}
+                onPhoneNumberChange={(value) => {
+                  setPhoneNumber(value);
+                  clearFieldError("phoneNumber");
+                }}
+                onShippingAddressChange={(value) => {
+                  setShippingAddress(value);
+                  clearFieldError("shippingAddress");
+                }}
+                onPaymentMethodChange={(value) => {
+                  setPaymentMethod(value);
+                  clearFieldError("general");
+                }}
+                onReview={handleReview}
+              />
+            ) : (
+              <MaterialCheckoutReview
+                material={material}
+                weightKg={weightKg}
+                receiverName={receiverName}
+                phoneNumber={phoneNumber}
+                shippingAddress={shippingAddress}
+                paymentMethod={paymentMethod}
+                errorMessage={fieldErrors.general ?? null}
+                onBack={() => {
+                  setFieldErrors({});
+                  setStep("form");
+                }}
+                onConfirm={openFinalConfirmation}
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        <MaterialCheckoutOrderSummary
+          material={material}
+          weightKg={weightKg}
+          paymentMethod={paymentMethod}
+        />
       </div>
+
+      <MaterialCheckoutConfirmationDialog
+        open={isConfirmationOpen}
+        material={material}
+        weightKg={weightKg}
+        receiverName={receiverName}
+        shippingAddress={shippingAddress}
+        paymentMethod={paymentMethod}
+        confirmationAccepted={confirmationAccepted}
+        isSubmitting={isSubmitting}
+        errorMessage={fieldErrors.general ?? null}
+        onConfirmationChange={setConfirmationAccepted}
+        onClose={closeFinalConfirmation}
+        onConfirm={() => {
+          void handlePurchase();
+        }}
+      />
     </div>
   );
+}
+
+function getMaterialCheckoutErrorMessage(error: unknown): string {
+  const code = String(error ?? "");
+
+  if (code.includes("MATERIAL_BATCH_NOT_FOUND")) {
+    return "Batch material tidak ditemukan atau sudah tidak tersedia.";
+  }
+
+  if (code.includes("INSUFFICIENT_MATERIAL_STOCK")) {
+    return "Stok material tidak mencukupi untuk volume yang dipilih.";
+  }
+
+  if (code.includes("FAILED_TO_CREATE_MATERIAL_ORDER")) {
+    return "Pesanan material belum dapat dibuat. Silakan coba kembali.";
+  }
+
+  return code || "Checkout material belum dapat diproses.";
 }

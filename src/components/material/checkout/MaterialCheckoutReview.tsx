@@ -4,10 +4,10 @@ import type { LucideIcon } from "lucide-react";
 import {
   ArrowLeft,
   CheckCircle2,
-  Coins,
   MapPin,
   Package,
   QrCode,
+  Scale,
   ShieldCheck,
   UserRound,
 } from "lucide-react";
@@ -15,25 +15,25 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { formatCoin, formatIdr } from "@/lib/productDetail";
-import type {
-  CustomerCheckoutPaymentMethod,
-  CustomerCheckoutPreview,
-} from "@/types/customerCheckout";
+import { formatIdr } from "@/lib/productDetail";
+import type { MaterialDetailItem } from "@/types/material";
+import type { MaterialPaymentMethod } from "@/types/materialOrder";
 
-interface ProductCheckoutReviewProps {
-  checkout: CustomerCheckoutPreview;
+interface MaterialCheckoutReviewProps {
+  material: MaterialDetailItem;
+  weightKg: number;
   receiverName: string;
   phoneNumber: string;
   shippingAddress: string;
-  paymentMethod: CustomerCheckoutPaymentMethod | null;
+  paymentMethod: MaterialPaymentMethod;
   errorMessage: string | null;
   onBack: () => void;
   onConfirm: () => void;
 }
 
-export default function ProductCheckoutReview({
-  checkout,
+export default function MaterialCheckoutReview({
+  material,
+  weightKg,
   receiverName,
   phoneNumber,
   shippingAddress,
@@ -41,7 +41,7 @@ export default function ProductCheckoutReview({
   errorMessage,
   onBack,
   onConfirm,
-}: ProductCheckoutReviewProps) {
+}: MaterialCheckoutReviewProps) {
   return (
     <>
       <div className="flex items-center gap-3 text-brand-emerald">
@@ -54,7 +54,8 @@ export default function ProductCheckoutReview({
       </h1>
 
       <p className="mt-4 text-sm leading-6 text-muted-moss">
-        Periksa seluruh detail sebelum membuka konfirmasi transaksi akhir.
+        Periksa material, volume, penerima, dan metode pembayaran sebelum
+        membuka konfirmasi transaksi akhir.
       </p>
 
       <div className="mt-8 space-y-4">
@@ -63,23 +64,27 @@ export default function ProductCheckoutReview({
         <ReviewFact
           icon={MapPin}
           label="Alamat Pengiriman"
-          value={`${phoneNumber || "Tanpa nomor telepon"} — ${shippingAddress}`}
+          value={`${phoneNumber} — ${shippingAddress}`}
         />
 
         <ReviewFact
           icon={Package}
-          label="Produk"
-          value={`${checkout.quantity}× ${checkout.product.name}`}
+          label="Material"
+          value={`${material.title} · ${material.batchCode}`}
         />
 
         <ReviewFact
-          icon={paymentMethod === "coin" ? Coins : QrCode}
+          icon={Scale}
+          label="Volume"
+          value={`${weightKg} kg × ${formatIdr(material.pricePerKg)}/kg`}
+        />
+
+        <ReviewFact
+          icon={QrCode}
           label="Pembayaran"
-          value={
-            paymentMethod === "coin"
-              ? `Coin — ${formatCoin(checkout.totalPriceCoin ?? 0)}`
-              : `QRIS — ${formatIdr(checkout.totalPriceIdr ?? 0)}`
-          }
+          value={`${paymentMethod.toUpperCase()} — ${formatIdr(
+            weightKg * material.pricePerKg,
+          )}`}
         />
       </div>
 

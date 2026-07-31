@@ -1,6 +1,6 @@
 "use client";
 
-import { Coins, QrCode } from "lucide-react";
+import { QrCode } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
@@ -15,18 +15,17 @@ import {
   DialogTitle,
 } from "@/components/ui/Dialog";
 import { Separator } from "@/components/ui/Separator";
-import { formatCoin, formatIdr } from "@/lib/productDetail";
-import type {
-  CustomerCheckoutPaymentMethod,
-  CustomerCheckoutPreview,
-} from "@/types/customerCheckout";
+import { formatIdr } from "@/lib/productDetail";
+import type { MaterialDetailItem } from "@/types/material";
+import type { MaterialPaymentMethod } from "@/types/materialOrder";
 
-interface FinalConfirmationModalProps {
+interface MaterialCheckoutConfirmationDialogProps {
   open: boolean;
-  checkout: CustomerCheckoutPreview;
+  material: MaterialDetailItem;
+  weightKg: number;
   receiverName: string;
   shippingAddress: string;
-  paymentMethod: CustomerCheckoutPaymentMethod | null;
+  paymentMethod: MaterialPaymentMethod;
   confirmationAccepted: boolean;
   isSubmitting: boolean;
   errorMessage: string | null;
@@ -35,9 +34,10 @@ interface FinalConfirmationModalProps {
   onConfirm: () => void;
 }
 
-export function ProductCheckoutConfirmationModal({
+export default function MaterialCheckoutConfirmationDialog({
   open,
-  checkout,
+  material,
+  weightKg,
   receiverName,
   shippingAddress,
   paymentMethod,
@@ -47,11 +47,8 @@ export function ProductCheckoutConfirmationModal({
   onConfirmationChange,
   onClose,
   onConfirm,
-}: FinalConfirmationModalProps) {
-  const paymentText =
-    paymentMethod === "coin"
-      ? formatCoin(checkout.totalPriceCoin ?? 0)
-      : formatIdr(checkout.totalPriceIdr ?? 0);
+}: MaterialCheckoutConfirmationDialogProps) {
+  const totalPriceIdr = weightKg * material.pricePerKg;
 
   return (
     <Dialog
@@ -73,15 +70,17 @@ export function ProductCheckoutConfirmationModal({
           </DialogTitle>
           <DialogDescription>
             Periksa ringkasan terakhir dan berikan persetujuan sebelum pesanan
-            dibuat.
+            material dibuat.
           </DialogDescription>
         </DialogHeader>
 
         <Card variant="warm" className="mt-2 p-5">
           <ConfirmationRow
-            label="Produk"
-            value={`${checkout.quantity}× ${checkout.product.name}`}
+            label="Material"
+            value={`${material.title} · ${material.batchCode}`}
           />
+          <Separator className="bg-line-trace" />
+          <ConfirmationRow label="Volume" value={`${weightKg} kg`} />
           <Separator className="bg-line-trace" />
           <ConfirmationRow label="Penerima" value={receiverName} />
           <Separator className="bg-line-trace" />
@@ -89,28 +88,18 @@ export function ProductCheckoutConfirmationModal({
           <Separator className="bg-line-trace" />
           <ConfirmationRow
             label="Metode"
-            value={paymentMethod === "coin" ? "Coin" : "QRIS"}
+            value={paymentMethod.toUpperCase()}
           />
           <Separator className="bg-line-trace" />
-          <ConfirmationRow label="Total" value={paymentText} />
+          <ConfirmationRow label="Total" value={formatIdr(totalPriceIdr)} />
         </Card>
 
-        {paymentMethod === "qris" && (
-          <Alert className="border-amber-200 bg-amber-50 text-amber-800">
-            <AlertDescription>
-              Pesanan akan dibuat dengan status menunggu pembayaran. Stok akan
-              direservasi selama 30 menit.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {paymentMethod === "coin" && (
-          <Alert className="border-brand-lime bg-brand-lime/15 text-brand-forest">
-            <AlertDescription>
-              Coin akan langsung dipotong setelah transaksi dikonfirmasi.
-            </AlertDescription>
-          </Alert>
-        )}
+        <Alert className="border-amber-200 bg-amber-50 text-amber-800">
+          <AlertDescription>
+            Pesanan akan dibuat dengan status menunggu pembayaran. Lanjutkan
+            proses pembayaran dari dashboard pembelian material.
+          </AlertDescription>
+        </Alert>
 
         <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-line-trace bg-canvas-warm/40 p-4">
           <Checkbox
@@ -123,8 +112,8 @@ export function ProductCheckoutConfirmationModal({
           />
 
           <span className="text-xs leading-5 text-brand-black">
-            Saya sudah memeriksa produk, jumlah, alamat, metode pembayaran, dan
-            total transaksi. Saya menyetujui pembuatan pesanan ini.
+            Saya sudah memeriksa material, volume, alamat, metode pembayaran,
+            dan total transaksi. Saya menyetujui pembuatan pesanan ini.
           </span>
         </label>
 
@@ -150,17 +139,8 @@ export function ProductCheckoutConfirmationModal({
             disabled={!confirmationAccepted}
             onClick={onConfirm}
           >
-            {paymentMethod === "coin" ? (
-              <>
-                Bayar dengan Coin
-                <Coins />
-              </>
-            ) : (
-              <>
-                Buat Pesanan QRIS
-                <QrCode />
-              </>
-            )}
+            Buat Pesanan QRIS
+            <QrCode />
           </Button>
         </DialogFooter>
       </DialogContent>

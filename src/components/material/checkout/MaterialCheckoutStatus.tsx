@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 
-export function ProductCheckoutLoading() {
+export function MaterialCheckoutLoading() {
   return (
     <Card
       className="flex min-h-[480px] items-center justify-center rounded-2xl"
@@ -23,7 +23,7 @@ export function ProductCheckoutLoading() {
   );
 }
 
-export function ProductCheckoutLoadError({
+export function MaterialCheckoutLoadError({
   message,
   onRetry,
 }: {

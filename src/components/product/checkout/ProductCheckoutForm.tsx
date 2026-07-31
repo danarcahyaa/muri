@@ -1,7 +1,25 @@
 "use client";
 
-import { ArrowRight, Check, Coins, Phone, QrCode, ShieldCheck, User } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  Coins,
+  Phone,
+  QrCode,
+  ShieldCheck,
+  User,
+} from "lucide-react";
+
+import { Alert, AlertDescription } from "@/components/ui/Alert";
+import { Button } from "@/components/ui/Button";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
 import { formatCoin, formatIdr } from "@/lib/productDetail";
 import type {
   CustomerCheckoutPaymentMethod,
@@ -47,74 +65,63 @@ export default function ProductCheckoutForm({
       </h1>
 
       <p className="mt-4 max-w-xl text-sm leading-6 text-muted-moss">
-        Isi data pengiriman dan pilih metode pembayaran sebelum melakukan review.
+        Isi data pengiriman dan pilih metode pembayaran sebelum melakukan
+        review.
       </p>
 
-      <div className="mt-8 space-y-5">
-        <div className="space-y-2.5">
-          <label htmlFor="receiver-name" className="block mb-2 text-xs font-bold text-brand-black">
-            Nama Penerima<span className="text-red-600"> *</span>
-          </label>
+      <FieldGroup className="mt-8">
+        <Field>
+          <FieldLabel htmlFor="receiver-name">
+            Nama Penerima <span className="text-destructive">*</span>
+          </FieldLabel>
           <Input
             id="receiver-name"
             type="text"
             required
+            minLength={2}
             maxLength={120}
             value={receiverName}
-            onChange={(e) => onReceiverNameChange(e.target.value)}
+            onChange={(event) => onReceiverNameChange(event.target.value)}
             placeholder="Nama lengkap penerima"
-            endIcon={<User className="size-4 text-muted-moss/60" strokeWidth={1.7} />}
+            endIcon={<User strokeWidth={1.7} />}
           />
-        </div>
+        </Field>
 
-        <div className="space-y-2.5">
-          <label htmlFor="phone-number" className="block mb-2 text-xs font-bold text-brand-black">
-            Nomor Telepon
-          </label>
+        <Field>
+          <FieldLabel htmlFor="phone-number">Nomor Telepon</FieldLabel>
           <Input
             id="phone-number"
             type="tel"
             maxLength={30}
             value={phoneNumber}
-            onChange={(e) => onPhoneNumberChange(e.target.value)}
+            onChange={(event) => onPhoneNumberChange(event.target.value)}
             placeholder="Contoh: 081234567890"
-            endIcon={<Phone className="size-4 text-muted-moss/60" strokeWidth={1.7} />}
+            endIcon={<Phone strokeWidth={1.7} />}
           />
-        </div>
+          <FieldDescription>
+            Opsional, tetapi disarankan untuk koordinasi pengiriman.
+          </FieldDescription>
+        </Field>
 
-        <div className="space-y-2.5">
-          <label
-            htmlFor="shipping-address"
-            className="block mb-2 text-xs font-bold text-brand-black"
-          >
-            Alamat Pengiriman<span className="text-red-600"> *</span>
-          </label>
-
-          <textarea
+        <Field>
+          <FieldLabel htmlFor="shipping-address">
+            Alamat Pengiriman <span className="text-destructive">*</span>
+          </FieldLabel>
+          <Textarea
             id="shipping-address"
             rows={4}
+            required
+            minLength={10}
             maxLength={1000}
             value={shippingAddress}
             placeholder="Masukkan alamat lengkap pengiriman"
             onChange={(event) => {
               onShippingAddressChange(event.target.value);
             }}
-            className="
-              w-full resize-none
-              rounded-sm border
-              border-line-trace
-              bg-transparent
-              px-4 py-3
-              font-body text-xs text-brand-black
-              shadow-none outline-none transition
-              placeholder:text-xs placeholder:text-muted-moss/60
-              focus-visible:border-brand-emerald
-              focus-visible:ring-2
-              focus-visible:ring-brand-emerald/10
-            "
           />
-        </div>
-      </div>
+          <FieldDescription>Minimal 10 karakter.</FieldDescription>
+        </Field>
+      </FieldGroup>
 
       <div className="mt-9">
         <p className="text-xs font-bold text-brand-black">Metode Pembayaran</p>
@@ -155,24 +162,22 @@ export default function ProductCheckoutForm({
         </div>
       </div>
 
-      {errorMessage && <CheckoutErrorMessage message={errorMessage} />}
+      {errorMessage && (
+        <Alert variant="destructive" className="mt-6">
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
+      )}
 
-      <button
+      <Button
         type="button"
+        fullWidth
+        size="lg"
         onClick={onReview}
-        className="
-          group mt-8 flex w-full
-          items-center justify-center
-          gap-3 rounded-sm
-          bg-brand-forest
-          px-6 py-4
-          text-xs font-bold text-white
-          transition hover:bg-brand-black
-        "
+        className="mt-8"
       >
         Lanjut ke Review
-        <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-      </button>
+        <ArrowRight className="transition-transform group-hover/button:translate-x-1" />
+      </Button>
     </>
   );
 }
@@ -197,34 +202,21 @@ function PaymentMethodOption({
   const Icon = method === "qris" ? QrCode : Coins;
 
   return (
-    <button
+    <Button
       type="button"
+      variant="outline"
+      size="lg"
+      fullWidth
       disabled={disabled}
-      onClick={() => {
-        onSelect(method);
-      }}
+      aria-pressed={selected}
+      onClick={() => onSelect(method)}
       className={`
-        relative rounded-xl border
-        p-5 text-left transition
+        relative h-auto min-h-40 flex-col items-start justify-start
+        whitespace-normal rounded-xl p-5 text-left
         ${
           selected
-            ? `
-                border-brand-forest
-                bg-brand-lime/20
-              `
-            : `
-                border-line-trace
-                bg-canvas-pure
-                hover:border-brand-emerald
-              `
-        }
-        ${
-          disabled
-            ? `
-                cursor-not-allowed
-                opacity-45
-              `
-            : ""
+            ? "border-brand-forest bg-brand-lime/20 hover:bg-brand-lime/25"
+            : "bg-canvas-pure"
         }
       `}
     >
@@ -235,20 +227,15 @@ function PaymentMethodOption({
       )}
 
       <Icon className="size-5 text-brand-emerald" />
-      <p className="mt-5 text-sm font-bold text-brand-black">{title}</p>
-      <p className="mt-2 text-[10px] leading-4 text-muted-moss">{description}</p>
-      <p className="mt-5 text-xs font-bold text-brand-forest">{amount}</p>
-    </button>
-  );
-}
-
-export function CheckoutErrorMessage({ message }: { message: string }) {
-  return (
-    <div
-      role="alert"
-      className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs leading-5 text-red-700"
-    >
-      {message}
-    </div>
+      <span className="mt-4 block text-sm font-bold text-brand-black">
+        {title}
+      </span>
+      <span className="mt-2 block text-[10px] font-normal leading-4 text-muted-moss">
+        {description}
+      </span>
+      <span className="mt-auto pt-5 text-xs font-bold text-brand-forest">
+        {amount}
+      </span>
+    </Button>
   );
 }
