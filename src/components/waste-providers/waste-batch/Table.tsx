@@ -115,7 +115,7 @@ export function WasteBatchTable({
         </TableBody>
       </Table>
       {totalPages > 1 && (
-        <div className="flex items-center justify-between border-t border-line-trace px-6 py-4 bg-canvas-warm/10">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-line-trace px-6 py-4 bg-canvas-warm/10">
           <div className="text-xs text-muted-moss">
             Menampilkan{" "}
             <span className="font-semibold text-brand-black">
@@ -131,7 +131,7 @@ export function WasteBatchTable({
             </span>{" "}
             data
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}

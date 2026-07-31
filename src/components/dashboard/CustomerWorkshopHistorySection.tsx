@@ -122,7 +122,7 @@ export default function CustomerWorkshopHistorySection() {
   return (
     <section className="mt-8 overflow-hidden rounded-2xl border border-brand-black/15 bg-canvas-pure">
       {/* Section Header */}
-      <div className="flex items-center justify-between border-b border-line-trace px-6 py-5 sm:px-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-line-trace px-6 py-5 sm:px-8">
         <div>
           <h2 className="font-display text-xl font-bold text-brand-black">
             Riwayat Workshop ({history.length})
@@ -342,7 +342,7 @@ export default function CustomerWorkshopHistorySection() {
                   workshop
                 </p>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
                   <button
                     type="button"
                     disabled={currentPage <= 1}

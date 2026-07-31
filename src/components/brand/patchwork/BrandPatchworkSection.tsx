@@ -4,11 +4,16 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Factory,
   FileImage,
+  Layers,
   Leaf,
   Package,
   RefreshCw,
+  Ruler,
+  Scissors,
   Sparkles,
   Upload,
 } from "lucide-react";
@@ -20,6 +25,25 @@ import type { MaterialOrder } from "@/types/materialOrder";
 type SourceMode = "upload" | "purchased";
 type AiStatus = "idle" | "processing" | "done";
 
+interface CuttingPiece {
+  name: string;
+  qty: string;
+  size: string;
+  note: string;
+}
+
+interface PatternSpecs {
+  productName: string;
+  patternTechnique: string;
+  needleSpec: string;
+  threadSpec: string;
+  materialEfficiency: string;
+  carbonSaved: string;
+  waterSaved: string;
+  cuttingPieces: CuttingPiece[];
+  assemblySteps: string[];
+}
+
 export default function BrandPatchworkSection() {
   const [sourceMode, setSourceMode] = useState<SourceMode>("purchased");
   const [status, setStatus] = useState<AiStatus>("idle");
@@ -28,7 +52,9 @@ export default function BrandPatchworkSection() {
   const [uploadedPreviewUrl, setUploadedPreviewUrl] = useState<string | null>(null);
   const [selectedFileName, setSelectedFileName] = useState("");
   const [aiImageUrl, setAiImageUrl] = useState<string | null>(null);
-  const [promptText, setPromptText] = useState("");
+  const [patternSpecs, setPatternSpecs] = useState<PatternSpecs | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"image" | "specs">("image");
 
   const loadMaterials = useCallback(async () => {
     const res = await getBrandMaterialOrders();
@@ -59,27 +85,57 @@ export default function BrandPatchworkSection() {
     setSelectedFileName(file.name);
     setStatus("idle");
     setAiImageUrl(null);
+    setPatternSpecs(null);
+    setErrorMsg(null);
   }
 
-  function handleGenerate() {
+  async function handleGenerate() {
     if (status === "processing") return;
     setStatus("processing");
+    setErrorMsg(null);
 
-    const materialDesc =
-      sourceMode === "purchased" && selectedMaterial
-        ? `${selectedMaterial.batchTitle} from ${selectedMaterial.providerName}`
-        : selectedFileName || "recycled denim cotton fabric";
+    try {
+      const res = await fetch("/api/patchwork/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          materialTitle:
+            sourceMode === "purchased" && selectedMaterial
+              ? selectedMaterial.batchTitle
+              : selectedFileName || "Denim and Cotton Waste Fabric",
+          providerName:
+            sourceMode === "purchased" && selectedMaterial
+              ? selectedMaterial.providerName
+              : "MURI Recrafting Studio",
+        }),
+      });
 
-    const prompt = `upcycled sustainable fashion catalogue photoshoot, luxury patchwork design made of ${materialDesc}, clean warm editorial studio lighting, zero-waste apparel, 8k detail`;
-    setPromptText(prompt);
+      const data = await res.json();
 
-    const seed = Math.floor(Math.random() * 1000000);
-    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&seed=${seed}`;
+      if (data.success && data.output) {
+        if (data.patternSpecs) {
+          setPatternSpecs(data.patternSpecs);
+        }
 
-    setTimeout(() => {
-      setAiImageUrl(pollinationsUrl);
-      setStatus("done");
-    }, 1500);
+        // Preload Pollinations AI image
+        const img = new window.Image();
+        img.src = data.output;
+        img.onload = () => {
+          setAiImageUrl(data.output);
+          setStatus("done");
+        };
+        img.onerror = () => {
+          setAiImageUrl(data.output);
+          setStatus("done");
+        };
+      } else {
+        setErrorMsg("Gagal memproses AI. Silakan coba lagi.");
+        setStatus("idle");
+      }
+    } catch {
+      setErrorMsg("Terjadi kesalahan jaringan.");
+      setStatus("idle");
+    }
   }
 
   return (
@@ -89,16 +145,16 @@ export default function BrandPatchworkSection() {
         <div className="flex flex-col gap-2 border-b border-line-trace pb-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="font-display text-xl font-bold text-brand-black">
-              Generator Patchwork & Re-Desain AI
+              Generator Patchwork & Spesifikasi Pola AI
             </h2>
             <p className="mt-1 text-xs text-muted-moss">
-              Transformasi limbah kain sisa atau batch material sirkular menjadi rekomendasi pola busana modern via Pollinations AI.
+              Transformasi limbah kain sisa menjadi rincian pola potongan, dimensi (cm), dan instruksi perakitan via Pollinations AI.
             </p>
           </div>
 
           <div className="flex items-center gap-1.5 self-start rounded-full bg-brand-lime/30 px-3 py-1 text-xs font-bold text-brand-forest sm:self-auto">
             <Sparkles className="size-3.5 text-brand-forest" />
-            <span>Pollinations AI Engine</span>
+            <span>Pollinations AI Active</span>
           </div>
         </div>
 
@@ -119,6 +175,8 @@ export default function BrandPatchworkSection() {
                     setSourceMode("purchased");
                     setStatus("idle");
                     setAiImageUrl(null);
+                    setPatternSpecs(null);
+                    setErrorMsg(null);
                   }}
                   className={`inline-flex items-center gap-2 rounded-sm px-4 py-2 text-xs font-bold transition ${
                     sourceMode === "purchased"
@@ -136,6 +194,8 @@ export default function BrandPatchworkSection() {
                     setSourceMode("upload");
                     setStatus("idle");
                     setAiImageUrl(null);
+                    setPatternSpecs(null);
+                    setErrorMsg(null);
                   }}
                   className={`inline-flex items-center gap-2 rounded-sm px-4 py-2 text-xs font-bold transition ${
                     sourceMode === "upload"
@@ -171,10 +231,12 @@ export default function BrandPatchworkSection() {
                             setSelectedMaterialId(item.id);
                             setStatus("idle");
                             setAiImageUrl(null);
+                            setPatternSpecs(null);
+                            setErrorMsg(null);
                           }}
                           className={`flex items-center justify-between rounded-lg border p-3.5 transition cursor-pointer ${
                             selected
-                              ? "border-brand-forest bg-canvas-pure"
+                              ? "border-brand-forest bg-canvas-pure shadow-xs"
                               : "border-line-trace bg-canvas-pure hover:border-brand-forest"
                           }`}
                         >
@@ -221,23 +283,27 @@ export default function BrandPatchworkSection() {
               </div>
             )}
 
+            {errorMsg && (
+              <p className="text-xs font-bold text-red-600">{errorMsg}</p>
+            )}
+
             {/* Action Button */}
             <Button
               variant="default"
               size="md"
               fullWidth
               disabled={status === "processing"}
-              onClick={handleGenerate}
+              onClick={() => void handleGenerate()}
             >
               {status === "processing" ? (
                 <>
                   <RefreshCw className="size-4 animate-spin" />
-                  Pollinations AI Generasi...
+                  Pollinations AI Generasi Pola...
                 </>
               ) : (
                 <>
                   <Sparkles className="size-4 text-brand-lime" />
-                  Hasikan Desain Pola Sirkular
+                  Hasilkan Desain & Spesifikasi Pola
                 </>
               )}
             </Button>
@@ -246,22 +312,45 @@ export default function BrandPatchworkSection() {
           {/* Right Column: AI Result Preview Card */}
           <div className="lg:col-span-6 rounded-xl border border-line-trace bg-canvas-pure p-5 sm:p-6 flex flex-col justify-between">
             <div>
+              {/* Header Tab Bar */}
               <div className="flex items-center justify-between border-b border-line-trace pb-4">
-                <p className="text-xs font-bold uppercase tracking-wide text-brand-black">
-                  Hasil Generasi Pola Patchwork AI
-                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("image")}
+                    className={`rounded-sm px-3 py-1 text-xs font-bold transition ${
+                      activeTab === "image"
+                        ? "bg-brand-forest text-white"
+                        : "bg-canvas-warm text-brand-black hover:bg-line-trace"
+                    }`}
+                  >
+                    Visual Look
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("specs")}
+                    className={`rounded-sm px-3 py-1 text-xs font-bold transition ${
+                      activeTab === "specs"
+                        ? "bg-brand-forest text-white"
+                        : "bg-canvas-warm text-brand-black hover:bg-line-trace"
+                    }`}
+                  >
+                    Spesifikasi Pola (cm)
+                  </button>
+                </div>
+
                 {status === "done" && (
                   <span className="inline-flex items-center gap-1 text-[9px] font-bold text-brand-forest bg-brand-lime/50 px-2.5 py-1 rounded-full uppercase">
-                    <CheckCircle2 className="size-3" /> Pollinations AI Generated
+                    <CheckCircle2 className="size-3" /> Live Pattern Ready
                   </span>
                 )}
               </div>
 
               {status === "idle" && (
-                <div className="flex min-h-[260px] flex-col items-center justify-center text-center py-8">
-                  <Sparkles className="size-8 text-muted-moss/40" />
+                <div className="flex min-h-[280px] flex-col items-center justify-center text-center py-8">
+                  <Scissors className="size-8 text-muted-moss/40" />
                   <p className="mt-3 text-xs font-bold text-brand-black">
-                    Belum Ada Hasil Generasi
+                    Belum Ada Hasil Generasi Pola
                   </p>
                   <p className="mt-1 max-w-xs text-[11px] text-muted-moss">
                     Pilih material sisa atau unggah foto kain di sebelah kiri lalu klik Hasilkan Desain.
@@ -270,24 +359,24 @@ export default function BrandPatchworkSection() {
               )}
 
               {status === "processing" && (
-                <div className="flex min-h-[260px] flex-col items-center justify-center text-center py-8">
+                <div className="flex min-h-[280px] flex-col items-center justify-center text-center py-8">
                   <RefreshCw className="size-8 animate-spin text-brand-forest" />
                   <p className="mt-3 font-display text-base font-bold text-brand-black">
-                    Pollinations AI Menganalisis Tekstur...
+                    AI Menghitung Dimensi & Potongan Pola...
                   </p>
                   <p className="mt-1 text-xs text-muted-moss">
-                    Menggenerasi pola desain busana sirkular secara real-time.
+                    Menghasilkan spesifikasi potongan (cm) dan panduan perakitan zero-waste.
                   </p>
                 </div>
               )}
 
-              {status === "done" && aiImageUrl && (
+              {status === "done" && activeTab === "image" && aiImageUrl && (
                 <div className="mt-4 space-y-4 animate-in fade-in-0">
                   <div className="relative aspect-square w-full overflow-hidden rounded-lg border border-line-trace bg-canvas-warm">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={aiImageUrl}
-                      alt="Hasil Patchwork Pollinations AI"
+                      alt="Hasil Pattern AI"
                       className="size-full object-cover"
                     />
                   </div>
@@ -295,22 +384,79 @@ export default function BrandPatchworkSection() {
                   <div className="rounded-lg border border-line-trace bg-canvas-warm/40 p-4 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-brand-black">
-                        Hasil Pola Patchwork
+                        {patternSpecs?.productName || "Upcycled Fashion Design"}
                       </span>
-                      <span className="text-xs font-bold text-brand-forest truncate max-w-[200px]">
-                        {selectedMaterial?.batchTitle || "Upcycled Textile Design"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-moss">Estimasi Karbon Dicegah</span>
-                      <span className="font-bold text-brand-black flex items-center gap-1">
-                        <Leaf className="size-3 text-brand-emerald" /> 3.4 kg CO₂e
+                      <span className="text-xs font-bold text-brand-forest">
+                        {patternSpecs?.materialEfficiency || "95% Zero-Waste"}
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-moss">Efisiensi Bahan Sisa</span>
-                      <span className="font-bold text-brand-black">94% Zero-Waste</span>
+                      <span className="text-muted-moss">Teknik Potongan</span>
+                      <span className="font-bold text-brand-black">
+                        {patternSpecs?.patternTechnique}
+                      </span>
                     </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-moss">Instruksi Jarum</span>
+                      <span className="font-bold text-brand-black">
+                        {patternSpecs?.needleSpec}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {status === "done" && activeTab === "specs" && patternSpecs && (
+                <div className="mt-4 space-y-4 animate-in fade-in-0 max-h-[380px] overflow-y-auto muri-scrollbar pr-1">
+                  <div className="rounded-lg border border-line-trace bg-canvas-warm/40 p-3.5 space-y-1">
+                    <p className="text-xs font-bold text-brand-black">
+                      {patternSpecs.productName}
+                    </p>
+                    <p className="text-[11px] text-muted-moss">
+                      {patternSpecs.needleSpec} • {patternSpecs.threadSpec}
+                    </p>
+                  </div>
+
+                  {/* Cutting Pieces Table */}
+                  <div>
+                    <p className="mb-2 text-xs font-bold uppercase tracking-wider text-brand-black flex items-center gap-1.5">
+                      <Ruler className="size-3.5 text-brand-emerald" />
+                      Rincian Dimensi Potongan Pola (cm)
+                    </p>
+
+                    <div className="space-y-2">
+                      {patternSpecs.cuttingPieces.map((piece, idx) => (
+                        <div
+                          key={idx}
+                          className="rounded-lg border border-line-trace bg-canvas-pure p-3 text-xs flex items-center justify-between"
+                        >
+                          <div>
+                            <p className="font-bold text-brand-black">{piece.name}</p>
+                            <p className="mt-0.5 text-[10px] text-muted-moss">{piece.note}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className="font-mono font-bold text-brand-forest">{piece.size}</span>
+                            <p className="text-[10px] font-bold text-brand-black">{piece.qty}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Assembly Guide */}
+                  <div>
+                    <p className="mb-2 text-xs font-bold uppercase tracking-wider text-brand-black flex items-center gap-1.5">
+                      <Layers className="size-3.5 text-brand-emerald" />
+                      Tahapan Perakitan Zero-Waste
+                    </p>
+
+                    <ol className="space-y-1.5 list-decimal list-inside text-xs leading-relaxed text-brand-black">
+                      {patternSpecs.assemblySteps.map((step, idx) => (
+                        <li key={idx} className="bg-canvas-warm/30 p-2 rounded border border-line-trace/60">
+                          {step}
+                        </li>
+                      ))}
+                    </ol>
                   </div>
                 </div>
               )}
@@ -324,6 +470,7 @@ export default function BrandPatchworkSection() {
                   onClick={() => {
                     setStatus("idle");
                     setAiImageUrl(null);
+                    setPatternSpecs(null);
                   }}
                 >
                   Simpan ke Draft Katalog

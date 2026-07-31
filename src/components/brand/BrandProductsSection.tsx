@@ -336,7 +336,7 @@ export default function BrandProductsSection() {
                 <span className="font-bold text-brand-black">{filteredProducts.length}</span> produk
               </p>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
                 <button
                   type="button"
                   disabled={currentPage === 1}

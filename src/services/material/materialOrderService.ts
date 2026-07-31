@@ -10,7 +10,7 @@ import { getMaterialBatchByCode } from "./materialService";
 
 const STORAGE_KEY = "muri_brand_material_orders_v1";
 
-function getStoredMaterialOrders(): MaterialOrder[] {
+export function getStoredMaterialOrders(): MaterialOrder[] {
   if (typeof window === "undefined") return getInitialMockOrders();
   try {
     const raw = localStorage.getItem(STORAGE_KEY);

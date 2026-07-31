@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
+  ArrowRight,
+  Check,
   CheckCircle2,
   ChevronRight,
   Factory,
@@ -13,6 +15,7 @@ import {
   Package,
   Phone,
   QrCode,
+  ShieldAlert,
   ShieldCheck,
   User,
 } from "lucide-react";
@@ -21,11 +24,19 @@ import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { formatIdr } from "@/lib/productDetail";
 import { createMaterialOrder, getMaterialBatchByCode } from "@/services/material";
+import { supabase } from "@/lib/supabaseClient";
 import type { MaterialDetailItem } from "@/types/material";
 
 interface BrandMaterialCheckoutProps {
   batchCode: string;
   requestedWeightKg: number;
+}
+
+interface FieldErrors {
+  receiverName?: string;
+  phoneNumber?: string;
+  shippingAddress?: string;
+  general?: string;
 }
 
 export default function BrandMaterialCheckout({
@@ -38,6 +49,9 @@ export default function BrandMaterialCheckout({
   const [isLoadingMaterial, setIsLoadingMaterial] = useState(true);
   const [materialError, setMaterialError] = useState<string | null>(null);
 
+  const [isCustomer, setIsCustomer] = useState(false);
+  const [checkingRole, setCheckingRole] = useState(true);
+
   const [weightKg, setWeightKg] = useState<number>(requestedWeightKg);
   const [receiverName, setReceiverName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -45,13 +59,41 @@ export default function BrandMaterialCheckout({
   const [paymentMethod, setPaymentMethod] = useState<"qris">("qris");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [orderCreatedSuccess, setOrderCreatedSuccess] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   useEffect(() => {
-    async function loadMaterial() {
+    async function loadMaterialAndAuth() {
       setIsLoadingMaterial(true);
       setMaterialError(null);
+
+      // Check role & auto-fill profile data
+      try {
+        const { data: authData } = await supabase.auth.getUser();
+        if (authData.user) {
+          const { data: brandData } = await supabase
+            .from("brands")
+            .select("*")
+            .eq("id", authData.user.id)
+            .maybeSingle();
+
+          if (!brandData) {
+            setIsCustomer(true);
+          } else {
+            // Auto-fill profile information
+            const defaultName = brandData.brand_name || authData.user.user_metadata?.full_name || "";
+            const defaultPhone = brandData.active_number || authData.user.user_metadata?.phone || "";
+            const defaultAddress = brandData.warehouse_address || brandData.address || "";
+
+            setReceiverName((prev) => prev || defaultName);
+            setPhoneNumber((prev) => prev || defaultPhone);
+            setShippingAddress((prev) => prev || defaultAddress);
+          }
+        }
+      } catch {
+        // Continue
+      } finally {
+        setCheckingRole(false);
+      }
 
       const res = await getMaterialBatchByCode(batchCode);
       if (!res.success || !res.data) {
@@ -70,10 +112,10 @@ export default function BrandMaterialCheckout({
       setIsLoadingMaterial(false);
     }
 
-    void loadMaterial();
+    void loadMaterialAndAuth();
   }, [batchCode, requestedWeightKg]);
 
-  if (isLoadingMaterial) {
+  if (isLoadingMaterial || checkingRole) {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center p-8 text-center font-body">
         <LoaderCircle className="size-8 animate-spin text-brand-emerald" />
@@ -84,9 +126,38 @@ export default function BrandMaterialCheckout({
     );
   }
 
+  // Restrict Customer role from accessing material purchasing
+  if (isCustomer) {
+    return (
+      <div className="mx-auto max-w-xl rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center font-body">
+        <ShieldAlert className="mx-auto size-10 text-amber-600" />
+        <h2 className="mt-3 font-display text-xl font-bold text-brand-black">
+          Khusus Akun Brand Fashion
+        </h2>
+        <p className="mt-2 text-xs leading-relaxed text-muted-moss">
+          Pembelian material sisa limbah pabrik dari Waste Provider hanya diperuntukkan bagi akun berjenis Brand Fashion. Akun Customer Anda dapat digunakan untuk membeli produk sirkular dan mendaftar workshop.
+        </p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Link
+            href="/brand/register"
+            className="inline-flex items-center gap-2 rounded-sm bg-brand-forest px-5 py-3 text-xs font-bold text-white transition hover:bg-brand-black"
+          >
+            Daftar Akun Brand
+          </Link>
+          <Link
+            href="/material"
+            className="inline-flex items-center gap-2 rounded-sm border border-brand-black/15 bg-canvas-pure px-5 py-3 text-xs font-bold text-brand-black transition hover:bg-canvas-warm"
+          >
+            Lihat Katalog Sourcing
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   if (materialError || !material) {
     return (
-      <div className="mx-auto max-w-lg rounded-2xl border border-brand-black/15 bg-canvas-pure p-8 text-center font-body shadow-sm">
+      <div className="mx-auto max-w-lg rounded-2xl border border-brand-black/15 bg-canvas-pure p-8 text-center font-body">
         <h2 className="font-display text-xl font-bold text-brand-black">
           Batch Material Tidak Ditemukan
         </h2>
@@ -110,20 +181,28 @@ export default function BrandMaterialCheckout({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setFormError(null);
+    setFieldErrors({});
+
+    const errors: FieldErrors = {};
 
     if (!receiverName.trim()) {
-      setFormError("Nama penerima wajib diisi.");
-      return;
+      errors.receiverName = "Nama penerima wajib diisi.";
+    } else if (receiverName.trim().length < 2) {
+      errors.receiverName = "Nama penerima minimal 2 karakter.";
     }
 
     if (!phoneNumber.trim()) {
-      setFormError("Nomor telepon penerima wajib diisi.");
-      return;
+      errors.phoneNumber = "Nomor telepon penerima wajib diisi.";
     }
 
     if (!shippingAddress.trim()) {
-      setFormError("Alamat pengiriman wajib diisi.");
+      errors.shippingAddress = "Alamat pengiriman wajib diisi.";
+    } else if (shippingAddress.trim().length < 10) {
+      errors.shippingAddress = "Alamat pengiriman minimal 10 karakter.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
@@ -133,25 +212,27 @@ export default function BrandMaterialCheckout({
       const res = await createMaterialOrder({
         batchCode: activeMaterial.batchCode,
         weightKg,
-        receiverName,
-        phoneNumber,
-        shippingAddress,
+        receiverName: receiverName.trim(),
+        phoneNumber: phoneNumber.trim(),
+        shippingAddress: shippingAddress.trim(),
         paymentMethod,
       });
 
       if (!res.success || !res.data) {
-        setFormError(
-          typeof res.error === "string"
-            ? res.error
-            : "Gagal membuat pesanan material.",
-        );
+        setFieldErrors({
+          general:
+            typeof res.error === "string"
+              ? res.error
+              : "Gagal membuat pesanan material.",
+        });
         return;
       }
 
-      setOrderCreatedSuccess(res.data.id);
       router.push("/brand/dashboard/sourcing/purchases");
     } catch {
-      setFormError("Terjadi kesalahan saat memproses pesanan.");
+      setFieldErrors({
+        general: "Terjadi kesalahan saat memproses pesanan.",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -243,17 +324,17 @@ export default function BrandMaterialCheckout({
           <section className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8 space-y-5">
             <div className="flex items-center gap-2 text-xs font-bold uppercase text-brand-emerald">
               <MapPin className="size-4" />
-              <span>Data Penerima & Alamat Pengiriman Brand</span>
+              <span>Data Penerima &amp; Alamat Pengiriman Brand</span>
             </div>
 
-            {formError && (
-              <div className="rounded-sm border border-error-rust/30 bg-error-rust/10 p-3 text-xs font-medium text-error-rust">
-                {formError}
-              </div>
+            {fieldErrors.general && (
+              <p className="text-xs font-medium text-error-rust">
+                {fieldErrors.general}
+              </p>
             )}
 
             {/* Nama Penerima */}
-            <div className="space-y-2.5">
+            <div className="space-y-1.5">
               <label className="block mb-2 text-xs font-bold text-brand-black">
                 Nama Penerima / Team Sourcing <span className="text-error-rust">*</span>
               </label>
@@ -261,14 +342,24 @@ export default function BrandMaterialCheckout({
                 type="text"
                 required
                 value={receiverName}
-                onChange={(e) => setReceiverName(e.target.value)}
+                onChange={(e) => {
+                  setReceiverName(e.target.value);
+                  if (fieldErrors.receiverName) {
+                    setFieldErrors((prev) => ({ ...prev, receiverName: undefined }));
+                  }
+                }}
                 placeholder="Contoh: Budi Prasetyo (Team Sourcing Brand)"
                 startIcon={<User className="size-4 text-muted-moss/60" />}
               />
+              {fieldErrors.receiverName && (
+                <p className="mt-1 text-[11px] font-medium text-error-rust">
+                  {fieldErrors.receiverName}
+                </p>
+              )}
             </div>
 
             {/* Phone Number */}
-            <div className="space-y-2.5">
+            <div className="space-y-1.5">
               <label className="block mb-2 text-xs font-bold text-brand-black">
                 Nomor Telepon Penerima <span className="text-error-rust">*</span>
               </label>
@@ -276,14 +367,24 @@ export default function BrandMaterialCheckout({
                 type="tel"
                 required
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
+                onChange={(e) => {
+                  setPhoneNumber(e.target.value);
+                  if (fieldErrors.phoneNumber) {
+                    setFieldErrors((prev) => ({ ...prev, phoneNumber: undefined }));
+                  }
+                }}
                 placeholder="Contoh: 081234567890"
                 startIcon={<Phone className="size-4 text-muted-moss/60" />}
               />
+              {fieldErrors.phoneNumber && (
+                <p className="mt-1 text-[11px] font-medium text-error-rust">
+                  {fieldErrors.phoneNumber}
+                </p>
+              )}
             </div>
 
             {/* Shipping Address */}
-            <div className="space-y-2.5">
+            <div className="space-y-1.5">
               <label className="block mb-2 text-xs font-bold text-brand-black">
                 Alamat Pengiriman Gudang Brand <span className="text-error-rust">*</span>
               </label>
@@ -291,45 +392,54 @@ export default function BrandMaterialCheckout({
                 rows={3}
                 required
                 value={shippingAddress}
-                onChange={(e) => setShippingAddress(e.target.value)}
+                onChange={(e) => {
+                  setShippingAddress(e.target.value);
+                  if (fieldErrors.shippingAddress) {
+                    setFieldErrors((prev) => ({ ...prev, shippingAddress: undefined }));
+                  }
+                }}
                 placeholder="Masukkan alamat lengkap gudang / workshop brand Anda..."
               />
+              {fieldErrors.shippingAddress && (
+                <p className="mt-1 text-[11px] font-medium text-error-rust">
+                  {fieldErrors.shippingAddress}
+                </p>
+              )}
             </div>
           </section>
 
-          {/* Payment Method Selector */}
+          {/* Payment Method Selector - Harmonized with Product Checkout */}
           <section className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8 space-y-4">
             <div className="flex items-center gap-2 text-xs font-bold uppercase text-brand-emerald">
               <QrCode className="size-4" />
               <span>Metode Pembayaran</span>
             </div>
 
-            <label className="flex cursor-pointer items-center justify-between rounded-xl border border-brand-emerald bg-brand-lime/20 p-4 transition">
-              <div className="flex items-center gap-3">
-                <div className="flex size-9 items-center justify-center rounded-lg bg-brand-lime text-brand-forest font-bold">
-                  <QrCode className="size-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-brand-black">QRIS Standar MURI</p>
-                  <p className="text-[10px] text-muted-moss">
-                    Bayar cepat via GoPay, OVO, ShopeePay, DANA, atau M-Banking.
-                  </p>
-                </div>
-              </div>
-              <input
-                type="radio"
-                name="payment"
-                checked={paymentMethod === "qris"}
-                onChange={() => setPaymentMethod("qris")}
-                className="size-4 accent-brand-forest"
-              />
-            </label>
+            <div className="mt-4 grid gap-3 sm:grid-cols-1">
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("qris")}
+                className="relative rounded-xl border border-brand-forest bg-brand-lime/20 p-5 text-left transition"
+              >
+                <span className="absolute right-4 top-4 flex size-5 items-center justify-center rounded-full bg-brand-forest text-white">
+                  <Check className="size-3" />
+                </span>
+                <QrCode className="size-5 text-brand-emerald" />
+                <p className="mt-4 text-sm font-bold text-brand-black">QRIS Standar MURI</p>
+                <p className="mt-1 text-[10px] leading-4 text-muted-moss">
+                  Bayar cepat via GoPay, OVO, ShopeePay, DANA, atau M-Banking.
+                </p>
+                <p className="mt-4 text-xs font-bold text-brand-forest">
+                  {formatIdr(totalPriceIdr)}
+                </p>
+              </button>
+            </div>
           </section>
         </div>
 
-        {/* Order Summary Right (1 Col Sticky) */}
+        {/* Order Summary Right (1 Col Sticky, Harmonized with Product Checkout) */}
         <div className="space-y-6">
-          <section className="sticky top-24 rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8 space-y-6 shadow-sm">
+          <section className="sticky top-24 rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8 space-y-6">
             <h3 className="font-display text-lg font-bold text-brand-black border-b border-line-trace pb-4">
               Ringkasan Pembayaran
             </h3>
@@ -359,7 +469,7 @@ export default function BrandMaterialCheckout({
               type="button"
               disabled={isSubmitting}
               onClick={handleSubmit}
-              className="flex w-full items-center justify-center gap-2 rounded-sm bg-brand-forest px-6 py-4 text-xs font-bold text-white transition hover:bg-brand-black disabled:opacity-50"
+              className="group mt-6 flex w-full items-center justify-center gap-3 rounded-sm bg-brand-forest px-6 py-4 text-xs font-bold text-white transition hover:bg-brand-black disabled:opacity-50 cursor-pointer"
             >
               {isSubmitting ? (
                 <>
@@ -369,7 +479,8 @@ export default function BrandMaterialCheckout({
               ) : (
                 <>
                   <CheckCircle2 className="size-4" />
-                  Buat Pesanan & Bayar QRIS
+                  Buat Pesanan &amp; Bayar QRIS
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                 </>
               )}
             </button>

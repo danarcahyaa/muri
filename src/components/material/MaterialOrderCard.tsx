@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Leaf, Minus, Plus } from "lucide-react";
+import { ArrowRight, Leaf, Minus, Plus, ShieldAlert } from "lucide-react";
 
 import { useMaterialOrder } from "@/hooks/material/useMaterialOrder";
+import { supabase } from "@/lib/supabaseClient";
 
 interface MaterialOrderCardProps {
   slug: string;
@@ -26,6 +28,30 @@ export default function MaterialOrderCard({
   minimumOrderKg,
   orderStepKg,
 }: MaterialOrderCardProps) {
+  const [isCustomer, setIsCustomer] = useState(false);
+
+  useEffect(() => {
+    async function checkRole() {
+      try {
+        const { data: authData } = await supabase.auth.getUser();
+        if (authData.user) {
+          const { data: brandData } = await supabase
+            .from("brands")
+            .select("id")
+            .eq("id", authData.user.id)
+            .maybeSingle();
+
+          if (!brandData) {
+            setIsCustomer(true);
+          }
+        }
+      } catch {
+        // Continue
+      }
+    }
+    void checkRole();
+  }, []);
+
   const {
     quantity,
     normalizedQuantity,
@@ -33,7 +59,6 @@ export default function MaterialOrderCard({
     canOrder,
     canDecrease,
     canIncrease,
-    loginHref,
     handleQuantityInput,
     updateQuantity,
     commitQuantity,
@@ -45,16 +70,30 @@ export default function MaterialOrderCard({
     orderStepKg,
   });
 
+  if (isCustomer) {
+    return (
+      <aside className="rounded-2xl border border-amber-200 bg-amber-50 p-6 sm:p-7 text-center font-body">
+        <div className="flex items-center justify-center gap-2 text-xs font-bold text-amber-800 uppercase tracking-tight">
+          <ShieldAlert className="size-4 text-amber-600" />
+          <span>Sourcing Material Sirkular</span>
+        </div>
+        <p className="mt-3 text-xs leading-relaxed text-amber-900/80">
+          Katalog material sisa kain ini disediakan khusus untuk produsen & Brand Fashion sirkular. Akun Customer Anda dapat digunakan untuk berbelanja produk sirkular dan mendaftar workshop.
+        </p>
+        <Link
+          href="/brand/register"
+          className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-sm bg-brand-forest px-5 py-3.5 text-xs font-bold text-white transition hover:bg-brand-black"
+        >
+          Daftar / Masuk Akun Brand
+        </Link>
+      </aside>
+    );
+  }
+
   return (
-    <aside
-      className="
-        rounded-2xl border border-brand-black/15
-        bg-canvas-pure p-6 sm:p-7
-      "
-    >
+    <aside className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-7">
       <div className="flex items-center gap-3 text-brand-emerald">
         <Leaf className="size-4" strokeWidth={2} />
-
         <h2 className="text-xs font-bold uppercase tracking-tight">
           Ringkasan Pesanan
         </h2>
@@ -75,12 +114,7 @@ export default function MaterialOrderCard({
               aria-label="Kurangi volume"
               onClick={() => updateQuantity(quantity - orderStepKg)}
               disabled={!canDecrease}
-              className="
-                flex size-9 items-center justify-center rounded-md
-                text-brand-forest transition
-                hover:bg-canvas-warm
-                disabled:cursor-not-allowed disabled:opacity-35
-              "
+              className="flex size-9 items-center justify-center rounded-md text-brand-forest transition hover:bg-canvas-warm disabled:cursor-not-allowed disabled:opacity-35"
             >
               <Minus className="size-4" />
             </button>
@@ -100,15 +134,7 @@ export default function MaterialOrderCard({
                 }
               }}
               aria-label="Volume material dalam kilogram"
-              className="
-                h-9 w-16 border-x border-line-trace
-                bg-transparent text-center text-xs font-bold
-                text-brand-black outline-none
-                disabled:cursor-not-allowed disabled:opacity-50
-                [appearance:textfield]
-                [&::-webkit-inner-spin-button]:appearance-none
-                [&::-webkit-outer-spin-button]:appearance-none
-              "
+              className="h-9 w-16 border-x border-line-trace bg-transparent text-center text-xs font-bold text-brand-black outline-none disabled:cursor-not-allowed disabled:opacity-50 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
 
             <button
@@ -116,12 +142,7 @@ export default function MaterialOrderCard({
               aria-label="Tambah volume"
               onClick={() => updateQuantity(quantity + orderStepKg)}
               disabled={!canIncrease}
-              className="
-                flex size-9 items-center justify-center rounded-md
-                text-brand-forest transition
-                hover:bg-canvas-warm
-                disabled:cursor-not-allowed disabled:opacity-35
-              "
+              className="flex size-9 items-center justify-center rounded-md text-brand-forest transition hover:bg-canvas-warm disabled:cursor-not-allowed disabled:opacity-35"
             >
               <Plus className="size-4" />
             </button>
@@ -146,14 +167,7 @@ export default function MaterialOrderCard({
       {canOrder ? (
         <Link
           href={`/material/${encodeURIComponent(slug)}/checkout?quantity=${normalizedQuantity}`}
-          className="
-            group mt-6 flex w-full items-center
-            justify-center gap-3 rounded-sm
-            bg-brand-forest px-6 py-4
-            text-xs font-bold text-canvas-pure
-            transition duration-300
-            hover:bg-brand-black
-          "
+          className="group mt-6 flex w-full items-center justify-center gap-3 rounded-sm bg-brand-forest px-6 py-4 text-xs font-bold text-canvas-pure transition duration-300 hover:bg-brand-black"
         >
           Beli &amp; Ajukan Pembelian Material
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
@@ -162,12 +176,7 @@ export default function MaterialOrderCard({
         <button
           type="button"
           disabled
-          className="
-            mt-6 flex w-full cursor-not-allowed
-            items-center justify-center rounded-sm
-            bg-muted-moss/25 px-6 py-4
-            text-xs font-bold text-muted-moss
-          "
+          className="mt-6 flex w-full cursor-not-allowed items-center justify-center rounded-sm bg-muted-moss/25 px-6 py-4 text-xs font-bold text-muted-moss"
         >
           Stok Tidak Memenuhi Minimum
         </button>
