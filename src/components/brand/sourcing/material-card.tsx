@@ -9,20 +9,25 @@ import type { SourcingWastePostItem } from "@/types/sourcing";
 
 interface MaterialCardProps {
   item: SourcingWastePostItem;
-  isSaved: boolean;
-  onToggleSave: (item: SourcingWastePostItem) => void;
+  isSaved?: boolean;
+  onToggleSave?: (item: SourcingWastePostItem) => void;
+  onSelect?: (item: SourcingWastePostItem) => void;
 }
 
 export function MaterialCard({
   item,
-  isSaved,
+  isSaved = false,
   onToggleSave,
+  onSelect,
 }: MaterialCardProps): ReactElement {
   const fallbackImage =
     "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?q=80&w=600&auto=format&fit=crop";
 
   return (
-    <Card className="group overflow-hidden flex flex-col hover:border-brand-emerald/40 transition-all duration-200 shadow-2xs">
+    <Card
+      onClick={() => onSelect?.(item)}
+      className="group overflow-hidden flex flex-col rounded-md border border-brand-black/15 bg-canvas-pure hover:border-brand-forest/60 transition-all duration-200 shadow-none cursor-pointer"
+    >
       {/* Thumbnail Image Container */}
       <div className="relative w-full aspect-3/2 bg-canvas-warm/50 overflow-hidden">
         <img
@@ -36,7 +41,7 @@ export function MaterialCard({
 
         {/* Fabric Category Badge Top-Left */}
         <div className="absolute top-2.5 left-2.5">
-          <Badge variant="secondary" className="bg-canvas-pure/90 text-brand-black backdrop-blur-xs font-bold border-line-trace/60 shadow-xs">
+          <Badge variant="secondary" className="bg-canvas-pure/90 text-brand-black backdrop-blur-xs font-bold border border-brand-black/15 rounded-sm shadow-none">
             {item.categoryName}
           </Badge>
         </div>
@@ -46,14 +51,14 @@ export function MaterialCard({
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            onToggleSave(item);
+            onToggleSave?.(item);
           }}
           title={isSaved ? "Hapus dari simpanan" : "Simpan material"}
           aria-label={isSaved ? "Hapus dari simpanan" : "Simpan material"}
-          className={`absolute top-2.5 right-2.5 p-2 rounded-full backdrop-blur-md transition-all ${
+          className={`absolute top-2.5 right-2.5 p-1.5 rounded-sm backdrop-blur-md transition-all ${
             isSaved
-              ? "bg-black text-white shadow-md"
-              : "bg-canvas-pure/85 text-brand-black hover:bg-canvas-pure hover:text-brand-emerald shadow-xs"
+              ? "bg-brand-black text-white shadow-none"
+              : "bg-canvas-pure/90 text-brand-black hover:bg-canvas-pure hover:text-brand-forest border border-brand-black/15 shadow-none"
           }`}
         >
           <Bookmark

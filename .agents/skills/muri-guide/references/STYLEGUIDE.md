@@ -89,13 +89,64 @@ Komposisi tata letak 3 kolom kartu untuk memetakan alur kerja multi-sektor MURI:
 ### **Floating Action Chat (`floating-action-chat`)**
 Tombol melayang melingkar sempurna (`rounded-full`) di sisi kanan layar berwarna dasar `#C8F169` (Lime) dengan ikon chat murni hitam pekat di tengahnya, berfungsi sebagai pusat bantuan atau edukasi interaktif sirkular.
 
+## Brand Portal & Dashboard Style Guide
+
+### Overview & Visual Philosophy
+Antarmuka modul/portal Brand dirancang untuk menyajikan pengalaman SaaS *Enterprise Waste Management* yang intuitif, profesional, dan bersih (*clean & structured workspace*). Berbeda dengan area publik yang kontras ekstrim antar zona, area Brand berfokus pada efisiensi kerja, visualisasi data keberlanjutan (*impact metrics*), serta transparansi rantai pasok material limbah.
+
+### Layout & Navigation Architecture
+- **Desktop Sidebar (`BrandSidebar`)**:
+  - Lebar tetap `220px` (`w-[220px]`), posisi *sticky full-height* (`lg:sticky lg:top-0 lg:h-screen`).
+  - Latar belakang *Pure White Canvas* (`bg-canvas-pure` / `#FBFAF6`) dengan garis batas kanan 1px `border-brand-black/15`.
+  - Navigasi dikelompokkan secara logis (`Workspace`, `Produk`, `Sourcing Limbah`) dengan label kelompok *uppercase* `text-[11px] font-medium text-muted-moss`.
+  - **Active State Nav Item**: `bg-brand-lime/65 text-brand-black` dengan sudut melengkung `rounded-md`, teks `text-xs font-semibold`, dan ikon Lucide `strokeWidth={1.8}`.
+  - **Hover State Nav Item**: `hover:bg-canvas-warm hover:text-brand-black text-muted-moss`.
+- **Mobile Navigation Drawer**:
+  - Header sticky top `h-16 bg-canvas-pure border-b border-brand-black/15` dengan tombol menu hamburger `size-10 border border-brand-black/15 rounded-sm`.
+  - Drawer slide-out menggunakan komponen `Sheet` (`w-[260px] p-0 bg-canvas-pure border-r border-brand-black/15`).
+- **Main Workspace Container**:
+  - Lebar maksimum `max-w-[1320px]` terpusat (`mx-auto`), padding `px-5 py-10 sm:px-6 lg:px-8 lg:py-14`, dan jarak vertikal antar modul `space-y-10`.
+
+### Color Application in Brand Module
+- **Impact Accent Gradient (`bg-gradient-to-br from-brand-forest to-[#315F35]`)**:
+  - Digunakan khusus pada kartu KPI utama dampak lingkungan (*Limbah Terselamatkan* & *Emisi CO2 Terhindar*).
+  - Menggunakan teks angka masif berwarna **Lime Eco-Neon** (`#C8F169` / `text-brand-lime`) menggunakan font display `Plus Jakarta Sans` (`font-display text-4xl sm:text-5xl font-medium tracking-tight`).
+- **Card & Surface Standards**:
+  - **Standard Metric Card**: Latar `bg-canvas-pure` (`#FBFAF6`) dengan garis keliling 1px `border border-brand-black/15` dan sudut melengkung besar `rounded-2xl` (`p-6`).
+  - **Surface Highlights**: `bg-canvas-warm` (`#F5F3EC`) atau `bg-canvas-warm/55` untuk wadah profil pengguna di footer sidebar dan area sekunder.
+- **Action & Status Colors**:
+  - **Primary CTA**: Tombol solid lime `bg-brand-lime text-brand-black hover:bg-brand-lime/90 rounded-sm font-semibold`.
+  - **Secondary Action**: Tombol outline `border border-brand-black/15 text-brand-black hover:bg-canvas-warm rounded-sm`.
+  - **Destructive / Sign Out**: Teks/ikon `text-error-rust` dengan state hover `hover:bg-error-rust/[0.08]`.
+
+### Brand Components & UI Patterns
+- **Brand KPICards (`BrandKPICards`)**:
+  - Grid 4 kolom responsif (`grid gap-5 sm:grid-cols-2 lg:grid-cols-4`).
+  - Menyandingkan 2 kartu dampak lingkungan bernuansa hijau gelap pekat dengan 2 kartu data operasional bernuansa putih bersih.
+- **Earth Impact Metrics Widget (`EarthImpactMetrics`)**:
+  - Visualisasi metrik kontribusi ekologi brand dengan skor keberlanjutan dan rincian penghematan emisi.
+- **Quick Actions Nav (`QuickActionsNav`)**:
+  - Kartu pintasan akses cepat ke fitur inti Brand (Patchwork Studio, Marketplace Sourcing, Manajemen Produk).
+- **Data Tables & Management (Products, Orders, Sourcing)**:
+  - Struktur tabel bersih (`Table`, `TableHeader`, `TableRow`, `TableCell`) dibingkai dengan `border border-brand-black/15 rounded-xl bg-canvas-pure`.
+  - Header tabel menggunakan `bg-canvas-warm/40 text-muted-moss text-xs font-medium`.
+  - Indikator status berbentuk *pill badge* (`rounded-full px-2.5 py-0.5 text-xs font-semibold`):
+    - **Published / Active**: `bg-brand-forest/10 text-brand-forest` atau `bg-brand-lime/50 text-brand-black`.
+    - **Draft / Inactive**: `bg-muted-moss/10 text-muted-moss`.
+    - **Processing / Pending**: `bg-amber-500/10 text-amber-700`.
+    - **Cancelled / Out of Stock**: `bg-error-rust/10 text-error-rust`.
+
 ## Do's and Don'ts
 
 ### Do
 - Gunakan warna hijau hutan pekat `#0C382C` sebagai latar belakang penuh pelindung untuk memberikan aura teknologi premium pada bagian atas halaman.
 - Pastikan semua headline utama menggunakan font `Plus Jakarta Sans` dengan ketebalan **Bold (700)** dan dikunci rapat menggunakan modifier `tracking-tight` atau `tracking-tighter` di Tailwind.
+- Gunakan `bg-brand-lime/65` untuk sorotan navigasi aktif di sidebar Brand agar selaras dengan identitas aksen MURI.
+- Pertahankan konsistensi `border-brand-black/15` pada seluruh kartu, tabel, dan pembatas navigasi area Brand.
 - Tampilkan foto lembar perca asli secara jujur berdampingan dengan gambar baju hasil rekayasa kecerdasan buatan.
 
 ### Don't
-- Jangan pernah mencampur skema warna latar belakang hangat `#F5F3EC` dengan bayangan komponen (*drop shadows*) ; andalkan pembatas garis tipis 1px (`Hairline Border` warna `#C2C9C6`).
+- Jangan pernah mencampur skema warna latar belakang hangat `#F5F3EC` dengan bayangan komponen (*drop shadows*) ; andalkan pembatas garis tipis 1px (`Hairline Border` warna `#C2C9C6` atau `border-brand-black/15`).
 - Jangan gunakan warna hijau limau neon `#C8F169` sebagai warna teks tubuh (*body text*); batasi penggunaannya hanya untuk tombol aksi, ikon, dan teks penunjuk sub-header kecil.
+- Jangan menggunakan latar belakang gelap pekat (`#0C382C`) untuk seluruh halaman dashboard Brand; batasi warna pekat hanya pada kartu KPI dampak dan aksen tertentu.
+

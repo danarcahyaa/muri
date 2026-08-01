@@ -12,7 +12,7 @@ import {
   UserRound,
 } from "lucide-react";
 
-import { CheckoutErrorMessage } from "@/components/product/checkout/ProductCheckoutForm";
+import { CheckoutErrorMessage } from "@/components/product/ProductCheckoutForm";
 import type { CustomerCheckoutData } from "@/types/customerCheckout";
 
 interface ProductCheckoutReviewProps {

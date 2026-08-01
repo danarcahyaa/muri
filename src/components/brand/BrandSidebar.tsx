@@ -74,6 +74,11 @@ const brandNavigation: NavigationGroup[] = [
     groupName: "Sourcing Limbah",
     items: [
       {
+        label: "Cari Limbah",
+        href: "/brand/dashboard/sourcing/search",
+        icon: Search,
+      },
+      {
         label: "Kelola",
         href: "/brand/dashboard/sourcing/manage",
         icon: Settings2,
