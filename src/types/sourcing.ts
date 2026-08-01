@@ -4,6 +4,8 @@ export interface SourcingFilterInput {
   maxPrice?: number;
   minOrderKg?: number;
   categoryNames?: string[];
+  location?: string;
+  page?: number;
 }
 
 export interface SourcingWastePostItem {
@@ -16,6 +18,7 @@ export interface SourcingWastePostItem {
   detailsAndConditions: string;
   status: string;
   providerName: string;
+  providerLocation?: string;
   imageUrl: string | null;
   createdAt: string | null;
   isSaved?: boolean;

@@ -21,9 +21,20 @@ interface DbSourcingRow {
   weight_kg: number;
   status: string;
   created_at: string;
-  fabric_categories: { name: string } | null;
-  waste_providers: { company_name: string } | null;
+  fabric_categories: { name: string } | { name: string }[] | null;
+  waste_providers:
+    | { company_name: string; address?: string | null }
+    | { company_name: string; address?: string | null }[]
+    | null;
   waste_post_media: DbSourcingMedia[] | null;
+}
+
+function unwrapRelation<T>(value: T | T[] | null | undefined): T | null {
+  if (!value) return null;
+  if (Array.isArray(value)) {
+    return value.length > 0 ? value[0] : null;
+  }
+  return value;
 }
 
 /**
@@ -52,7 +63,8 @@ export async function getWastePosts(
           name
         ),
         waste_providers (
-          company_name
+          company_name,
+          address
         ),
         waste_post_media (
           media_url,
@@ -84,47 +96,85 @@ export async function getWastePosts(
 
     const rawRows = (data || []) as unknown as DbSourcingRow[];
     let items: SourcingWastePostItem[] = rawRows.map((row) => {
+      const provider = unwrapRelation(row.waste_providers);
+      const category = unwrapRelation(row.fabric_categories);
       const mediaList = row.waste_post_media || [];
       const firstImage =
         mediaList.find((m) => m.media_type === "image")?.media_url ||
         mediaList[0]?.media_url ||
         null;
 
+      const providerName =
+        typeof provider?.company_name === "string"
+          ? provider.company_name
+          : "Waste Provider";
+
+      const providerLocation =
+        typeof provider?.address === "string" && provider.address.trim()
+          ? provider.address
+          : "Denpasar, Bali";
+
+      const categoryName =
+        typeof category?.name === "string" ? category.name : "Lainnya";
+
       return {
-        id: row.id,
+        id: String(row.id),
         customFabricName:
-          row.custom_fabric_name ||
-          row.fabric_categories?.name ||
-          "Limbah Kain Perca",
-        categoryName: row.fabric_categories?.name || "Lainnya",
+          typeof row.custom_fabric_name === "string" && row.custom_fabric_name.trim()
+            ? row.custom_fabric_name
+            : categoryName !== "Lainnya"
+            ? categoryName
+            : "Limbah Kain Perca",
+        categoryName,
         pricePerKg: Number(row.price_per_kg) || 0,
         minimumOrderKg: Number(row.minimum_order_kg) || 0,
         weightKg: Number(row.weight_kg) || 0,
-        detailsAndConditions: row.details_and_conditions || "",
-        status: row.status,
-        providerName: row.waste_providers?.company_name || "Waste Provider",
+        detailsAndConditions:
+          typeof row.details_and_conditions === "string"
+            ? row.details_and_conditions
+            : "",
+        status: String(row.status || "active"),
+        providerName,
+        providerLocation,
         imageUrl: firstImage,
         createdAt: row.created_at,
       };
     });
 
-    // Client-side filtering for searchQuery and multi-select categoryNames
+    // Client-side filtering for searchQuery, categoryNames, and location
     if (filters.searchQuery?.trim()) {
       const q = filters.searchQuery.trim().toLowerCase();
-      items = items.filter(
-        (item) =>
-          item.customFabricName.toLowerCase().includes(q) ||
-          item.categoryName.toLowerCase().includes(q) ||
-          item.providerName.toLowerCase().includes(q) ||
-          item.detailsAndConditions.toLowerCase().includes(q)
-      );
+      items = items.filter((item) => {
+        const fabricName = String(item.customFabricName || "").toLowerCase();
+        const catName = String(item.categoryName || "").toLowerCase();
+        const provName = String(item.providerName || "").toLowerCase();
+        const provLoc = String(item.providerLocation || "").toLowerCase();
+        const details = String(item.detailsAndConditions || "").toLowerCase();
+
+        return (
+          fabricName.includes(q) ||
+          catName.includes(q) ||
+          provName.includes(q) ||
+          provLoc.includes(q) ||
+          details.includes(q)
+        );
+      });
     }
 
     if (filters.categoryNames && filters.categoryNames.length > 0) {
-      const activeCats = filters.categoryNames.map((c) => c.toLowerCase());
-      items = items.filter((item) =>
-        activeCats.some((cat) => item.categoryName.toLowerCase().includes(cat))
-      );
+      const activeCats = filters.categoryNames.map((c) => String(c).toLowerCase());
+      items = items.filter((item) => {
+        const catName = String(item.categoryName || "").toLowerCase();
+        return activeCats.some((cat) => catName.includes(cat));
+      });
+    }
+
+    if (filters.location?.trim()) {
+      const loc = filters.location.trim().toLowerCase();
+      items = items.filter((item) => {
+        const provLoc = String(item.providerLocation || "").toLowerCase();
+        return provLoc.includes(loc);
+      });
     }
 
     return {
@@ -201,11 +251,17 @@ export async function getSavedWastePosts(
     const rawSaved = (data || []) as unknown as DbSavedRow[];
     const savedItems: SavedWastePostItem[] = rawSaved.map((row) => {
       const wp = row.waste_posts;
+      const provider = wp ? unwrapRelation(wp.waste_providers) : null;
+      const category = wp ? unwrapRelation(wp.fabric_categories) : null;
       const mediaList = wp?.waste_post_media || [];
       const firstImage =
         mediaList.find((m: DbSourcingMedia) => m.media_type === "image")?.media_url ||
         mediaList[0]?.media_url ||
         null;
+
+      const categoryName = typeof category?.name === "string" ? category.name : "Lainnya";
+      const providerName = typeof provider?.company_name === "string" ? provider.company_name : "Waste Provider";
+      const providerLocation = typeof provider?.address === "string" && provider.address.trim() ? provider.address : "Denpasar, Bali";
 
       return {
         id: row.id,
@@ -216,15 +272,15 @@ export async function getSavedWastePosts(
           id: wp?.id || row.waste_post_id,
           customFabricName:
             wp?.custom_fabric_name ||
-            wp?.fabric_categories?.name ||
-            "Limbah Kain Perca",
-          categoryName: wp?.fabric_categories?.name || "Lainnya",
+            (categoryName !== "Lainnya" ? categoryName : "Limbah Kain Perca"),
+          categoryName,
           pricePerKg: Number(wp?.price_per_kg) || 0,
           minimumOrderKg: Number(wp?.minimum_order_kg) || 0,
           weightKg: Number(wp?.weight_kg) || 0,
           detailsAndConditions: wp?.details_and_conditions || "",
           status: wp?.status || "active",
-          providerName: wp?.waste_providers?.company_name || "Waste Provider",
+          providerName,
+          providerLocation,
           imageUrl: firstImage,
           createdAt: wp?.created_at ?? null,
           isSaved: true,
