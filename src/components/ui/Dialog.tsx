@@ -29,6 +29,7 @@ function DialogOverlay({
 }: DialogPrimitive.Backdrop.Props) {
   return (
     <DialogPrimitive.Close
+      nativeButton={false}
       data-slot="dialog-overlay-close"
       render={
         <DialogPrimitive.Backdrop
