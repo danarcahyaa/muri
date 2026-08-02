@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import { CreditCard } from "lucide-react";
 
 import BrandMaterialPurchasesSection from "@/components/brand/sourcing/BrandMaterialPurchasesSection";
+import { TableSkeleton } from "@/components/ui/TableSkeleton";
 
 export default function BrandMaterialPurchasesPage() {
   return (
@@ -21,7 +23,15 @@ export default function BrandMaterialPurchasesPage() {
         </p>
       </div>
 
-      <BrandMaterialPurchasesSection />
+      <Suspense
+        fallback={
+          <div className="mt-8 rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8">
+            <TableSkeleton columnsCount={6} rowsCount={5} />
+          </div>
+        }
+      >
+        <BrandMaterialPurchasesSection />
+      </Suspense>
     </div>
   );
 }

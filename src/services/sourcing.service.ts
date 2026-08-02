@@ -545,6 +545,7 @@ export interface CreateWastePurchaseInput {
   purchaseStatus?: "pending" | "processing" | "shipped" | "complete" | "cancelled" | "rejected";
   mediaUrlsSnapshot?: { url: string; type: string }[] | null;
   recipientSnapshot?: RecipientSnapshot | null;
+  purchaseId?: string;
 }
 
 /**
@@ -557,11 +558,15 @@ export async function createWastePurchase(
   input: CreateWastePurchaseInput
 ): Promise<BaseResponse<string>> {
   try {
+    const randomHex = Math.random().toString(16).substring(2, 10).toUpperCase();
+    const purchaseId = input.purchaseId || `PUR-${randomHex}`;
+
     const { data, error } = await supabase
       .from("waste_purchases")
       .insert({
         brand_id: input.brandId,
         waste_post_id: input.wastePostId,
+        purchase_id: purchaseId,
         category_name_snapshot: input.categoryNameSnapshot,
         fabric_name_snapshot: input.fabricNameSnapshot,
         original_price_per_kg: input.originalPricePerKg,
@@ -596,5 +601,197 @@ export async function createWastePurchase(
     };
   }
 }
+
+export interface BrandWastePurchaseItem {
+  id: string;
+  purchaseId: string;
+  brandId: string;
+  wastePostId: string;
+  categoryNameSnapshot: string;
+  fabricNameSnapshot: string;
+  originalPricePerKg: number;
+  finalPriceIdr: number;
+  weightBoughtKg: number;
+  purchaseStatus: "pending" | "processing" | "shipped" | "complete" | "completed" | "cancelled" | "rejected";
+  mediaUrlsSnapshot: { url: string; type: string }[] | null;
+  recipientSnapshot: RecipientSnapshot | null;
+  createdAt: string;
+  updatedAt: string;
+  providerName?: string;
+}
+
+export interface GetBrandWastePurchasesInput {
+  brandId?: string;
+  searchQuery?: string;
+  statusFilter?: string;
+}
+
+/**
+ * Fetches waste purchases for a specific brand directly from Supabase database.
+ * EXCLUDES all orders with purchaseStatus === "cancelled".
+ */
+export async function getBrandWastePurchases(
+  input: GetBrandWastePurchasesInput = {}
+): Promise<BaseResponse<BrandWastePurchaseItem[]>> {
+  try {
+    let query = supabase
+      .from("waste_purchases")
+      .select("*")
+      .neq("purchase_status", "cancelled");
+
+    if (input.brandId) {
+      query = query.eq("brand_id", input.brandId);
+    }
+
+    query = query.order("created_at", { ascending: false });
+
+    const { data, error } = await query;
+
+    if (error) {
+      return {
+        success: false,
+        error: translateSupabaseError(error),
+      };
+    }
+
+    const rawRows = (data || []) as unknown as Record<string, unknown>[];
+    const dbItems: BrandWastePurchaseItem[] = rawRows.map((row) => {
+      const mediaRaw = row.media_urls_snapshot;
+      let mediaUrls: { url: string; type: string }[] = [];
+      if (Array.isArray(mediaRaw)) {
+        mediaUrls = mediaRaw.map((m) =>
+          typeof m === "string" ? { url: m, type: "image" } : (m as { url: string; type: string })
+        );
+      }
+
+      const recipientRaw = row.recipient_snapshot as Record<string, string> | null;
+      let recipient: RecipientSnapshot | null = null;
+      if (recipientRaw && typeof recipientRaw === "object") {
+        recipient = {
+          name: recipientRaw.name || recipientRaw.receiverName || "",
+          phone: recipientRaw.phone || recipientRaw.phoneNumber || "",
+          address: recipientRaw.address || recipientRaw.shippingAddress || "",
+        };
+      }
+
+      const idStr = String(row.id || "");
+      const pId = String(
+        row.purchase_id ||
+          row.purchaseId ||
+          (idStr ? `PUR-${idStr.substring(0, 8).toUpperCase()}` : "PUR-UNKNOWN")
+      );
+
+      return {
+        id: idStr,
+        purchaseId: pId,
+        brandId: String(row.brand_id || ""),
+        wastePostId: String(row.waste_post_id || ""),
+        categoryNameSnapshot: String(row.category_name_snapshot || "Kain Sirkular"),
+        fabricNameSnapshot: String(row.fabric_name_snapshot || "Limbah Kain Perca"),
+        originalPricePerKg: Number(row.original_price_per_kg || 0),
+        finalPriceIdr: Number(row.final_price_idr || 0),
+        weightBoughtKg: Number(row.weight_bought_kg || 0),
+        purchaseStatus: String(
+          row.purchase_status || "pending"
+        ) as BrandWastePurchaseItem["purchaseStatus"],
+        mediaUrlsSnapshot: mediaUrls,
+        recipientSnapshot: recipient,
+        createdAt: String(row.created_at || new Date().toISOString()),
+        updatedAt: String(row.updated_at || new Date().toISOString()),
+      };
+    });
+
+    let filtered = dbItems;
+
+    // Specific search filter by waste fabric name (fabricNameSnapshot)
+    if (input.searchQuery && input.searchQuery.trim()) {
+      const q = input.searchQuery.trim().toLowerCase();
+      filtered = filtered.filter((item) =>
+        item.fabricNameSnapshot.toLowerCase().includes(q)
+      );
+    }
+
+    // Status filter
+    if (input.statusFilter && input.statusFilter !== "all") {
+      filtered = filtered.filter((item) => {
+        if (input.statusFilter === "pending") {
+          return item.purchaseStatus === "pending";
+        }
+        if (input.statusFilter === "completed") {
+          return item.purchaseStatus === "complete" || item.purchaseStatus === "completed";
+        }
+        return item.purchaseStatus === input.statusFilter;
+      });
+    }
+
+    return {
+      success: true,
+      data: filtered,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: translateSupabaseError(error),
+    };
+  }
+}
+
+/**
+ * Cancels a brand waste purchase in the Supabase database using its primary key ID (UUID).
+ * Updates purchase_status to 'cancelled' directly in Supabase.
+ *
+ * @param purchaseId Primary key ID (UUID) of the waste purchase to cancel
+ */
+export async function cancelWastePurchase(
+  purchaseId: string
+): Promise<BaseResponse<boolean>> {
+  try {
+    if (!purchaseId) {
+      return { success: false, error: "ID pesanan tidak valid." };
+    }
+
+    console.log("Cancelling waste purchase in Supabase DB with ID:", purchaseId);
+
+    // Update purchase_status to 'cancelled' in Supabase waste_purchases table strictly by primary key ID (UUID)
+    const { data, error } = await supabase
+      .from("waste_purchases")
+      .update({
+        purchase_status: "cancelled",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", purchaseId)
+      .select("id, purchase_status");
+
+    console.log("Supabase update cancellation response:", { data, error });
+
+    if (error) {
+      console.error("Supabase cancel purchase error:", error);
+      return {
+        success: false,
+        error: translateSupabaseError(error),
+      };
+    }
+
+    if (!data || data.length === 0) {
+      console.warn("0 rows updated in Supabase waste_purchases table for ID:", purchaseId);
+      return {
+        success: false,
+        error: `Gagal memperbarui status di Supabase. 0 baris ter-update (ID ${purchaseId} tidak cocok atau diblokir oleh RLS / Izin Supabase).`,
+      };
+    }
+
+    return {
+      success: true,
+      data: true,
+    };
+  } catch (error) {
+    console.error("Exception in cancelWastePurchase:", error);
+    return {
+      success: false,
+      error: translateSupabaseError(error),
+    };
+  }
+}
+
 
 
