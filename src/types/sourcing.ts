@@ -32,3 +32,32 @@ export interface SavedWastePostItem {
   createdAt: string | null;
   wastePost: SourcingWastePostItem;
 }
+
+export interface SourcingMediaItem {
+  url: string;
+  type: "image" | "video";
+}
+
+export interface SourcingWastePostDetailItem {
+  id: string;
+  customFabricName: string;
+  categoryName: string;
+  pricePerKg: number;
+  minimumOrderKg: number;
+  weightKg: number;
+  detailsAndConditions: string;
+  status: string;
+  providerName: string;
+  providerLocation: string;
+  imageUrl: string | null;
+  mediaList: SourcingMediaItem[];
+  fabricType?: string;
+  wasteForm?: string;
+  carbonSavedKg: number;
+  waterSavedLiter: number;
+  createdAt: string | null;
+  estimatedDeliveryDays?: string;
+  batchCode?: string;
+  isSaved?: boolean;
+}
+
