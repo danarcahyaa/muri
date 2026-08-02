@@ -1,10 +1,13 @@
 import { supabase } from "@/lib/supabaseClient";
 import { translateSupabaseError } from "@/lib/supabaseError";
 import type { BaseResponse } from "@/types/common";
+import type { Json } from "@/types/database";
 import type {
   SourcingFilterInput,
   SourcingWastePostItem,
   SavedWastePostItem,
+  SourcingWastePostDetailItem,
+  SourcingMediaItem,
 } from "@/types/sourcing";
 
 interface DbSourcingMedia {
@@ -375,3 +378,223 @@ export async function unsaveWastePost(
     };
   }
 }
+
+/**
+ * Fetches a single waste post by its ID for detail and mini-checkout.
+ *
+ * @param id Waste post UUID
+ * @returns SourcingWastePostDetailItem
+ */
+export async function getWastePostById(
+  id: string
+): Promise<BaseResponse<SourcingWastePostDetailItem | null>> {
+  try {
+    const { data, error } = await supabase
+      .from("waste_posts")
+      .select(
+        `
+        id,
+        custom_fabric_name,
+        details_and_conditions,
+        minimum_order_kg,
+        price_per_kg,
+        weight_kg,
+        status,
+        created_at,
+        fabric_categories (
+          name
+        ),
+        waste_providers (
+          company_name,
+          address
+        ),
+        waste_post_media (
+          media_url,
+          media_type
+        ),
+        waste_batches (
+          batch_code,
+          origin_city
+        )
+      `
+      )
+      .eq("id", id)
+      .maybeSingle();
+
+    if (error) {
+      return {
+        success: false,
+        error: translateSupabaseError(error),
+      };
+    }
+
+    if (!data) {
+      return {
+        success: true,
+        data: null,
+      };
+    }
+
+    const row = data as unknown as DbSourcingRow & {
+      waste_batches?: { batch_code: string; origin_city: string }[] | null;
+    };
+    const provider = unwrapRelation(row.waste_providers);
+    const category = unwrapRelation(row.fabric_categories);
+    const rawMedia = row.waste_post_media || [];
+
+    const mediaList: SourcingMediaItem[] = rawMedia.map((m) => ({
+      url: m.media_url,
+      type: m.media_type === "video" ? "video" : "image",
+    }));
+
+    const firstImage =
+      mediaList.find((m) => m.type === "image")?.url ||
+      mediaList[0]?.url ||
+      null;
+
+    const providerName =
+      typeof provider?.company_name === "string" && provider.company_name.trim()
+        ? provider.company_name
+        : "Garment Supply Partner";
+
+    let providerLocation = "Lokasi tidak diketahui";
+    if (provider?.address) {
+      if (typeof provider.address === "string") {
+        try {
+          const parsed = JSON.parse(provider.address);
+          const regency = parsed.regency || parsed.city || "";
+          const province = parsed.province || "";
+          if (regency && province) {
+            providerLocation = `${regency}, ${province}`;
+          } else if (regency || province) {
+            providerLocation = regency || province;
+          } else {
+            providerLocation = provider.address;
+          }
+        } catch {
+          providerLocation = provider.address;
+        }
+      }
+    }
+
+    const categoryName =
+      typeof category?.name === "string" ? category.name : "Limbah Kain Perca";
+
+    const customFabricName =
+      typeof row.custom_fabric_name === "string" && row.custom_fabric_name.trim()
+        ? row.custom_fabric_name
+        : categoryName;
+
+    const weight = Number(row.weight_kg) || 0;
+    const carbonSavedKg = parseFloat((weight * 2.5).toFixed(1));
+    const waterSavedLiter = Math.round(weight * 10);
+
+    const batchCode = row.waste_batches?.[0]?.batch_code;
+
+    const detailItem: SourcingWastePostDetailItem = {
+      id: String(row.id),
+      customFabricName,
+      categoryName,
+      pricePerKg: Number(row.price_per_kg) || 0,
+      minimumOrderKg: Number(row.minimum_order_kg) || 0,
+      weightKg: weight,
+      detailsAndConditions:
+        typeof row.details_and_conditions === "string"
+          ? row.details_and_conditions
+          : "",
+      status: String(row.status || "active"),
+      providerName,
+      providerLocation,
+      imageUrl: firstImage,
+      mediaList,
+      fabricType: categoryName,
+      wasteForm: "Perca Kain Potongan",
+      carbonSavedKg,
+      waterSavedLiter,
+      createdAt: row.created_at,
+      estimatedDeliveryDays: "2 - 4 Hari Kerja",
+      batchCode,
+    };
+
+    return {
+      success: true,
+      data: detailItem,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: translateSupabaseError(error),
+    };
+  }
+}
+
+export interface RecipientSnapshot {
+  name: string;
+  phone: string;
+  address: string;
+}
+
+export interface CreateWastePurchaseInput {
+  brandId: string;
+  wastePostId: string;
+  categoryNameSnapshot: string;
+  fabricNameSnapshot: string;
+  originalPricePerKg: number;
+  finalPriceIdr: number;
+  weightBoughtKg: number;
+  purchaseStatus?: "pending" | "processing" | "shipped" | "complete" | "cancelled" | "rejected";
+  mediaUrlsSnapshot?: { url: string; type: string }[] | null;
+  recipientSnapshot?: RecipientSnapshot | null;
+}
+
+/**
+ * Inserts a new purchase record into the waste_purchases table.
+ *
+ * @param input Purchase transaction details
+ * @returns ID of the created purchase
+ */
+export async function createWastePurchase(
+  input: CreateWastePurchaseInput
+): Promise<BaseResponse<string>> {
+  try {
+    const { data, error } = await supabase
+      .from("waste_purchases")
+      .insert({
+        brand_id: input.brandId,
+        waste_post_id: input.wastePostId,
+        category_name_snapshot: input.categoryNameSnapshot,
+        fabric_name_snapshot: input.fabricNameSnapshot,
+        original_price_per_kg: input.originalPricePerKg,
+        final_price_idr: input.finalPriceIdr,
+        weight_bought_kg: input.weightBoughtKg,
+        purchase_status: input.purchaseStatus || "pending",
+        media_urls_snapshot: input.mediaUrlsSnapshot ?? [],
+        recipient_snapshot: input.recipientSnapshot
+          ? (input.recipientSnapshot as unknown as Json)
+          : null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      return {
+        success: false,
+        error: translateSupabaseError(error),
+      };
+    }
+
+    return {
+      success: true,
+      data: (data as { id: string }).id,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: translateSupabaseError(error),
+    };
+  }
+}
+
+

@@ -82,6 +82,12 @@ export interface WasteFilterInput {
   sortOrder?: "asc" | "desc";
 }
 
+export interface RecipientSnapshot {
+  name?: string;
+  phone?: string;
+  address?: string;
+}
+
 export interface WastePurchaseItem {
   id: string;
   brand_id: string;
@@ -92,6 +98,7 @@ export interface WastePurchaseItem {
   weight_bought_kg: number;
   purchase_status: string;
   media_urls_snapshot: { url: string; type: string }[] | string[] | null;
+  recipient_snapshot?: RecipientSnapshot | Record<string, unknown> | null;
   waste_post_id: string;
   created_at: string;
   updated_at: string;
