@@ -4,10 +4,11 @@ import sharp from "sharp";
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
-const MAX_IMAGES = 8;
+const MAX_IMAGES = 4;
 const MAX_TOTAL_UPLOAD_BYTES = 4 * 1024 * 1024;
 const MAX_INPUT_PIXELS = 40_000_000;
-const MAX_PROMPT_CHARACTERS = 900;
+const MAX_CUSTOM_NOTE_CHARACTERS = 240;
+const MIN_REFERENCE_SIDE = 240;
 const CANVAS_SIZE = 1024;
 const COLLAGE_PADDING = 24;
 const COLLAGE_GAP = 16;
@@ -17,13 +18,21 @@ const GENERATION_MODEL =
   process.env.POLLINATIONS_GENERATION_MODEL?.trim() || "zimage";
 
 /**
- * 0 disables the application-level timeout. Pollinations image requests may
- * legitimately take longer than three minutes, especially for image editing.
- * The hosting platform may still enforce its own route duration limit.
+ * Hard cap for a Pollinations request. A value of 0 disables the app-level
+ * timeout, but keeping a finite limit prevents a request from hanging forever.
  */
 const POLLINATIONS_TIMEOUT_MS = (() => {
-  const value = Number(process.env.POLLINATIONS_TIMEOUT_MS ?? "0");
-  return Number.isFinite(value) && value > 0 ? value : 0;
+  const value = Number(
+    process.env.POLLINATIONS_IMAGE_TIMEOUT_MS ??
+      process.env.POLLINATIONS_TIMEOUT_MS ??
+      "180000",
+  );
+  return Number.isFinite(value) && value >= 0 ? value : 180_000;
+})();
+
+const MAX_REQUESTS_PER_HOUR = (() => {
+  const value = Number(process.env.PATCHWORK_MAX_REQUESTS_PER_HOUR ?? "6");
+  return Number.isFinite(value) && value >= 0 ? Math.floor(value) : 6;
 })();
 
 const ALLOWED_IMAGE_TYPES = new Set([
@@ -33,10 +42,106 @@ const ALLOWED_IMAGE_TYPES = new Set([
   "image/avif",
 ]);
 
-const DEFAULT_DIRECTION =
-  "Create premium upcycled patchwork fashion designs with sustainable circular apparel, zero-waste cutting techniques, and editorial studio presentation.";
+const FABRIC_TYPES = [
+  "auto",
+  "denim",
+  "cotton-linen",
+  "knit",
+  "synthetic",
+  "mixed",
+] as const;
+
+const PIECE_FORMATS = [
+  "large-panels",
+  "medium-pieces",
+  "small-scraps",
+  "strips",
+] as const;
+
+const MATERIAL_CONDITIONS = ["clean", "mixed", "damaged"] as const;
+
+const TARGET_PRODUCTS = [
+  "auto",
+  "jacket",
+  "shirt",
+  "bag",
+  "accessory",
+  "home",
+] as const;
+
+const PRODUCTION_LEVELS = ["basic", "standard", "advanced"] as const;
+const VISUAL_DIRECTIONS = [
+  "commercial",
+  "minimal",
+  "graphic",
+  "heritage",
+] as const;
+
+const OFF_CONTEXT_PATTERNS: RegExp[] = [
+  /https?:\/\//i,
+  /\b(?:www\.|\.com\b|\.net\b|\.org\b)/i,
+  /\b(?:ignore|abaikan)\b.{0,30}\b(?:instruction|instruksi|prompt|aturan)\b/i,
+  /\b(?:system prompt|developer message|jailbreak|prompt injection)\b/i,
+  /\b(?:buatkan|tuliskan|generate|write)\b.{0,25}\b(?:kode|code|script|artikel|cerita|email|website|aplikasi)\b/i,
+  /\b(?:politik|crypto|kripto|resep masakan|game cheat|password|malware)\b/i,
+];
 
 type SourceMode = "upload" | "purchased";
+type FabricType = (typeof FABRIC_TYPES)[number];
+type PieceFormat = (typeof PIECE_FORMATS)[number];
+type MaterialCondition = (typeof MATERIAL_CONDITIONS)[number];
+type TargetProduct = (typeof TARGET_PRODUCTS)[number];
+type ProductionLevel = (typeof PRODUCTION_LEVELS)[number];
+type VisualDirection = (typeof VISUAL_DIRECTIONS)[number];
+type ResolvedFabricType = Exclude<FabricType, "auto">;
+type ResolvedProduct = Exclude<TargetProduct, "auto">;
+
+interface DesignBrief {
+  fabricType: FabricType;
+  pieceFormat: PieceFormat;
+  materialCondition: MaterialCondition;
+  targetProduct: TargetProduct;
+  productionLevel: ProductionLevel;
+  visualDirection: VisualDirection;
+  customNote: string;
+}
+
+interface CuttingPiece {
+  name: string;
+  qty: string;
+  size: string;
+  note: string;
+}
+
+interface VisualPanelGuide {
+  title: string;
+  description: string;
+}
+
+interface ExecutionPlan {
+  recommendationTitle: string;
+  productName: string;
+  productCategory: string;
+  fitReason: string;
+  patternTechnique: string;
+  difficulty: string;
+  productionLevel: string;
+  visualDirection: string;
+  materialUsage: string;
+  wasteTarget: string;
+  needleSpec: string;
+  threadSpec: string;
+  stabilizerSpec: string;
+  seamAllowance: string;
+  estimatedYield: string;
+  cuttingPieces: CuttingPiece[];
+  assemblySteps: string[];
+  riskNotes: string[];
+  qualityChecks: string[];
+  alternativeProducts: string[];
+  visualPanelGuide: VisualPanelGuide[];
+  impactDisclaimer: string;
+}
 
 type PollinationsImageResponse = {
   data?: Array<{
@@ -45,6 +150,20 @@ type PollinationsImageResponse = {
   }>;
   error?: unknown;
 };
+
+type RateBucket = {
+  count: number;
+  resetAt: number;
+};
+
+const globalRateLimit = globalThis as typeof globalThis & {
+  __muriPatchworkRateLimit?: Map<string, RateBucket>;
+};
+
+const rateLimitStore =
+  globalRateLimit.__muriPatchworkRateLimit ?? new Map<string, RateBucket>();
+
+globalRateLimit.__muriPatchworkRateLimit = rateLimitStore;
 
 class RouteError extends Error {
   readonly status: number;
@@ -66,12 +185,78 @@ function isUploadedFile(value: unknown): value is File {
   );
 }
 
-function normalizeString(value: FormDataEntryValue | null): string {
-  return typeof value === "string" ? value.trim() : "";
+function normalizeString(value: FormDataEntryValue | null, max = 180): string {
+  if (typeof value !== "string") return "";
+
+  return value
+    .replace(/[<>]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, max);
 }
 
 function getSourceMode(value: FormDataEntryValue | null): SourceMode {
   return value === "purchased" ? "purchased" : "upload";
+}
+
+function readEnum<T extends readonly string[]>(
+  value: FormDataEntryValue | null,
+  options: T,
+  fallback: T[number],
+): T[number] {
+  return typeof value === "string" && options.includes(value as T[number])
+    ? (value as T[number])
+    : fallback;
+}
+
+function validateCustomNote(value: FormDataEntryValue | null): string {
+  const note = normalizeString(value, MAX_CUSTOM_NOTE_CHARACTERS + 1);
+
+  if (note.length > MAX_CUSTOM_NOTE_CHARACTERS) {
+    throw new RouteError(
+      422,
+      `Catatan desain maksimal ${MAX_CUSTOM_NOTE_CHARACTERS} karakter.`,
+    );
+  }
+
+  if (note && OFF_CONTEXT_PATTERNS.some((pattern) => pattern.test(note))) {
+    throw new RouteError(
+      422,
+      "Catatan hanya boleh berisi arahan desain fashion, penempatan patchwork, warna, siluet, atau detail konstruksi.",
+    );
+  }
+
+  return note;
+}
+
+function getClientKey(request: Request): string {
+  const forwarded = request.headers.get("x-forwarded-for");
+  const ip = forwarded?.split(",")[0]?.trim() || request.headers.get("x-real-ip");
+  return ip || "unknown-client";
+}
+
+function enforceRateLimit(request: Request): void {
+  if (MAX_REQUESTS_PER_HOUR === 0) return;
+
+  const key = getClientKey(request);
+  const now = Date.now();
+  const oneHour = 60 * 60 * 1000;
+  const current = rateLimitStore.get(key);
+
+  if (!current || current.resetAt <= now) {
+    rateLimitStore.set(key, { count: 1, resetAt: now + oneHour });
+    return;
+  }
+
+  if (current.count >= MAX_REQUESTS_PER_HOUR) {
+    throw new RouteError(
+      429,
+      `Batas ${MAX_REQUESTS_PER_HOUR} generasi per jam tercapai. Periksa kembali brief sebelum mencoba lagi.`,
+    );
+  }
+
+  current.count += 1;
+  rateLimitStore.set(key, current);
 }
 
 function getErrorText(value: unknown): string {
@@ -95,50 +280,108 @@ async function fetchWithTimeout(
   timeoutMs = POLLINATIONS_TIMEOUT_MS,
 ): Promise<Response> {
   const startedAt = Date.now();
-
-  // Pollinations removed artificial time limits from image generation. Avoid
-  // aborting a healthy request unless an explicit timeout is configured.
-  if (timeoutMs <= 0) {
-    try {
-      const response = await fetch(url, init);
-      console.info("[patchwork/generate] Pollinations response received", {
-        status: response.status,
-        elapsedMs: Date.now() - startedAt,
-      });
-      return response;
-    } catch {
-      throw new RouteError(502, "Gagal menghubungi layanan Pollinations AI.");
-    }
-  }
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  const controller = timeoutMs > 0 ? new AbortController() : null;
+  const timeoutId = controller
+    ? setTimeout(() => controller.abort(), timeoutMs)
+    : null;
 
   try {
     const response = await fetch(url, {
       ...init,
-      signal: controller.signal,
+      ...(controller ? { signal: controller.signal } : {}),
     });
+
     console.info("[patchwork/generate] Pollinations response received", {
       status: response.status,
       elapsedMs: Date.now() - startedAt,
+      requestClient: "node-native-fetch",
     });
+
     return response;
   } catch (error) {
+    const detail = inspectNetworkError(error);
+    const elapsedMs = Date.now() - startedAt;
+
+    console.error("[patchwork/generate] Pollinations fetch failed", {
+      elapsedMs,
+      ...detail,
+      bundledUndiciVersion: process.versions.undici ?? "unknown",
+      requestClient: "node-native-fetch",
+      configuredAbortTimeoutMs: timeoutMs,
+    });
+
     if (
       error instanceof Error &&
       (error.name === "AbortError" || error.name === "TimeoutError")
     ) {
       throw new RouteError(
         504,
-        `Pollinations belum selesai setelah ${Math.round(timeoutMs / 1_000)} detik. Naikkan POLLINATIONS_TIMEOUT_MS atau set ke 0 untuk menonaktifkan timeout aplikasi.`,
+        `Pollinations belum memberikan respons setelah ${Math.round(timeoutMs / 1_000)} detik. Silakan coba generate ulang.`,
       );
     }
 
-    throw new RouteError(502, "Gagal menghubungi layanan Pollinations AI.");
+    if (
+      detail.code === "UND_ERR_CONNECT_TIMEOUT" ||
+      detail.code === "UND_ERR_HEADERS_TIMEOUT" ||
+      detail.code === "UND_ERR_BODY_TIMEOUT" ||
+      detail.code === "ETIMEDOUT" ||
+      detail.code === "ECONNRESET" ||
+      detail.code === "ENETUNREACH"
+    ) {
+      throw new RouteError(
+        502,
+        "Koneksi ke Pollinations terputus atau tidak stabil. Silakan generate ulang.",
+      );
+    }
+
+    throw new RouteError(
+      502,
+      detail.message
+        ? `Gagal menghubungi Pollinations AI: ${detail.message}`
+        : "Gagal menghubungi layanan Pollinations AI.",
+    );
   } finally {
-    clearTimeout(timeoutId);
+    if (timeoutId) clearTimeout(timeoutId);
   }
+}
+
+function inspectNetworkError(error: unknown): {
+  name?: string;
+  message?: string;
+  code?: string;
+  causeName?: string;
+  causeMessage?: string;
+} {
+  if (!(error instanceof Error)) return {};
+
+  const errorWithCause = error as Error & {
+    code?: unknown;
+    cause?: unknown;
+  };
+  const cause = errorWithCause.cause;
+  const causeRecord =
+    cause && typeof cause === "object"
+      ? (cause as { name?: unknown; message?: unknown; code?: unknown })
+      : null;
+
+  const ownCode =
+    typeof errorWithCause.code === "string"
+      ? errorWithCause.code
+      : undefined;
+  const causeCode =
+    typeof causeRecord?.code === "string" ? causeRecord.code : undefined;
+
+  return {
+    name: error.name,
+    message: error.message,
+    code: causeCode ?? ownCode,
+    causeName:
+      typeof causeRecord?.name === "string" ? causeRecord.name : undefined,
+    causeMessage:
+      typeof causeRecord?.message === "string"
+        ? causeRecord.message
+        : undefined,
+  };
 }
 
 async function parseProviderResponse(
@@ -146,9 +389,7 @@ async function parseProviderResponse(
 ): Promise<{ data: PollinationsImageResponse | null; raw: string }> {
   const raw = await response.text();
 
-  if (!raw) {
-    return { data: null, raw: "" };
-  }
+  if (!raw) return { data: null, raw: "" };
 
   try {
     return {
@@ -185,7 +426,7 @@ function throwPollinationsError(
     case 402:
       throw new RouteError(
         402,
-        "Saldo atau budget Pollen tidak mencukupi. Periksa key dan saldo di dashboard Pollinations.",
+        "Saldo atau budget Pollen tidak mencukupi. Periksa key dan saldo Pollinations.",
       );
     case 429:
       throw new RouteError(
@@ -240,6 +481,23 @@ async function createReferenceCollage(files: File[]): Promise<Buffer> {
       const sourceBuffer = await fileToBuffer(file);
 
       try {
+        const metadata = await sharp(sourceBuffer, {
+          failOn: "error",
+          limitInputPixels: MAX_INPUT_PIXELS,
+        }).metadata();
+
+        if (
+          !metadata.width ||
+          !metadata.height ||
+          metadata.width < MIN_REFERENCE_SIDE ||
+          metadata.height < MIN_REFERENCE_SIDE
+        ) {
+          throw new RouteError(
+            400,
+            `Foto "${file.name || `kain-${index + 1}`}" terlalu kecil. Gunakan minimal ${MIN_REFERENCE_SIDE} × ${MIN_REFERENCE_SIDE} px.`,
+          );
+        }
+
         const tileBuffer = await sharp(sourceBuffer, {
           failOn: "error",
           limitInputPixels: MAX_INPUT_PIXELS,
@@ -262,10 +520,12 @@ async function createReferenceCollage(files: File[]): Promise<Buffer> {
             topOffset +
             Math.floor(index / columns) * (cellSize + COLLAGE_GAP),
         };
-      } catch {
+      } catch (error) {
+        if (error instanceof RouteError) throw error;
+
         throw new RouteError(
           400,
-          `File "${file.name || `image-${index + 1}`}" rusak atau tidak didukung.`,
+          `File "${file.name || `kain-${index + 1}`}" rusak atau tidak didukung.`,
         );
       }
     }),
@@ -284,53 +544,341 @@ async function createReferenceCollage(files: File[]): Promise<Buffer> {
     .toBuffer();
 }
 
+function inferFabricType(
+  requestedType: FabricType,
+  materialTitle: string,
+): ResolvedFabricType {
+  if (requestedType !== "auto") return requestedType;
+
+  const title = materialTitle.toLowerCase();
+
+  if (/denim|jean/.test(title)) return "denim";
+  if (/knit|jersey|rib|spandex|lycra/.test(title)) return "knit";
+  if (/linen|cotton|katun|canvas|muslin/.test(title)) return "cotton-linen";
+  if (/polyester|nylon|satin|taffeta|synthetic/.test(title)) return "synthetic";
+
+  return "mixed";
+}
+
+function resolveProduct(
+  requestedProduct: TargetProduct,
+  fabricType: ResolvedFabricType,
+  pieceFormat: PieceFormat,
+): ResolvedProduct {
+  if (requestedProduct !== "auto") return requestedProduct;
+
+  if (pieceFormat === "small-scraps") return "bag";
+  if (pieceFormat === "strips") return "shirt";
+  if (fabricType === "denim") return "jacket";
+  if (fabricType === "knit") return "accessory";
+  if (fabricType === "cotton-linen") return "shirt";
+
+  return "bag";
+}
+
+function getTechnique(pieceFormat: PieceFormat): string {
+  switch (pieceFormat) {
+    case "large-panels":
+      return "Panel Blocking / Colour-Block Patchwork";
+    case "small-scraps":
+      return "Foundation Crazy Patchwork dengan Backing";
+    case "strips":
+      return "Strip Piecing Patchwork";
+    case "medium-pieces":
+    default:
+      return "Modular Grid Patchwork";
+  }
+}
+
+function getFabricSetup(fabricType: ResolvedFabricType) {
+  switch (fabricType) {
+    case "denim":
+      return {
+        needle: "Jarum denim #16 (100/16)",
+        thread: "Benang poliester core-spun 30–40s",
+        stabilizer: "Interfacing woven pada kerah, saku, dan bukaan",
+      };
+    case "cotton-linen":
+      return {
+        needle: "Jarum universal #12 (80/12)",
+        thread: "Benang katun-poliester 40s",
+        stabilizer: "Interfacing ringan pada area struktural",
+      };
+    case "knit":
+      return {
+        needle: "Jarum stretch / ballpoint #11 (75/11)",
+        thread: "Benang poliester elastis",
+        stabilizer: "Tricot fusible atau backing ringan agar panel tidak melar",
+      };
+    case "synthetic":
+      return {
+        needle: "Jarum Microtex #10 (70/10)",
+        thread: "Benang poliester 40s",
+        stabilizer: "Backing ringan; lakukan uji panas sebelum pressing",
+      };
+    case "mixed":
+    default:
+      return {
+        needle: "Jarum universal #14 (90/14)",
+        thread: "Benang poliester all-purpose 40s",
+        stabilizer: "Backing nonwoven medium untuk menyamakan karakter panel",
+      };
+  }
+}
+
+function getProductMeta(product: ResolvedProduct) {
+  switch (product) {
+    case "jacket":
+      return {
+        category: "Outerwear",
+        name: "Patchwork Overshirt Jacket",
+        alternatives: ["Structured Tote Bag", "Utility Vest"],
+        yield: "1 outerwear sample per ±1,8–2,4 kg material tersortir",
+      };
+    case "shirt":
+      return {
+        category: "Apparel",
+        name: "Oversized Patchwork Shirt",
+        alternatives: ["Boxy Blouse", "Lightweight Kimono"],
+        yield: "1 shirt sample per ±1,2–1,7 kg material tersortir",
+      };
+    case "bag":
+      return {
+        category: "Accessory",
+        name: "Structured Patchwork Tote Bag",
+        alternatives: ["Laptop Sleeve", "Bucket Bag"],
+        yield: "1–2 tote samples per ±0,8–1,2 kg material tersortir",
+      };
+    case "accessory":
+      return {
+        category: "Small Goods",
+        name: "Patchwork Accessory Capsule",
+        alternatives: ["Pouch Set", "Scarf Panel"],
+        yield: "3–6 small goods per ±0,5 kg material tersortir",
+      };
+    case "home":
+    default:
+      return {
+        category: "Home Textile",
+        name: "Patchwork Cushion Cover",
+        alternatives: ["Table Runner", "Wall Textile Panel"],
+        yield: "2 cushion covers per ±0,8–1 kg material tersortir",
+      };
+  }
+}
+
+function buildCuttingPieces(
+  product: ResolvedProduct,
+  pieceFormat: PieceFormat,
+): CuttingPiece[] {
+  const patchNote =
+    pieceFormat === "small-scraps"
+      ? "Bangun panel dari perca di atas backing sebelum dipotong final"
+      : pieceFormat === "strips"
+        ? "Gabungkan strip menjadi panel stabil sebelum pemotongan final"
+        : "Susun motif dan arah serat sebelum pemotongan final";
+
+  switch (product) {
+    case "jacket":
+      return [
+        { name: "Panel badan depan", qty: "2 pcs", size: "32 × 70 cm", note: patchNote },
+        { name: "Panel badan belakang", qty: "1 pcs", size: "62 × 72 cm", note: patchNote },
+        { name: "Panel lengan", qty: "2 pcs", size: "26 × 60 cm", note: "Samakan berat dan kelenturan kiri-kanan" },
+        { name: "Kerah, manset, dan saku", qty: "Set", size: "Sesuai pola dasar", note: "Gunakan bagian kain paling stabil" },
+      ];
+    case "shirt":
+      return [
+        { name: "Panel depan", qty: "2 pcs", size: "30 × 72 cm", note: patchNote },
+        { name: "Panel belakang", qty: "1 pcs", size: "60 × 74 cm", note: patchNote },
+        { name: "Panel lengan", qty: "2 pcs", size: "24 × 56 cm", note: "Hindari sambungan tebal di siku" },
+        { name: "Kerah dan placket", qty: "Set", size: "Sesuai pola dasar", note: "Pilih kain stabil dan tipis" },
+      ];
+    case "bag":
+      return [
+        { name: "Panel depan-belakang", qty: "2 pcs", size: "42 × 45 cm", note: patchNote },
+        { name: "Panel samping dan dasar", qty: "3 pcs", size: "12 × 42 cm", note: "Tambahkan backing struktural" },
+        { name: "Handle", qty: "2 pcs", size: "8 × 70 cm", note: "Gunakan strip terpanjang dan terkuat" },
+        { name: "Lining dan kantong", qty: "Set", size: "Sesuai panel luar", note: "Gunakan kain lining baru atau deadstock bersih" },
+      ];
+    case "accessory":
+      return [
+        { name: "Panel modular kecil", qty: "6–12 pcs", size: "12 × 18 cm", note: patchNote },
+        { name: "Backing", qty: "Sesuai jumlah", size: "12 × 18 cm", note: "Menyamakan ketebalan dan bentuk" },
+        { name: "Zipper / binding", qty: "Set", size: "Sesuai produk", note: "Pilih komponen paling sederhana untuk produksi kecil" },
+      ];
+    case "home":
+    default:
+      return [
+        { name: "Panel muka", qty: "2 pcs", size: "47 × 47 cm", note: patchNote },
+        { name: "Panel belakang", qty: "4 pcs", size: "30 × 47 cm", note: "Gunakan bukaan envelope sederhana" },
+        { name: "Backing opsional", qty: "2 pcs", size: "47 × 47 cm", note: "Diperlukan untuk material tipis atau perca kecil" },
+      ];
+  }
+}
+
+function buildExecutionPlan(
+  brief: DesignBrief,
+  materialTitle: string,
+): ExecutionPlan {
+  const fabricType = inferFabricType(brief.fabricType, materialTitle);
+  const product = resolveProduct(
+    brief.targetProduct,
+    fabricType,
+    brief.pieceFormat,
+  );
+  const technique = getTechnique(brief.pieceFormat);
+  const setup = getFabricSetup(fabricType);
+  const productMeta = getProductMeta(product);
+
+  const conditionRisk =
+    brief.materialCondition === "clean"
+      ? "Material siap disortir berdasarkan warna, arah serat, dan gramasi."
+      : brief.materialCondition === "mixed"
+        ? "Pisahkan panel berdasarkan ketebalan dan elastisitas sebelum penyambungan."
+        : "Buang area rapuh, berlubang, bernoda permanen, atau serat yang sudah kehilangan kekuatan.";
+
+  const difficultyLabel =
+    brief.productionLevel === "basic"
+      ? "Dasar — minim sambungan melengkung"
+      : brief.productionLevel === "advanced"
+        ? "Lanjut — detail panel dan finishing lebih kompleks"
+        : "Menengah — cocok untuk workshop produksi brand";
+
+  const materialUsage =
+    brief.pieceFormat === "large-panels"
+      ? "Utamakan 70% panel besar sebagai struktur, 30% panel aksen."
+      : brief.pieceFormat === "small-scraps"
+        ? "Bangun lembar patchwork baru dari perca kecil di atas backing sebelum dipotong pola."
+        : brief.pieceFormat === "strips"
+          ? "Gabungkan strip searah serat menjadi lembar panel, lalu potong pola final."
+          : "Kelompokkan modul berdasarkan ukuran dan warna, lalu susun grid sebelum pemotongan pola.";
+
+  const visualLabels: Record<VisualDirection, string> = {
+    commercial: "Komersial bersih",
+    minimal: "Minimal tonal",
+    graphic: "Kontras grafis",
+    heritage: "Craft / heritage",
+  };
+
+  const fitReason = `${productMeta.name} dipilih karena format material ${brief.pieceFormat.replaceAll("-", " ")} paling efisien dieksekusi dengan ${technique.toLowerCase()}. Struktur produk ini memberi ruang untuk sambungan patchwork tetap terlihat tanpa mengorbankan fungsi utama produk.`;
+
+  const riskNotes = [
+    conditionRisk,
+    fabricType === "knit"
+      ? "Jangan menggabungkan knit dengan woven tanpa stabilizer karena tingkat mulurnya berbeda."
+      : "Uji tarik sambungan dan ketebalan bertumpuk sebelum produksi penuh.",
+    brief.pieceFormat === "small-scraps"
+      ? "Perca sangat kecil meningkatkan waktu kerja; standarkan modul minimum 6 × 6 cm."
+      : "Pertahankan arah serat pada panel utama agar produk tidak melintir.",
+  ];
+
+  const assemblySteps = [
+    "Sortir material berdasarkan jenis, ketebalan, elastisitas, warna, kerusakan, dan arah serat.",
+    `Buat satu lembar uji ${technique.toLowerCase()} berukuran minimal 30 × 30 cm.`,
+    `Gunakan ${setup.needle.toLowerCase()} dan uji kombinasi dengan ${setup.thread.toLowerCase()}.`,
+    "Stabilkan panel, press sambungan, lalu potong mengikuti pola final dengan toleransi jahitan 1,2–1,5 cm.",
+    `Rakit ${productMeta.name.toLowerCase()} dari area struktural menuju detail, lalu lakukan fitting atau load test.`,
+    "Lakukan finishing, trimming benang, pemeriksaan simetri, kekuatan sambungan, dan dokumentasi penggunaan material.",
+  ];
+
+  return {
+    recommendationTitle: "Rekomendasi Eksekusi Utama",
+    productName: productMeta.name,
+    productCategory: productMeta.category,
+    fitReason,
+    patternTechnique: technique,
+    difficulty: difficultyLabel,
+    productionLevel: brief.productionLevel,
+    visualDirection: visualLabels[brief.visualDirection],
+    materialUsage,
+    wasteTarget:
+      brief.pieceFormat === "small-scraps"
+        ? "Target sisa akhir 5–10%"
+        : "Target sisa akhir 8–15%",
+    needleSpec: setup.needle,
+    threadSpec: setup.thread,
+    stabilizerSpec: setup.stabilizer,
+    seamAllowance: "1,2–1,5 cm; tambah 0,3 cm pada sambungan tebal",
+    estimatedYield: productMeta.yield,
+    cuttingPieces: buildCuttingPieces(product, brief.pieceFormat),
+    assemblySteps,
+    riskNotes,
+    qualityChecks: [
+      "Sambungan tidak terbuka setelah uji tarik manual 10 detik.",
+      "Ketebalan panel kiri dan kanan relatif seimbang.",
+      "Tidak ada area rapuh pada titik beban, bukaan, handle, siku, atau bahu.",
+      "Produk tetap rata setelah pressing dan tidak melintir saat digantung.",
+    ],
+    alternativeProducts: productMeta.alternatives,
+    visualPanelGuide: [
+      {
+        title: "Material",
+        description:
+          "Swatch dan close-up tekstur kain asli tanpa tulisan atau label buatan AI.",
+      },
+      {
+        title: "Hero Look",
+        description:
+          "Satu tampilan utama produk pada model dari arah depan atau tiga-perempat.",
+      },
+      {
+        title: "Alternate Look",
+        description:
+          "Model yang berbeda dengan sudut belakang, samping, atau pose bergerak; bukan pengulangan hero look.",
+      },
+      {
+        title: "Construction Detail",
+        description:
+          "Close-up sambungan, saku, lengan, kerah, atau flat lay konstruksi tanpa teks kecil.",
+      },
+    ],
+    impactDisclaimer:
+      "Target limbah adalah estimasi proses. Klaim karbon dan penghematan air harus dihitung dari berat material aktual dan metodologi dampak MURI; tidak dibuat otomatis oleh AI.",
+  };
+}
+
 function buildGenerationPrompt({
-  userDirection,
+  brief,
+  executionPlan,
   materialText,
   imageCount,
 }: {
-  userDirection: string;
+  brief: DesignBrief;
+  executionPlan: ExecutionPlan;
   materialText: string;
   imageCount: number;
 }): string {
-  const referenceSection =
+  const referenceRule =
     imageCount > 0
-      ? `
-REFERENCE PRIORITY — MOST IMPORTANT:
-- The uploaded reference board contains ${imageCount} real fabric image(s), separated by neutral beige gutters.
-- Preserve recognizable motif geometry, color palette, pattern scale, weave, surface texture, and material character.
-- Keep every reference fabric visually identifiable in the final products.
-- Do not invent unrelated prints, colors, or decorative motifs.
-- Reference fidelity is more important than artistic creativity.
-`.trim()
-      : `
-MATERIAL INTERPRETATION:
-- No fabric photograph is available for this purchased batch.
-- Interpret the material strictly from the supplied material title and provider context.
-- Use a believable textile surface appropriate to that material description.
-`.trim();
+      ? `Use the ${imageCount} uploaded textile reference image(s) faithfully. Preserve the real colors, motif, texture, weave, and visible material character.`
+      : "Create a believable textile surface from the supplied material description.";
+
+  const note = brief.customNote
+    ? `Design constraint: ${brief.customNote}`
+    : "";
 
   return `
-Create one premium square fashion catalogue image for a circular-fashion brand.
+Create one square 2x2 fashion contact sheet made only from four edge-to-edge photographs.
 
-MATERIAL CONTEXT:
-${materialText}
+Material: ${materialText}.
+Product: ${executionPlan.productName}.
+Patchwork technique: ${executionPlan.patternTechnique}.
+${referenceRule}
+${note}
 
-${referenceSection}
+Show the same coherent product design in four clearly different views:
+1. clean product flat lay;
+2. model wearing it from a front three-quarter angle;
+3. side, back, or movement angle with a different pose;
+4. macro close-up of patch seams, stitching, pocket, collar, or construction detail.
 
-COMBINATION AND CONSTRUCTION RULES:
-- Create an intentional upcycled patchwork composition.
-- Use realistic textile drape, seams, folds, stitching, panel joins, and material thickness.
-- Apply credible zero-waste cutting logic.
-
-OUTPUT:
-- Show exactly 3 coordinated products: one hero garment, one oversized shirt, and one tote bag or accessory.
-- Use a clean warm studio background with refined editorial lighting.
-- Premium commercial styling, realistic proportions, no mannequin distortion.
-- No text, logos, watermarks, extra products, or messy background.
-
-USER DIRECTION:
-${userDirection}
+Critical rules:
+- photographs only;
+- no title, text, letters, numbers, labels, captions, logo, watermark, signage, poster, diagram, infographic, paper background, swatch card, or presentation layout;
+- no repeated pose or repeated camera angle;
+- no unrelated garments or accessories;
+- keep the patchwork realistically sewable with believable seams, drape, thickness, and stitching;
+- warm neutral studio lighting and premium commercial fashion photography.
 `.trim();
 }
 
@@ -343,6 +891,7 @@ async function generateFromReference({
   collage: Buffer;
   apiKey: string;
 }): Promise<string> {
+  // Use Node's matching native fetch + FormData implementation.
   const providerForm = new FormData();
   providerForm.append(
     "image",
@@ -354,6 +903,14 @@ async function generateFromReference({
   providerForm.append("size", "1024x1024");
   providerForm.append("n", "1");
   providerForm.append("response_format", "url");
+
+  console.info("[patchwork/generate] Pollinations request prepared", {
+    transport: "direct-multipart",
+    model: EDIT_MODEL,
+    promptCharacters: prompt.length,
+    collageKilobytes: Math.round(collage.byteLength / 1024),
+    timeoutMs: POLLINATIONS_TIMEOUT_MS,
+  });
 
   const response = await fetchWithTimeout(
     "https://gen.pollinations.ai/v1/images/edits",
@@ -370,9 +927,7 @@ async function generateFromReference({
 
   const { data, raw } = await parseProviderResponse(response);
 
-  if (!response.ok) {
-    throwPollinationsError(response, data, raw);
-  }
+  if (!response.ok) throwPollinationsError(response, data, raw);
 
   return extractGeneratedImage(data);
 }
@@ -406,9 +961,7 @@ async function generateFromText({
 
   const { data, raw } = await parseProviderResponse(response);
 
-  if (!response.ok) {
-    throwPollinationsError(response, data, raw);
-  }
+  if (!response.ok) throwPollinationsError(response, data, raw);
 
   return extractGeneratedImage(data);
 }
@@ -476,24 +1029,62 @@ export async function POST(request: Request) {
       );
     }
 
-    const promptEntry = normalizeString(incomingForm.get("prompt"));
-    const materialTitle = normalizeString(incomingForm.get("materialTitle"));
+    const materialTitle = normalizeString(
+      incomingForm.get("materialTitle"),
+      160,
+    );
     const providerName =
-      normalizeString(incomingForm.get("providerName")) || "Waste Provider";
+      normalizeString(incomingForm.get("providerName"), 120) ||
+      "Waste Provider";
 
-    const userDirection = promptEntry
-      ? promptEntry.slice(0, MAX_PROMPT_CHARACTERS)
-      : DEFAULT_DIRECTION;
+    const brief: DesignBrief = {
+      fabricType: readEnum(
+        incomingForm.get("fabricType"),
+        FABRIC_TYPES,
+        "auto",
+      ),
+      pieceFormat: readEnum(
+        incomingForm.get("pieceFormat"),
+        PIECE_FORMATS,
+        "medium-pieces",
+      ),
+      materialCondition: readEnum(
+        incomingForm.get("materialCondition"),
+        MATERIAL_CONDITIONS,
+        "clean",
+      ),
+      targetProduct: readEnum(
+        incomingForm.get("targetProduct"),
+        TARGET_PRODUCTS,
+        "auto",
+      ),
+      productionLevel: readEnum(
+        incomingForm.get("productionLevel"),
+        PRODUCTION_LEVELS,
+        "standard",
+      ),
+      visualDirection: readEnum(
+        incomingForm.get("visualDirection"),
+        VISUAL_DIRECTIONS,
+        "commercial",
+      ),
+      customNote: validateCustomNote(incomingForm.get("customNote")),
+    };
 
     const materialText = materialTitle
       ? `${materialTitle}, supplied by ${providerName}`
       : "upcycled textile waste supplied through the MURI circular ecosystem";
 
+    const executionPlan = buildExecutionPlan(brief, materialTitle);
     const finalPrompt = buildGenerationPrompt({
-      userDirection,
+      brief,
+      executionPlan,
       materialText,
       imageCount: images.length,
     });
+
+    // Count only validated requests that are about to consume provider credits.
+    enforceRateLimit(request);
 
     const output =
       sourceMode === "upload"
@@ -507,8 +1098,6 @@ export async function POST(request: Request) {
             apiKey,
           });
 
-    const patternSpecs = getPatternSpecsForFabric(materialTitle);
-
     return NextResponse.json(
       {
         success: true,
@@ -516,7 +1105,9 @@ export async function POST(request: Request) {
         type: sourceMode === "upload" ? "fashion_edit" : "fashion_generation",
         model: sourceMode === "upload" ? EDIT_MODEL : GENERATION_MODEL,
         imageCount: images.length,
-        patternSpecs,
+        designBrief: brief,
+        executionPlan,
+        promptText: finalPrompt,
       },
       {
         status: 200,
@@ -542,7 +1133,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         success: false,
-        error: status >= 500 ? "Gagal generate fashion mockup." : message,
+        error: status >= 500 ? "Gagal generate rekomendasi patchwork." : message,
         detail:
           status < 500 || process.env.NODE_ENV !== "production"
             ? message
@@ -557,135 +1148,4 @@ export async function POST(request: Request) {
       },
     );
   }
-}
-
-function getPatternSpecsForFabric(materialTitle: string) {
-  const title = (materialTitle || "").toLowerCase();
-
-  if (
-    title.includes("denim") ||
-    title.includes("jean") ||
-    title.includes("jeans")
-  ) {
-    return {
-      productName: "Upcycled Patchwork Denim Jacket & Tote Set",
-      patternTechnique: "Grid Block Patchwork Zero-Waste",
-      needleSpec: "Jarum Heavy-Duty Denim #16 (100/16)",
-      threadSpec: "Benang Poliester Tahan Tarik 30s",
-      materialEfficiency: "95% Zero-Waste",
-      carbonSaved: "3.6 kg CO₂e",
-      waterSaved: "850 Liter",
-      cuttingPieces: [
-        {
-          name: "Panel Badan Utama (Depan & Belakang)",
-          qty: "2 Pcs",
-          size: "48 cm × 68 cm",
-          note: "Potongan simetris ikuti serat denim utama",
-        },
-        {
-          name: "Panel Lengan Patchwork Multi-Tone",
-          qty: "2 Pcs",
-          size: "22 cm × 58 cm",
-          note: "Kombinasi 3 variasi perca denim",
-        },
-        {
-          name: "Kantong Depan & Ornamen Kerah",
-          qty: "4 Pcs",
-          size: "16 cm × 16 cm",
-          note: "Potongan persegi zero-waste",
-        },
-        {
-          name: "Strap & Trim Aksesori Tote Bag",
-          qty: "2 Pcs",
-          size: "8 cm × 90 cm",
-          note: "Sisa lipatan pinggir kain",
-        },
-      ],
-      assemblySteps: [
-        "Sortir potongan kain sisa denim berdasarkan warna dan gramasi (14oz).",
-        "Potong kain mengikuti dimensi pola dengan toleransi jahitan 1,5 cm.",
-        "Gabungkan perca kecil menjadi lembaran panel badan dengan jahitan ganda.",
-        "Pasang kantong depan lalu sambungkan bagian bahu dan lengan.",
-        "Lakukan obras tepi dan finishing kancing logam sirkular.",
-      ],
-    };
-  }
-
-  if (
-    title.includes("linen") ||
-    title.includes("katun") ||
-    title.includes("cotton")
-  ) {
-    return {
-      productName: "Circular Linen Patchwork Oversized Shirt",
-      patternTechnique: "Vertical Strip Patchwork",
-      needleSpec: "Jarum Standard Ballpoint #11 (75/11)",
-      threadSpec: "Benang Katun Organik 40s",
-      materialEfficiency: "93% Zero-Waste",
-      carbonSaved: "2.8 kg CO₂e",
-      waterSaved: "620 Liter",
-      cuttingPieces: [
-        {
-          name: "Panel Badan Utama (Depan & Belakang)",
-          qty: "2 Pcs",
-          size: "54 cm × 72 cm",
-          note: "Potongan serat lurus kain linen",
-        },
-        {
-          name: "Panel Lengan Longgar",
-          qty: "2 Pcs",
-          size: "24 cm × 52 cm",
-          note: "Potongan melintang",
-        },
-        {
-          name: "Kerah Shirt & Manset Lengan",
-          qty: "2 Pcs",
-          size: "12 cm × 42 cm",
-          note: "Lapisan kain perca halus",
-        },
-      ],
-      assemblySteps: [
-        "Ratakan dan setrika sisa kain linen atau katun.",
-        "Potong kain sesuai spesifikasi ukuran pola.",
-        "Jahit strip perca menggunakan jahitan Perancis.",
-        "Gabungkan panel depan dan belakang lalu pasang kerah kemeja.",
-      ],
-    };
-  }
-
-  return {
-    productName: "Upcycled Circular Patchwork Apparel",
-    patternTechnique: "Geometric Modular Patchwork",
-    needleSpec: "Jarum Universal #14 (90/14)",
-    threadSpec: "Benang Poliester All-Purpose 40s",
-    materialEfficiency: "92% Zero-Waste",
-    carbonSaved: "3.1 kg CO₂e",
-    waterSaved: "500 Liter",
-    cuttingPieces: [
-      {
-        name: "Panel Depan Utama",
-        qty: "2 Pcs",
-        size: "45 cm × 65 cm",
-        note: "Potongan simetris",
-      },
-      {
-        name: "Panel Belakang & Lengan",
-        qty: "2 Pcs",
-        size: "20 cm × 55 cm",
-        note: "Kombinasi perca",
-      },
-      {
-        name: "Trim & Pockets",
-        qty: "4 Pcs",
-        size: "15 cm × 15 cm",
-        note: "Patchwork persegi",
-      },
-    ],
-    assemblySteps: [
-      "Persiapkan dan ukur sisa kain yang akan di-upcycle.",
-      "Ikuti potongan spesifikasi ukuran pada tabel.",
-      "Jahit sambungan antar potongan kain dengan rapi.",
-      "Lakukan finishing dan pemeriksaan kualitas akhir.",
-    ],
-  };
 }
