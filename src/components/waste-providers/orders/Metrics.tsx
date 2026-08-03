@@ -45,7 +45,7 @@ export function PurchaseSummaryMetrics({
   return (
     <div className="grid gap-5 grid-cols-1 sm:grid-cols-4 font-body">
       {/* Menunggu Konfirmasi */}
-      <article className="flex min-h-32 flex-col rounded-lg border border-brand-black/15 bg-canvas-pure p-6">
+      <article className="flex min-h-32 flex-col rounded-xl border border-brand-black/15 bg-canvas-pure p-6">
         <div className="flex items-center justify-between gap-2">
           <p className="text-[11px] font-semibold uppercase text-muted-moss">
             Menunggu Konfirmasi
@@ -69,7 +69,7 @@ export function PurchaseSummaryMetrics({
       </article>
 
       {/* Complete */}
-      <article className="flex min-h-32 flex-col rounded-lg border border-brand-black/15 bg-canvas-pure p-6">
+      <article className="flex min-h-32 flex-col rounded-xl border border-brand-black/15 bg-canvas-pure p-6">
         <div className="flex items-center justify-between gap-2">
           <p className="text-[11px] font-semibold uppercase text-muted-moss">
             Selesai
@@ -93,7 +93,7 @@ export function PurchaseSummaryMetrics({
       </article>
 
       {/* Cancelled */}
-      <article className="flex min-h-32 flex-col rounded-lg border border-brand-black/15 bg-canvas-pure p-6">
+      <article className="flex min-h-32 flex-col rounded-xl border border-brand-black/15 bg-canvas-pure p-6">
         <div className="flex items-center justify-between gap-2">
           <p className="text-[11px] font-semibold uppercase text-muted-moss">
             Dibatalkan
@@ -117,7 +117,7 @@ export function PurchaseSummaryMetrics({
       </article>
           
       {/* Rejected */}
-      <article className="flex min-h-32 flex-col rounded-lg border border-brand-black/15 bg-canvas-pure p-6">
+      <article className="flex min-h-32 flex-col rounded-xl border border-brand-black/15 bg-canvas-pure p-6">
         <div className="flex items-center justify-between gap-2">
           <p className="text-[11px] font-semibold uppercase text-muted-moss">
             Ditolak

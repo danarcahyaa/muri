@@ -1,9 +1,8 @@
 import { useState, useEffect, type ReactElement } from "react";
+import { Package, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/Dialog";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -166,21 +165,43 @@ export function WasteDialogForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md sm:max-w-3xl bg-canvas-pure border border-line-trace rounded-xl w-full max-h-[95vh] flex flex-col overflow-hidden p-0 font-body">
-        <DialogHeader className="px-6 py-5 border-b border-line-trace">
-          <DialogTitle className="font-display text-2xl font-bold tracking-tight text-brand-black">
-            {isEditMode
-              ? "Detail / Edit Limbah Kain"
-              : "Tambah Limbah Kain Baru"}
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent showCloseButton={false} className="max-w-md sm:max-w-3xl bg-canvas-pure border border-line-trace rounded-xl w-full max-h-[95vh] flex flex-col overflow-hidden p-0 font-body">
+        {/* Header */}
+        <div className="flex shrink-0 items-center justify-between border-b border-line-trace px-6 py-5 sm:px-8">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-brand-lime/40 text-brand-forest">
+              <Package className="size-5" />
+            </div>
+            <div>
+              <h3 className="font-display text-lg font-bold text-brand-black">
+                {isEditMode
+                  ? "Detail / Edit Limbah Kain"
+                  : "Tambah Limbah Kain Baru"}
+              </h3>
+              <p className="text-xs text-muted-moss">
+                {isEditMode
+                  ? "Perbarui informasi dan spesifikasi limbah"
+                  : "Daftarkan ketersediaan sisa kain perca garmen baru"}
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            aria-label="Tutup modal"
+            className="flex size-8 items-center justify-center rounded-full bg-canvas-warm text-brand-black transition hover:bg-line-trace cursor-pointer"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
 
         <form
           onSubmit={handleSubmit}
           className="flex flex-col flex-1 overflow-hidden"
         >
           {error && (
-            <div className="mx-6 mt-4 rounded bg-error-rust/[0.06] border border-error-rust/20 p-3 text-xs text-error-rust font-medium">
+            <div className="mx-6 sm:mx-8 mt-4 rounded-lg border border-red-200 bg-red-50 p-3.5 text-xs font-medium text-red-700">
               {error}
             </div>
           )}

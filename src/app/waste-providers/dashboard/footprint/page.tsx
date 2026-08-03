@@ -35,10 +35,10 @@ export default function WasteFootprintPage(): ReactElement {
     <div className="mx-auto w-full max-w-[1320px] px-5 py-10 sm:px-6 lg:px-8 lg:py-14">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="font-display text-4xl font-bold tracking-tight text-brand-black sm:text-5xl">
+        <h1 className="font-display text-5xl font-medium leading-none tracking-[-0.05em] text-brand-black sm:text-6xl">
           Jejak Limbah
         </h1>
-        <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-moss">
+        <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-moss">
           Pantau riwayat pencatatan batch limbah kain Anda yang digunakan oleh pihak brand sebagai bukti asal-usul bahan baku ramah lingkungan.
         </p>
       </div>

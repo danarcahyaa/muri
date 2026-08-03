@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CreditCard, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -77,14 +78,35 @@ export function PurchaseDetailDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md bg-canvas-pure border border-line-trace rounded-xl max-h-[90vh] overflow-y-auto p-6">
-          <DialogHeader>
-            <DialogTitle className="font-display text-lg font-bold text-brand-black pr-6">
-              Detail Transaksi Pesanan
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-md sm:max-w-xl bg-canvas-pure border border-line-trace rounded-xl w-full max-h-[90vh] flex flex-col overflow-hidden p-0 font-body">
+          {/* Header */}
+          <div className="flex shrink-0 items-center justify-between border-b border-line-trace px-6 py-5 sm:px-8">
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-lg bg-brand-lime/40 text-brand-forest">
+                <CreditCard className="size-5" />
+              </div>
+              <div>
+                <h3 className="font-display text-lg font-bold text-brand-black">
+                  Detail Transaksi Pesanan
+                </h3>
+                <p className="text-xs text-muted-moss">
+                  Informasi pesanan dari brand pembeli
+                </p>
+              </div>
+            </div>
 
-          <div className="space-y-4 py-2 font-body text-xs text-brand-black">
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              aria-label="Tutup modal"
+              className="flex size-8 items-center justify-center rounded-full bg-canvas-warm text-brand-black transition hover:bg-line-trace cursor-pointer"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto space-y-4 p-6 sm:p-8 font-body text-xs text-brand-black">
             {/* Status Badge */}
             <div className="flex justify-between items-center pb-2 border-b border-line-trace/40">
               <span className="text-muted-moss">Status Pesanan</span>
@@ -110,7 +132,7 @@ export function PurchaseDetailDialog({
                 <span className="font-medium text-right">{purchase.category_name_snapshot || "-"}</span>
               </div>
 
-              {/* Media Lampiran (Menggunakan komponen Gallery Viewer Reusable) */}
+              {/* Media Lampiran */}
               <div className="flex justify-between items-center py-1">
                 <span className="text-muted-moss shrink-0">Media Lampiran</span>
                 <MediaGalleryViewer media={purchase.media_urls_snapshot} />
@@ -139,9 +161,15 @@ export function PurchaseDetailDialog({
                 <span className="font-bold text-sm text-brand-forest">{formatCurrencyIDR(purchase.final_price_idr)}</span>
               </div>
             </div>
+          </div>
 
+          {/* Footer */}
+          <div className="shrink-0 flex items-center justify-between border-t border-line-trace bg-canvas-warm/55 px-6 py-4 sm:px-8">
+            <Button variant="outline" size="md" onClick={() => onOpenChange(false)}>
+              Tutup
+            </Button>
             {purchase.purchase_status === PurchaseStatus.PENDING && (
-              <div className="flex gap-3 justify-end pt-4 border-t border-line-trace mt-4">
+              <div className="flex items-center gap-3">
                 <Button
                   onClick={() => setPendingReject(true)}
                   disabled={isProcessing}

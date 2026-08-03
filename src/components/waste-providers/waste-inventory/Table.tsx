@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/Tooltip";
 import { WastePostItem } from "@/types/wasteProvider";
 import { WastePostStatus } from "@/enums/enums";
-import { Eye, Archive, Trash2, PencilOff } from "lucide-react";
+import { Eye, Archive, Trash2, PencilOff, AlertTriangle, X } from "lucide-react";
 import {
   formatWeightKg,
   formatIndonesianDate,
@@ -86,80 +86,126 @@ export function WasteDataTable({
 
   return (
     <>
-      {/* Alert Dialog */}
-      <AlertDialog
-        open={!!pendingAction}
-        onOpenChange={(open) => {
-          if (!open) setPendingAction(null);
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {pendingAction?.type === "permanent_delete"
-                ? "Hapus Permanen Limbah?"
-                : "Arsipkan Limbah?"}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {pendingAction?.type === "permanent_delete" ? (
-                <>
-                  Limbah{" "}
-                  <span className="font-semibold text-brand-black">
-                    &ldquo;
-                    {pendingAction.post.custom_fabric_name || "Kain Tanpa Nama"}
-                    &rdquo;
-                  </span>{" "}
-                  berstatus{" "}
-                  <span className="font-semibold text-[#B05B00]">
-                    Terjual
-                  </span>{" "}
-                  akan dihapus secara{" "}
-                  <span className="font-semibold text-error-rust">
-                    permanen
-                  </span>{" "}
-                  dari sistem. Tindakan ini tidak dapat dibatalkan.
-                </>
-              ) : (
-                <>
-                  Limbah{" "}
-                  <span className="font-semibold text-brand-black">
-                    &ldquo;
-                    {pendingAction?.post.custom_fabric_name ||
-                      "Kain Tanpa Nama"}
-                    &rdquo;
-                  </span>{" "}
-                  akan diarsipkan dan tidak akan muncul di daftar aktif.
-                </>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <Button
-              variant={"outline-black"}
-              size={"sm"}
-              onClick={() => setPendingAction(null)}
-            >
-              Batal
-            </Button>
-            <Button
-              variant={
-                pendingAction?.type === "permanent_delete"
-                  ? "destructive"
-                  : "solid-black"
-              }
-              size={"sm"}
-              onClick={handleConfirm}
-            >
-              {pendingAction?.type === "permanent_delete"
-                ? "Hapus Permanen"
-                : "Arsipkan"}
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Confirmation Modal */}
+      {pendingAction && (
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setPendingAction(null);
+            }
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in-0 cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative flex w-full max-w-md flex-col overflow-hidden rounded-xl border border-line-trace bg-canvas-pure cursor-default shadow-xl"
+          >
+            {/* Header */}
+            <div className="flex shrink-0 items-center justify-between border-b border-line-trace px-6 py-5 sm:px-8">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex size-10 items-center justify-center rounded-lg ${
+                    pendingAction.type === "permanent_delete"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-amber-100 text-amber-700"
+                  }`}
+                >
+                  {pendingAction.type === "permanent_delete" ? (
+                    <AlertTriangle className="size-5" />
+                  ) : (
+                    <Archive className="size-5" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-display text-lg font-bold text-brand-black">
+                    {pendingAction.type === "permanent_delete"
+                      ? "Hapus Permanen Limbah?"
+                      : "Arsipkan Limbah?"}
+                  </h3>
+                  <p className="text-xs text-muted-moss">
+                    {pendingAction.type === "permanent_delete"
+                      ? "Tindakan ini tidak dapat dibatalkan"
+                      : "Penyimpanan kain limbah"}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setPendingAction(null)}
+                aria-label="Tutup modal"
+                className="flex size-8 items-center justify-center rounded-full bg-canvas-warm text-brand-black transition hover:bg-line-trace cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 sm:p-8 space-y-4">
+              <p className="text-xs leading-relaxed text-brand-black/80">
+                {pendingAction.type === "permanent_delete" ? (
+                  <>
+                    Limbah{" "}
+                    <span className="font-bold text-brand-black">
+                      &ldquo;
+                      {pendingAction.post.custom_fabric_name || "Kain Tanpa Nama"}
+                      &rdquo;
+                    </span>{" "}
+                    berstatus{" "}
+                    <span className="font-semibold text-amber-800">
+                      Terjual
+                    </span>{" "}
+                    akan dihapus secara{" "}
+                    <span className="font-semibold text-red-700">
+                      permanen
+                    </span>{" "}
+                    dari sistem. Semua data terkait limbah ini tidak dapat dikembalikan.
+                  </>
+                ) : (
+                  <>
+                    Limbah{" "}
+                    <span className="font-bold text-brand-black">
+                      &ldquo;
+                      {pendingAction.post.custom_fabric_name || "Kain Tanpa Nama"}
+                      &rdquo;
+                    </span>{" "}
+                    akan diarsipkan dan tidak lagi ditampilkan pada katalog aktif brand.
+                  </>
+                )}
+              </p>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-end gap-3 border-t border-line-trace bg-canvas-warm/55 px-6 py-5 sm:px-8">
+              <Button
+                size="md"
+                variant="outline"
+                type="button"
+                onClick={() => setPendingAction(null)}
+              >
+                Batal
+              </Button>
+              <Button
+                size="md"
+                variant={
+                  pendingAction.type === "permanent_delete"
+                    ? "destructive"
+                    : "default"
+                }
+                type="button"
+                onClick={handleConfirm}
+              >
+                {pendingAction.type === "permanent_delete"
+                  ? "Ya, Hapus Permanen"
+                  : "Ya, Arsipkan"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Table */}
-      <div className="w-full bg-canvas-pure border border-brand-black/15 rounded-lg overflow-hidden">
+      <div className="w-full bg-canvas-pure border border-brand-black/15 rounded-xl overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-canvas-warm/50 border-b border-line-trace/60">

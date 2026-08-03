@@ -3,10 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  usePathname,
-  useRouter,
-} from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Layers,
   LayoutDashboard,
@@ -15,105 +12,84 @@ import {
   Truck,
   Menu,
   X,
+  type LucideIcon,
 } from "lucide-react";
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/Sidebar";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Sheet, SheetContent } from "@/components/ui/Sheet";
 
-const wasteProviderNavigation = [
+interface NavigationItem {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+}
+
+interface NavigationGroup {
+  groupName: string;
+  items: NavigationItem[];
+}
+
+const wasteProviderNavigation: NavigationGroup[] = [
   {
-    label: "Ringkasan",
-    href: "/waste-providers/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Inventaris Limbah",
-    href: "/waste-providers/dashboard/inventory",
-    icon: Layers,
-  },
-  {
-    label: "Pesanan",
-    href: "/waste-providers/dashboard/order",
-    icon: Truck,
-  },
-  {
-    label: "Jejak Limbah",
-    href: "/waste-providers/dashboard/footprint",
-    icon: Leaf,
+    groupName: "Penyedia Limbah",
+    items: [
+      {
+        label: "Ringkasan",
+        href: "/waste-providers/dashboard",
+        icon: LayoutDashboard,
+      },
+      {
+        label: "Inventaris Limbah",
+        href: "/waste-providers/dashboard/inventory",
+        icon: Layers,
+      },
+      {
+        label: "Pesanan",
+        href: "/waste-providers/dashboard/order",
+        icon: Truck,
+      },
+      {
+        label: "Jejak Limbah",
+        href: "/waste-providers/dashboard/footprint",
+        icon: Leaf,
+      },
+    ],
   },
 ];
 
-function isNavigationActive(
-  pathname: string,
-  href: string,
-) {
+function isNavigationActive(pathname: string, href: string): boolean {
   if (href === "/waste-providers/dashboard") {
     return pathname === href;
   }
-
-  return (
-    pathname === href ||
-    pathname.startsWith(`${href}/`)
-  );
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 export function WasteProviderSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { user, fullName, signOut } = useAuth();
+  const [isSigningOut, setIsSigningOut] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const {
-    user,
-    fullName,
-    signOut,
-  } = useAuth();
-
-  const [
-    isSigningOut,
-    setIsSigningOut,
-  ] = useState(false);
-
-  const [isOpen, setIsOpen] = useState(false);
-
-  const displayName =
+  const displayName: string =
     fullName ||
-    (typeof user?.user_metadata?.name ===
-    "string"
+    (typeof user?.user_metadata?.name === "string"
       ? user.user_metadata.name
       : "") ||
     user?.email ||
     "Penyedia Limbah";
 
-  const initial =
-    displayName
-      .trim()
-      .charAt(0)
-      .toUpperCase() || "M";
+  const initial: string =
+    displayName.trim().charAt(0).toUpperCase() || "M";
 
-  async function handleSignOut() {
+  async function handleSignOut(): Promise<void> {
     try {
       setIsSigningOut(true);
-
       await signOut();
-
       router.replace("/");
       router.refresh();
     } catch (error) {
-      console.error(
-        "Gagal keluar:",
-        error,
-      );
+      console.error("Gagal keluar:", error);
     } finally {
       setIsSigningOut(false);
     }
@@ -121,206 +97,89 @@ export function WasteProviderSidebar() {
 
   return (
     <>
-      {/* Desktop full-height sidebar */}
-      <Sidebar
-        className="
-          hidden
-          border-r border-line-trace
-          bg-canvas-pure
-          [--sidebar-width:240px]
-          lg:flex
-        "
-      >
+      {/* Desktop full-height sidebar — same structure as BrandSidebar */}
+      <aside className="hidden w-[220px] shrink-0 border-r border-brand-black/15 bg-canvas-pure lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
         {/* Logo */}
-        <SidebarHeader
-          className="
-            shrink-0
-            border-b border-line-trace/70
-            px-6 py-5
-          "
-        >
-          <Link
-            href="/"
-            aria-label="Kembali ke beranda Muri"
-            className="
-              flex w-fit items-center gap-2.5
-              rounded-md
-              focus-visible:outline-none
-              focus-visible:ring-2
-              focus-visible:ring-brand-emerald/20
-            "
-          >
+        <div className="flex shrink-0 items-center gap-2.5 border-b border-brand-black/15 px-6 py-5">
+          <Link href="/" aria-label="Kembali ke beranda Muri" className="flex items-center gap-2.5">
             <Image
               src="/logo.png"
               alt="Logo Muri"
-              width={40}
-              height={40}
+              width={36}
+              height={36}
               priority
-              className="size-10 object-contain"
+              className="size-9 object-contain"
             />
-
-            <span className="font-display text-2xl font-medium tracking-tight text-brand-black">
+            <span className="font-display text-xl font-medium tracking-tight text-brand-black">
               Muri
             </span>
           </Link>
-        </SidebarHeader>
+        </div>
 
-        {/* Navigation */}
-        <SidebarContent className="flex-1 overflow-y-auto px-4 py-6">
-          <SidebarGroup className="p-0">
-            <SidebarGroupLabel
-              className="
-                mb-3 h-auto px-3 py-0
-                text-[11px] font-medium
-                uppercase tracking-normal
-                text-muted-moss
-              "
-            >
-              Penyedia Limbah
-            </SidebarGroupLabel>
+        {/* Navigation — scrollable */}
+        <div className="flex-1 overflow-y-auto muri-scrollbar p-6">
+          {wasteProviderNavigation.map((group) => (
+            <div key={group.groupName} className="mb-6 last:mb-0">
+              <p className="mb-3 text-[11px] font-medium uppercase text-muted-moss">
+                {group.groupName}
+              </p>
 
-            <SidebarGroupContent>
-              <SidebarMenu className="space-y-1.5">
-                {wasteProviderNavigation.map(
-                  (item) => {
-                    const Icon = item.icon;
+              <nav aria-label={`Navigasi ${group.groupName}`} className="space-y-1.5">
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = isNavigationActive(pathname, item.href);
 
-                    const isActive =
-                      isNavigationActive(
-                        pathname,
-                        item.href,
-                      );
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      aria-current={isActive ? "page" : undefined}
+                      className={`flex items-center gap-3 rounded-md px-3 py-3 text-xs font-semibold transition-colors ${
+                        isActive
+                          ? "bg-brand-lime/65 text-brand-black"
+                          : "text-muted-moss hover:bg-canvas-warm hover:text-brand-black"
+                      }`}
+                    >
+                      <Icon className="size-4 shrink-0" strokeWidth={1.8} />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+          ))}
+        </div>
 
-                    return (
-                      <SidebarMenuItem
-                        key={item.href}
-                      >
-                        <SidebarMenuButton
-                          isActive={isActive}
-                          render={
-                            <Link
-                              href={item.href}
-                              aria-current={
-                                isActive
-                                  ? "page"
-                                  : undefined
-                              }
-                            />
-                          }
-                          className={`
-                            h-auto w-full
-                            justify-start gap-3
-                            rounded-md px-3 py-3
-                            text-xs font-semibold
-                            transition-colors
-
-                            ${
-                              isActive
-                                ? `
-                                  bg-brand-lime/65
-                                  text-brand-black
-                                  hover:bg-brand-lime/75
-                                  hover:text-brand-black
-                                `
-                                : `
-                                  text-muted-moss
-                                  hover:bg-canvas-warm
-                                  hover:text-brand-black
-                                `
-                            }
-                          `}
-                        >
-                          <Icon
-                            className="size-4 shrink-0"
-                            strokeWidth={1.8}
-                          />
-
-                          <span className="truncate">
-                            {item.label}
-                          </span>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    );
-                  },
-                )}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-
-        {/* Logged-in user */}
-        <SidebarFooter
-          className="
-            mt-auto shrink-0
-            border-t border-line-trace/70
-            p-4
-          "
-        >
-          <div
-            className="
-              flex w-full items-center gap-3
-              rounded-xl
-              bg-canvas-warm/55
-              p-3
-            "
-          >
-            <div
-              className="
-                flex size-10 shrink-0
-                items-center justify-center
-                rounded-full
-                bg-brand-lime
-                font-display text-sm
-                font-bold text-brand-black
-              "
-            >
+        {/* User footer — always at bottom */}
+        <div className="shrink-0 border-t border-brand-black/15 p-4">
+          <div className="flex w-full items-center gap-3 rounded-xl bg-canvas-warm/55 p-3">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-lime font-display text-xs font-bold text-brand-black">
               {initial}
             </div>
-
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-bold leading-tight text-brand-black">
                 {displayName}
               </p>
-
-              <p className="mt-1 truncate text-[10px] leading-none text-muted-moss">
-                {user?.email}
+              <p className="mt-0.5 truncate text-[10px] leading-none text-muted-moss">
+                {user?.email || "Penyedia Limbah"}
               </p>
             </div>
-
             <button
               type="button"
               title="Keluar"
               aria-label="Keluar dari akun"
               disabled={isSigningOut}
               onClick={handleSignOut}
-              className="
-                flex size-9 shrink-0
-                items-center justify-center
-                rounded-md
-                text-error-rust
-                transition-colors
-
-                hover:bg-error-rust/[0.08]
-
-                focus-visible:outline-none
-                focus-visible:ring-2
-                focus-visible:ring-error-rust/20
-
-                disabled:cursor-not-allowed
-                disabled:opacity-50
-              "
+              className="flex size-8 shrink-0 items-center justify-center rounded-md text-error-rust transition-colors hover:bg-error-rust/[0.08] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
             >
-              <LogOut
-                className="size-4"
-                strokeWidth={1.8}
-              />
+              <LogOut className="size-4" strokeWidth={1.8} />
             </button>
           </div>
-        </SidebarFooter>
-      </Sidebar>
+        </div>
+      </aside>
 
       {/* Mobile header bar with menu toggle button */}
-      <div className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-line-trace bg-canvas-pure px-4 lg:hidden">
+      <div className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-brand-black/15 bg-canvas-pure px-4 lg:hidden">
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -355,10 +214,10 @@ export function WasteProviderSidebar() {
 
       {/* Slide-out mobile drawer Sheet */}
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetContent side="left" showCloseButton={false} className="w-[260px] p-0 bg-canvas-pure border-r border-line-trace">
+        <SheetContent side="left" showCloseButton={false} className="w-[260px] p-0 bg-canvas-pure border-r border-brand-black/15">
           <div className="flex h-full flex-col">
             {/* Header / Logo inside drawer */}
-            <div className="flex shrink-0 items-center justify-between border-b border-line-trace px-6 py-5">
+            <div className="flex shrink-0 items-center justify-between border-b border-brand-black/15 px-6 py-5">
               <Link href="/" className="flex items-center gap-2.5" onClick={() => setIsOpen(false)}>
                 <Image
                   src="/logo.png"
@@ -384,37 +243,41 @@ export function WasteProviderSidebar() {
 
             {/* Scrollable Navigation inside drawer */}
             <div className="flex-1 overflow-y-auto muri-scrollbar p-6">
-              <p className="mb-3 text-[11px] font-medium uppercase text-muted-moss">
-                Penyedia Limbah
-              </p>
+              {wasteProviderNavigation.map((group) => (
+                <div key={group.groupName} className="mb-6 last:mb-0">
+                  <p className="mb-3 text-[11px] font-medium uppercase text-muted-moss">
+                    {group.groupName}
+                  </p>
 
-              <nav aria-label="Navigasi mobile penyedia limbah" className="space-y-1.5">
-                {wasteProviderNavigation.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = isNavigationActive(pathname, item.href);
+                  <nav aria-label={`Navigasi mobile ${group.groupName}`} className="space-y-1.5">
+                    {group.items.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = isNavigationActive(pathname, item.href);
 
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setIsOpen(false)}
-                      aria-current={isActive ? "page" : undefined}
-                      className={`flex items-center gap-3 rounded-md px-3 py-3 text-xs font-semibold transition-colors ${
-                        isActive
-                          ? "bg-brand-lime/65 text-brand-black"
-                          : "text-muted-moss hover:bg-canvas-warm hover:text-brand-black"
-                      }`}
-                    >
-                      <Icon className="size-4 shrink-0" strokeWidth={1.8} />
-                      <span>{item.label}</span>
-                    </Link>
-                  );
-                })}
-              </nav>
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setIsOpen(false)}
+                          aria-current={isActive ? "page" : undefined}
+                          className={`flex items-center gap-3 rounded-md px-3 py-3 text-xs font-semibold transition-colors ${
+                            isActive
+                              ? "bg-brand-lime/65 text-brand-black"
+                              : "text-muted-moss hover:bg-canvas-warm hover:text-brand-black"
+                          }`}
+                        >
+                          <Icon className="size-4 shrink-0" strokeWidth={1.8} />
+                          <span>{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </nav>
+                </div>
+              ))}
             </div>
 
             {/* User footer inside drawer */}
-            <div className="shrink-0 border-t border-line-trace p-4 bg-canvas-pure">
+            <div className="shrink-0 border-t border-brand-black/15 p-4 bg-canvas-pure">
               <div className="flex w-full items-center gap-3 rounded-xl bg-canvas-warm/55 p-3">
                 <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-lime font-display text-xs font-bold text-brand-black">
                   {initial}
@@ -424,7 +287,7 @@ export function WasteProviderSidebar() {
                     {displayName}
                   </p>
                   <p className="mt-0.5 truncate text-[10px] leading-none text-muted-moss">
-                    {user?.email}
+                    {user?.email || "Penyedia Limbah"}
                   </p>
                 </div>
                 <button
@@ -444,4 +307,4 @@ export function WasteProviderSidebar() {
       </Sheet>
     </>
   );
-}
+}

@@ -51,7 +51,7 @@ export function PurchaseTable({
   };
 
   return (
-    <div className="w-full bg-canvas-pure border border-brand-black/15 rounded-lg overflow-hidden font-body">
+    <div className="w-full bg-canvas-pure border border-brand-black/15 rounded-xl overflow-hidden font-body">
       <Table>
         <TableHeader>
           <TableRow className="bg-canvas-warm/50 border-b border-line-trace/60">

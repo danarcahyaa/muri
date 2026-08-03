@@ -2,16 +2,8 @@
 
 import type { ReactElement } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
-import {
-  AlertDialog,
-  AlertDialogPortal,
-  AlertDialogOverlay,
-  AlertDialogContent,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogAction,
-  AlertDialogCancel,
-} from "@/components/ui/AlertDialog";
+import { AlertTriangle, X } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 import { WasteSummaryMetrics } from "@/components/waste-providers/waste-inventory/Metrics";
 import { WasteTableToolbar } from "@/components/waste-providers/waste-inventory/Toolbar";
 import { WasteDataTable } from "@/components/waste-providers/waste-inventory/Table";
@@ -52,10 +44,10 @@ export default function WasteInventoryPage(): ReactElement {
     <div className="mx-auto w-full max-w-[1320px] px-5 py-10 sm:px-6 lg:px-8 lg:py-14">
       {/* Page header */}
       <div className="mb-8">
-        <h1 className="font-display text-4xl font-bold tracking-tight text-brand-black sm:text-5xl">
+        <h1 className="font-display text-5xl font-medium leading-none tracking-[-0.05em] text-brand-black sm:text-6xl">
           Inventaris
         </h1>
-        <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-moss">
+        <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-moss">
           Kelola sisa kain perca garmen, atur detail kategori serat kain, serta perbarui status dan berat ketersediaan kain Anda di sini.
         </p>
       </div>
@@ -94,28 +86,81 @@ export default function WasteInventoryPage(): ReactElement {
         />
       </div>
 
-      <AlertDialog open={batchWarningOpen} onOpenChange={setBatchWarningOpen}>
-        <AlertDialogPortal>
-          <AlertDialogOverlay />
-          <AlertDialogContent>
-            <AlertDialogTitle>Perhatian: Jejak Limbah Permanen</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-3 text-sm text-muted-foreground">
-              Limbah yang Anda tambahkan akan secara otomatis membuat{" "}
-              <strong className="text-foreground">jejak limbah</strong> yang digunakan oleh pihak
-              brand untuk melacak asal-usul bahan baku mereka. Jejak limbah ini bersifat{" "}
-              <strong className="text-foreground">permanen dan tidak dapat diubah maupun dihapus</strong>{" "}
-              setelah limbah berhasil ditambahkan. Pastikan informasi yang Anda masukkan sudah benar
-              sebelum melanjutkan.
-            </AlertDialogDescription>
-            <div className="flex justify-end gap-3 mt-2">
-              <AlertDialogCancel id="batch-warning-cancel">Batal</AlertDialogCancel>
-              <AlertDialogAction id="batch-warning-confirm" onClick={handleConfirmAddDialog}>
-                Mengerti, Lanjutkan
-              </AlertDialogAction>
+      {/* Modal Warning Jejak Limbah */}
+      {batchWarningOpen && (
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setBatchWarningOpen(false);
+            }
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in-0 cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative flex w-full max-w-md flex-col overflow-hidden rounded-xl border border-line-trace bg-canvas-pure cursor-default shadow-xl"
+          >
+            {/* Header */}
+            <div className="flex shrink-0 items-center justify-between border-b border-line-trace px-6 py-5 sm:px-8">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-lg bg-amber-100 text-amber-800">
+                  <AlertTriangle className="size-5" />
+                </div>
+                <div>
+                  <h3 className="font-display text-lg font-bold text-brand-black">
+                    Perhatian: Jejak Limbah Permanen
+                  </h3>
+                  <p className="text-xs text-muted-moss">
+                    Informasi penting sebelum menambah limbah
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setBatchWarningOpen(false)}
+                aria-label="Tutup modal"
+                className="flex size-8 items-center justify-center rounded-full bg-canvas-warm text-brand-black transition hover:bg-line-trace cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
             </div>
-          </AlertDialogContent>
-        </AlertDialogPortal>
-      </AlertDialog>
+
+            {/* Body */}
+            <div className="p-6 sm:p-8 space-y-4">
+              <p className="text-xs leading-relaxed text-brand-black/80">
+                Limbah yang Anda tambahkan akan secara otomatis membuat{" "}
+                <strong className="text-brand-black">jejak limbah</strong> yang digunakan oleh pihak
+                brand untuk melacak asal-usul bahan baku mereka. Jejak limbah ini bersifat{" "}
+                <strong className="text-brand-black">permanen dan tidak dapat diubah maupun dihapus</strong>{" "}
+                setelah limbah berhasil ditambahkan. Pastikan informasi yang Anda masukkan sudah benar sebelum melanjutkan.
+              </p>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-end gap-3 border-t border-line-trace bg-canvas-warm/55 px-6 py-5 sm:px-8">
+              <Button
+                id="batch-warning-cancel"
+                size="md"
+                variant="outline"
+                type="button"
+                onClick={() => setBatchWarningOpen(false)}
+              >
+                Batal
+              </Button>
+              <Button
+                id="batch-warning-confirm"
+                size="md"
+                variant="default"
+                type="button"
+                onClick={handleConfirmAddDialog}
+              >
+                Mengerti, Lanjutkan
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <WasteDialogForm
         open={dialogOpen}

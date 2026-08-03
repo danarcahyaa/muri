@@ -45,7 +45,7 @@ export function WasteBatchTable({
   );
 
   return (
-    <div className="w-full bg-canvas-pure border border-brand-black/15 rounded-lg overflow-hidden">
+    <div className="w-full bg-canvas-pure border border-brand-black/15 rounded-xl overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow className="bg-canvas-warm/50 border-b border-line-trace/60">
