@@ -40,6 +40,10 @@ export function PurchaseTable({
     switch (status) {
       case PurchaseStatus.PENDING:
         return <StatusBadge variant="warning">Konfirmasi</StatusBadge>;
+      case PurchaseStatus.PROCESSING:
+        return <StatusBadge variant="warning">Diproses</StatusBadge>;
+      case PurchaseStatus.SHIPPED:
+        return <StatusBadge variant="info">Dikirim</StatusBadge>;
       case PurchaseStatus.COMPLETE:
         return <StatusBadge variant="success">Selesai</StatusBadge>;
       case PurchaseStatus.CANCELLED:
@@ -71,7 +75,7 @@ export function PurchaseTable({
             <TableSkeleton columnsCount={9} rowsCount={pageSize} />
           ) : purchases.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-10 text-xs text-muted-moss">
+              <TableCell colSpan={9} className="text-center py-10 text-xs text-muted-moss">
                 Belum ada transaksi pesanan yang cocok dengan filter.
               </TableCell>
             </TableRow>

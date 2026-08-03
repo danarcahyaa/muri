@@ -2,39 +2,67 @@ import { supabase } from "@/lib/supabaseClient";
 import { translateSupabaseError } from "@/lib/supabaseError";
 import { BaseResponse } from "@/types/common";
 import { OrderStatus as PurchaseStatus } from "@/enums/enums";
-import { WastePurchaseItem, PurchaseListResponse, PurchaseMetricsResponse } from "@/types/wasteProvider";
+import { WastePurchaseItem, PurchaseListResponse, PurchaseMetricsResponse, PickupAddress } from "@/types/wasteProvider";
 import { getStoredMaterialOrders, updateMaterialOrderStatus } from "@/services/material/materialOrderService";
 
 function getMaterialOrdersAsWastePurchases(): WastePurchaseItem[] {
   const materialOrders = getStoredMaterialOrders();
-  return materialOrders.map((ord) => ({
-    id: ord.id,
-    brand_id: ord.buyerUserId,
-    category_name_snapshot: "Kain Sirkular",
-    fabric_name_snapshot: ord.batchTitle,
-    original_price_per_kg: ord.pricePerKg,
-    final_price_idr: ord.totalPriceIdr,
-    weight_bought_kg: ord.weightKg,
-    purchase_status:
-      ord.status === "completed" || ord.status === "shipped"
-        ? PurchaseStatus.COMPLETE
-        : ord.status === "cancelled"
-          ? PurchaseStatus.CANCELLED
-          : PurchaseStatus.PENDING,
-    media_urls_snapshot: null,
-    waste_post_id: ord.batchCode,
-    created_at: ord.createdAt,
-    updated_at: ord.updatedAt,
-    brands: {
-      id: ord.buyerUserId,
-      brand_name: ord.brandName,
-    },
-    waste_posts: {
-      id: ord.batchCode,
-      provider_id: "provider-1",
-      custom_fabric_name: ord.batchTitle,
-    },
-  }));
+  return materialOrders.map((ord) => {
+    let mappedStatus = PurchaseStatus.PENDING;
+    const statusStr = String(ord.status);
+    if (statusStr === "completed" || statusStr === "complete") {
+      mappedStatus = PurchaseStatus.COMPLETE;
+    } else if (statusStr === "shipped") {
+      mappedStatus = PurchaseStatus.SHIPPED;
+    } else if (statusStr === "processing") {
+      mappedStatus = PurchaseStatus.PROCESSING;
+    } else if (statusStr === "cancelled") {
+      mappedStatus = PurchaseStatus.CANCELLED;
+    } else if (statusStr === "rejected") {
+      mappedStatus = PurchaseStatus.REJECTED;
+    }
+
+    const ordExt = ord as unknown as Record<string, unknown>;
+
+    return {
+      id: ord.id,
+      brand_id: ord.buyerUserId,
+      category_name_snapshot: "Kain Sirkular",
+      fabric_name_snapshot: ord.batchTitle,
+      original_price_per_kg: ord.pricePerKg,
+      final_price_idr: ord.totalPriceIdr,
+      weight_bought_kg: ord.weightKg,
+      purchase_status: mappedStatus,
+      media_urls_snapshot: null,
+      recipient_snapshot: {
+        name: ord.receiverName || "Brand Memuai Sourcing Team",
+        phone: ord.phoneNumber || "081234567890",
+        address: ord.shippingAddress || "Jl. Industri Kreatif No. 12, Bandung Jawa Barat",
+        city: "Bandung",
+        postalCode: "40123",
+        notes: ord.shippingNote || "Paket material dikemas karung terpal waterproof.",
+      },
+      pickup_address: (ordExt.pickupAddress as PickupAddress) || {
+        formatted_address: "Denpasar Timur, Bali",
+        latitude: -8.65,
+        longitude: 115.23333,
+        address_detail: "Gudang Utama Waste Provider, Jl. Industry No. 45, Denpasar Timur, Bali",
+      },
+      tracking_number: ord.trackingNumber || null,
+      waste_post_id: ord.batchCode,
+      created_at: ord.createdAt,
+      updated_at: ord.updatedAt,
+      brands: {
+        id: ord.buyerUserId,
+        brand_name: ord.brandName,
+      },
+      waste_posts: {
+        id: ord.batchCode,
+        provider_id: "provider-1",
+        custom_fabric_name: ord.batchTitle,
+      },
+    };
+  });
 }
 
 /**
@@ -136,20 +164,77 @@ export async function getWastePurchases(
 }
 
 /**
- * Confirms a brand purchase by setting status to 'completed'
+ * Confirms a brand purchase by storing pickup_address JSONB and setting status to 'processing'
  */
 export async function confirmWastePurchase(
-  purchaseId: string
+  purchaseId: string,
+  pickupAddress: PickupAddress
 ): Promise<BaseResponse> {
   try {
-    await supabase
-      .from("waste_purchases")
-      .update({ purchase_status: PurchaseStatus.COMPLETE as "complete" })
+    // Update Supabase waste_purchases table
+    await (supabase.from("waste_purchases") as unknown as {
+      update: (data: unknown) => { eq: (col: string, val: string) => Promise<unknown> };
+    })
+      .update({
+        purchase_status: PurchaseStatus.PROCESSING,
+        pickup_address: pickupAddress,
+      })
+      .eq("id", purchaseId);
+
+    // Sync local material order state
+    void updateMaterialOrderStatus({
+      orderId: purchaseId,
+      status: "processing",
+    });
+
+    // Also attach pickupAddress to local storage fallback
+    const localOrders = getStoredMaterialOrders();
+    const target = localOrders.find((o) => o.id === purchaseId);
+    if (target) {
+      (target as unknown as Record<string, unknown>).pickupAddress = pickupAddress;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("muri_brand_material_orders_v1", JSON.stringify(localOrders));
+      }
+    }
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: translateSupabaseError(error),
+    };
+  }
+}
+
+/**
+ * Updates logistics status of a purchase (e.g. from Processing -> Shipped or Shipped -> Complete)
+ */
+export async function updateWastePurchaseLogistics(
+  purchaseId: string,
+  newStatus: PurchaseStatus.SHIPPED | PurchaseStatus.COMPLETE,
+  trackingNumber?: string
+): Promise<BaseResponse> {
+  try {
+    const updatePayload: Record<string, unknown> = {
+      purchase_status: newStatus,
+    };
+
+    if (trackingNumber) {
+      updatePayload.tracking_number = trackingNumber;
+    }
+
+    await (supabase.from("waste_purchases") as unknown as {
+      update: (data: unknown) => { eq: (col: string, val: string) => Promise<unknown> };
+    })
+      .update(updatePayload)
       .eq("id", purchaseId);
 
     void updateMaterialOrderStatus({
       orderId: purchaseId,
-      status: "completed",
+      status: newStatus === PurchaseStatus.SHIPPED ? "shipped" : "completed",
+      trackingNumber: trackingNumber || undefined,
     });
 
     return {
@@ -192,11 +277,7 @@ export async function rejectWastePurchase(
 }
 
 /**
- * Calculates aggregated counts for purchases of the waste provider:
- * - Waiting Confirmation
- * - Completed
- * - Cancelled
- * - Rejected
+ * Calculates aggregated counts for purchases of the waste provider
  */
 export async function getPurchaseMetrics(
   providerId: string
@@ -210,6 +291,8 @@ export async function getPurchaseMetrics(
     const purchases = listRes.data?.purchases || [];
 
     const waitingCount = purchases.filter((p) => p.purchase_status === PurchaseStatus.PENDING).length;
+    const processingCount = purchases.filter((p) => p.purchase_status === PurchaseStatus.PROCESSING).length;
+    const shippedCount = purchases.filter((p) => p.purchase_status === PurchaseStatus.SHIPPED).length;
     const completedCount = purchases.filter((p) => p.purchase_status === PurchaseStatus.COMPLETE).length;
     const cancelledCount = purchases.filter((p) => p.purchase_status === PurchaseStatus.CANCELLED).length;
     const rejectedCount = purchases.filter((p) => p.purchase_status === PurchaseStatus.REJECTED).length;
@@ -218,6 +301,8 @@ export async function getPurchaseMetrics(
       success: true,
       data: {
         waitingCount,
+        processingCount,
+        shippedCount,
         completedCount,
         cancelledCount,
         rejectedCount,
@@ -230,3 +315,4 @@ export async function getPurchaseMetrics(
     };
   }
 }
+

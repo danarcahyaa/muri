@@ -27,6 +27,8 @@ interface PurchaseToolbarProps {
 
 const TRANSACTION_STATUSES = [
   { value: PurchaseStatus.PENDING, label: "Menunggu Konfirmasi" },
+  { value: PurchaseStatus.PROCESSING, label: "Diproses" },
+  { value: PurchaseStatus.SHIPPED, label: "Dikirim" },
   { value: PurchaseStatus.COMPLETE, label: "Selesai" },
   { value: PurchaseStatus.CANCELLED, label: "Dibatalkan" },
   { value: PurchaseStatus.REJECTED, label: "Ditolak" },

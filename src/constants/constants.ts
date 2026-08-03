@@ -13,6 +13,8 @@ export const ALL_WASTE_STATUSES = [
 /** All possible statuses for a purchase/order. */
 export const ALL_STATUSES = [
   PurchaseStatus.PENDING,
+  PurchaseStatus.PROCESSING,
+  PurchaseStatus.SHIPPED,
   PurchaseStatus.COMPLETE,
   PurchaseStatus.CANCELLED,
   PurchaseStatus.REJECTED,

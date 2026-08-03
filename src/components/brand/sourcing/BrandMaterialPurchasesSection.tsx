@@ -15,6 +15,7 @@ import {
 import { BrandMaterialPurchasesTable } from "./BrandMaterialPurchasesTable";
 import { BrandMaterialPurchasesPagination } from "./BrandMaterialPurchasesPagination";
 import BrandWasteOrderDetailModal from "./BrandWasteOrderDetailModal";
+import { supabase } from "@/lib/supabaseClient";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -107,6 +108,38 @@ export default function BrandMaterialPurchasesSection(): ReactElement {
       setIsLoading(false);
     }
   }, [urlSearch, urlStatus]);
+
+  // Supabase Realtime Subscription for real-time status updates on Brand side
+  useEffect(() => {
+    const channel = supabase
+      .channel("waste_purchases_realtime_brand")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "waste_purchases",
+        },
+        () => {
+          void loadOrders();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [loadOrders]);
+
+  // Sync selectedOrder if it's currently open in modal when purchases array updates
+  useEffect(() => {
+    if (selectedOrder) {
+      const updated = purchases.find((p) => p.id === selectedOrder.id);
+      if (updated) {
+        setSelectedOrder(updated);
+      }
+    }
+  }, [purchases]);
 
   useEffect(() => {
     void loadOrders();

@@ -22,6 +22,7 @@ import {
   CreditCard,
   Factory,
   MapPin,
+  Navigation,
   Package,
   Phone,
   Truck,
@@ -183,6 +184,36 @@ export default function BrandWasteOrderDetailModal({
                     </span>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Lokasi Asal Pengiriman Material (Dari Provider) */}
+            <div>
+              <div className="flex items-center gap-2 text-xs font-bold uppercase text-brand-black">
+                <Truck className="size-4 text-brand-emerald" />
+                <span>Lokasi Asal Pengiriman Material</span>
+              </div>
+
+              <div className="mt-3 space-y-2.5 rounded-lg border border-line-trace bg-canvas-warm/50 p-4">
+                {order.pickupAddress ? (
+                  <div className="space-y-2 text-xs">
+                    <div>
+                      <span className="text-muted-moss block text-[11px] mb-0.5">Wilayah Asal Pengiriman</span>
+                      <span className="font-semibold text-brand-black">{order.pickupAddress.formatted_address}</span>
+                    </div>
+
+                    <div>
+                      <span className="text-muted-moss block text-[11px] mb-0.5">Detail Alamat Lengkap & Catatan Gudang Asal</span>
+                      <p className="font-medium text-brand-black leading-relaxed bg-canvas-pure/80 p-2 rounded border border-line-trace/60">
+                        {order.pickupAddress.address_detail}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs italic text-muted-moss">
+                    Lokasi asal pengiriman material sedang dikonfirmasi oleh penyedia limbah.
+                  </p>
+                )}
               </div>
             </div>
 

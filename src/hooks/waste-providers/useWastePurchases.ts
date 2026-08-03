@@ -3,14 +3,17 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabaseClient";
 import {
   getWastePurchases,
   confirmWastePurchase,
+  updateWastePurchaseLogistics,
   rejectWastePurchase,
 } from "@/services/waste-providers/purchaseService";
-import type { WastePurchaseItem } from "@/types/wasteProvider";
+import type { WastePurchaseItem, PickupAddress } from "@/types/wasteProvider";
 import type { UseWastePurchasesReturn } from "@/types/hooks";
 import { ALL_STATUSES } from "@/constants/constants";
+import { OrderStatus } from "@/enums/enums";
 
 const PAGE_SIZE = 5;
 
@@ -40,6 +43,38 @@ export function useWastePurchases(): UseWastePurchasesReturn {
   // Dialog state
   const [selectedPurchase, setSelectedPurchase] = useState<WastePurchaseItem | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+
+  // Supabase Realtime Subscription for real-time status updates
+  useEffect(() => {
+    const channel = supabase
+      .channel("waste_purchases_realtime_provider")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "waste_purchases",
+        },
+        () => {
+          setRefreshTrigger((prev) => prev + 1);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Sync selectedPurchase when purchases array is refreshed
+  useEffect(() => {
+    if (selectedPurchase) {
+      const updated = purchases.find((p) => p.id === selectedPurchase.id);
+      if (updated) {
+        setSelectedPurchase(updated);
+      }
+    }
+  }, [purchases]);
 
   // Load purchase data
   useEffect(() => {
@@ -106,11 +141,11 @@ export function useWastePurchases(): UseWastePurchasesReturn {
 
   // --- Action Handlers ---
 
-  const handleConfirmPurchase = async (purchaseId: string) => {
+  const handleConfirmPurchase = async (purchaseId: string, pickupAddress: PickupAddress) => {
     try {
-      const res = await confirmWastePurchase(purchaseId);
+      const res = await confirmWastePurchase(purchaseId, pickupAddress);
       if (res.success) {
-        toast.success("Pesanan berhasil dikonfirmasi!");
+        toast.success("Pesanan berhasil dikonfirmasi! Status pesanan kini Diproses.");
         triggerRefresh();
       } else {
         toast.error(res.error || "Gagal mengonfirmasi pesanan.");
@@ -118,6 +153,29 @@ export function useWastePurchases(): UseWastePurchasesReturn {
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Terjadi kesalahan saat mengonfirmasi.";
+      toast.error(message);
+    }
+  };
+
+  const handleUpdateLogistics = async (
+    purchaseId: string,
+    newStatusStr: string,
+    trackingNumber?: string
+  ) => {
+    try {
+      const newStatus =
+        newStatusStr === OrderStatus.SHIPPED ? OrderStatus.SHIPPED : OrderStatus.COMPLETE;
+
+      const res = await updateWastePurchaseLogistics(purchaseId, newStatus, trackingNumber);
+      if (res.success) {
+        toast.success(`Status logistik pesanan berhasil diperbarui menjadi ${newStatusStr === OrderStatus.SHIPPED ? "Dikirim" : "Selesai"}!`);
+        triggerRefresh();
+      } else {
+        toast.error(res.error || "Gagal memperbarui logistik pesanan.");
+      }
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Terjadi kesalahan saat memperbarui status logistik.";
       toast.error(message);
     }
   };
@@ -173,6 +231,7 @@ export function useWastePurchases(): UseWastePurchasesReturn {
     detailDialogOpen,
     setDetailDialogOpen,
     handleConfirmPurchase,
+    handleUpdateLogistics,
     handleRejectPurchase,
     handleViewDetail,
     handleFilterSearchExecute,
