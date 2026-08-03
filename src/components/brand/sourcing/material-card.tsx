@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { type ReactElement } from "react";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -23,10 +24,10 @@ export function MaterialCard({
   const fallbackImage =
     "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?q=80&w=600&auto=format&fit=crop";
 
-  return (
+  const cardContent = (
     <Card
       onClick={() => onSelect?.(item)}
-      className="group overflow-hidden flex flex-col rounded-md border border-brand-black/15 bg-canvas-pure hover:border-brand-forest/60 transition-all duration-200 shadow-none cursor-pointer"
+      className="group overflow-hidden flex flex-col rounded-md border border-brand-black/15 bg-canvas-pure hover:border-brand-forest/60 transition-all duration-200 shadow-none cursor-pointer h-full"
     >
       {/* Thumbnail Image Container */}
       <div className="relative w-full aspect-3/2 bg-canvas-warm/50 overflow-hidden">
@@ -97,7 +98,13 @@ export function MaterialCard({
         </div>
       </CardContent>
 
-     
     </Card>
   );
+
+  if (onSelect) {
+    return cardContent;
+  }
+
+  return <Link href={`/brand/dashboard/sourcing/waste/${item.id}`}>{cardContent}</Link>;
 }
+
