@@ -84,8 +84,24 @@ export interface WasteFilterInput {
 
 export interface RecipientSnapshot {
   name?: string;
+  receiverName?: string;
   phone?: string;
+  phoneNumber?: string;
   address?: string;
+  shippingAddress?: string;
+  city?: string;
+  cityRegency?: string;
+  postalCode?: string;
+  postal_code?: string;
+  notes?: string;
+  shippingNote?: string;
+}
+
+export interface PickupAddress {
+  formatted_address: string;
+  latitude: number;
+  longitude: number;
+  address_detail: string;
 }
 
 export interface WastePurchaseItem {
@@ -99,6 +115,8 @@ export interface WastePurchaseItem {
   purchase_status: string;
   media_urls_snapshot: { url: string; type: string }[] | string[] | null;
   recipient_snapshot?: RecipientSnapshot | Record<string, unknown> | null;
+  pickup_address?: PickupAddress | null;
+  tracking_number?: string | null;
   waste_post_id: string;
   created_at: string;
   updated_at: string;
@@ -122,6 +140,8 @@ export interface PurchaseListResponse extends BaseResponse {
 
 export interface PurchaseMetricsData {
   waitingCount: number;
+  processingCount?: number;
+  shippedCount?: number;
   completedCount: number;
   cancelledCount: number;
   rejectedCount: number;

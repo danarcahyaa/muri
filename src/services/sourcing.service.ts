@@ -532,6 +532,8 @@ export interface RecipientSnapshot {
   name: string;
   phone: string;
   address: string;
+  formatted_address?: string;
+  address_detail?: string;
 }
 
 export interface CreateWastePurchaseInput {
@@ -602,6 +604,8 @@ export async function createWastePurchase(
   }
 }
 
+import type { PickupAddress } from "@/types/wasteProvider";
+
 export interface BrandWastePurchaseItem {
   id: string;
   purchaseId: string;
@@ -615,6 +619,8 @@ export interface BrandWastePurchaseItem {
   purchaseStatus: "pending" | "processing" | "shipped" | "complete" | "completed" | "cancelled" | "rejected";
   mediaUrlsSnapshot: { url: string; type: string }[] | null;
   recipientSnapshot: RecipientSnapshot | null;
+  pickupAddress?: PickupAddress | null;
+  trackingNumber?: string | null;
   createdAt: string;
   updatedAt: string;
   providerName?: string;
@@ -674,6 +680,9 @@ export async function getBrandWastePurchases(
         };
       }
 
+      const pickupRaw = (row.pickup_address as PickupAddress | null) || null;
+      const trackingNum = row.tracking_number ? String(row.tracking_number) : null;
+
       const idStr = String(row.id || "");
       const pId = String(
         row.purchase_id ||
@@ -696,6 +705,8 @@ export async function getBrandWastePurchases(
         ) as BrandWastePurchaseItem["purchaseStatus"],
         mediaUrlsSnapshot: mediaUrls,
         recipientSnapshot: recipient,
+        pickupAddress: pickupRaw,
+        trackingNumber: trackingNum,
         createdAt: String(row.created_at || new Date().toISOString()),
         updatedAt: String(row.updated_at || new Date().toISOString()),
       };

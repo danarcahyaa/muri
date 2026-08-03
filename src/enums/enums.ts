@@ -18,6 +18,8 @@ export enum ProductStatus {
 
 export enum OrderStatus {
   PENDING = "pending",
+  PROCESSING = "processing",
+  SHIPPED = "shipped",
   COMPLETE = "complete",
   CANCELLED = "cancelled",
   REJECTED = "rejected",

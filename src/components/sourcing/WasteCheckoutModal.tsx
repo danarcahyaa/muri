@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, type ReactElement, type FormEvent } from "react";
 import {
   Dialog,
@@ -10,13 +8,13 @@ import {
 } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Textarea } from "@/components/ui/Textarea";
 import { Field, FieldLabel, FieldError, FieldGroup } from "@/components/ui/Field";
-import { ShieldCheck, CheckCircle2, QrCode, User, Phone } from "lucide-react";
+import { CheckCircle2, User, Phone } from "lucide-react";
 import { formatCurrencyIDR, formatWeightKg } from "@/lib/formatter";
 import { toast } from "sonner";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { createWastePurchase } from "@/services/sourcing.service";
+import { LocationPicker, type AddressJSONB } from "@/components/shared/LocationPicker";
 import type { SourcingWastePostDetailItem } from "@/types/sourcing";
 
 interface WasteCheckoutModalProps {
@@ -35,8 +33,12 @@ export function WasteCheckoutModal({
   const { user } = useAuth();
   const [receiverName, setReceiverName] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
-  const [shippingAddress, setShippingAddress] = useState<string>("");
-  const [paymentMethod, setPaymentMethod] = useState<"rekber" | "qris">("rekber");
+  const [shippingLocation, setShippingLocation] = useState<AddressJSONB>({
+    formatted_address: "",
+    latitude: 0,
+    longitude: 0,
+    address_detail: "",
+  });
 
   const [errors, setErrors] = useState<{
     receiverName?: string;
@@ -60,10 +62,10 @@ export function WasteCheckoutModal({
     } else if (phoneNumber.trim().length < 8) {
       newErrors.phoneNumber = "Nomor telepon tidak valid";
     }
-    if (!shippingAddress.trim()) {
-      newErrors.shippingAddress = "Alamat pengiriman wajib diisi";
-    } else if (shippingAddress.trim().length < 10) {
-      newErrors.shippingAddress = "Alamat pengiriman minimal 10 karakter";
+    if (!shippingLocation.formatted_address.trim()) {
+      newErrors.shippingAddress = "Silakan tentukan wilayah tujuan pengiriman terlebih dahulu";
+    } else if (!shippingLocation.address_detail.trim()) {
+      newErrors.shippingAddress = "Silakan lengkapi detail alamat & catatan gudang tujuan";
     }
 
     setErrors(newErrors);
@@ -78,6 +80,8 @@ export function WasteCheckoutModal({
     try {
       const brandId = user?.id || "de3b8543-ecac-40ff-8c20-a1cb6b58293c"; // Fallback demo brand ID if not logged in
 
+      const fullAddressStr = `${shippingLocation.formatted_address} — ${shippingLocation.address_detail.trim()}`;
+
       const result = await createWastePurchase({
         brandId,
         wastePostId: material.id,
@@ -91,7 +95,9 @@ export function WasteCheckoutModal({
         recipientSnapshot: {
           name: receiverName.trim(),
           phone: phoneNumber.trim(),
-          address: shippingAddress.trim(),
+          address: fullAddressStr,
+          formatted_address: shippingLocation.formatted_address,
+          address_detail: shippingLocation.address_detail.trim(),
         },
       });
 
@@ -166,7 +172,7 @@ export function WasteCheckoutModal({
             </Button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-5 pt-2">
+          <form onSubmit={handleSubmit} className="space-y-5 pt-2 font-body text-xs">
             {/* Summary Box */}
             <div className="p-4 rounded-md bg-canvas-warm border border-brand-black/15 space-y-2 text-xs">
               <div className="flex justify-between">
@@ -221,20 +227,24 @@ export function WasteCheckoutModal({
                 {errors.phoneNumber && <FieldError>{errors.phoneNumber}</FieldError>}
               </Field>
 
-              <Field>
-                <FieldLabel htmlFor="shippingAddress" className="text-xs font-semibold">
-                  Alamat Gudang <span className="text-error-rust">*</span>
-                </FieldLabel>
-                <Textarea
-                  id="shippingAddress"
-                  rows={3}
-                  value={shippingAddress}
-                  onChange={(e) => setShippingAddress(e.target.value)}
-                  placeholder="Alamat lengkap tujuan pengiriman material limbah..."
-                  className="rounded-sm"
+              {/* Component Reusable LocationPicker untuk Alamat Pengiriman Brand */}
+              <div className="space-y-3">
+                <LocationPicker
+                  value={shippingLocation}
+                  onChange={setShippingLocation}
+                  label="Cari Tujuan Pengiriman"
+                  detailLabel="Detail Alamat Lengkap & Catatan Gudang"
+                  placeholder="Ketik wilayah/kota gudang..."
+                  detailPlaceholder="Jl. Sukajadi No. 120, Gudang Studio Brand, Kontak Security (0812345678)..."
+                  disabled={isSubmitting}
+                  required={true}
                 />
-                {errors.shippingAddress && <FieldError>{errors.shippingAddress}</FieldError>}
-              </Field>
+                {errors.shippingAddress && (
+                  <p className="text-xs text-error-rust font-medium mt-1">
+                    {errors.shippingAddress}
+                  </p>
+                )}
+              </div>
             </FieldGroup>
 
             {/* Submit Action */}
@@ -242,7 +252,7 @@ export function WasteCheckoutModal({
               <Button
                 type="submit"
                 fullWidth
-                disabled={isSubmitting}
+                loading={isSubmitting}
                 className="bg-brand-black text-canvas-pure hover:bg-brand-forest font-bold rounded-sm h-11"
               >
                 {isSubmitting ? "Memproses Pesanan..." : `Beli Sekarang (${formatCurrencyIDR(totalPrice)})`}

@@ -4,7 +4,6 @@ import {
   Dialog,
   DialogContent,
 } from "@/components/ui/Dialog";
-import { Button } from "@/components/ui/Button";
 import { MediaGalleryViewer } from "@/components/ui/MediaGalleryViewer";
 import { formatWeightKg, formatIndonesianDate } from "@/lib/formatter";
 import type { WasteBatchItem } from "@/types/wasteProvider";
@@ -30,7 +29,7 @@ export function WasteBatchDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md sm:max-w-lg bg-canvas-pure border border-line-trace rounded-xl w-full max-h-[90vh] flex flex-col overflow-hidden p-0 font-body">
+      <DialogContent showCloseButton={false} className="max-w-md sm:max-w-lg bg-canvas-pure border border-line-trace rounded-xl w-full max-h-[90vh] flex flex-col overflow-hidden p-0 font-body">
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b border-line-trace px-6 py-5 sm:px-8">
           <div className="flex items-center gap-3">
@@ -107,13 +106,6 @@ export function WasteBatchDetailDialog({
               </div>
             )}
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="shrink-0 flex items-center justify-end border-t border-line-trace bg-canvas-warm/55 px-6 py-4 sm:px-8">
-          <Button variant="outline" size="md" onClick={() => onOpenChange(false)}>
-            Tutup
-          </Button>
         </div>
       </DialogContent>
     </Dialog>

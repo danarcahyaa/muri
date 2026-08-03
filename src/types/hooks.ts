@@ -1,4 +1,4 @@
-import type { WastePostItem, FabricCategoryItem, WasteInput, WastePurchaseItem, WasteBatchItem } from "@/types/wasteProvider";
+import type { WastePostItem, FabricCategoryItem, WasteInput, WastePurchaseItem, WasteBatchItem, PickupAddress } from "@/types/wasteProvider";
 
 /** Return type for the `useWasteInventory` hook. */
 export interface UseWasteInventoryReturn {
@@ -56,7 +56,8 @@ export interface UseWastePurchasesReturn {
   detailDialogOpen: boolean;
   setDetailDialogOpen: (v: boolean) => void;
   // Handlers
-  handleConfirmPurchase: (purchaseId: string) => Promise<void>;
+  handleConfirmPurchase: (purchaseId: string, pickupAddress: PickupAddress) => Promise<void>;
+  handleUpdateLogistics: (purchaseId: string, newStatus: string, trackingNumber?: string) => Promise<void>;
   handleRejectPurchase: (purchaseId: string) => Promise<void>;
   handleViewDetail: (purchase: WastePurchaseItem) => void;
   handleFilterSearchExecute: () => void;

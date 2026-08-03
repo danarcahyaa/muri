@@ -31,6 +31,7 @@ export default function WasteProviderOrderPage(): ReactElement {
     detailDialogOpen,
     setDetailDialogOpen,
     handleConfirmPurchase,
+    handleUpdateLogistics,
     handleRejectPurchase,
     handleViewDetail,
     handleFilterSearchExecute,
@@ -45,7 +46,7 @@ export default function WasteProviderOrderPage(): ReactElement {
           Daftar Transaksi Pesanan
         </h1>
         <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-moss">
-          Pantau riwayat order sisa kain perca dari brand fesyen, saring data transaksi berdasarkan status dan tanggal, serta lakukan konfirmasi pengiriman material.
+          Pantau riwayat order sisa kain perca dari brand fesyen, saring data transaksi berdasarkan status dan tanggal, serta tentukan lokasi penjemputan limbah & kelola status logistik pengiriman material.
         </p>
       </div>
 
@@ -90,6 +91,7 @@ export default function WasteProviderOrderPage(): ReactElement {
         open={detailDialogOpen}
         onOpenChange={setDetailDialogOpen}
         onConfirmPurchase={handleConfirmPurchase}
+        onUpdateLogistics={handleUpdateLogistics}
         onRejectPurchase={handleRejectPurchase}
       />
     </div>
