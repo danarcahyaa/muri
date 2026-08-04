@@ -3,6 +3,7 @@
 import { Check, Layers, LoaderCircle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import type { SavedBrandPattern } from "@/services/brand/patchworkService";
+import { PatchworkGallerySkeleton } from "./PatchworkGallerySkeleton";
 
 interface PatchworkSavedPatternsTabProps {
   patterns: SavedBrandPattern[];
@@ -22,14 +23,7 @@ export function PatchworkSavedPatternsTab({
   deletingId,
 }: PatchworkSavedPatternsTabProps) {
   if (isLoading) {
-    return (
-      <div className="flex min-h-[360px] flex-col items-center justify-center p-8 text-center font-body">
-        <LoaderCircle className="size-8 animate-spin text-brand-emerald" />
-        <p className="mt-3 text-xs font-medium text-brand-black">
-          Memuat galeri pola tersimpan...
-        </p>
-      </div>
-    );
+    return <PatchworkGallerySkeleton count={6} />;
   }
 
   if (patterns.length === 0) {

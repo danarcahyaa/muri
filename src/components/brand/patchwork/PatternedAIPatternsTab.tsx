@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import type { SavedBrandPattern } from "@/services/brand/patchworkService";
+import { PatchworkGallerySkeleton } from "./PatchworkGallerySkeleton";
 import { SeamlessTileTester } from "./SeamlessTileTester";
 import { SilhouetteMockupModal } from "./SilhouetteMockupModal";
 
@@ -39,14 +40,7 @@ export function PatternedAIPatternsTab({
   const [viewMode, setViewMode] = useState<"card" | "repeat">("card");
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[360px] flex-col items-center justify-center p-8 text-center font-body">
-        <LoaderCircle className="size-8 animate-spin text-brand-emerald" />
-        <p className="mt-3 text-xs font-medium text-brand-black">
-          Memuat studio galeri pola seamless...
-        </p>
-      </div>
-    );
+    return <PatchworkGallerySkeleton count={6} />;
   }
 
   if (patterns.length === 0) {
