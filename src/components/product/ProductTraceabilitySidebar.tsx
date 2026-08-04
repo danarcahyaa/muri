@@ -343,15 +343,6 @@ export default function ProductTraceabilitySidebar({
           </div>
         </div>
 
-        <SheetFooter className="shrink-0 border-t border-line-trace bg-canvas-warm/55 px-6 py-5 sm:px-8">
-          <Button
-            fullWidth
-            render={<Link href={buildTraceabilityHref(productionId)} />}
-          >
-            Lihat Paspor & Sertifikat Lengkap
-            <ArrowRight className="size-4" />
-          </Button>
-        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

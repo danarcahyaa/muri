@@ -257,17 +257,6 @@ export default function ProductTraceabilityCard({
             {selectedStep.detail}
           </p>
         </div>
-
-        <Button
-          fullWidth
-          variant="outline"
-          size="sm"
-          className="mt-5"
-          render={<Link href={buildTraceabilityHref(productionId)} />}
-        >
-          Lihat Paspor Lengkap
-          <ArrowRight className="size-4" />
-        </Button>
       </CardContent>
     </Card>
   );
