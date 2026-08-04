@@ -15,7 +15,6 @@ interface ProductOrderSidebarProps {
 
   paymentOption: ProductPaymentOption;
   priceIdr: number;
-  priceCoin: number | null;
 
   stock: number;
 

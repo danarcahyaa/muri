@@ -12,7 +12,6 @@ interface UseProductOrderOptions {
   slug: string;
   paymentOption: ProductPaymentOption;
   priceIdr: number;
-  priceCoin: number | null;
   stock: number;
   bonusProduct: ProductBonusSummary | null;
   bonusProductQty: number;
@@ -22,7 +21,6 @@ export function useProductOrder({
   slug,
   paymentOption,
   priceIdr,
-  priceCoin,
   stock,
   bonusProduct,
   bonusProductQty,
@@ -46,8 +44,6 @@ export function useProductOrder({
   const requiresNewPaymentFlow = paymentOption !== "idr";
 
   const totalPriceIdr = priceIdr * quantity;
-  const totalPriceCoin =
-    priceCoin === null ? null : priceCoin * quantity;
 
   const totalBonusQty =
     bonusProduct && bonusProductQty > 0
@@ -82,7 +78,6 @@ export function useProductOrder({
     acceptsCoin,
     requiresNewPaymentFlow,
     totalPriceIdr,
-    totalPriceCoin,
     totalBonusQty,
     checkoutHref,
     decreaseQuantity,

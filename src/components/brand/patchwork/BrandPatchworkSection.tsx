@@ -1,12 +1,11 @@
 "use client";
 
-import { Sparkles } from "lucide-react";
+import { Grid, Sparkles } from "lucide-react";
 
 import { TooltipProvider } from "@/components/ui/Tooltip";
 import { useBrandPatchwork } from "@/hooks/brand/useBrandPatchwork";
-import { PatchworkSourceCard } from "./PatchworkSourceCard";
-import { PatchworkBriefCard } from "./PatchworkBriefCard";
-import { PatchworkResultPanel } from "./PatchworkResultPanel";
+import { PatternedAILeftPanel } from "./PatternedAILeftPanel";
+import { PatternedAIPatternsTab } from "./PatternedAIPatternsTab";
 
 export default function BrandPatchworkSection() {
   const patchwork = useBrandPatchwork();
@@ -14,35 +13,27 @@ export default function BrandPatchworkSection() {
   return (
     <TooltipProvider delay={200}>
       <section className="mt-8 font-body">
-        <div className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8">
+        {/* Studio White Container */}
+        <div className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8 space-y-6">
+          {/* Studio Top Header */}
           <div className="flex flex-col gap-3 border-b border-line-trace pb-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="font-display text-xl font-bold text-brand-black">
-                Patchwork Execution Advisor
-              </h2>
-              <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted-moss">
-                Sistem membantu memilih produk yang paling cocok, teknik
-                patchwork, kebutuhan mesin, pola potong, risiko produksi, dan
-                urutan eksekusi.
-              </p>
-            </div>
-
-            <div className="inline-flex items-center gap-1.5 self-start rounded-full bg-brand-lime/30 px-3 py-1 text-xs font-bold text-brand-forest sm:self-auto">
-              <Sparkles className="size-3.5" />
-              <span>1 rekomendasi terarah per generate</span>
+              <div className="flex items-center gap-2">
+                <h2 className="font-display text-xl font-bold text-brand-black">
+                  Patchwork Pattern & Mockup Studio
+                </h2>
+                
+              </div>
+              
             </div>
           </div>
 
-          <div className="mt-6 grid gap-6 lg:grid-cols-12">
-            <div className="space-y-4 lg:col-span-6">
-              <PatchworkSourceCard
+          {/* Studio Split Layout (2 Columns) */}
+          <div className="grid gap-8 lg:grid-cols-12 items-start">
+            {/* Left Column: Patterned.ai Controls */}
+            <div className="lg:col-span-5">
+              <PatternedAILeftPanel
                 fileInputRef={patchwork.fileInputRef}
-                sourceMode={patchwork.sourceMode}
-                switchMode={patchwork.switchMode}
-                materials={patchwork.materials}
-                isLoadingMaterials={patchwork.isLoadingMaterials}
-                selectedMaterialId={patchwork.selectedMaterialId}
-                selectMaterial={patchwork.selectMaterial}
                 files={patchwork.files}
                 previews={patchwork.previews}
                 totalBytes={patchwork.totalBytes}
@@ -51,47 +42,41 @@ export default function BrandPatchworkSection() {
                 handleFileChange={patchwork.handleFileChange}
                 handleDrop={patchwork.handleDrop}
                 clearImages={patchwork.clearImages}
-              />
-
-              <PatchworkBriefCard
-                fabricType={patchwork.fabricType}
-                setFabricType={patchwork.setFabricType}
-                pieceFormat={patchwork.pieceFormat}
-                setPieceFormat={patchwork.setPieceFormat}
-                materialCondition={patchwork.materialCondition}
-                setMaterialCondition={patchwork.setMaterialCondition}
-                targetProduct={patchwork.targetProduct}
-                setTargetProduct={patchwork.setTargetProduct}
-                productionLevel={patchwork.productionLevel}
-                setProductionLevel={patchwork.setProductionLevel}
-                visualDirection={patchwork.visualDirection}
-                setVisualDirection={patchwork.setVisualDirection}
-                customNote={patchwork.customNote}
-                setCustomNote={patchwork.setCustomNote}
+                promptText={patchwork.promptText}
+                setPromptText={patchwork.setPromptText}
                 customNoteError={patchwork.customNoteError}
-                briefConfirmed={patchwork.briefConfirmed}
-                setBriefConfirmed={patchwork.setBriefConfirmed}
-                invalidateBrief={patchwork.invalidateBrief}
                 status={patchwork.status}
-                sourceReady={patchwork.sourceReady}
                 canGenerate={patchwork.canGenerate}
                 errorMsg={patchwork.errorMsg}
                 handleGenerate={patchwork.handleGenerate}
               />
             </div>
 
-            <PatchworkResultPanel
-              status={patchwork.status}
-              activeTab={patchwork.activeTab}
-              setActiveTab={patchwork.setActiveTab}
-              savedPattern={patchwork.savedPattern}
-              aiImageUrl={patchwork.aiImageUrl}
-              executionPlan={patchwork.executionPlan}
-              isSaving={patchwork.isSaving}
-              handleSave={patchwork.handleSave}
-              resetResult={patchwork.resetResult}
-              setBriefConfirmed={patchwork.setBriefConfirmed}
-            />
+            {/* Right Column: Galeri Pola Tersimpan & Modal Mockup */}
+            <div className="lg:col-span-7 space-y-6">
+              {/* Header Title */}
+              <div className="flex items-center justify-between border-b border-line-trace pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 rounded-xl bg-brand-forest px-4 py-2 text-xs font-bold text-white shadow-xs">
+                    <Grid className="size-4" />
+                    <span>Galeri Pola Tersimpan</span>
+                    <span className="ml-1 rounded-full bg-brand-lime px-2 py-0.5 text-[10px] text-brand-forest">
+                      {patchwork.savedPatterns.length}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Direct Pattern Gallery */}
+              <PatternedAIPatternsTab
+                patterns={patchwork.savedPatterns}
+                isLoading={patchwork.isLoadingSavedPatterns}
+                activePatternId={patchwork.activeSilhouettePattern?.id ?? null}
+                onSelectPattern={patchwork.handleSelectPatternForSilhouette}
+                onDeletePattern={patchwork.handleDeletePattern}
+                deletingId={patchwork.deletingPatternId}
+              />
+            </div>
           </div>
         </div>
       </section>

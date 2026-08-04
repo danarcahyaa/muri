@@ -48,10 +48,7 @@ export function ProductCheckoutConfirmationModal({
   onClose,
   onConfirm,
 }: FinalConfirmationModalProps) {
-  const paymentText =
-    paymentMethod === "coin"
-      ? formatCoin(checkout.totalPriceCoin ?? 0)
-      : formatIdr(checkout.totalPriceIdr ?? 0);
+  const paymentText = formatIdr(checkout.totalPriceIdr ?? 0);
 
   return (
     <Dialog

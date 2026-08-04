@@ -10,7 +10,7 @@ import type {
 
 export const MAX_IMAGES = 4;
 export const MAX_TOTAL_BYTES = 4 * 1024 * 1024;
-export const MAX_CUSTOM_NOTE = 240;
+export const MAX_CUSTOM_NOTE = 1000;
 
 export const ALLOWED_IMAGE_TYPES = new Set([
   "image/jpeg",

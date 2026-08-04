@@ -151,11 +151,7 @@ export default function ProductCheckoutForm({
               description={`Saldo tersedia ${formatCoin(
                 checkout.profile.totalPoints,
               )}.`}
-              amount={
-                checkout.totalPriceCoin !== null
-                  ? formatCoin(checkout.totalPriceCoin)
-                  : "-"
-              }
+              amount="Coin"
               onSelect={onPaymentMethodChange}
             />
           )}

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import sharp from "sharp";
+import sharp, { type OverlayOptions } from "sharp";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -7,7 +7,7 @@ export const maxDuration = 300;
 const MAX_IMAGES = 4;
 const MAX_TOTAL_UPLOAD_BYTES = 4 * 1024 * 1024;
 const MAX_INPUT_PIXELS = 40_000_000;
-const MAX_CUSTOM_NOTE_CHARACTERS = 240;
+const MAX_CUSTOM_NOTE_CHARACTERS = 1000;
 const MIN_REFERENCE_SIDE = 240;
 const CANVAS_SIZE = 1024;
 const COLLAGE_PADDING = 24;
@@ -476,7 +476,7 @@ async function createReferenceCollage(files: File[]): Promise<Buffer> {
     Math.floor((CANVAS_SIZE - totalHeight) / 2),
   );
 
-  const composites: sharp.OverlayOptions[] = await Promise.all(
+  const composites: OverlayOptions[] = await Promise.all(
     files.map(async (file, index) => {
       const sourceBuffer = await fileToBuffer(file);
 
@@ -851,34 +851,29 @@ function buildGenerationPrompt({
   const referenceRule =
     imageCount > 0
       ? `Use the ${imageCount} uploaded textile reference image(s) faithfully. Preserve the real colors, motif, texture, weave, and visible material character.`
-      : "Create a believable textile surface from the supplied material description.";
+      : "Create a believable textile fabric pattern from the supplied material description.";
 
   const note = brief.customNote
-    ? `Design constraint: ${brief.customNote}`
+    ? `Design constraint & prompt: ${brief.customNote}`
     : "";
 
   return `
-Create one square 2x2 fashion contact sheet made only from four edge-to-edge photographs.
+Create a high-resolution, flat 2D top-down textile fabric patchwork pattern (murni pola kain patchwork).
 
-Material: ${materialText}.
-Product: ${executionPlan.productName}.
-Patchwork technique: ${executionPlan.patternTechnique}.
+Material & Textile Texture: ${materialText}.
+Style direction: ${executionPlan.visualDirection} sewn fabric patchwork pattern.
 ${referenceRule}
 ${note}
 
-Show the same coherent product design in four clearly different views:
-1. clean product flat lay;
-2. model wearing it from a front three-quarter angle;
-3. side, back, or movement angle with a different pose;
-4. macro close-up of patch seams, stitching, pocket, collar, or construction detail.
-
-Critical rules:
-- photographs only;
-- no title, text, letters, numbers, labels, captions, logo, watermark, signage, poster, diagram, infographic, paper background, swatch card, or presentation layout;
-- no repeated pose or repeated camera angle;
-- no unrelated garments or accessories;
-- keep the patchwork realistically sewable with believable seams, drape, thickness, and stitching;
-- warm neutral studio lighting and premium commercial fashion photography.
+CRITICAL MANDATORY RULES FOR PATTERN GENERATION:
+- Pure flat 2D textile fabric patchwork pattern, made of real sewn fabric patches, cloth textures, and visible thread stitching.
+- High quality fabric weave, denim/cotton cloth texture, stitched fabric seams, and textile material surface ONLY.
+- ABSOLUTELY NO ceramic tiles, NO floor tiles, NO wall tiles, NO porcelain, NO bricks, NO masonry, NO stone, NO ceramic materials.
+- ABSOLUTELY NO human models, NO mannequins, NO faces, NO bodies, NO people.
+- ABSOLUTELY NO clothing garments, NO t-shirts, NO jackets, NO pants, NO hangers, NO apparel mockups, NO 3D clothing cuts.
+- ABSOLUTELY NO 3D backgrounds, NO furniture, NO props, NO room settings, NO borders, NO margins, NO frames.
+- ABSOLUTELY NO text, letters, numbers, logos, watermarks, tags, labels, or diagrams.
+- Pure flat 2D sewn fabric patchwork pattern only.
 `.trim();
 }
 

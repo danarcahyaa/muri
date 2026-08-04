@@ -9,10 +9,10 @@ export interface BrandProductItem {
   categoryId: number;
   categoryName: string;
   priceIdr: number;
-  priceCoin: number | null;
   stock: number;
   status: "published" | "draft" | string;
   description: string | null;
+  productionId?: string | null;
   createdAt: string | null;
 }
 
@@ -22,10 +22,10 @@ export interface SaveBrandProductInput {
   sku: string;
   categoryId: number;
   priceIdr: number;
-  priceCoin?: number | null;
   stock: number;
   description?: string;
   status: "published" | "draft";
+  productionId?: string;
 }
 
 /**
@@ -55,10 +55,10 @@ export async function getMyBrandProducts(): Promise<
         product_name,
         product_category_id,
         price_idr,
-        price_coin,
         stock,
         status,
         description,
+        production_id,
         created_at,
         product_categories (
           id,
@@ -86,10 +86,12 @@ export async function getMyBrandProducts(): Promise<
         categoryId: row.product_category_id,
         categoryName: cat?.category_name ?? "Lainnya",
         priceIdr: Number(row.price_idr ?? 0),
-        priceCoin: row.price_coin ? Number(row.price_coin) : null,
         stock: Number(row.stock ?? 0),
         status: row.status,
         description: row.description ?? null,
+        productionId: (row as Record<string, unknown>).production_id
+          ? String((row as Record<string, unknown>).production_id)
+          : null,
         createdAt: row.created_at ?? null,
       };
     });
@@ -139,6 +141,29 @@ export async function saveBrandProduct(
       };
     }
 
+    // Validasi stok produk tidak boleh melebihi target pcs dari batch produksi
+    if (input.productionId) {
+      const { data: prodData } = await supabase
+        .from("brand_productions")
+        .select("target_quantity")
+        .eq("id", input.productionId)
+        .maybeSingle();
+
+      if (
+        prodData &&
+        prodData.target_quantity !== null &&
+        prodData.target_quantity !== undefined
+      ) {
+        const maxTarget = Number(prodData.target_quantity);
+        if (input.stock > maxTarget) {
+          return {
+            success: false,
+            error: `Stok produk (${input.stock} pcs) tidak boleh melebihi pcs produksi (${maxTarget} pcs).`,
+          };
+        }
+      }
+    }
+
     if (input.productId) {
       const { data, error } = await supabase
         .from("products")
@@ -147,14 +172,29 @@ export async function saveBrandProduct(
           sku: input.sku.trim().toUpperCase(),
           product_category_id: input.categoryId,
           price_idr: Math.max(0, input.priceIdr),
-          price_coin: input.priceCoin && input.priceCoin > 0 ? input.priceCoin : null,
           stock: Math.max(0, input.stock),
           description: input.description?.trim() || null,
           status: input.status,
+          production_id: input.productionId ?? "",
           updated_at: new Date().toISOString(),
         })
         .eq("id", input.productId)
-        .select()
+        .select(`
+          id,
+          sku,
+          product_name,
+          product_category_id,
+          price_idr,
+          stock,
+          status,
+          description,
+          production_id,
+          created_at,
+          product_categories (
+            id,
+            category_name
+          )
+        `)
         .single();
 
       if (error || !data) {
@@ -164,6 +204,10 @@ export async function saveBrandProduct(
         };
       }
 
+      const catUpdate = Array.isArray(data.product_categories)
+        ? data.product_categories[0]
+        : data.product_categories;
+
       return {
         success: true,
         data: {
@@ -171,12 +215,14 @@ export async function saveBrandProduct(
           sku: data.sku,
           name: data.product_name,
           categoryId: data.product_category_id,
-          categoryName: "Produk Brand",
+          categoryName: catUpdate?.category_name ?? "Lainnya",
           priceIdr: Number(data.price_idr),
-          priceCoin: data.price_coin ? Number(data.price_coin) : null,
           stock: Number(data.stock),
           status: data.status,
           description: data.description,
+          productionId: (data as Record<string, unknown>).production_id
+            ? String((data as Record<string, unknown>).production_id)
+            : null,
           createdAt: data.created_at ?? null,
         },
       };
@@ -189,15 +235,29 @@ export async function saveBrandProduct(
           sku: input.sku.trim().toUpperCase(),
           product_category_id: input.categoryId,
           price_idr: Math.max(0, input.priceIdr),
-          price_coin: input.priceCoin && input.priceCoin > 0 ? input.priceCoin : null,
           stock: Math.max(0, input.stock),
           description: input.description?.trim() || null,
           detail: "",
-          production_id: "",
+          production_id: input.productionId ?? "",
           status: input.status,
           payment_option: "idr_or_coin",
         })
-        .select()
+        .select(`
+          id,
+          sku,
+          product_name,
+          product_category_id,
+          price_idr,
+          stock,
+          status,
+          description,
+          production_id,
+          created_at,
+          product_categories (
+            id,
+            category_name
+          )
+        `)
         .single();
 
       if (error || !data) {
@@ -207,6 +267,10 @@ export async function saveBrandProduct(
         };
       }
 
+      const catInsert = Array.isArray(data.product_categories)
+        ? data.product_categories[0]
+        : data.product_categories;
+
       return {
         success: true,
         data: {
@@ -214,12 +278,14 @@ export async function saveBrandProduct(
           sku: data.sku,
           name: data.product_name,
           categoryId: data.product_category_id,
-          categoryName: "Produk Brand",
+          categoryName: catInsert?.category_name ?? "Lainnya",
           priceIdr: Number(data.price_idr),
-          priceCoin: data.price_coin ? Number(data.price_coin) : null,
           stock: Number(data.stock),
           status: data.status,
           description: data.description,
+          productionId: (data as Record<string, unknown>).production_id
+            ? String((data as Record<string, unknown>).production_id)
+            : null,
           createdAt: data.created_at ?? null,
         },
       };

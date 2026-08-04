@@ -11,6 +11,7 @@ export interface SavedBrandPattern {
   id: string;
   brandId: string;
   generatedDesignUrl: string;
+  promptText?: string | null;
   createdAt: string | null;
 }
 
@@ -272,6 +273,7 @@ export async function saveBrandPatchwork(
         id: savedPattern.id as string,
         brandId: savedPattern.brand_id as string,
         generatedDesignUrl: savedPattern.generated_design_url as string,
+        promptText: input.promptText,
         createdAt: (savedPattern.created_at as string | null) ?? null,
       },
     };
@@ -286,3 +288,91 @@ export async function saveBrandPatchwork(
     return { success: false, error: translateSupabaseError(error) };
   }
 }
+
+/**
+ * Mengambil daftar pola patchwork tersimpan milik brand yang sedang login.
+ */
+export async function getMySavedPatterns(): Promise<BaseResponse<SavedBrandPattern[]>> {
+  try {
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { success: false, error: "UNAUTHENTICATED" };
+    }
+
+    const { data, error } = await supabase
+      .from("brand_ai_patterns")
+      .select("id, brand_id, generated_design_url, prompt_text, created_at")
+      .eq("brand_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      return { success: false, error: translateSupabaseError(error) };
+    }
+
+    const items: SavedBrandPattern[] = (data ?? []).map((row) => ({
+      id: row.id,
+      brandId: row.brand_id,
+      generatedDesignUrl: row.generated_design_url,
+      promptText: row.prompt_text ?? null,
+      createdAt: row.created_at ?? null,
+    }));
+
+    return { success: true, data: items };
+  } catch (error) {
+    return { success: false, error: translateSupabaseError(error) };
+  }
+}
+
+/**
+ * Menghapus pola patchwork tersimpan milik brand.
+ */
+export async function deleteSavedBrandPattern(
+  patternId: string,
+): Promise<BaseResponse<boolean>> {
+  try {
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { success: false, error: "UNAUTHENTICATED" };
+    }
+
+    // 1. Delete associated input materials if any
+    await supabase.from("ai_input_materials").delete().eq("ai_pattern_id", patternId);
+
+    // 2. Delete pattern record
+    const { error: deleteError } = await supabase
+      .from("brand_ai_patterns")
+      .delete()
+      .eq("id", patternId)
+      .eq("brand_id", user.id);
+
+    if (deleteError) {
+      return { success: false, error: translateSupabaseError(deleteError) };
+    }
+
+    // 3. Cleanup files from storage (best-effort)
+    const storagePathPrefix = `${user.id}/${patternId}`;
+    const { data: fileList } = await supabase.storage
+      .from(PATCHWORK_STORAGE_BUCKET)
+      .list(storagePathPrefix);
+
+    if (fileList && fileList.length > 0) {
+      const pathsToRemove = fileList.map((f) => `${storagePathPrefix}/${f.name}`);
+      await supabase.storage
+        .from(PATCHWORK_STORAGE_BUCKET)
+        .remove(pathsToRemove)
+        .catch(() => undefined);
+    }
+
+    return { success: true, data: true };
+  } catch (error) {
+    return { success: false, error: translateSupabaseError(error) };
+  }
+}

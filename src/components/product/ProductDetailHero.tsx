@@ -23,7 +23,6 @@ interface ProductDetailHeroProps {
 
   paymentOption: ProductPaymentOption;
   priceIdr: number;
-  priceCoin: number | null;
 }
 
 export default function ProductDetailHero({
@@ -33,7 +32,6 @@ export default function ProductDetailHero({
   categoryName,
   paymentOption,
   priceIdr,
-  priceCoin,
 }: ProductDetailHeroProps) {
   const acceptsIdr =
     paymentOption === "idr" ||
@@ -135,24 +133,10 @@ export default function ProductDetailHero({
             </div>
 
             <div className="mt-7 space-y-4">
-              {acceptsIdr && (
-                <PriceOption
-                  label="Harga IDR"
-                  value={formatIdr(priceIdr)}
-                />
-              )}
-
-              {acceptsCoin && (
-                <PriceOption
-                  label="Harga Coin"
-                  value={
-                    priceCoin !== null
-                      ? formatCoin(priceCoin)
-                      : "Belum tersedia"
-                  }
-                  coin
-                />
-              )}
+              <PriceOption
+                label="Harga IDR"
+                value={formatIdr(priceIdr)}
+              />
             </div>
 
             <p className="mt-5 text-[11px] text-muted-moss">

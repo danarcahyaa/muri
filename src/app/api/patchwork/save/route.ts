@@ -24,7 +24,8 @@ class RouteError extends Error {
 }
 
 type AuthContext = {
-  supabase: ReturnType<typeof createClient>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any;
   brandId: string;
 };
 
@@ -162,7 +163,7 @@ async function fetchImageBuffer(
   imageUrl: string,
 ): Promise<{ buffer: Buffer; contentType: string }> {
   if (imageUrl.startsWith("data:")) {
-    const match = imageUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/s);
+    const match = imageUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,([\s\S]+)$/);
     if (!match) throw new RouteError(400, "Format gambar hasil AI tidak valid.");
 
     const buffer = Buffer.from(match[2], "base64");

@@ -87,7 +87,6 @@ export default async function ProductDetailPage({
           categoryName={product.categoryName}
           paymentOption={product.paymentOption}
           priceIdr={product.priceIdr}
-          priceCoin={product.priceCoin}
         />
 
         <section className="bg-canvas-warm/45">
@@ -107,7 +106,6 @@ export default async function ProductDetailPage({
               productName={product.name}
               paymentOption={product.paymentOption}
               priceIdr={product.priceIdr}
-              priceCoin={product.priceCoin}
               stock={product.stock}
               bonusProduct={product.bonusProduct}
               bonusProductQty={product.bonusProductQty}

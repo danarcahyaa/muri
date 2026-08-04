@@ -25,7 +25,6 @@ interface ProductOrderCardProps {
   productName: string;
   paymentOption: ProductPaymentOption;
   priceIdr: number;
-  priceCoin: number | null;
   stock: number;
   bonusProduct: ProductBonusSummary | null;
   bonusProductQty: number;
@@ -38,7 +37,6 @@ export default function ProductOrderCard({
   productName,
   paymentOption,
   priceIdr,
-  priceCoin,
   stock,
   bonusProduct,
   bonusProductQty,
@@ -54,7 +52,6 @@ export default function ProductOrderCard({
     acceptsIdr,
     acceptsCoin,
     totalPriceIdr,
-    totalPriceCoin,
     totalBonusQty,
     checkoutHref,
     decreaseQuantity,
@@ -63,7 +60,6 @@ export default function ProductOrderCard({
     slug,
     paymentOption,
     priceIdr,
-    priceCoin,
     stock,
     bonusProduct,
     bonusProductQty,
@@ -136,33 +132,15 @@ export default function ProductOrderCard({
         </p>
 
         <div className="mt-7 space-y-5">
-          {acceptsIdr && (
-            <div>
-              <p className="text-[9px] font-bold uppercase opacity-60">
-                Pembayaran IDR
-              </p>
+          <div>
+            <p className="text-[9px] font-bold uppercase opacity-60">
+              Pembayaran IDR
+            </p>
 
-              <p className="mt-2 font-display text-[clamp(2.4rem,4vw,3.6rem)] font-medium leading-none tracking-[-0.055em]">
-                {formatIdr(totalPriceIdr)}
-              </p>
-            </div>
-          )}
-
-          {acceptsCoin && totalPriceCoin !== null && (
-            <div
-              className={
-                acceptsIdr ? "border-t border-brand-forest/15 pt-5" : ""
-              }
-            >
-              <p className="text-[9px] font-bold uppercase opacity-60">
-                Pembayaran Coin
-              </p>
-
-              <p className="mt-2 font-display text-[clamp(2.4rem,4vw,3.6rem)] font-medium leading-none tracking-[-0.055em]">
-                {formatCoin(totalPriceCoin)}
-              </p>
-            </div>
-          )}
+            <p className="mt-2 font-display text-[clamp(2.4rem,4vw,3.6rem)] font-medium leading-none tracking-[-0.055em]">
+              {formatIdr(totalPriceIdr)}
+            </p>
+          </div>
         </div>
 
         <p className="mt-5 text-[11px] opacity-70">Untuk {quantity} produk</p>

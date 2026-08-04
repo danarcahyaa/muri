@@ -180,16 +180,6 @@ export async function getCustomerCheckoutPreview(
           ) * quantity
         : null;
 
-    const totalPriceCoin =
-      availablePaymentMethods.includes(
-        "coin",
-      ) &&
-      product.priceCoin !== null
-        ? toNonNegativeInteger(
-            product.priceCoin,
-          ) * quantity
-        : null;
-
     const reward =
       buildCheckoutReward({
         quantity,
@@ -236,13 +226,6 @@ export async function getCustomerCheckoutPreview(
               product.priceIdr,
             ),
 
-          priceCoin:
-            product.priceCoin === null
-              ? null
-              : toNonNegativeInteger(
-                  product.priceCoin,
-                ),
-
           stock:
             toNonNegativeInteger(
               product.stock,
@@ -258,11 +241,8 @@ export async function getCustomerCheckoutPreview(
         availablePaymentMethods,
 
         totalPriceIdr,
-        totalPriceCoin,
 
-        hasEnoughCoinBalance:
-          totalPriceCoin === null ||
-          totalPoints >= totalPriceCoin,
+        hasEnoughCoinBalance: true,
 
         reward,
       },
@@ -485,9 +465,6 @@ export function getSecureCheckoutErrorMessage(
 
     case "INVALID_PRODUCT_PRICE":
       return "Harga IDR produk tidak valid.";
-
-    case "INVALID_PRODUCT_COIN_PRICE":
-      return "Harga coin produk tidak valid.";
 
     case "COIN_AMOUNT_TOO_LARGE":
       return "Jumlah coin transaksi tidak valid.";
@@ -771,7 +748,6 @@ function mapSecureCheckoutErrorCode(
       "INVALID_BONUS_CONFIGURATION",
       "BONUS_PRODUCT_NOT_AVAILABLE",
       "INSUFFICIENT_BONUS_STOCK",
-      "INVALID_PRODUCT_COIN_PRICE",
       "QUANTITY_LIMIT_EXCEEDED",
       "INVALID_SHIPPING_ADDRESS",
       "SHIPPING_ADDRESS_TOO_LONG",

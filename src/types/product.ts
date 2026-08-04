@@ -15,7 +15,6 @@ export interface ProductCatalogItem {
 
   paymentOption: ProductPaymentOption;
   priceIdr: number;
-  priceCoin: number | null;
 
   brandId: string;
   brandName: string;
@@ -56,7 +55,6 @@ export interface ProductDetailItem {
 
   paymentOption: ProductPaymentOption;
   priceIdr: number;
-  priceCoin: number | null;
 
   stock: number;
   carbonSavedKg: number;

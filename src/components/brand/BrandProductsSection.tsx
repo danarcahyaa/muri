@@ -259,11 +259,6 @@ export default function BrandProductsSection() {
                             <p className="text-xs font-bold text-brand-black">
                               {formatIdr(prod.priceIdr)}
                             </p>
-                            {prod.priceCoin && (
-                              <p className="mt-0.5 text-[11px] text-brand-forest">
-                                atau {formatCoin(prod.priceCoin)} coin
-                              </p>
-                            )}
                           </TableCell>
 
                           <TableCell className="py-4">

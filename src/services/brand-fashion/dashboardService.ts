@@ -35,7 +35,7 @@ export async function getBrandDashboardStats(
       totalDistributedWaste = rpcWaste;
     } else {
       // Fallback query if RPC has not been executed in Supabase yet
-      const { data: purchaseTraces, error: traceError } = await supabase
+      const { data: purchaseTraces, error: traceError } = await (supabase as any)
         .from("purchase_traces")
         .select("weight_bought_kg, waste_purchases!inner(brand_id)")
         .eq("waste_purchases.brand_id", brandId);

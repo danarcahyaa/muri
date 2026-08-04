@@ -13,6 +13,8 @@ import {
 import { supabase } from "@/lib/supabaseClient";
 import { getBrandMaterialOrders } from "@/services/material";
 import {
+  deleteSavedBrandPattern,
+  getMySavedPatterns,
   saveBrandPatchwork,
   type SavedBrandPattern,
 } from "@/services/brand/patchworkService";
@@ -41,7 +43,7 @@ export function useBrandPatchwork() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewUrlsRef = useRef<string[]>([]);
 
-  const [sourceMode, setSourceMode] = useState<SourceMode>("purchased");
+  const [sourceMode, setSourceMode] = useState<SourceMode>("upload");
   const [status, setStatus] = useState<AiStatus>("idle");
   const [materials, setMaterials] = useState<MaterialOrder[]>([]);
   const [isLoadingMaterials, setIsLoadingMaterials] = useState(true);
@@ -50,6 +52,9 @@ export function useBrandPatchwork() {
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [dragActive, setDragActive] = useState(false);
+
+  // Prompt State
+  const [promptText, setPromptText] = useState("");
 
   const [fabricType, setFabricType] = useState<FabricType>("auto");
   const [pieceFormat, setPieceFormat] =
@@ -61,8 +66,6 @@ export function useBrandPatchwork() {
     useState<ProductionLevel>("standard");
   const [visualDirection, setVisualDirection] =
     useState<VisualDirection>("commercial");
-  const [customNote, setCustomNote] = useState("");
-  const [briefConfirmed, setBriefConfirmed] = useState(false);
 
   const [aiImageUrl, setAiImageUrl] = useState<string | null>(null);
   const [executionPlan, setExecutionPlan] = useState<ExecutionPlan | null>(
@@ -74,7 +77,14 @@ export function useBrandPatchwork() {
   const [generationPrompt, setGenerationPrompt] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"image" | "plan">("image");
+
+  // Saved Patterns Gallery & Active Silhouette Selection
+  const [savedPatterns, setSavedPatterns] = useState<SavedBrandPattern[]>([]);
+  const [isLoadingSavedPatterns, setIsLoadingSavedPatterns] = useState(true);
+  const [deletingPatternId, setDeletingPatternId] = useState<string | null>(null);
+  const [activeSilhouettePattern, setActiveSilhouettePattern] =
+    useState<SavedBrandPattern | null>(null);
+  const [activeRightTab, setActiveRightTab] = useState<"pola" | "siluet">("pola");
 
   useEffect(() => {
     return () => {
@@ -94,9 +104,22 @@ export function useBrandPatchwork() {
     setIsLoadingMaterials(false);
   }, []);
 
+  const loadSavedPatterns = useCallback(async () => {
+    setIsLoadingSavedPatterns(true);
+    const response = await getMySavedPatterns();
+    if (response.success && response.data) {
+      setSavedPatterns(response.data);
+      if (response.data.length > 0 && !activeSilhouettePattern) {
+        setActiveSilhouettePattern(response.data[0]);
+      }
+    }
+    setIsLoadingSavedPatterns(false);
+  }, [activeSilhouettePattern]);
+
   useEffect(() => {
     void loadMaterials();
-  }, [loadMaterials]);
+    void loadSavedPatterns();
+  }, [loadMaterials, loadSavedPatterns]);
 
   const selectedMaterial = useMemo(() => {
     return (
@@ -111,8 +134,8 @@ export function useBrandPatchwork() {
   );
 
   const customNoteError = useMemo(
-    () => validateCustomNote(customNote),
-    [customNote],
+    () => validateCustomNote(promptText),
+    [promptText],
   );
 
   const sourceReady =
@@ -122,7 +145,6 @@ export function useBrandPatchwork() {
     status !== "processing" &&
     !isSaving &&
     sourceReady &&
-    briefConfirmed &&
     !customNoteError;
 
   function resetResult() {
@@ -133,11 +155,6 @@ export function useBrandPatchwork() {
     setGenerationPrompt("");
     setIsSaving(false);
     setErrorMsg(null);
-  }
-
-  function invalidateBrief() {
-    setBriefConfirmed(false);
-    resetResult();
   }
 
   function replaceFiles(selected: File[]) {
@@ -177,7 +194,6 @@ export function useBrandPatchwork() {
 
     setFiles(selected);
     setPreviews(nextPreviews);
-    setBriefConfirmed(false);
     resetResult();
   }
 
@@ -196,7 +212,6 @@ export function useBrandPatchwork() {
     previewUrlsRef.current = [];
     setFiles([]);
     setPreviews([]);
-    setBriefConfirmed(false);
     resetResult();
 
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -204,14 +219,35 @@ export function useBrandPatchwork() {
 
   function switchMode(mode: SourceMode) {
     setSourceMode(mode);
-    setBriefConfirmed(false);
     resetResult();
   }
 
   function selectMaterial(id: string) {
     setSelectedMaterialId(id);
-    setBriefConfirmed(false);
     resetResult();
+  }
+
+  async function handleDeletePattern(patternId: string) {
+    setDeletingPatternId(patternId);
+    try {
+      const res = await deleteSavedBrandPattern(patternId);
+      if (res.success) {
+        setSavedPatterns((prev) => prev.filter((p) => p.id !== patternId));
+        if (activeSilhouettePattern?.id === patternId) {
+          const remaining = savedPatterns.filter((p) => p.id !== patternId);
+          setActiveSilhouettePattern(remaining[0] ?? null);
+        }
+      } else {
+        setErrorMsg(res.error ?? "Gagal menghapus pola.");
+      }
+    } finally {
+      setDeletingPatternId(null);
+    }
+  }
+
+  function handleSelectPatternForSilhouette(pattern: SavedBrandPattern) {
+    setActiveSilhouettePattern(pattern);
+    setActiveRightTab("siluet");
   }
 
   async function handleGenerate() {
@@ -244,7 +280,7 @@ export function useBrandPatchwork() {
       formData.append("targetProduct", targetProduct);
       formData.append("productionLevel", productionLevel);
       formData.append("visualDirection", visualDirection);
-      formData.append("customNote", customNote.trim());
+      formData.append("customNote", promptText.trim());
 
       if (sourceMode === "upload") {
         if (files.length === 0) {
@@ -313,62 +349,46 @@ export function useBrandPatchwork() {
       setAiImageUrl(data.output);
       setExecutionPlan(data.executionPlan);
       setGenerationPrompt(data.promptText);
-      setSavedPattern(null);
-      setActiveTab("image");
       setStatus("done");
+
+      // Auto save generated pattern to DB/storage
+      setIsSaving(true);
+      const saveRes = await saveBrandPatchwork({
+        outputUrl: data.output,
+        promptText: promptText.trim() || data.promptText,
+        images: sourceMode === "upload" ? files : [],
+        sourceMode,
+        materialTitle:
+          sourceMode === "upload"
+            ? "Uploaded Upcycled Textile Waste"
+            : selectedMaterial?.batchTitle,
+        providerName:
+          sourceMode === "upload"
+            ? "MURI Brand Studio"
+            : selectedMaterial?.providerName,
+        materialSourceId:
+          sourceMode === "purchased" ? selectedMaterial?.id : undefined,
+        fabricType,
+        pieceFormat,
+        materialCondition,
+        targetProduct,
+        productionLevel,
+        visualDirection,
+        customNote: promptText.trim(),
+      });
+
+      setIsSaving(false);
+
+      if (saveRes.success && saveRes.data) {
+        setSavedPattern(saveRes.data);
+        setActiveSilhouettePattern(saveRes.data);
+        await loadSavedPatterns();
+        setActiveRightTab("siluet");
+      }
     } catch {
       setErrorMsg("Terjadi kesalahan jaringan. Silakan coba lagi.");
       setStatus("idle");
     }
-  }
-
-  async function handleSave() {
-    if (
-      isSaving ||
-      !aiImageUrl ||
-      !generationPrompt ||
-      !executionPlan ||
-      savedPattern
-    ) {
-      return;
-    }
-
-    setIsSaving(true);
-    setErrorMsg(null);
-
-    const result = await saveBrandPatchwork({
-      outputUrl: aiImageUrl,
-      promptText: generationPrompt,
-      images: sourceMode === "upload" ? files : [],
-      sourceMode,
-      materialTitle:
-        sourceMode === "upload"
-          ? "Uploaded Upcycled Textile Waste"
-          : selectedMaterial?.batchTitle,
-      providerName:
-        sourceMode === "upload"
-          ? "MURI Brand Studio"
-          : selectedMaterial?.providerName,
-      materialSourceId:
-        sourceMode === "purchased" ? selectedMaterial?.id : undefined,
-      fabricType,
-      pieceFormat,
-      materialCondition,
-      targetProduct,
-      productionLevel,
-      visualDirection,
-      customNote: customNote.trim(),
-    });
-
-    if (!result.success || !result.data) {
-      setErrorMsg(result.error ?? "Gagal menyimpan hasil AI.");
-      setIsSaving(false);
-      return;
-    }
-
-    setSavedPattern(result.data);
-    setAiImageUrl(result.data.generatedDesignUrl);
-    setIsSaving(false);
   }
 
   return {
@@ -388,6 +408,8 @@ export function useBrandPatchwork() {
     handleFileChange,
     handleDrop,
     clearImages,
+    promptText,
+    setPromptText,
     fabricType,
     setFabricType,
     pieceFormat,
@@ -400,12 +422,7 @@ export function useBrandPatchwork() {
     setProductionLevel,
     visualDirection,
     setVisualDirection,
-    customNote,
-    setCustomNote,
     customNoteError,
-    briefConfirmed,
-    setBriefConfirmed,
-    invalidateBrief,
     status,
     sourceReady,
     canGenerate,
@@ -414,11 +431,25 @@ export function useBrandPatchwork() {
     aiImageUrl,
     executionPlan,
     savedPattern,
-    activeTab,
-    setActiveTab,
+    savedPatterns,
+    isLoadingSavedPatterns,
+    deletingPatternId,
+    activeSilhouettePattern,
+    activeRightTab,
+    setActiveRightTab,
     handleGenerate,
-    handleSave,
+    handleDeletePattern,
+    handleSelectPatternForSilhouette,
     resetResult,
+    // Legacy compatibility fields
+    customNote: promptText,
+    setCustomNote: setPromptText,
+    briefConfirmed: true,
+    setBriefConfirmed: (_val?: boolean) => {},
+    invalidateBrief: () => {},
+    activeTab: "image" as "image" | "plan",
+    setActiveTab: (_val?: "image" | "plan") => {},
+    handleSave: async () => {},
   };
 }
 

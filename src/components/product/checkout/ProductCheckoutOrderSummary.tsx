@@ -22,10 +22,7 @@ export default function ProductCheckoutOrderSummary({
   const effectivePaymentMethod =
     paymentMethod ?? checkout.availablePaymentMethods[0] ?? "qris";
 
-  const totalPayment =
-    effectivePaymentMethod === "coin"
-      ? formatCoin(checkout.totalPriceCoin ?? 0)
-      : formatIdr(checkout.totalPriceIdr ?? 0);
+  const totalPayment = formatIdr(checkout.totalPriceIdr ?? 0);
 
   return (
     <Card className="self-start rounded-2xl lg:sticky lg:top-24">
@@ -61,29 +58,7 @@ export default function ProductCheckoutOrderSummary({
           </p>
         </div>
 
-        {effectivePaymentMethod === "coin" && (
-          <div className="mt-5 space-y-3 text-xs">
-            <SummaryRow
-              label="Saldo coin"
-              value={formatCoin(checkout.profile.totalPoints)}
-            />
-            <SummaryRow
-              label="Coin digunakan"
-              value={formatCoin(checkout.totalPriceCoin ?? 0)}
-            />
-            <SummaryRow
-              label="Sisa coin"
-              value={formatCoin(
-                Math.max(
-                  0,
-                  checkout.profile.totalPoints -
-                    (checkout.totalPriceCoin ?? 0),
-                ),
-              )}
-              strong
-            />
-          </div>
-        )}
+
 
         {checkout.reward && <CheckoutRewardCard checkout={checkout} />}
 

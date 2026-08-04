@@ -17,6 +17,10 @@ import {
   saveBrandProduct,
   type BrandProductItem,
 } from "@/services/brand";
+import {
+  getBrandProductions,
+  type BrandProductionItem as ProductionBatchItem,
+} from "@/services/brand-fashion/circularProductionService";
 
 interface BrandProductModalProps {
   product: BrandProductItem | null;
@@ -43,40 +47,62 @@ export function BrandProductModal({
   const [sku, setSku] = useState("");
   const [categoryId, setCategoryId] = useState("1");
   const [priceIdr, setPriceIdr] = useState("");
-  const [priceCoin, setPriceCoin] = useState("");
   const [stock, setStock] = useState("10");
   const [status, setStatus] = useState<"published" | "draft">("published");
   const [description, setDescription] = useState("");
+  const [productionId, setProductionId] = useState("");
 
+  const [productionsList, setProductionsList] = useState<ProductionBatchItem[]>([]);
+  const [isLoadingProductions, setIsLoadingProductions] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       setErrorMessage(null);
+      void fetchProductions();
       if (product) {
         setName(product.name);
         setSku(product.sku);
         setCategoryId(String(product.categoryId));
         setPriceIdr(String(product.priceIdr));
-        setPriceCoin(product.priceCoin ? String(product.priceCoin) : "");
         setStock(String(product.stock));
         setStatus(product.status === "published" ? "published" : "draft");
         setDescription(product.description ?? "");
+        setProductionId(product.productionId ?? "");
       } else {
         setName("");
         setSku("");
         setCategoryId("1");
         setPriceIdr("");
-        setPriceCoin("");
         setStock("10");
         setStatus("published");
         setDescription("");
+        setProductionId("");
       }
     }
   }, [isOpen, product]);
 
+  async function fetchProductions() {
+    setIsLoadingProductions(true);
+    try {
+      const res = await getBrandProductions();
+      if (res.success && res.data) {
+        setProductionsList(res.data);
+      } else {
+        setProductionsList([]);
+      }
+    } catch {
+      setProductionsList([]);
+    } finally {
+      setIsLoadingProductions(false);
+    }
+  }
+
   if (!isOpen) return null;
+
+  const selectedCategory = CATEGORIES.find((c) => String(c.id) === categoryId);
+  const selectedProduction = productionsList.find((p) => p.id === productionId);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -85,7 +111,6 @@ export function BrandProductModal({
     const trimmedName = name.trim();
     const trimmedSku = sku.trim();
     const parsedPriceIdr = Number(priceIdr);
-    const parsedPriceCoin = priceCoin ? Number(priceCoin) : null;
     const parsedStock = Number(stock);
 
     if (!trimmedName || trimmedName.length < 2) {
@@ -95,6 +120,11 @@ export function BrandProductModal({
 
     if (!trimmedSku || trimmedSku.length < 2) {
       setErrorMessage("SKU produk minimal 2 karakter.");
+      return;
+    }
+
+    if (!productionId) {
+      setErrorMessage("Wajib memilih batch produksi sirkular.");
       return;
     }
 
@@ -108,6 +138,13 @@ export function BrandProductModal({
       return;
     }
 
+    if (selectedProduction && parsedStock > selectedProduction.targetQuantity) {
+      setErrorMessage(
+        `Stok produk (${parsedStock} pcs) tidak boleh melebihi pcs produksi (${selectedProduction.targetQuantity} pcs).`
+      );
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -117,10 +154,10 @@ export function BrandProductModal({
         sku: trimmedSku,
         categoryId: Number(categoryId),
         priceIdr: parsedPriceIdr,
-        priceCoin: parsedPriceCoin,
         stock: parsedStock,
         description: description.trim() || undefined,
         status,
+        productionId,
       });
 
       if (!res.success) {
@@ -148,7 +185,7 @@ export function BrandProductModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-xl border border-line-trace bg-canvas-pure cursor-default"
+        className="relative flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-xl border border-line-trace bg-canvas-pure cursor-default font-body"
       >
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b border-line-trace px-6 py-5 sm:px-8">
@@ -185,6 +222,45 @@ export function BrandProductModal({
               </div>
             )}
 
+            {/* Batch Produksi Sirkular (Wajib) */}
+            <div className="space-y-2.5">
+              <label className="block mb-2 text-xs font-bold text-brand-black">
+                Hasil Produksi Limbah <span className="text-error-rust">*</span>
+              </label>
+              <Select
+                value={productionId}
+                onValueChange={(val) => {
+                  if (val) setProductionId(val);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue>
+                    {selectedProduction
+                      ? selectedProduction.productionName
+                      : "Pilih Hasil Produksi"}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {isLoadingProductions ? (
+                    <div className="flex items-center gap-2 p-3 text-xs text-muted-moss">
+                      <LoaderCircle className="size-4 animate-spin text-brand-forest" />
+                      <span>Memuat data produksi...</span>
+                    </div>
+                  ) : productionsList.length === 0 ? (
+                    <div className="p-3 text-xs text-muted-moss">
+                      Belum ada batch produksi. Silakan buat produksi terlebih dahulu.
+                    </div>
+                  ) : (
+                    productionsList.map((prod) => (
+                      <SelectItem key={prod.id} value={prod.id}>
+                        {prod.productionName} (Target: {prod.targetQuantity} Pcs)
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Nama Produk */}
             <div className="space-y-2.5">
               <label className="block mb-2 text-xs font-bold text-brand-black">
@@ -214,20 +290,28 @@ export function BrandProductModal({
                 />
               </div>
 
+              {/* Kategori (Displayed with Number ID) */}
               <div className="space-y-2.5">
                 <label className="block mb-2 text-xs font-bold text-brand-black">
                   Kategori <span className="text-error-rust">*</span>
                 </label>
                 <Select
                   value={categoryId}
-                  onValueChange={(val) => { if (val) setCategoryId(val); }}
+                  onValueChange={(val) => {
+                    if (val) setCategoryId(val);
+                  }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Pilih kategori" />
+                    <SelectValue>
+                      {selectedCategory
+                        ? selectedCategory.label
+                        : "Pilih kategori"}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {CATEGORIES.map((cat) => (
                       <SelectItem key={cat.id} value={String(cat.id)}>
+                        <span className="font-bold mr-1">{cat.id}.</span>{" "}
                         {cat.label}
                       </SelectItem>
                     ))}
@@ -236,35 +320,19 @@ export function BrandProductModal({
               </div>
             </div>
 
-            {/* Harga IDR & Coin */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2.5">
-                <label className="block mb-2 text-xs font-bold text-brand-black">
-                  Harga IDR (Rp) <span className="text-error-rust">*</span>
-                </label>
-                <Input
-                  type="number"
-                  required
-                  min={0}
-                  value={priceIdr}
-                  onChange={(e) => setPriceIdr(e.target.value)}
-                  placeholder="Contoh: 269000"
-                />
-              </div>
-
-              <div className="space-y-2.5">
-                <label className="block mb-2 text-xs font-bold text-brand-black">
-                  Harga Coin{" "}
-                  <span className="font-normal text-muted-moss">(Opsional)</span>
-                </label>
-                <Input
-                  type="number"
-                  min={0}
-                  value={priceCoin}
-                  onChange={(e) => setPriceCoin(e.target.value)}
-                  placeholder="Contoh: 250"
-                />
-              </div>
+            {/* Harga IDR */}
+            <div className="space-y-2.5">
+              <label className="block mb-2 text-xs font-bold text-brand-black">
+                Harga IDR (Rp) <span className="text-error-rust">*</span>
+              </label>
+              <Input
+                type="number"
+                required
+                min={0}
+                value={priceIdr}
+                onChange={(e) => setPriceIdr(e.target.value)}
+                placeholder="Contoh: 269000"
+              />
             </div>
 
             {/* Stok & Status */}
@@ -277,12 +345,23 @@ export function BrandProductModal({
                   type="number"
                   required
                   min={0}
+                  max={selectedProduction ? selectedProduction.targetQuantity : undefined}
                   value={stock}
                   onChange={(e) => setStock(e.target.value)}
                   placeholder="Contoh: 15"
                 />
+                {selectedProduction && (
+                  <p className="mt-1 text-[11px] text-muted-moss">
+                    Maksimal stok:{" "}
+                    <span className="font-semibold text-brand-black">
+                      {selectedProduction.targetQuantity} Pcs
+                    </span>{" "}
+                    (berdasarkan pcs produksi)
+                  </p>
+                )}
               </div>
 
+              {/* Status Katalog (Displaying Human Readable Label) */}
               <div className="space-y-2.5">
                 <label className="block mb-2 text-xs font-bold text-brand-black">
                   Status Katalog <span className="text-error-rust">*</span>
@@ -294,7 +373,11 @@ export function BrandProductModal({
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Pilih status" />
+                    <SelectValue>
+                      {status === "published"
+                        ? "Published (Tampil di Katalog)"
+                        : "Draft (Disimpan)"}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="published">
@@ -326,6 +409,7 @@ export function BrandProductModal({
             <Button
               variant="outline"
               size="md"
+              type="button"
               onClick={onClose}
             >
               Batal

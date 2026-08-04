@@ -52,11 +52,11 @@ export async function registerWasteProvider(
     }
 
     // Insert the waste provider profile into the public `waste_providers` table (email and password columns have been removed)
-    const { error: dbError } = await supabase.from("waste_providers").insert({
+    const { error: dbError } = await (supabase.from("waste_providers") as any).insert({
       id: authUser.id,
       company_name: companyName.trim(),
       active_number: activeNumber.trim(),
-      address: (address ? address : null) as any,
+      address: address ? address : null,
       pickup_address: null,
       pickup_maps_url: null,
     });

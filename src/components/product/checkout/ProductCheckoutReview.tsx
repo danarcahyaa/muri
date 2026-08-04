@@ -77,7 +77,7 @@ export default function ProductCheckoutReview({
           label="Pembayaran"
           value={
             paymentMethod === "coin"
-              ? `Coin — ${formatCoin(checkout.totalPriceCoin ?? 0)}`
+              ? "Coin"
               : `QRIS — ${formatIdr(checkout.totalPriceIdr ?? 0)}`
           }
         />

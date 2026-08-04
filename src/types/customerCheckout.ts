@@ -140,7 +140,6 @@ export type SecureCheckoutErrorCode =
   | "INSUFFICIENT_BONUS_STOCK"
   | "PAYMENT_METHOD_NOT_ALLOWED"
   | "INVALID_PRODUCT_PRICE"
-  | "INVALID_PRODUCT_COIN_PRICE"
   | "COIN_AMOUNT_TOO_LARGE"
   | "INSUFFICIENT_POINTS"
   | "CHECKOUT_LOAD_FAILED"
@@ -161,7 +160,6 @@ export interface CustomerCheckoutPreviewProduct {
   paymentOption: Database["public"]["Enums"]["product_payment_option"];
 
   priceIdr: number;
-  priceCoin: number | null;
   stock: number;
 
   brandName: string;
@@ -195,7 +193,6 @@ export interface CustomerCheckoutPreview {
   availablePaymentMethods: CustomerCheckoutPaymentMethod[];
 
   totalPriceIdr: number | null;
-  totalPriceCoin: number | null;
 
   hasEnoughCoinBalance: boolean;
 
