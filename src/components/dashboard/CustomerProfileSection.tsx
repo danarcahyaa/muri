@@ -24,6 +24,8 @@ import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { LocationPicker } from "@/components/shared/LocationPicker";
+import { addressJSONBToString, stringToAddressJSONB } from "@/lib/addressUtils";
 import {
   getCustomerDashboardSummary,
 } from "@/services/customer/dashboardService";
@@ -314,36 +316,19 @@ export default function CustomerProfileSection() {
             </div>
 
             {/* Default Shipping Address */}
-            <div className="space-y-2.5">
-              <label htmlFor="shipping-address" className="block mb-2 text-xs font-bold text-brand-black">
-                Alamat Pengiriman Utama
-              </label>
-              <div className="relative">
-                <textarea
-                  id="shipping-address"
-                  rows={4}
-                  value={shippingAddress}
-                  onChange={(e) => setShippingAddress(e.target.value)}
-                  placeholder="Masukkan alamat pengiriman lengkap Anda"
-                  disabled={isSaving}
-                  className="
-                    w-full resize-none rounded-sm
-                    border border-brand-black/15 bg-transparent
-                    px-4 py-3 pr-11
-                    font-body text-xs text-brand-black shadow-none
-                    outline-none transition
-                    placeholder:text-xs placeholder:text-muted-moss/60
-                    focus-visible:border-brand-emerald
-                    focus-visible:ring-2 focus-visible:ring-brand-emerald/10
-                    disabled:cursor-not-allowed disabled:bg-canvas-warm/50
-                  "
-                />
-                <MapPin
-                  aria-hidden="true"
-                  className="pointer-events-none absolute right-4 top-4 size-4 text-muted-moss/60"
-                  strokeWidth={1.7}
-                />
-              </div>
+            <div className="pt-1">
+              <LocationPicker
+                value={stringToAddressJSONB(shippingAddress)}
+                onChange={(newLocation) => {
+                  setShippingAddress(addressJSONBToString(newLocation));
+                }}
+                label="Cari Alamat Pengiriman Utama"
+                detailLabel="Detail Alamat Lengkap & Catatan Pengiriman"
+                placeholder="Ketik wilayah/kota (misal: Denpasar Barat, Bali)..."
+                detailPlaceholder="Jl. Imam Bonjol No. 45, Samping Apotek, Kontak PJ (08123456789)..."
+                disabled={isSaving}
+                required={false}
+              />
             </div>
 
             {/* Save Button */}

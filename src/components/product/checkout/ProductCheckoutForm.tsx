@@ -21,6 +21,8 @@ import {
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { formatCoin, formatIdr } from "@/lib/productDetail";
+import { addressJSONBToString, stringToAddressJSONB } from "@/lib/addressUtils";
+import { LocationPicker, type AddressJSONB } from "@/components/shared/LocationPicker";
 import type {
   CustomerCheckoutPaymentMethod,
   CustomerCheckoutPreview,
@@ -103,24 +105,19 @@ export default function ProductCheckoutForm({
           </FieldDescription>
         </Field>
 
-        <Field>
-          <FieldLabel htmlFor="shipping-address">
-            Alamat Pengiriman <span className="text-destructive">*</span>
-          </FieldLabel>
-          <Textarea
-            id="shipping-address"
-            rows={4}
-            required
-            minLength={10}
-            maxLength={1000}
-            value={shippingAddress}
-            placeholder="Masukkan alamat lengkap pengiriman"
-            onChange={(event) => {
-              onShippingAddressChange(event.target.value);
+        <div className="pt-2">
+          <LocationPicker
+            value={stringToAddressJSONB(shippingAddress)}
+            onChange={(newLocation) => {
+              onShippingAddressChange(addressJSONBToString(newLocation));
             }}
+            label="Cari Tujuan Pengiriman"
+            detailLabel="Detail Alamat Lengkap & Catatan Pengiriman"
+            placeholder="Ketik wilayah/kota (misal: Denpasar Barat, Bali)..."
+            detailPlaceholder="Jl. Imam Bonjol No. 45, Samping Apotek, Kontak Penerima (08123456789)..."
+            required={true}
           />
-          <FieldDescription>Minimal 10 karakter.</FieldDescription>
-        </Field>
+        </div>
       </FieldGroup>
 
       <div className="mt-9">
