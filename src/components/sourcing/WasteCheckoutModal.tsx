@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Field, FieldLabel, FieldError, FieldGroup } from "@/components/ui/Field";
-import { CheckCircle2, User, Phone } from "lucide-react";
+import { CheckCircle2, User, Phone, QrCode, Check } from "lucide-react";
 import { formatCurrencyIDR, formatWeightKg } from "@/lib/formatter";
 import { toast } from "sonner";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -157,6 +157,10 @@ export function WasteCheckoutModal({
                 <span className="font-bold text-brand-black">{formatWeightKg(quantityKg)}</span>
               </div>
               <div className="flex justify-between">
+                <span className="text-muted-moss">Metode Pembayaran:</span>
+                <span className="font-bold text-brand-forest">QRIS</span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-muted-moss">Total Pembayaran:</span>
                 <span className="font-bold text-brand-forest">{formatCurrencyIDR(totalPrice)}</span>
               </div>
@@ -192,6 +196,28 @@ export function WasteCheckoutModal({
               <div className="flex justify-between pt-2 border-t border-line-trace/60 font-bold text-sm">
                 <span className="text-brand-black">Total Estimasi:</span>
                 <span className="text-brand-forest">{formatCurrencyIDR(totalPrice)}</span>
+              </div>
+            </div>
+
+            {/* Payment Method Section (QRIS Mandatory) */}
+            <div className="space-y-1.5">
+              <span className="text-xs font-semibold text-brand-black block">
+                Metode Pembayaran <span className="text-error-rust">*</span>
+              </span>
+              <div className="relative rounded-lg border border-brand-forest bg-brand-lime/20 p-4 text-left">
+                <span className="absolute right-3 top-3 flex size-5 items-center justify-center rounded-full bg-brand-forest text-white">
+                  <Check className="size-3" />
+                </span>
+                <div className="flex items-center gap-2 text-brand-emerald font-bold">
+                  <QrCode className="size-4" />
+                  <span className="text-xs font-bold text-brand-black">QRIS</span>
+                </div>
+                <p className="mt-1.5 text-[11px] leading-4 text-muted-moss">
+                  Wajib menggunakan QRIS. Pembayaran dilakukan melalui scan QRIS aplikasi m-banking / dompet digital setelah pesanan dikonfirmasi.
+                </p>
+                <div className="mt-2.5 text-xs font-bold text-brand-forest">
+                  Total: {formatCurrencyIDR(totalPrice)}
+                </div>
               </div>
             </div>
 

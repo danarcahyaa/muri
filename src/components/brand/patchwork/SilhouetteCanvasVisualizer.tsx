@@ -27,6 +27,7 @@ export function SilhouetteCanvasVisualizer({
 }: SilhouetteCanvasVisualizerProps) {
   const patternId = useId();
 
+  const [mockupType, setMockupType] = useState<"tshirt" | "sweatshirt">("tshirt");
   const [zoomLevel, setZoomLevel] = useState<number>(100); // 50% to 200%
   const [tileRepeat, setTileRepeat] = useState<number>(3); // Pattern repeat count
   const [offsetX, setOffsetX] = useState<number>(0);
@@ -36,6 +37,11 @@ export function SilhouetteCanvasVisualizer({
   const activeImageUrl =
     patternUrl ??
     "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=800&q=80";
+
+  const mockupImageSrc =
+    mockupType === "sweatshirt"
+      ? "/images/mockups/sweatshirt.webp"
+      : "/images/mockups/shirt.webp";
 
   const resetView = () => {
     setZoomLevel(100);
@@ -50,14 +56,43 @@ export function SilhouetteCanvasVisualizer({
   return (
     <div className="space-y-4 font-body">
       {/* Top Header */}
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="font-display text-base font-bold text-brand-black">
-            2D T-Shirt Mockup Visualizer
+            2D Apparel Mockup Visualizer
           </h3>
           <p className="text-xs text-muted-moss">
-            Proyeksi tekstur pola seamless presisi pada mockup t-shirt MURI.
+            Proyeksi tekstur pola seamless presisi pada mockup t-shirt dan sweatshirt MURI.
           </p>
+        </div>
+
+        {/* Mockup Silhouette Selector */}
+        <div className="flex items-center gap-1.5 rounded-lg border border-brand-black/15 bg-canvas-warm p-1 shrink-0">
+          <button
+            type="button"
+            onClick={() => setMockupType("tshirt")}
+            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+              mockupType === "tshirt"
+                ? "bg-brand-forest text-white shadow-xs"
+                : "text-muted-moss hover:bg-canvas-pure hover:text-brand-black"
+            }`}
+          >
+            <Shirt className="size-3.5" />
+            <span>T-Shirt</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMockupType("sweatshirt")}
+            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+              mockupType === "sweatshirt"
+                ? "bg-brand-forest text-white shadow-xs"
+                : "text-muted-moss hover:bg-canvas-pure hover:text-brand-black"
+            }`}
+          >
+            <Shirt className="size-3.5" />
+            <span>Sweatshirt</span>
+          </button>
         </div>
       </div>
 
@@ -116,9 +151,9 @@ export function SilhouetteCanvasVisualizer({
               fill={`url(#${patternId})`}
             />
 
-            {/* 2. Real T-Shirt Cutout Mockup Frame Overlay (shirt.webp) */}
+            {/* 2. Real Cutout Mockup Frame Overlay (shirt.webp or sweatshirt.webp) */}
             <image
-              href="/images/mockups/shirt.webp"
+              href={mockupImageSrc}
               width="500"
               height="500"
               preserveAspectRatio="xMidYMid meet"

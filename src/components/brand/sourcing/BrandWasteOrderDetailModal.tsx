@@ -26,6 +26,7 @@ import {
   Navigation,
   Package,
   Phone,
+  QrCode,
   Truck,
   User,
   X,
@@ -248,6 +249,10 @@ export default function BrandWasteOrderDetailModal({
 
               <div className="mt-3 space-y-2.5 rounded-lg border border-line-trace bg-canvas-warm/50 p-4">
                 <DetailRow
+                  label="Metode Pembayaran"
+                  value="QRIS"
+                />
+                <DetailRow
                   label="Harga per Kg"
                   value={`${formatCurrencyIDR(order.originalPricePerKg)} / kg`}
                 />
@@ -262,6 +267,17 @@ export default function BrandWasteOrderDetailModal({
                     bold
                   />
                 </div>
+                {isPending && (
+                  <div className="mt-3 rounded-lg border border-brand-forest/20 bg-brand-lime/15 p-3 flex items-start gap-2.5 text-xs text-brand-black">
+                    <QrCode className="size-4 text-brand-forest shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-brand-forest block">Metode Pembayaran QRIS</span>
+                      <p className="text-[11px] text-muted-moss leading-relaxed mt-0.5">
+                        Pesanan ini menggunakan pembayaran QRIS MURI. Pembayaran dikonfirmasi melalui sistem Rekber MURI.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

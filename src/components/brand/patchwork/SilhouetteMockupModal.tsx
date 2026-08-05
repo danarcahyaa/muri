@@ -62,12 +62,11 @@ export function SilhouetteMockupModal({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-display text-base font-bold text-brand-black">
-                  2D T-Shirt Mockup Visualizer Studio
+                  2D Apparel Mockup Visualizer Studio
                 </h3>
-                
               </div>
               <p className="text-xs text-muted-moss">
-                Proyeksi tekstur pola seamless pada mockup kaos T-shirt MURI.
+                Proyeksi tekstur pola seamless pada mockup T-Shirt dan Sweatshirt MURI.
               </p>
             </div>
           </div>

@@ -127,6 +127,7 @@ export default function MaterialPurchaseDetailModal({
             </div>
 
             <div className="mt-3 space-y-2 rounded-lg border border-line-trace bg-canvas-warm/50 p-4">
+              <DetailRow label="Metode Pembayaran" value={order.paymentMethod ? order.paymentMethod.toUpperCase() : "QRIS"} />
               <DetailRow label="Harga per Kg" value={`${formatIdr(order.pricePerKg)} / kg`} />
               <DetailRow label="Total Berat Material" value={`${order.weightKg} kg`} />
               {order.paymentProofUrl && (
