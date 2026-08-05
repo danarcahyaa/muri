@@ -1,49 +1,3 @@
-import DOMPurify from "isomorphic-dompurify";
-import type { Config } from "isomorphic-dompurify";
-
-const RICH_TEXT_CONFIG: Config = {
-  ALLOWED_TAGS: [
-    "p",
-    "br",
-    "strong",
-    "b",
-    "em",
-    "i",
-    "u",
-    "ul",
-    "ol",
-    "li",
-  ],
-
-  // Tidak menerima style, class, data-subtree,
-  // data-copy-service-computed-style, dan atribut lainnya.
-  ALLOWED_ATTR: [],
-
-  ALLOW_DATA_ATTR: false,
-  ALLOW_ARIA_ATTR: false,
-
-  // Isi dari tag yang dibuang tetap dipertahankan.
-  // Contoh: <span>Text</span> menjadi Text.
-  KEEP_CONTENT: true,
-};
-
-/**
- * Membersihkan HTML rich-text tetapi tetap mempertahankan
- * formatting dasar seperti bold, italic, underline, dan list.
- */
-export function sanitizeRichTextHtml(
-  value: string | null | undefined,
-): string {
-  if (!value) {
-    return "";
-  }
-
-  return DOMPurify.sanitize(
-    value,
-    RICH_TEXT_CONFIG,
-  ).trim();
-}
-
 /**
  * Menghilangkan seluruh tag HTML tetapi mempertahankan teks.
  *
@@ -56,15 +10,74 @@ export function sanitizeRichTextAsPlainHtml(
     return "";
   }
 
-  return DOMPurify.sanitize(value, {
-    ALLOWED_TAGS: [],
-    ALLOWED_ATTR: [],
-    ALLOW_DATA_ATTR: false,
-    ALLOW_ARIA_ATTR: false,
-    KEEP_CONTENT: true,
-  })
+  return value
+    .replace(/<script\b[^<]*>([\s\S]*?)<\/script>/gi, "")
+    .replace(/<style\b[^<]*>([\s\S]*?)<\/style>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/**
+ * Membersihkan HTML rich-text tetapi tetap mempertahankan
+ * formatting dasar seperti bold, italic, underline, dan list.
+ *
+ * Dibuat murni tanpa jsdom / isomorphic-dompurify untuk mencegah
+ * ERR_REQUIRE_ESM pada Vercel Serverless SSR.
+ */
+export function sanitizeRichTextHtml(
+  value: string | null | undefined,
+): string {
+  if (!value) {
+    return "";
+  }
+
+  // 1. Buang tag berbahaya beserta seluruh isinya
+  let clean = value
+    .replace(/<script\b[^<]*>([\s\S]*?)<\/script>/gi, "")
+    .replace(/<style\b[^<]*>([\s\S]*?)<\/style>/gi, "")
+    .replace(/<iframe\b[^<]*>([\s\S]*?)<\/iframe>/gi, "")
+    .replace(/<object\b[^<]*>([\s\S]*?)<\/object>/gi, "")
+    .replace(/<embed\b[^<]*>([\s\S]*?)<\/embed>/gi, "")
+    .replace(/<svg\b[^<]*>([\s\S]*?)<\/svg>/gi, "");
+
+  const allowedTags = [
+    "p",
+    "br",
+    "strong",
+    "b",
+    "em",
+    "i",
+    "u",
+    "ul",
+    "ol",
+    "li",
+  ];
+
+  // 2. Filter tag tersisa: hapus atribut & buang tag non-izinkan (isinya tetap dipertahankan)
+  clean = clean.replace(/<\/?([a-z0-9]+)\b[^>]*>/gi, (match, tagName) => {
+    const lower = tagName.toLowerCase();
+
+    if (allowedTags.includes(lower)) {
+      if (match.startsWith("</")) {
+        return `</${lower}>`;
+      }
+      if (lower === "br") {
+        return "<br />";
+      }
+      return `<${lower}>`;
+    }
+
+    return "";
+  });
+
+  return clean.trim();
 }
 
 /**

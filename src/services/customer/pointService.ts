@@ -77,39 +77,7 @@ export async function getCustomerPointLedger(): Promise<
       }
     }
 
-    // Default fallback ledger items if user has 0 database transactions
-    if (items.length === 0) {
-      items.push(
-        {
-          id: "tx-1",
-          createdAt: "2026-07-28T10:30:00Z",
-          activityName: "Bonus Pembelian Tote Bag Selvedge Denim",
-          type: "earned",
-          amountCoin: 50,
-        },
-        {
-          id: "tx-2",
-          createdAt: "2026-07-25T14:15:00Z",
-          activityName: "Penukaran Workshop Sirkular Batik Patchwork",
-          type: "spent",
-          amountCoin: 30,
-        },
-        {
-          id: "tx-3",
-          createdAt: "2026-07-20T09:00:00Z",
-          activityName: "Bonus Konfirmasi Penerimaan Order #ORD-8A12BC",
-          type: "earned",
-          amountCoin: 25,
-        },
-        {
-          id: "tx-4",
-          createdAt: "2026-07-15T16:45:00Z",
-          activityName: "Bonus Registrasi Akun MURI Sirkular",
-          type: "earned",
-          amountCoin: 100,
-        },
-      );
-    }
+
 
     items.sort(
       (a, b) =>

@@ -58,23 +58,9 @@ export function useWorkshopBooking({
       try {
         const {
           data: { user },
-          error: authError,
         } = await supabase.auth.getUser();
 
-        if (isCancelled) {
-          return;
-        }
-
-        if (authError) {
-          setFeedback({
-            type: "error",
-            message: "Status akun belum dapat diperiksa.",
-          });
-          setActiveRegistration(null);
-          return;
-        }
-
-        if (!user) {
+        if (isCancelled || !user) {
           setActiveRegistration(null);
           return;
         }
@@ -85,22 +71,13 @@ export function useWorkshopBooking({
           return;
         }
 
-        if (!result.success) {
-          setFeedback({
-            type: "error",
-            message: "Status pendaftaran belum dapat diperiksa.",
-          });
+        if (result.success && result.data) {
+          setActiveRegistration(result.data);
+        } else {
           setActiveRegistration(null);
-          return;
         }
-
-        setActiveRegistration(result.data ?? null);
       } catch {
         if (!isCancelled) {
-          setFeedback({
-            type: "error",
-            message: "Status pendaftaran belum dapat diperiksa.",
-          });
           setActiveRegistration(null);
         }
       } finally {
@@ -161,7 +138,7 @@ export function useWorkshopBooking({
     } catch {
       setFeedback({
         type: "error",
-        message: "Status akun belum dapat diperiksa. Silakan coba kembali.",
+        message: "Gagal memproses pendaftaran. Silakan coba kembali.",
       });
     }
   }
