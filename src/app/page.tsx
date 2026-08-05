@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Header from "@/components/layout/Header";
 import HeroSection from "@/components/home/HeroSection";
 import EcosystemSection from "@/components/home/EcosystemSection";
@@ -22,7 +22,15 @@ export default function Home() {
       <main className="pt-16">
         <HeroSection />
         <EcosystemSection />
-        <TraceabilitySection />
+        <Suspense
+          fallback={
+            <div className="flex min-h-[400px] items-center justify-center py-20">
+              <div className="size-8 animate-spin rounded-full border-2 border-brand-emerald border-t-transparent" />
+            </div>
+          }
+        >
+          <TraceabilitySection />
+        </Suspense>
         <ImpactSection />
         <HowItWorksSection />
         <AIMaterialSection />
