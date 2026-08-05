@@ -11,17 +11,27 @@ import { getMaterialBatchByCode } from "./materialService";
 const STORAGE_KEY = "muri_brand_material_orders_v1";
 
 export function getStoredMaterialOrders(): MaterialOrder[] {
-  if (typeof window === "undefined") return getInitialMockOrders();
+  if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      const initial = getInitialMockOrders();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
-      return initial;
+      return [];
     }
-    return JSON.parse(raw) as MaterialOrder[];
+    const parsed = JSON.parse(raw) as MaterialOrder[];
+    const clean = parsed.filter(
+      (o) =>
+        o.id !== "mat-ord-001" &&
+        o.id !== "mat-ord-002" &&
+        o.buyerUserId !== "brand-user-demo" &&
+        o.orderCode !== "MAT-884F2A1C" &&
+        o.orderCode !== "MAT-19C4E0B2"
+    );
+    if (clean.length !== parsed.length) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
+    }
+    return clean;
   } catch {
-    return getInitialMockOrders();
+    return [];
   }
 }
 
@@ -35,54 +45,7 @@ function saveStoredMaterialOrders(orders: MaterialOrder[]): void {
 }
 
 function getInitialMockOrders(): MaterialOrder[] {
-  return [
-    {
-      id: "mat-ord-001",
-      orderCode: "MAT-884F2A1C",
-      batchCode: "BATCH-DENIM-001",
-      batchTitle: "Sisa Kain Katun Denim Premium 14oz",
-      providerName: "PT Tekstil Jaya Limbah",
-      brandName: "Memuai Sustainable Fashion",
-      buyerUserId: "brand-user-demo",
-      weightKg: 50,
-      pricePerKg: 25000,
-      totalPriceIdr: 1250000,
-      receiverName: "Brand Memuai Sourcing Team",
-      phoneNumber: "081234567890",
-      shippingAddress: "Jl. Industri Kreatif No. 12, Bandung Jawa Barat 40123",
-      paymentMethod: "qris",
-      status: "processing",
-      paymentProofUrl: "https://images.unsplash.com/photo-1556742049-0a670f4a4591?w=800",
-      trackingNumber: "JNE-MAT-9921441",
-      shippingNote: "Paket material dikemas karung terpal waterproof.",
-      cancellationReason: null,
-      createdAt: "2026-07-28T09:30:00Z",
-      updatedAt: "2026-07-29T11:00:00Z",
-    },
-    {
-      id: "mat-ord-002",
-      orderCode: "MAT-19C4E0B2",
-      batchCode: "BATCH-LINEN-002",
-      batchTitle: "Limbah Perca Linen Organik Natural",
-      providerName: "CV Sirkular Kain Nusantara",
-      brandName: "Memuai Sustainable Fashion",
-      buyerUserId: "brand-user-demo",
-      weightKg: 30,
-      pricePerKg: 35000,
-      totalPriceIdr: 1050000,
-      receiverName: "Brand Memuai Sourcing Team",
-      phoneNumber: "081234567890",
-      shippingAddress: "Jl. Industri Kreatif No. 12, Bandung Jawa Barat 40123",
-      paymentMethod: "qris",
-      status: "completed",
-      paymentProofUrl: "https://images.unsplash.com/photo-1556742049-0a670f4a4591?w=800",
-      trackingNumber: "SICEPAT-8819203",
-      shippingNote: "Sudah diterima di gudang Bandung.",
-      cancellationReason: null,
-      createdAt: "2026-07-20T14:15:00Z",
-      updatedAt: "2026-07-22T16:00:00Z",
-    },
-  ];
+  return [];
 }
 
 export async function createMaterialOrder(

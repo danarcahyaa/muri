@@ -99,7 +99,7 @@ export async function getMyOrders(): Promise<BaseResponse<CustomerOrder[]>> {
     if (error || !data || data.length === 0) {
       return {
         success: true,
-        data: [getInitialCustomerOrder()],
+        data: [],
       };
     }
 
@@ -110,7 +110,7 @@ export async function getMyOrders(): Promise<BaseResponse<CustomerOrder[]>> {
   } catch {
     return {
       success: true,
-      data: [getInitialCustomerOrder()],
+      data: [],
     };
   }
 }

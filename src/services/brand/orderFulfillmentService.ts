@@ -166,17 +166,16 @@ export async function getBrandFulfillmentOrders(
         };
       }
 
-      // Return initial brand fulfillment order list if DB has 0 records
       return {
         success: true,
-        data: getInitialBrandOrders(),
+        data: [],
       };
     }
 
     if (!data || data.length === 0) {
       return {
         success: true,
-        data: getInitialBrandOrders(),
+        data: [],
       };
     }
 

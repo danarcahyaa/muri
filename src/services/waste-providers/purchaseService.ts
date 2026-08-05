@@ -89,36 +89,73 @@ export async function getWastePurchases(
 
     let dbPurchases: WastePurchaseItem[] = [];
 
-    try {
-      const { data, error } = await (
-        supabase.rpc as unknown as (
-          fn: string,
-          args: Record<string, unknown>
-        ) => Promise<{ data: { result_row: WastePurchaseItem }[] | null; error: unknown }>
-      )("get_waste_purchases_rpc", {
-        p_provider_id: providerId,
-        p_search_query: options.searchQuery || null,
-        p_status_filter: statuses && statuses.length > 0 ? statuses : null,
-        p_date_from: options.dateFrom ? `${options.dateFrom}T00:00:00Z` : null,
-        p_date_to: options.dateTo ? `${options.dateTo}T23:59:59Z` : null,
-      });
+    let query = supabase
+      .from("waste_purchases")
+      .select(`
+        *,
+        brands (
+          id,
+          brand_name
+        ),
+        waste_posts!inner (
+          id,
+          provider_id,
+          custom_fabric_name
+        )
+      `)
+      .eq("waste_posts.provider_id", providerId)
+      .order("created_at", { ascending: false });
 
-      if (!error && data) {
-        const rawRows = data as unknown as { result_row: WastePurchaseItem }[];
-        dbPurchases = rawRows.map((row) => row.result_row);
-      }
-    } catch {
-      // Continue with local orders fallback
+    if (statuses && statuses.length > 0) {
+      const mappedStatuses = statuses.map((s) => (s === "completed" ? "complete" : s));
+      query = query.in("purchase_status", mappedStatuses as ("pending" | "processing" | "shipped" | "complete" | "cancelled" | "rejected")[]);
     }
 
-    const localPurchases = getMaterialOrdersAsWastePurchases();
+    if (options.dateFrom) {
+      query = query.gte("created_at", `${options.dateFrom}T00:00:00Z`);
+    }
+    if (options.dateTo) {
+      query = query.lte("created_at", `${options.dateTo}T23:59:59Z`);
+    }
 
-    // Merge duplicate IDs prioritizing DB
-    const dbIds = new Set(dbPurchases.map((p) => p.id));
-    const mergedPurchases = [...dbPurchases, ...localPurchases.filter((p) => !dbIds.has(p.id))];
+    const { data, error } = await query;
 
-    // Filter merged purchases by search query & status
-    let filteredPurchases = mergedPurchases;
+    if (!error && data) {
+      dbPurchases = (data as unknown as Record<string, unknown>[]).map((row) => {
+        const brandObj = row.brands as Record<string, unknown> | null;
+        const postObj = row.waste_posts as Record<string, unknown> | null;
+
+        return {
+          id: String(row.id || ""),
+          brand_id: String(row.brand_id || ""),
+          category_name_snapshot: String(row.category_name_snapshot || "Kain Sirkular"),
+          fabric_name_snapshot: String(row.fabric_name_snapshot || "Limbah Kain"),
+          original_price_per_kg: Number(row.original_price_per_kg || 0),
+          final_price_idr: Number(row.final_price_idr || 0),
+          weight_bought_kg: Number(row.weight_bought_kg || 0),
+          purchase_status: (row.purchase_status as PurchaseStatus) || PurchaseStatus.PENDING,
+          media_urls_snapshot: (row.media_urls_snapshot as { url: string; type: string }[] | null) || null,
+          recipient_snapshot: (row.recipient_snapshot as Record<string, unknown> | null) || null,
+          pickup_address: (row.pickup_address as PickupAddress | null) || null,
+          tracking_number: row.tracking_number ? String(row.tracking_number) : null,
+          waste_post_id: String(row.waste_post_id || ""),
+          created_at: String(row.created_at || new Date().toISOString()),
+          updated_at: String(row.updated_at || new Date().toISOString()),
+          brands: {
+            id: String(brandObj?.id || row.brand_id || ""),
+            brand_name: String(brandObj?.brand_name || "Brand"),
+          },
+          waste_posts: {
+            id: String(postObj?.id || row.waste_post_id || ""),
+            provider_id: String(postObj?.provider_id || providerId),
+            custom_fabric_name: String(postObj?.custom_fabric_name || row.fabric_name_snapshot || ""),
+          },
+        };
+      });
+    }
+
+    // Filter purchases by search query & status
+    let filteredPurchases = dbPurchases;
 
     if (statuses && statuses.length > 0) {
       filteredPurchases = filteredPurchases.filter((p) => statuses.includes(p.purchase_status));
