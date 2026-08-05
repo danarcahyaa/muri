@@ -52,7 +52,7 @@ export function TraceabilityQrModal({
 
         <div className="mt-4 flex flex-col items-center justify-center">
           {/* Big crisp QR Container with gentle rounding so corners are NEVER cut off */}
-          <div className="relative flex size-64 items-center justify-center rounded-lg border-2 border-brand-forest/20 bg-white p-3 shadow-lg">
+          <div className="relative flex size-64 items-center justify-center rounded-lg border-2 border-brand-forest/20 bg-white p-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={qrUrl}
