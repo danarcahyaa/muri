@@ -16,6 +16,8 @@ import {
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { StatusBadge, type BadgeVariant } from "@/components/ui/StatusBadge";
+import { TableActionButton } from "@/components/ui/TableActionButton";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import {
   Table,
@@ -437,23 +439,20 @@ export default function BrandOrderFulfillmentSection() {
                             </TableCell>
 
                             <TableCell className="py-4">
-                              <span
-                                className={`inline-flex rounded-full px-3 py-1 text-[9px] font-bold uppercase tracking-wide ${statusMeta.className}`}
-                              >
+                              <StatusBadge variant={statusMeta.variant}>
                                 {statusMeta.label}
-                              </span>
+                              </StatusBadge>
                             </TableCell>
 
                             <TableCell className="py-4 pr-6 text-right sm:pr-8">
                               <div className="flex items-center justify-end gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="icon-sm"
+                                <TableActionButton
                                   onClick={() => setSelectedModalOrder(order)}
                                   title="Lihat Detail Pesanan"
+                                  aria-label="Lihat Detail Pesanan"
                                 >
-                                  <Eye className="size-3.5 text-brand-emerald" />
-                                </Button>
+                                  <Eye className="size-4 text-brand-forest" />
+                                </TableActionButton>
                               </div>
                             </TableCell>
                           </TableRow>
@@ -562,34 +561,34 @@ function FilterTabButton({
   );
 }
 
-function getFulfillmentStatusMeta(status: string) {
+function getFulfillmentStatusMeta(status: string): { label: string; variant: BadgeVariant } {
   switch (status) {
     case "complete":
       return {
         label: "SELESAI",
-        className: "bg-brand-lime/50 text-brand-forest",
+        variant: "success",
       };
     case "shipped":
       return {
         label: "DIKIRIM",
-        className: "bg-blue-50 text-blue-700 border border-blue-200",
+        variant: "info",
       };
     case "processing":
       return {
         label: "DIPROSES",
-        className: "bg-amber-50 text-amber-800 border border-amber-200",
+        variant: "warning",
       };
     case "cancelled":
     case "rejected":
       return {
         label: "DIBATALKAN",
-        className: "bg-red-50 text-red-700",
+        variant: "danger",
       };
     case "pending":
     default:
       return {
         label: "MENUNGGU",
-        className: "bg-brand-emerald/10 text-brand-emerald",
+        variant: "neutral",
       };
   }
 }

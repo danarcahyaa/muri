@@ -14,8 +14,12 @@ interface ProductBrandCardProps {
 export default function ProductBrandCard({
   brand,
 }: ProductBrandCardProps) {
-  const address =
-    brand.warehouseAddress || brand.address;
+  const address = brand.warehouseAddress || brand.address;
+  const effectiveMapsUrl =
+    brand.warehouseMapsUrl ||
+    (address
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
+      : null);
 
   return (
     <DetailCard
@@ -46,14 +50,14 @@ export default function ProductBrandCard({
             </div>
           )}
 
-          {brand.warehouseMapsUrl && (
+          {effectiveMapsUrl && (
             <a
-              href={brand.warehouseMapsUrl}
+              href={effectiveMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-5 inline-flex items-center gap-2 text-xs font-bold text-brand-emerald transition-colors hover:text-brand-forest"
+              className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-brand-emerald transition-colors hover:text-brand-forest"
             >
-              Buka lokasi warehouse
+              <span>Buka lokasi warehouse di Google Maps</span>
               <ExternalLink className="size-3.5" />
             </a>
           )}

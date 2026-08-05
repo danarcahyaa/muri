@@ -15,6 +15,8 @@ import {
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { TableActionButton } from "@/components/ui/TableActionButton";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import {
   Table,
@@ -274,33 +276,29 @@ export default function BrandProductsSection() {
                           </TableCell>
 
                           <TableCell className="py-4">
-                            <span
-                              className={`inline-flex rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide ${
-                                prod.status === "published"
-                                  ? "bg-brand-lime/50 text-brand-forest"
-                                  : "bg-canvas-warm text-muted-moss"
-                              }`}
-                            >
+                            <StatusBadge variant={prod.status === "published" ? "success" : "neutral"}>
                               {prod.status === "published" ? "Published" : "Draft"}
-                            </span>
+                            </StatusBadge>
                           </TableCell>
 
                           <TableCell className="py-4 pr-6 text-right sm:pr-8">
                             <div className="flex items-center justify-end gap-2">
-                              <Button
-                                variant="outline"
-                                size="icon-sm"
+                              <TableActionButton
                                 onClick={() => handleOpenEditModal(prod)}
                                 title="Edit Produk"
+                                aria-label="Edit Produk"
                               >
-                                <Edit2 className="size-3.5 text-brand-emerald" />
-                              </Button>
+                                <Edit2 className="size-4 text-brand-emerald" />
+                              </TableActionButton>
 
-                              <Button
-                                variant="outline"
-                                size="icon-sm"
+                              <TableActionButton
                                 onClick={() => void handleToggleStatus(prod)}
                                 title={
+                                  prod.status === "published"
+                                    ? "Jadikan Draft"
+                                    : "Publikasikan"
+                                }
+                                aria-label={
                                   prod.status === "published"
                                     ? "Jadikan Draft"
                                     : "Publikasikan"
@@ -309,9 +307,9 @@ export default function BrandProductsSection() {
                                 {prod.status === "published" ? (
                                   <ToggleRight className="size-4 text-brand-forest" />
                                 ) : (
-                                  <ToggleLeft className="size-4" />
+                                  <ToggleLeft className="size-4 text-muted-moss" />
                                 )}
-                              </Button>
+                              </TableActionButton>
                             </div>
                           </TableCell>
                         </TableRow>

@@ -24,6 +24,8 @@ import {
 import { Input } from "@/components/ui/Input";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
+import { StatusBadge, type BadgeVariant } from "@/components/ui/StatusBadge";
+import { TableActionButton } from "@/components/ui/TableActionButton";
 import { Button } from "@/components/ui/Button";
 import { getMyOrders } from "@/services/customer";
 import type { CustomerOrder, CustomerOrderStatus } from "@/types/customerOrder";
@@ -289,37 +291,32 @@ export default function CustomerOrdersSection() {
 
                       {/* Status Badge */}
                       <TableCell className="py-4">
-                        <span
-                          className={`inline-flex rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide ${statusMeta.className}`}
-                        >
+                        <StatusBadge variant={statusMeta.variant}>
                           {statusMeta.label}
-                        </span>
+                        </StatusBadge>
                       </TableCell>
 
                       {/* Actions */}
                       <TableCell className="py-4 pr-6 text-right sm:pr-8">
                         <div className="flex items-center justify-end gap-2">
                           {order.payment?.status === "waiting_payment" && (
-                            <Button
-                              variant="default"
-                              size="icon-sm"
+                            <TableActionButton
+                              variant="primary"
                               title="Bayar QRIS Sekarang"
-                              render={
-                                <Link href={`/dashboard/orders/${order.id}/payment`}>
-                                  <QrCode className="size-3.5" />
-                                </Link>
-                              }
-                            />
+                              aria-label="Bayar QRIS Sekarang"
+                              onClick={() => window.location.href = `/dashboard/orders/${order.id}/payment`}
+                            >
+                              <QrCode className="size-4" />
+                            </TableActionButton>
                           )}
 
-                          <Button
-                            variant="outline"
-                            size="icon-sm"
+                          <TableActionButton
                             onClick={() => setSelectedOrder(order)}
                             title="Lihat Detail Pesanan"
+                            aria-label="Lihat Detail Pesanan"
                           >
-                            <Eye className="size-3.5 text-brand-emerald" />
-                          </Button>
+                            <Eye className="size-4 text-brand-forest" />
+                          </TableActionButton>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -392,33 +389,33 @@ export default function CustomerOrdersSection() {
   );
 }
 
-function getOrderStatusMeta(status: CustomerOrderStatus) {
+function getOrderStatusMeta(status: CustomerOrderStatus): { label: string; variant: BadgeVariant } {
   switch (status) {
     case "complete":
       return {
         label: "Selesai",
-        className: "bg-brand-lime/50 text-brand-forest",
+        variant: "success",
       };
     case "shipped":
       return {
         label: "Dikirim",
-        className: "bg-blue-50 text-blue-700 border border-blue-200",
+        variant: "info",
       };
     case "cancelled":
       return {
         label: "Dibatalkan",
-        className: "bg-red-50 text-red-700",
+        variant: "danger",
       };
     case "rejected":
       return {
         label: "Ditolak",
-        className: "bg-orange-50 text-orange-700",
+        variant: "danger",
       };
     case "pending":
     default:
       return {
         label: "Diproses",
-        className: "bg-brand-emerald/10 text-brand-emerald",
+        variant: "warning",
       };
   }
 }

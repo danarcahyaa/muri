@@ -20,7 +20,7 @@ import {
   FieldLabel,
 } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
-import { Textarea } from "@/components/ui/Textarea";
+import { LocationPicker, type AddressJSONB } from "@/components/shared/LocationPicker";
 import { formatIdr } from "@/lib/productDetail";
 import type { MaterialDetailItem } from "@/types/material";
 import type { MaterialPaymentMethod } from "@/types/materialOrder";
@@ -64,6 +64,23 @@ export default function MaterialCheckoutForm({
   onPaymentMethodChange,
   onReview,
 }: MaterialCheckoutFormProps) {
+  const locationValue: AddressJSONB = {
+    formatted_address: shippingAddress.includes(" — ")
+      ? shippingAddress.split(" — ")[0]
+      : "",
+    latitude: 0,
+    longitude: 0,
+    address_detail: shippingAddress.includes(" — ")
+      ? shippingAddress.split(" — ")[1]
+      : shippingAddress,
+  };
+
+  const handleLocationChange = (data: AddressJSONB) => {
+    const full = data.formatted_address
+      ? `${data.formatted_address} — ${data.address_detail}`
+      : data.address_detail;
+    onShippingAddressChange(full);
+  };
   const totalPriceIdr = weightKg * material.pricePerKg;
 
   return (
@@ -147,27 +164,22 @@ export default function MaterialCheckoutForm({
           <FieldError>{fieldErrors.phoneNumber}</FieldError>
         </Field>
 
-        <Field>
-          <FieldLabel htmlFor="material-shipping-address">
-            Alamat Gudang / Workshop{" "}
-            <span className="text-destructive">*</span>
-          </FieldLabel>
-          <Textarea
-            id="material-shipping-address"
-            rows={4}
+        <div className="pt-2">
+          <LocationPicker
+            value={locationValue}
+            onChange={handleLocationChange}
+            label="Cari Tujuan Pengiriman"
+            detailLabel="Detail Alamat Lengkap & Catatan Gudang / Workshop"
+            placeholder="Ketik wilayah/kota (misal: Denpasar Timur)..."
+            detailPlaceholder="Jl. Sukajadi No. 120, Gudang Studio Brand, Kontak Security (0812345678)..."
             required
-            minLength={10}
-            maxLength={1000}
-            value={shippingAddress}
-            aria-invalid={Boolean(fieldErrors.shippingAddress) || undefined}
-            onChange={(event) =>
-              onShippingAddressChange(event.target.value)
-            }
-            placeholder="Masukkan alamat lengkap gudang atau workshop brand"
           />
-          <FieldDescription>Minimal 10 karakter.</FieldDescription>
-          <FieldError>{fieldErrors.shippingAddress}</FieldError>
-        </Field>
+          {fieldErrors.shippingAddress && (
+            <p className="mt-1 text-xs font-medium text-destructive">
+              {fieldErrors.shippingAddress}
+            </p>
+          )}
+        </div>
       </FieldGroup>
 
       <div className="mt-9">

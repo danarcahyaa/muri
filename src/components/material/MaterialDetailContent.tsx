@@ -1,5 +1,6 @@
 import {
   CalendarDays,
+  ExternalLink,
   Images,
   MapPin,
   PackageCheck,
@@ -150,13 +151,25 @@ export default function MaterialDetailContent({
               Penyedia Material Sirkular
             </p>
 
-            <div className="mt-5 flex flex-wrap gap-x-7 gap-y-2 text-xs leading-6 text-muted-moss">
+            <div className="mt-5 flex flex-wrap items-center gap-x-7 gap-y-2 text-xs leading-6 text-muted-moss">
               <span>Material berasal dari {material.originCity}</span>
 
               {material.providerCreatedAt && (
                 <span>
                   Terdaftar sejak {formatDate(material.providerCreatedAt)}
                 </span>
+              )}
+
+              {material.originCity && (
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(material.originCity)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 font-bold text-brand-emerald transition-colors hover:text-brand-forest"
+                >
+                  <span>Buka peta lokasi {material.originCity}</span>
+                  <ExternalLink className="size-3.5" />
+                </a>
               )}
             </div>
           </div>

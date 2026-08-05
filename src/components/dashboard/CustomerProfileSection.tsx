@@ -23,6 +23,7 @@ import { formatCoin } from "@/lib/productDetail";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { LocationPicker, type AddressJSONB } from "@/components/shared/LocationPicker";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { LocationPicker } from "@/components/shared/LocationPicker";
 import { addressJSONBToString, stringToAddressJSONB } from "@/lib/addressUtils";
@@ -49,6 +50,24 @@ export default function CustomerProfileSection() {
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [shippingAddress, setShippingAddress] = useState("");
+
+  const locationValue: AddressJSONB = {
+    formatted_address: shippingAddress.includes(" — ")
+      ? shippingAddress.split(" — ")[0]
+      : "",
+    latitude: 0,
+    longitude: 0,
+    address_detail: shippingAddress.includes(" — ")
+      ? shippingAddress.split(" — ")[1]
+      : shippingAddress,
+  };
+
+  const handleLocationChange = (data: AddressJSONB) => {
+    const full = data.formatted_address
+      ? `${data.formatted_address} — ${data.address_detail}`
+      : data.address_detail;
+    setShippingAddress(full);
+  };
 
   // Feedback states
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -347,31 +366,8 @@ export default function CustomerProfileSection() {
           </form>
         </section>
 
-        {/* Side Panel: Security & Account Actions */}
+        {/* Side Panel: Account Actions */}
         <div className="space-y-6">
-          {/* Security Card */}
-          <section className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8">
-            <h3 className="font-display text-xl font-medium text-brand-black">
-              Keamanan Akun
-            </h3>
-            <p className="mt-1 text-xs text-muted-moss">
-              Pengaturan kata sandi dan autentikasi.
-            </p>
-
-            <div className="mt-5 space-y-3">
-              <Button
-                variant="outline"
-                size="md"
-                fullWidth
-                render={
-                  <Link href="/forgot-password">
-                    <KeyRound className="size-4 text-brand-emerald" />
-                    <span>Atur Ulang Kata Sandi</span>
-                  </Link>
-                }
-              />
-            </div>
-          </section>
 
           {/* Account Actions Card */}
           <section className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-6 sm:p-8">

@@ -19,7 +19,7 @@ import {
   FieldLabel,
 } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
-import { Textarea } from "@/components/ui/Textarea";
+import { LocationPicker, type AddressJSONB } from "@/components/shared/LocationPicker";
 import { formatCoin, formatIdr } from "@/lib/productDetail";
 import { addressJSONBToString, stringToAddressJSONB } from "@/lib/addressUtils";
 import { LocationPicker, type AddressJSONB } from "@/components/shared/LocationPicker";
@@ -55,6 +55,23 @@ export default function ProductCheckoutForm({
   onPaymentMethodChange,
   onReview,
 }: ProductCheckoutFormProps) {
+  const locationValue: AddressJSONB = {
+    formatted_address: shippingAddress.includes(" — ")
+      ? shippingAddress.split(" — ")[0]
+      : "",
+    latitude: 0,
+    longitude: 0,
+    address_detail: shippingAddress.includes(" — ")
+      ? shippingAddress.split(" — ")[1]
+      : shippingAddress,
+  };
+
+  const handleLocationChange = (data: AddressJSONB) => {
+    const full = data.formatted_address
+      ? `${data.formatted_address} — ${data.address_detail}`
+      : data.address_detail;
+    onShippingAddressChange(full);
+  };
   return (
     <>
       <div className="flex items-center gap-3 text-brand-emerald">

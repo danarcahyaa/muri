@@ -10,9 +10,11 @@ import {
   Plus,
   ScanLine,
   ShoppingBag,
+  ShoppingCart,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
+import { useCart } from "@/hooks/customer/useCart";
 import { useProductOrder } from "@/hooks/product/useProductOrder";
 import { formatCoin, formatIdr } from "@/lib/productDetail";
 import type {
@@ -21,6 +23,7 @@ import type {
 } from "@/types/product";
 
 interface ProductOrderCardProps {
+  productId?: string;
   slug: string;
   productName: string;
   paymentOption: ProductPaymentOption;
@@ -33,6 +36,7 @@ interface ProductOrderCardProps {
 }
 
 export default function ProductOrderCard({
+  productId,
   slug,
   productName,
   paymentOption,
@@ -64,6 +68,13 @@ export default function ProductOrderCard({
     bonusProduct,
     bonusProductQty,
   });
+
+  const { addToCart, isUpdating: isCartUpdating } = useCart();
+
+  const handleAddToCart = async () => {
+    if (!productId) return;
+    await addToCart(productId, quantity);
+  };
 
   const totalBonusCoinReward = Math.max(0, bonusCoinCost) * quantity;
   const hasProductBonus = Boolean(bonusProduct) && totalBonusQty > 0;
@@ -182,28 +193,44 @@ export default function ProductOrderCard({
       {isSoldOut ? (
         <DisabledCheckoutButton>Stok Habis</DisabledCheckoutButton>
       ) : (
-        <Link
-          href={checkoutHref}
-          aria-disabled={isAuthLoading}
-          onClick={(event) => {
-            if (isAuthLoading) {
-              event.preventDefault();
-            }
-          }}
-          className="group mt-7 flex w-full items-center justify-center gap-3 rounded-sm bg-brand-forest px-6 py-4 text-xs font-bold text-canvas-pure transition duration-300 hover:bg-brand-black"
-        >
-          {isAuthLoading ? (
-            <>
-              <LoaderCircle className="size-4 animate-spin" />
-              Memeriksa Akun...
-            </>
-          ) : (
-            <>
-              Beli Sekarang
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-            </>
+        <div className="mt-7 flex flex-col gap-2.5">
+          <Link
+            href={checkoutHref}
+            aria-disabled={isAuthLoading}
+            onClick={(event) => {
+              if (isAuthLoading) {
+                event.preventDefault();
+              }
+            }}
+            className="group flex w-full items-center justify-center gap-3 rounded-md bg-brand-forest px-6 py-4 text-xs font-bold text-canvas-pure transition duration-300 hover:bg-brand-black"
+          >
+            {isAuthLoading ? (
+              <>
+                <LoaderCircle className="size-4 animate-spin" />
+                Memeriksa Akun...
+              </>
+            ) : (
+              <>
+                Beli Sekarang
+                <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+              </>
+            )}
+          </Link>
+
+          {productId && (
+            <Button
+              type="button"
+              variant="outline"
+              fullWidth
+              disabled={isCartUpdating || isSoldOut}
+              onClick={handleAddToCart}
+              className="border-brand-emerald/40 text-brand-emerald hover:bg-brand-emerald hover:text-white"
+            >
+              <ShoppingCart className="size-4" />
+              Tambah ke Keranjang
+            </Button>
           )}
-        </Link>
+        </div>
       )}
 
       <Button

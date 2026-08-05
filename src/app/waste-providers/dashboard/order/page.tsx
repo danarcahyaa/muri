@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactElement } from "react";
+import { Leaf } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import { PurchaseToolbar } from "@/components/waste-providers/orders/PurchaseToolbar";
 import { PurchaseTable } from "@/components/waste-providers/orders/PurchaseTable";
@@ -42,10 +43,16 @@ export default function WasteProviderOrderPage(): ReactElement {
     <div className="mx-auto w-full max-w-[1320px] px-5 py-10 sm:px-6 lg:px-8 lg:py-14 font-body">
       {/* Page header */}
       <div className="mb-8">
-        <h1 className="font-display text-5xl font-medium leading-none tracking-[-0.05em] text-brand-black sm:text-6xl">
+        <div className="mb-4 flex items-center gap-3 text-brand-emerald">
+          <Leaf className="size-4" strokeWidth={2} />
+          <span className="text-xs font-bold uppercase tracking-tight">
+            Dashboard Waste Provider
+          </span>
+        </div>
+        <h1 className="font-display text-5xl font-medium leading-none tracking-[-0.04em] text-brand-black sm:text-6xl">
           Daftar Transaksi Pesanan
         </h1>
-        <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-moss">
+        <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted-moss">
           Pantau riwayat order sisa kain perca dari brand fesyen, saring data transaksi berdasarkan status dan tanggal, serta tentukan lokasi penjemputan limbah & kelola status logistik pengiriman material.
         </p>
       </div>

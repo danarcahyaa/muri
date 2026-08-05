@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/AlertDialog";
 import { Button } from "@/components/ui/Button";
 import { OrderProgressBar } from "@/components/ui/OrderProgressBar";
+import { StatusBadge, type BadgeVariant } from "@/components/ui/StatusBadge";
 import {
   AlertTriangle,
   CalendarDays,
@@ -108,11 +109,9 @@ export default function BrandWasteOrderDetailModal({
                   <span className="font-mono text-base font-bold text-brand-black">
                     {order.purchaseId}
                   </span>
-                  <span
-                    className={`inline-flex rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide ${statusMeta.badgeClass}`}
-                  >
+                  <StatusBadge variant={statusMeta.variant}>
                     {statusMeta.label}
-                  </span>
+                  </StatusBadge>
                 </div>
                 <p className="text-xs text-muted-moss">
                   Pesanan dibuat pada {formatDate(order.createdAt)}
@@ -353,29 +352,29 @@ function DetailRow({
   );
 }
 
-function getStatusMeta(status: string) {
+function getStatusMeta(status: string): { label: string; variant: BadgeVariant } {
   switch (status) {
     case "completed":
     case "complete":
       return {
         label: "Selesai",
-        badgeClass: "bg-brand-lime/50 text-brand-forest",
+        variant: "success",
       };
     case "shipped":
       return {
         label: "Dikirim",
-        badgeClass: "bg-blue-50 text-blue-700 border border-blue-200",
+        variant: "info",
       };
     case "processing":
       return {
         label: "Diproses",
-        badgeClass: "bg-amber-50 text-amber-800 border border-amber-200",
+        variant: "warning",
       };
     case "pending":
     default:
       return {
         label: "Menunggu",
-        badgeClass: "bg-brand-emerald/10 text-brand-emerald",
+        variant: "neutral",
       };
   }
 }

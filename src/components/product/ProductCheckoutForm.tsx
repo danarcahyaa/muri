@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRight, Gift, UserRound } from "lucide-react";
+import { LocationPicker, type AddressJSONB } from "@/components/shared/LocationPicker";
 
 import type { CustomerCheckoutData } from "@/types/customerCheckout";
 
@@ -31,6 +32,23 @@ export default function ProductCheckoutForm({
   errorMessage,
   onReview,
 }: ProductCheckoutFormProps) {
+  const locationValue: AddressJSONB = {
+    formatted_address: shippingAddress.includes(" — ")
+      ? shippingAddress.split(" — ")[0]
+      : "",
+    latitude: 0,
+    longitude: 0,
+    address_detail: shippingAddress.includes(" — ")
+      ? shippingAddress.split(" — ")[1]
+      : shippingAddress,
+  };
+
+  const handleLocationChange = (data: AddressJSONB) => {
+    const full = data.formatted_address
+      ? `${data.formatted_address} — ${data.address_detail}`
+      : data.address_detail;
+    onShippingAddressChange(full);
+  };
   return (
     <>
       <div className="flex items-center gap-3 text-brand-emerald">
@@ -72,40 +90,16 @@ export default function ProductCheckoutForm({
           type="tel"
         />
 
-        <div>
-          <label
-            htmlFor="shipping-address"
-            className="text-xs font-bold text-brand-black"
-          >
-            Alamat Pengiriman <span className="text-red-600">*</span>
-          </label>
-
-          <textarea
-            id="shipping-address"
-            value={shippingAddress}
-            onChange={(event) => {
-              onShippingAddressChange(event.target.value);
-            }}
-            rows={5}
-            minLength={10}
-            maxLength={1000}
+        <div className="pt-2">
+          <LocationPicker
+            value={locationValue}
+            onChange={handleLocationChange}
+            label="Cari Tujuan Pengiriman"
+            detailLabel="Detail Alamat Lengkap & Catatan Pengiriman"
+            placeholder="Ketik wilayah/kota (misal: Denpasar Timur)..."
+            detailPlaceholder="Jl. Sukajadi No. 120, Kontak Penerima (0812345678)..."
             required
-            aria-required="true"
-            placeholder="Masukkan alamat lengkap pengiriman"
-            className="
-              mt-3 w-full resize-none rounded-xl
-              border border-brand-black/15 bg-canvas-pure
-              px-4 py-3 text-sm text-brand-black
-              outline-none transition
-              placeholder:text-muted-moss/60
-              focus:border-brand-emerald
-              focus:ring-2 focus:ring-brand-emerald/10
-            "
           />
-
-          <p className="mt-2 text-[10px] text-muted-moss">
-            Minimal 10 karakter.
-          </p>
         </div>
       </div>
 

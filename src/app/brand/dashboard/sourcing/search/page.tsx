@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function BrandSourcingSearchPage() {
   return (
-    <div className="mx-auto w-full max-w-[1320px] px-5 py-8 sm:px-6 lg:px-8 lg:py-10">
+    <div className="mx-auto w-full max-w-[1320px] px-5 py-10 sm:px-6 lg:px-8 lg:py-14">
       <Suspense fallback={<SourcingSearchLoadingFallback />}>
         <BrandSourcingSearchSection />
       </Suspense>

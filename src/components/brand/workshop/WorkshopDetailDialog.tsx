@@ -14,13 +14,8 @@ import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { DatePickerInput } from "@/components/ui/DatePickerInput";
 import { BannerUpload } from "@/components/ui/BannerUpload";
 import { Spinner } from "@/components/ui/Spinner";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/Select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
+import { LocationPicker, type AddressJSONB } from "@/components/shared/LocationPicker";
 import { useWorkshopEdit } from "@/hooks/brand/useWorkshopEdit";
 import type { BrandWorkshopItem } from "@/types/brandWorkshop";
 
@@ -165,17 +160,29 @@ export function WorkshopDetailDialog({
               </div>
             </div>
 
-            {/* Lokasi */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-brand-black/70">
-                Lokasi
-              </label>
-              <Input
-                placeholder="Contoh: Gedung MURI Hub, Jakarta Selatan"
-                value={form.location}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, location: e.target.value }))
-                }
+            {/* Lokasi dengan LocationPicker & GPS Coordinates */}
+            <div className="pt-1">
+              <LocationPicker
+                value={{
+                  formatted_address: form.location.includes(" — ")
+                    ? form.location.split(" — ")[0]
+                    : "",
+                  latitude: 0,
+                  longitude: 0,
+                  address_detail: form.location.includes(" — ")
+                    ? form.location.split(" — ")[1]
+                    : form.location,
+                }}
+                onChange={(data: AddressJSONB) => {
+                  const full = data.formatted_address
+                    ? `${data.formatted_address} — ${data.address_detail}`
+                    : data.address_detail;
+                  setForm((prev) => ({ ...prev, location: full }));
+                }}
+                label="Cari Lokasi & Koordinat Workshop"
+                detailLabel="Detail Lokasi & Petunjuk Ruangan / Gedung"
+                placeholder="Ketik wilayah/kota workshop (misal: Denpasar Timur)..."
+                detailPlaceholder="Gedung MURI Hub Lt. 2, Ruang Srikandi..."
                 required
               />
             </div>

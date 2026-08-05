@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import { Toaster } from "@/components/ui/Sonner";
 import "./globals.css";
 import AuthProvider from "@/components/auth/AuthProvider";
+import { CartProvider } from "@/context/CartContext";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
@@ -43,7 +44,9 @@ export default function RootLayout({
         />
       </head>
       <body className="flex min-h-full flex-col">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <CartProvider>{children}</CartProvider>
+        </AuthProvider>
         <Toaster position="top-right" />
       </body>
     </html>
