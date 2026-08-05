@@ -41,7 +41,7 @@ export function DatePickerInput({
         <Button
           variant="outline"
           className={cn(
-            "w-full justify-start text-left font-normal text-xs h-12 border-line-trace bg-transparent hover:bg-canvas-warm/30 rounded-sm",
+            "w-full justify-start text-left font-normal text-xs h-12 border-brand-black/20 bg-transparent hover:bg-canvas-warm/30 rounded-sm",
             !value && "text-muted-moss/60",
             className
           )}

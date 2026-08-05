@@ -84,9 +84,9 @@ export function UpdateLogisticsDialog({
 
         {/* Modal Form */}
         <form onSubmit={handleSubmit}>
-          <div className="p-6 sm:p-8 space-y-4 text-xs">
+          <div className="p-6 sm:p-8 space-y-5 text-xs">
             {/* Target Status Selector */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <label className="block font-semibold text-brand-black">
                 Pilih Status Logistik Baru <span className="text-error-rust">*</span>
               </label>
@@ -101,7 +101,7 @@ export function UpdateLogisticsDialog({
             </div>
 
             {/* Tracking Number Input */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <label className="block font-semibold text-brand-black">
                 Nomor Resi / Tracking Logistik (Opsional)
               </label>

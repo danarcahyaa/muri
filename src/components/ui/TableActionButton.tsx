@@ -36,11 +36,11 @@ export const TableActionButton = forwardRef<
         size === "sm" && "h-8 px-3 rounded-md text-xs",
 
         variant === "default" && [
-          "border border-line-trace/80 bg-canvas-pure text-brand-black shadow-none",
-          "hover:bg-canvas-warm hover:border-brand-black/20",
+          "border border-brand-black/20 bg-canvas-pure text-brand-black shadow-none",
+          "hover:bg-canvas-warm hover:border-brand-black/30",
         ],
         variant === "outline" && [
-          "border border-brand-black/15 bg-transparent text-brand-black shadow-none",
+          "border border-brand-black/20 bg-transparent text-brand-black shadow-none",
           "hover:bg-canvas-warm hover:border-brand-black/30",
         ],
         variant === "primary" && [

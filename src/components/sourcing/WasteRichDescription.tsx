@@ -12,7 +12,7 @@ export function WasteRichDescription({
   detailsAndConditions,
 }: WasteRichDescriptionProps): ReactElement {
   return (
-    <div className="space-y-3 rounded-md bg-canvas-pure p-5 border border-brand-black/15">
+    <div className="space-y-3 rounded-xl bg-canvas-pure p-5 border border-brand-black/15">
       <div className="flex items-center gap-2 pb-3 border-b border-line-trace/40">
         <FileText className="size-4 text-brand-forest" />
         <h2 className="font-display font-bold text-base text-brand-black">

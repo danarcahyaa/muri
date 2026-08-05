@@ -207,11 +207,11 @@ export function WasteDialogForm({
           )}
 
           {/* Scrollable Form Fields */}
-          <div className="flex-1 overflow-y-auto space-y-4 p-6 sm:p-8">
+          <div className="flex-1 overflow-y-auto space-y-5 p-6 sm:p-8">
             {/* Nama Kain */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <label className="text-xs font-semibold text-brand-black/70">
+                <label className="text-xs font-semibold text-brand-black">
                   Nama Kain{" "}
                 </label>
                 <span className="text-[10px] text-muted-moss font-medium">
@@ -229,8 +229,8 @@ export function WasteDialogForm({
 
             {/* Jenis Kain & Status */}
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-brand-black/70">
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-brand-black">
                   Jenis Kain
                 </label>
                 <Select
@@ -259,8 +259,8 @@ export function WasteDialogForm({
               </div>
 
               {isEditMode && (
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-brand-black/70">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-brand-black">
                     Status
                   </label>
                   <Select
@@ -295,8 +295,8 @@ export function WasteDialogForm({
 
             {/* Berat, Harga, Min Order */}
             <div className="grid gap-4 grid-cols-3">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-brand-black/70">
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-brand-black">
                   Berat (Kg)
                 </label>
                 <Input
@@ -310,8 +310,8 @@ export function WasteDialogForm({
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-brand-black/70">
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-brand-black">
                   Harga / Kg
                 </label>
                 <Input
@@ -323,8 +323,8 @@ export function WasteDialogForm({
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-brand-black/70">
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-brand-black">
                   Min Order (Kg)
                 </label>
                 <Input
@@ -344,8 +344,8 @@ export function WasteDialogForm({
             {/* Batch & Location (Only in Detail/Edit Mode) */}
             {isEditMode && (
               <div className="grid gap-4 sm:grid-cols-2 bg-canvas-warm/50 p-4 rounded-lg border border-line-trace">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-brand-black/70">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-brand-black">
                     Kode Batch
                   </label>
                   <Input
@@ -355,8 +355,8 @@ export function WasteDialogForm({
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-brand-black/70">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-brand-black">
                     Lokasi Asal
                   </label>
                   <Input
@@ -372,8 +372,8 @@ export function WasteDialogForm({
             <MediaUpload value={media} onChange={setMedia} />
 
             {/* Deskripsi & Kondisi */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-brand-black/70">
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-brand-black">
                 Deskripsi & Kondisi
               </label>
               <RichTextEditor

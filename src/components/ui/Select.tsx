@@ -62,7 +62,7 @@ const selectTriggerVariants = cva(
          * Default select trigger mengikuti style input.
          */
         default: `
-          border-line-trace
+          border-brand-black/20
           bg-transparent
           text-brand-black
           shadow-none
@@ -96,7 +96,7 @@ const selectTriggerVariants = cva(
           aria-invalid:focus-visible:ring-destructive/20
         `,
         auth: `
-          border-line-trace
+          border-brand-black/20
           bg-transparent
           text-brand-black
           shadow-none

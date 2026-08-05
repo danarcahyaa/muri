@@ -47,21 +47,21 @@ export const purchasedMaterials: PurchasedMaterial[] = [
 
 export const mockRecommendations: AiRecommendation[] = [
   {
-    title: "Vintage Heritage Textile Patchwork",
+    title: "Pola Patchwork Permaisuri Denim",
     subtitle: "Kombinasi perca katun & motif kain etnik sirkular",
-    badge: "Seamless Pattern",
-    image: "https://images.unsplash.com/photo-1606041008023-472dfb5e530f?auto=format&fit=crop&w=600&q=80",
+    badge: "Pola Seamless",
+    image: "/product.png",
   },
   {
-    title: "Japanese Boro & Sashiko Embroidery",
-    subtitle: "Pola jahitan jelujur tradisional Sashiko di atas denim",
-    badge: "Boro Aesthetic",
-    image: "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=600&q=80",
+    title: "Motif Jelujur Batik & Tenun Perca",
+    subtitle: "Pola jahitan jelujur tradisional Indonesia di atas kain sisa",
+    badge: "Jelujur Batik",
+    image: "/product.png",
   },
   {
-    title: "Geometric Herringbone Patchwork",
+    title: "Pola Geometris Sisa Perumpung",
     subtitle: "Susunan geometris simetris potongan perca sisa",
-    badge: "Zero-Waste Grid",
-    image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=600&q=80",
+    badge: "Grid Zero-Waste",
+    image: "/product.png",
   },
 ];

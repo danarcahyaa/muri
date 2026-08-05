@@ -111,11 +111,11 @@ const FileDropzone = React.forwardRef<FilePickerHandle, FileDropzoneProps>(
           className={cn(
             `
               group/button inline-flex shrink-0 items-center justify-center
-              box-border rounded-sm border border-dashed border-line-trace
-              bg-transparent text-brand-black outline-none select-none cursor-pointer
+              box-border rounded-xl border-2 border-dashed border-brand-black/25
+              bg-canvas-warm/30 text-brand-black outline-none select-none cursor-pointer
               h-auto w-full whitespace-normal font-normal text-xs
               transition-[background-color,border-color,color] duration-200
-              hover:border-brand-emerald hover:bg-canvas-warm
+              hover:border-brand-emerald hover:bg-canvas-warm/60
 
               data-[dragging=true]:border-brand-emerald
               data-[dragging=true]:bg-brand-emerald/[0.05]

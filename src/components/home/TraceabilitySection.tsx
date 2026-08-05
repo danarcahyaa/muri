@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
@@ -499,10 +500,11 @@ function ProductPreview({ record, showNotFound }: ProductPreviewProps) {
     return (
       <div className="animate-in fade-in duration-300">
         <div className="mt-6 overflow-hidden rounded-lg bg-canvas-warm">
-          <div className="aspect-video overflow-hidden">
-            <Image
+          <div className="aspect-video overflow-hidden relative">
+            <ImageWithFallback
               src={record.product.image}
               alt={record.product.alt}
+              fallbackTitle={record.product.name}
               width={800}
               height={500}
               className="size-full object-cover object-center"

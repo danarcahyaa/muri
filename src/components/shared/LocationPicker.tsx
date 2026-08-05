@@ -263,10 +263,10 @@ export function LocationPicker({
   };
 
   return (
-    <div className="space-y-4 font-body" ref={containerRef}>
+    <div className="space-y-5 font-body" ref={containerRef}>
       {/* Baris Pertama: Search Bar & Current Location Button */}
-      <div className="space-y-1.5">
-        <label className="block text-xs font-semibold text-brand-black">
+      <div className="space-y-2">
+        <label className="block text-xs font-bold text-brand-black">
           {label} {required && <span className="text-error-rust">*</span>}
         </label>
         <div className="flex items-center gap-2">
@@ -340,8 +340,8 @@ export function LocationPicker({
 
 
       {/* Input Detail Alamat Lengkap & Catatan */}
-      <div className="space-y-1.5">
-        <label className="block text-xs font-semibold text-brand-black">
+      <div className="space-y-2">
+        <label className="block text-xs font-bold text-brand-black">
           {detailLabel} {required && <span className="text-error-rust">*</span>}
         </label>
         <textarea

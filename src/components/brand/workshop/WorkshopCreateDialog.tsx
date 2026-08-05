@@ -15,6 +15,7 @@ import { LocationPicker, type AddressJSONB } from "@/components/shared/LocationP
 import { DatePickerInput } from "@/components/ui/DatePickerInput";
 import { BannerUpload } from "@/components/ui/BannerUpload";
 import { Spinner } from "@/components/ui/Spinner";
+import { Hammer } from "lucide-react";
 import { useWorkshopCreate } from "@/hooks/brand/useWorkshopCreate";
 
 interface WorkshopCreateDialogProps {
@@ -51,9 +52,19 @@ export function WorkshopCreateDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-md sm:max-w-3xl bg-canvas-pure border border-line-trace rounded-xl w-full max-h-[95vh] flex flex-col overflow-hidden p-0">
         <DialogHeader className="px-6 py-5 border-b border-line-trace">
-          <DialogTitle className="font-display text-2xl font-bold tracking-tight text-brand-black">
-            Buat Workshop Baru
-          </DialogTitle>
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-brand-forest/10 text-brand-forest">
+              <Hammer className="size-5" />
+            </div>
+            <div>
+              <DialogTitle className="font-display text-lg font-bold tracking-tight text-brand-black">
+                Buat Workshop Baru
+              </DialogTitle>
+              <p className="text-xs text-muted-moss">
+                Tambah agenda & materi edukasi workshop sirkular baru
+              </p>
+            </div>
+          </div>
         </DialogHeader>
 
         <form
@@ -68,11 +79,11 @@ export function WorkshopCreateDialog({
           )}
 
           {/* Scrollable Form Fields */}
-          <div className="flex-1 overflow-y-auto space-y-4 p-6 sm:p-8">
+          <div className="flex-1 overflow-y-auto space-y-5 p-6 sm:p-8">
 
             {/* Judul */}
-            <div className="space-y-2.5">
-              <label className="block mb-2 text-xs font-semibold text-brand-black/70">
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-brand-black mb-2">
                 Judul Workshop
               </label>
               <Input
@@ -96,8 +107,8 @@ export function WorkshopCreateDialog({
 
             {/* Nama Narasumber & Jabatan */}
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2.5">
-                <label className="block mb-2 text-xs font-semibold text-brand-black/70">
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-brand-black mb-2">
                   Nama Narasumber
                 </label>
                 <Input
@@ -109,8 +120,8 @@ export function WorkshopCreateDialog({
                   required
                 />
               </div>
-              <div className="space-y-2.5">
-                <label className="block mb-2 text-xs font-semibold text-brand-black/70">
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-brand-black mb-2">
                   Jabatan Narasumber
                 </label>
                 <Input
@@ -153,8 +164,8 @@ export function WorkshopCreateDialog({
 
             {/* Kuota & Biaya Poin */}
             <div className="grid gap-4 grid-cols-2">
-              <div className="space-y-2.5">
-                <label className="block mb-2 text-xs font-semibold text-brand-black/70">
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-brand-black mb-2">
                   Kuota Peserta
                 </label>
                 <Input
@@ -168,9 +179,9 @@ export function WorkshopCreateDialog({
                   required
                 />
               </div>
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="block mb-2 text-xs font-semibold text-brand-black/70">
+                  <label className="block text-xs font-bold text-brand-black mb-2">
                     Biaya Poin
                   </label>
                   <span className="text-[10px] text-muted-moss font-medium">
@@ -191,8 +202,8 @@ export function WorkshopCreateDialog({
 
             {/* Tanggal Pelaksanaan (shadcn Calendar) & Jam Mulai */}
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2.5">
-                <label className="block mb-2 text-xs font-semibold text-brand-black/70">
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-brand-black mb-2">
                   Tanggal Pelaksanaan
                 </label>
                 <DatePickerInput
@@ -204,8 +215,8 @@ export function WorkshopCreateDialog({
                   fromDate={new Date()}
                 />
               </div>
-              <div className="space-y-2.5">
-                <label className="block mb-2 text-xs font-semibold text-brand-black/70">
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-brand-black mb-2">
                   Jam Mulai
                 </label>
                 <Input
@@ -220,9 +231,9 @@ export function WorkshopCreateDialog({
             </div>
 
             {/* Deskripsi Singkat */}
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <label className="text-xs font-semibold text-brand-black/70">
+                <label className="block text-xs font-bold text-brand-black mb-2">
                   Deskripsi Singkat
                 </label>
                 <span
@@ -247,8 +258,8 @@ export function WorkshopCreateDialog({
             </div>
 
             {/* Detail Lengkap — Rich Text (Wajib) */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-brand-black/70">
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-brand-black">
                 Detail Lengkap
               </label>
               <RichTextEditor

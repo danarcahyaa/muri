@@ -297,7 +297,7 @@ export function WasteProviderProfileSection() {
               size="md"
             >
               <Save className="size-4" />
-              Simpan Perubahan Profile Provider
+              Simpan Perubahan
             </Button>
           </div>
         </form>

@@ -55,7 +55,7 @@
   --color-canvas-warm: #F5F3EC;
   --color-canvas-pure: #FBFAF6;
   --color-muted-moss: #5C6E69;
-  --color-line-trace: rgba(8, 29, 23, 0.05);
+  --color-line-trace: rgba(8, 29, 23, 0.2);
   --color-error-rust: #A62626;
 
   /* Font variables matching STYLEGUIDE.md specification */

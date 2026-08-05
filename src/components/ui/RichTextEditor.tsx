@@ -166,9 +166,9 @@ export function RichTextEditor({
       className={cn(
         `
           flex w-full flex-col
-          overflow-hidden rounded-sm
-          border border-brand-black/15
-          bg-transparent text-sm
+          overflow-hidden rounded-md
+          border border-brand-black/20
+          bg-canvas-pure text-sm
           transition-all
 
           focus-within:border-brand-emerald
@@ -179,7 +179,7 @@ export function RichTextEditor({
       )}
     >
       {/* Toolbar */}
-      <div className="flex items-center gap-1 border-b border-line-trace/60 bg-canvas-warm/30 p-1.5">
+      <div className="flex items-center gap-1 border-b border-brand-black/20 bg-canvas-warm/40 p-1.5">
         <ToolbarButton
           title="Tebal (Bold)"
           onClick={() =>
@@ -207,7 +207,7 @@ export function RichTextEditor({
           <Underline className="size-4" />
         </ToolbarButton>
 
-        <div className="mx-1 h-4 w-px bg-line-trace/60" />
+        <div className="mx-1 h-4 w-px bg-brand-black/20" />
 
         <ToolbarButton
           title="Daftar Simbol (Bullet List)"

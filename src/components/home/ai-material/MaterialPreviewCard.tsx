@@ -57,16 +57,36 @@ export default function MaterialPreviewCard({
 
         {scanning && previewSrc ? (
           <>
-            <div className="pointer-events-none absolute inset-0 bg-brand-lime/[0.04]" />
+            <div className="pointer-events-none absolute inset-0 bg-brand-lime/[0.06] animate-pulse" />
 
-            <div className="ai-scan-line pointer-events-none absolute inset-x-4 z-20 h-[3px] rounded-full bg-brand-lime shadow-[0_0_22px_rgba(200,241,105,0.95)]" />
+            <div
+              className="pointer-events-none absolute inset-x-3 z-20 h-[3px] rounded-full bg-brand-lime shadow-[0_0_20px_#C8F169,0_0_8px_#C8F169]"
+              style={{
+                animation: "scanVertical 2s ease-in-out infinite alternate",
+              }}
+            />
 
-            <div className="ai-scan-glow pointer-events-none absolute inset-0 z-10" />
+            <style jsx>{`
+              @keyframes scanVertical {
+                0% {
+                  top: 8%;
+                  opacity: 0.85;
+                }
+                50% {
+                  top: 88%;
+                  opacity: 1;
+                }
+                100% {
+                  top: 8%;
+                  opacity: 0.85;
+                }
+              }
+            `}</style>
           </>
         ) : null}
 
         {previewSrc ? (
-          <div className="absolute bottom-4 left-4 z-30 rounded-full bg-brand-black/65 px-4 py-2 backdrop-blur-md">
+          <div className="absolute bottom-4 left-4 z-30 rounded-full bg-brand-black/75 px-4 py-2 backdrop-blur-md border border-white/10">
             <p className="text-[10px] font-bold uppercase text-brand-lime">
               {badgeLabel}
             </p>

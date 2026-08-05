@@ -34,7 +34,7 @@ const inputVariants = cva(
     variants: {
       variant: {
         default: `
-          border-line-trace
+          border-brand-black/20
           bg-transparent
           text-brand-black
           shadow-none

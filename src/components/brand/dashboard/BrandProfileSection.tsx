@@ -412,7 +412,7 @@ export function BrandProfileSection() {
               size="md"
             >
               <Save className="size-4" />
-              Simpan Perubahan Profile Brand
+              Simpan Perubahan
             </Button>
           </div>
         </form>

@@ -336,7 +336,7 @@ export default function BrandProductsSection() {
                   type="button"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                  className="inline-flex items-center gap-1 rounded-sm border border-brand-black/15 bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:opacity-40"
+                  className="inline-flex items-center gap-1 rounded-sm border border-brand-black/20 bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:opacity-40"
                 >
                   <ChevronLeft className="size-3.5" />
                   Sebelumnya
@@ -348,9 +348,9 @@ export default function BrandProductsSection() {
 
                 <button
                   type="button"
-                  disabled={currentPage === totalPages}
+                  disabled={currentPage >= totalPages}
                   onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                  className="inline-flex items-center gap-1 rounded-sm border border-brand-black/15 bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:opacity-40"
+                  className="inline-flex items-center gap-1 rounded-sm border border-brand-black/20 bg-canvas-pure px-3 py-1.5 text-xs font-bold text-brand-black transition hover:border-brand-forest disabled:opacity-40"
                 >
                   Berikutnya
                   <ChevronRight className="size-3.5" />

@@ -43,7 +43,7 @@ export function FulfillmentOrderCard({
       : formatIdr(order.amountIdr);
 
   return (
-    <article className="overflow-hidden rounded-3xl border border-brand-black/15 bg-canvas-pure">
+    <article className="overflow-hidden rounded-2xl border border-brand-black/15 bg-canvas-pure">
       <header className="border-b border-line-trace px-6 py-6 sm:px-8">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>

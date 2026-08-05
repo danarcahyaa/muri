@@ -4,8 +4,40 @@ import { findTraceabilityRecord, normalizeBatchId, type TraceabilityRecord } fro
 const IS_UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
 /**
+ * Resolves a dynamic product image based on DB media URL or matching product category & name.
+ */
+function resolveProductImage(name: string, sku: string, mediaUrl?: string | null): string {
+  if (mediaUrl && mediaUrl !== "/product.png") {
+    return mediaUrl;
+  }
+
+  const text = `${sku} ${name}`.toLowerCase();
+
+  if (text.includes("pouch") || text.includes("dompet") || text.includes("dry-fit")) {
+    return "/products/recycled-textile-pouch.png";
+  }
+  if (text.includes("bag") || text.includes("tote") || text.includes("canvas")) {
+    return "/products/natural-canvas-bag.png";
+  }
+  if (text.includes("blouse") || text.includes("atasan") || text.includes("floral")) {
+    return "/products/floral-upcycled-blouse.png";
+  }
+  if (text.includes("jacket") || text.includes("jaket") || text.includes("outer")) {
+    return "/products/patchwork-denim-jacket.png";
+  }
+  if (text.includes("pants") || text.includes("cargo") || text.includes("bawahan")) {
+    return "/products/upcycled-cargo-pants.png";
+  }
+  if (text.includes("shirt") || text.includes("kemeja")) {
+    return "/products/upcycled-denim-shirt.png";
+  }
+
+  return "/products/recycled-textile-pouch.png";
+}
+
+/**
  * Fetches traceability data directly from Supabase database based on Batch ID, Product SKU, or Production ID.
- * Falls back to static demo records if not found in database.
+ * Dynamically resolves product and waste media URLs.
  *
  * @param value Input Batch ID or SKU
  * @returns TraceabilityRecord or null
@@ -55,7 +87,7 @@ export async function fetchTraceabilityRecordFromDb(
         : prodData.product_categories;
 
       const brandName = brandObj?.brand_name || "Memuai";
-      const categoryName = catObj?.category_name || "Fashion Sirkular";
+      const categoryName = catObj?.category_name || "Tas & Aksesori";
       const carbon = Number(prodData.carbon_saved_kg ?? 0.8);
       const water = Number(prodData.water_saved_liter ?? 250);
       const dateStr = prodData.created_at
@@ -66,11 +98,30 @@ export async function fetchTraceabilityRecordFromDb(
           })
         : "05 Agustus 2026";
 
+      // Query media URL if present in waste_post_media
+      let mediaUrl: string | null = null;
+      if (prodData.production_id) {
+        const { data: mediaData } = await supabase
+          .from("waste_post_media")
+          .select("media_url")
+          .limit(1)
+          .maybeSingle();
+        if (mediaData?.media_url) {
+          mediaUrl = mediaData.media_url;
+        }
+      }
+
+      const productImage = resolveProductImage(
+        prodData.product_name || "",
+        prodData.sku || normalized,
+        mediaUrl
+      );
+
       return {
         batchId: prodData.sku || normalized,
         product: {
           name: prodData.product_name || "Produk Sirkular",
-          image: "/product.png",
+          image: productImage,
           alt: prodData.product_name || "Produk sirkular",
         },
         resultTitle: `Perjalanan Material ${categoryName} Menjadi Nilai Guna.`,
@@ -110,7 +161,7 @@ export async function fetchTraceabilityRecordFromDb(
       };
     }
 
-    // 2. Query waste_batches by batch_code or id
+    // 2. Query waste_batches by batch_code or id with waste_post_media
     let batchQuery = supabase
       .from("waste_batches")
       .select(`
@@ -121,7 +172,10 @@ export async function fetchTraceabilityRecordFromDb(
         created_at,
         waste_posts (
           custom_fabric_name,
-          details_and_conditions
+          details_and_conditions,
+          waste_post_media (
+            media_url
+          )
         )
       `);
 
@@ -149,11 +203,18 @@ export async function fetchTraceabilityRecordFromDb(
         : "05 Juli 2026";
       const weight = Number(batchData.initial_weight_kg || 50);
 
+      let mediaUrl: string | null = null;
+      if (wp?.waste_post_media && Array.isArray(wp.waste_post_media) && wp.waste_post_media.length > 0) {
+        mediaUrl = wp.waste_post_media[0].media_url || null;
+      }
+
+      const batchImage = resolveProductImage(fabricName, batchData.batch_code || normalized, mediaUrl);
+
       return {
         batchId: batchData.batch_code || normalized,
         product: {
           name: fabricName,
-          image: "/product.png",
+          image: batchImage,
           alt: fabricName,
         },
         resultTitle: `Jejak Digital Batch Limbah Kain Terverifikasi.`,

@@ -208,7 +208,7 @@ export function CreateProductionModal({
 
             {/* Field 1: Nama Produksi */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-brand-black mb-1.5">
+              <label className="block text-xs font-semibold text-brand-black mb-2">
                 Nama Produksi <span className="text-error-rust">*</span>
               </label>
               <Input
@@ -223,7 +223,7 @@ export function CreateProductionModal({
 
             {/* Field 2: Target Jumlah Produksi (pcs) */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-brand-black mb-1.5">
+              <label className="block text-xs font-semibold text-brand-black mb-2">
                 Target Jumlah Produksi (Pcs / Unit) <span className="text-error-rust">*</span>
               </label>
               <Input
@@ -240,7 +240,7 @@ export function CreateProductionModal({
             {/* Field 3: Multi-Select Material Limbah + Alokasi Berat */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-xs font-bold uppercase tracking-wider text-brand-black">
+                <label className="block text-xs font-semibold text-brand-black">
                   Alokasi Material Limbah Terbeli <span className="text-error-rust">*</span>
                 </label>
                 <span className="text-[11px] text-muted-moss">

@@ -144,7 +144,7 @@ export function PatternedAILeftPanel({
       </div>
 
       {/* Text Prompt & Style Studio (Tanpa Nomor 1., 2.) */}
-      <div className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-5 sm:p-6 space-y-4 shadow-2xs">
+      <div className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-5 sm:p-6 space-y-4">
         <div className="border-b border-line-trace pb-3">
           <h3 className="font-display text-base font-bold text-brand-black">
             Arahan Desain & Prompt Studio

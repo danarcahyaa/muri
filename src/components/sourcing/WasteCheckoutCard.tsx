@@ -57,7 +57,7 @@ export function WasteCheckoutCard({
 
   return (
     <>
-      <div className="lg:sticky lg:top-20 rounded-md bg-canvas-pure p-6 border border-brand-black/15 shadow-none space-y-6 z-20">
+      <div className="lg:sticky lg:top-20 rounded-2xl bg-canvas-pure p-6 border border-brand-black/15 shadow-none space-y-6 z-20">
         {/* Price & Unit Display */}
         <div className="space-y-1 pb-4 border-b border-line-trace/40">
           <span className="text-xs font-semibold uppercase text-muted-moss tracking-wider">

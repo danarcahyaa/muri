@@ -4,6 +4,7 @@ import Link from "next/link";
 import { type ReactElement } from "react";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { Bookmark, Store } from "lucide-react";
 import { formatCurrencyIDR, formatWeightKg } from "@/lib/formatter";
 import type { SourcingWastePostItem } from "@/types/sourcing";
@@ -27,22 +28,22 @@ export function MaterialCard({
   const cardContent = (
     <Card
       onClick={() => onSelect?.(item)}
-      className="group overflow-hidden flex flex-col rounded-md border border-brand-black/15 bg-canvas-pure hover:border-brand-forest/60 transition-all duration-200 shadow-none cursor-pointer h-full"
+      className="group overflow-hidden flex flex-col rounded-2xl border border-brand-black/15 bg-canvas-pure hover:border-brand-forest/60 transition-all duration-200 shadow-none cursor-pointer h-full"
     >
       {/* Thumbnail Image Container */}
       <div className="relative w-full aspect-3/2 bg-canvas-warm/50 overflow-hidden">
-        <img
-          src={item.imageUrl || fallbackImage}
+        <ImageWithFallback
+          src={item.imageUrl}
           alt={item.customFabricName}
+          fallbackTitle={item.customFabricName}
+          fill
+          sizes="(min-width: 1280px) 320px, (min-width: 768px) 33vw, 100vw"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = fallbackImage;
-          }}
         />
 
         {/* Fabric Category Badge Top-Left */}
-        <div className="absolute top-2.5 left-2.5">
-          <Badge variant="secondary" className="bg-canvas-pure/90 text-brand-black backdrop-blur-xs font-bold border border-brand-black/15 rounded-sm shadow-none">
+        <div className="absolute top-2.5 left-2.5 z-10">
+          <Badge variant="secondary" className="bg-canvas-pure/90 text-brand-black backdrop-blur-xs font-bold border border-brand-black/15 rounded-full px-2.5 py-0.5 shadow-none">
             {item.categoryName}
           </Badge>
         </div>
@@ -56,7 +57,7 @@ export function MaterialCard({
           }}
           title={isSaved ? "Hapus dari simpanan" : "Simpan material"}
           aria-label={isSaved ? "Hapus dari simpanan" : "Simpan material"}
-          className={`absolute top-2.5 right-2.5 p-1.5 rounded-sm backdrop-blur-md transition-all ${
+          className={`absolute top-2.5 right-2.5 z-10 p-1.5 rounded-full backdrop-blur-md transition-all ${
             isSaved
               ? "bg-brand-black text-white shadow-none"
               : "bg-canvas-pure/90 text-brand-black hover:bg-canvas-pure hover:text-brand-forest border border-brand-black/15 shadow-none"

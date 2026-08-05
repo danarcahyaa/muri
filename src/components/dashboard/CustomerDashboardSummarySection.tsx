@@ -132,7 +132,7 @@ function ImpactSummary({
   ];
 
   return (
-    <section className="mt-10 overflow-hidden rounded-3xl border border-brand-black/15 bg-canvas-pure">
+    <section className="mt-10 overflow-hidden rounded-2xl border border-brand-black/15 bg-canvas-pure">
       <div className="grid lg:grid-cols-3">
         {metrics.map((metric) => (
           <ImpactMetricCard

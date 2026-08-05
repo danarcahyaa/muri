@@ -2,6 +2,7 @@
 
 import { type ReactElement } from "react";
 import { Button } from "@/components/ui/Button";
+import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { Trash2, Store, Package, Bookmark, BookMarkedIcon, BookmarkX } from "lucide-react";
 import { formatCurrencyIDR, formatWeightKg } from "@/lib/formatter";
 import type { SavedWastePostItem } from "@/types/sourcing";
@@ -16,20 +17,18 @@ export function SavedMaterialCard({
   onUnsave,
 }: SavedMaterialCardProps): ReactElement {
   const wp = item.wastePost;
-  const fallbackImage =
-    "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?q=80&w=600&auto=format&fit=crop";
 
   return (
     <div className="flex items-center gap-3 py-2 pb-4 bg-canvas-pure hover:border-brand-emerald/40 transition-colors group font-body">
       {/* Thumbnail */}
-      <div className="relative size-16 shrink-0 rounded-md overflow-hidden bg-canvas-warm/60">
-        <img
-          src={wp.imageUrl || fallbackImage}
+      <div className="relative size-16 shrink-0 rounded-xl overflow-hidden bg-canvas-warm/60">
+        <ImageWithFallback
+          src={wp.imageUrl}
           alt={wp.customFabricName}
+          fallbackTitle={wp.customFabricName}
+          fill
+          sizes="64px"
           className="size-full object-cover group-hover:scale-105 transition-transform duration-200"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = fallbackImage;
-          }}
         />
       </div>
 

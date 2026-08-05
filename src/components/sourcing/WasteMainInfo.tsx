@@ -50,7 +50,7 @@ export function WasteMainInfo({ material }: WasteMainInfoProps): ReactElement {
       </div>
 
       {/* Main Material Specifications Grid */}
-      <div className="grid grid-cols-2 gap-5 p-4 sm:p-5 rounded-md bg-canvas-pure border border-brand-black/15">
+      <div className="grid grid-cols-2 gap-5 p-4 sm:p-5 rounded-xl bg-canvas-pure border border-brand-black/15">
         <div className="space-y-1">
           <span className="flex items-center gap-1 text-[11px] text-muted-moss uppercase tracking-wider font-semibold">
             <Tag className="size-3 text-brand-forest" />
@@ -93,7 +93,7 @@ export function WasteMainInfo({ material }: WasteMainInfoProps): ReactElement {
       </div>
 
       {/* Ecological Impact Section */}
-      <div className="rounded-md p-5 bg-gradient-to-br from-brand-forest to-[#134939] text-white space-y-4">
+      <div className="rounded-xl p-5 bg-gradient-to-br from-brand-forest to-[#134939] text-white space-y-4">
         <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-sm bg-brand-lime/20 text-brand-lime">
             <Leaf className="size-5" />

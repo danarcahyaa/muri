@@ -56,7 +56,7 @@ const buttonVariants = cva(
          * pada halaman login.
          */
         outline: `
-          border-line-trace
+          border-brand-black/20
           bg-transparent
           text-brand-black
           shadow-none
@@ -143,7 +143,7 @@ const buttonVariants = cva(
           focus-visible:ring-brand-black/20
         `,
         "solid-white": `
-          border-line-trace
+          border-brand-black/20
           bg-canvas-pure
           text-brand-black
           shadow-none

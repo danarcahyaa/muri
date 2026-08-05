@@ -29,7 +29,7 @@ const textareaVariants = cva(
          * Default textarea mengikuti style halaman login / input default.
          */
         default: `
-          border-line-trace
+          border-brand-black/20
           bg-transparent
           text-brand-black
           shadow-none
@@ -68,7 +68,7 @@ const textareaVariants = cva(
          * Alias agar kode auth lama tetap berjalan.
          */
         auth: `
-          border-line-trace
+          border-brand-black/20
           bg-transparent
           text-brand-black
           shadow-none

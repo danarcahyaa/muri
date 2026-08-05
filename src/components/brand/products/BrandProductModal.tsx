@@ -224,7 +224,7 @@ export function BrandProductModal({
             )}
 
             {/* Batch Produksi Sirkular (Wajib) */}
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               <label className="block mb-2 text-xs font-bold text-brand-black">
                 Hasil Produksi Limbah <span className="text-error-rust">*</span>
               </label>
@@ -263,7 +263,7 @@ export function BrandProductModal({
             </div>
 
             {/* Nama Produk */}
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               <label className="block mb-2 text-xs font-bold text-brand-black">
                 Nama Produk <span className="text-error-rust">*</span>
               </label>
@@ -278,7 +278,7 @@ export function BrandProductModal({
 
             {/* SKU & Kategori */}
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 <label className="block mb-2 text-xs font-bold text-brand-black">
                   SKU Produk <span className="text-error-rust">*</span>
                 </label>
@@ -292,7 +292,7 @@ export function BrandProductModal({
               </div>
 
               {/* Kategori (Displayed with Number ID) */}
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 <label className="block mb-2 text-xs font-bold text-brand-black">
                   Kategori <span className="text-error-rust">*</span>
                 </label>
