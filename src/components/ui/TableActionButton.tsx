@@ -2,9 +2,10 @@ import { forwardRef, type ButtonHTMLAttributes } from "react";
 
 import { cn } from "@/lib/utils";
 
-interface TableActionButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "default" | "destructive";
-  "aria-label": string;
+export interface TableActionButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "default" | "outline" | "destructive" | "ghost" | "primary";
+  size?: "icon" | "sm" | "xs";
+  "aria-label"?: string;
 }
 
 export const TableActionButton = forwardRef<
@@ -13,6 +14,7 @@ export const TableActionButton = forwardRef<
 >(function TableActionButton(
   {
     variant = "default",
+    size = "icon",
     className,
     children,
     disabled,
@@ -27,19 +29,30 @@ export const TableActionButton = forwardRef<
       type={type}
       disabled={disabled}
       className={cn(
-        "inline-flex size-8 cursor-pointer items-center justify-center rounded-sm border transition-colors",
+        "inline-flex cursor-pointer items-center justify-center font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-emerald/20 disabled:cursor-not-allowed disabled:opacity-40",
+
+        size === "icon" && "size-8 rounded-md text-xs",
+        size === "xs" && "h-7 px-2.5 rounded-md text-[11px]",
+        size === "sm" && "h-8 px-3 rounded-md text-xs",
 
         variant === "default" && [
-          "border-line-trace bg-canvas-pure text-muted-moss",
-          "hover:bg-canvas-warm hover:text-brand-black",
-          "disabled:cursor-not-allowed disabled:opacity-40",
-          "disabled:hover:bg-canvas-pure disabled:hover:text-muted-moss",
+          "border border-line-trace/80 bg-canvas-pure text-brand-black shadow-none",
+          "hover:bg-canvas-warm hover:border-brand-black/20",
         ],
-
+        variant === "outline" && [
+          "border border-brand-black/15 bg-transparent text-brand-black shadow-none",
+          "hover:bg-canvas-warm hover:border-brand-black/30",
+        ],
+        variant === "primary" && [
+          "bg-brand-forest text-white border border-brand-forest shadow-none",
+          "hover:bg-brand-black",
+        ],
         variant === "destructive" && [
-          "border-destructive/40 bg-canvas-pure text-destructive",
-          "hover:border-destructive hover:bg-destructive/10",
-          "disabled:cursor-not-allowed disabled:opacity-40",
+          "border border-error-rust/30 bg-canvas-pure text-error-rust shadow-none",
+          "hover:border-error-rust hover:bg-error-rust/10",
+        ],
+        variant === "ghost" && [
+          "bg-transparent text-muted-moss hover:bg-canvas-warm hover:text-brand-black",
         ],
 
         className,

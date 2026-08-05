@@ -16,6 +16,7 @@ import {
   Factory,
   LogOut,
   Menu,
+  User,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -92,6 +93,16 @@ const brandNavigation: NavigationGroup[] = [
         label: "Produksi",
         href: "/brand/dashboard/sourcing/production",
         icon: Factory,
+      },
+    ],
+  },
+  {
+    groupName: "Pengaturan",
+    items: [
+      {
+        label: "Profil",
+        href: "/brand/dashboard/profile",
+        icon: User,
       },
     ],
   },
@@ -193,24 +204,30 @@ export function BrandSidebar() {
         {/* User footer — always at bottom */}
         <div className="shrink-0 border-t border-brand-black/15 p-4">
           <div className="flex w-full items-center gap-3 rounded-xl bg-canvas-warm/55 p-3">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-lime font-display text-xs font-bold text-brand-black">
-              {initial}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-bold leading-tight text-brand-black">
-                {displayName}
-              </p>
-              <p className="mt-0.5 truncate text-[10px] leading-none text-muted-moss">
-                {user?.email || "Brand Account"}
-              </p>
-            </div>
+            <Link
+              href="/brand/dashboard/profile"
+              className="flex min-w-0 flex-1 items-center gap-3 transition-opacity hover:opacity-80"
+              title="Buka Profil Brand"
+            >
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-lime font-display text-xs font-bold text-brand-black">
+                {initial}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-bold leading-tight text-brand-black">
+                  {displayName}
+                </p>
+                <p className="mt-0.5 truncate text-[10px] leading-none text-muted-moss">
+                  {user?.email || "Brand Account"}
+                </p>
+              </div>
+            </Link>
             <button
               type="button"
               title="Keluar"
               aria-label="Keluar dari akun"
               disabled={isSigningOut}
               onClick={handleSignOut}
-              className="flex size-8 shrink-0 items-center justify-center rounded-md text-error-rust transition-colors hover:bg-error-rust/[0.08] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex size-8 shrink-0 items-center justify-center rounded-md text-error-rust transition-colors hover:bg-error-rust/[0.08] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
             >
               <LogOut className="size-4" strokeWidth={1.8} />
             </button>

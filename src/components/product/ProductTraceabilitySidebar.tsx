@@ -2,9 +2,7 @@
 
 import { useState } from "react";
 import type { ComponentType } from "react";
-import Link from "next/link";
 import {
-  ArrowRight,
   Check,
   CheckCircle2,
   Droplets,
@@ -18,18 +16,16 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Separator } from "@/components/ui/Separator";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/Sheet";
-import { buildTraceabilityHref, formatDecimal } from "@/lib/productDetail";
+import { formatDecimal } from "@/lib/productDetail";
 
 interface ProductTraceabilitySidebarProps {
   open: boolean;
@@ -107,9 +103,10 @@ export default function ProductTraceabilitySidebar({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full max-w-none gap-0 border-line-trace bg-canvas-pure p-0 sm:max-w-[620px]"
+        className="flex w-full flex-col gap-0 border-l border-line-trace bg-canvas-pure p-0 sm:max-w-md"
       >
-        <SheetHeader className="shrink-0 border-b border-line-trace px-6 py-5 pr-16 sm:px-8 sm:py-6 sm:pr-16">
+        {/* Header */}
+        <SheetHeader className="shrink-0 border-b border-line-trace px-6 py-5 pr-14">
           <div className="flex items-center gap-2 text-brand-emerald">
             <ScanLine className="size-4" strokeWidth={2} />
             <p className="text-[10px] font-bold uppercase tracking-wider">
@@ -117,232 +114,231 @@ export default function ProductTraceabilitySidebar({
             </p>
           </div>
 
-          <SheetTitle className="mt-2 font-display text-2xl font-medium tracking-[-0.04em] text-brand-black sm:text-3xl">
+          <SheetTitle className="mt-1 font-display text-xl font-bold tracking-tight text-brand-black">
             Paspor Sirkular Produk
           </SheetTitle>
 
-          <SheetDescription className="mt-2 max-w-xl text-xs leading-5 text-muted-moss">
+          <SheetDescription className="mt-1 text-xs leading-relaxed text-muted-moss">
             Perjalanan bahan baku, proses produksi, serta dampak lingkungan yang
             terhubung dengan bukti digital MURI.
           </SheetDescription>
         </SheetHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <div className="space-y-6 px-6 py-6 sm:px-8 sm:py-8">
-            <Card className="border-brand-forest/20 bg-brand-forest/[0.04]">
-              <CardContent className="p-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-3">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-lime text-brand-forest">
-                      <ShieldCheck className="size-5" />
-                    </div>
-
-                    <div>
-                      <p className="text-xs font-bold text-brand-black">
-                        MURI Circular Verified Protocol
-                      </p>
-                      <p className="mt-1 text-[10px] leading-4 text-muted-moss">
-                        Paspor material digital terverifikasi tiga lapis untuk
-                        transparansi dan pencegahan klaim palsu.
-                      </p>
-                    </div>
+        {/* Scrollable Body */}
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 space-y-4">
+          {/* Protocol Banner */}
+          <Card className="border-brand-forest/20 bg-brand-forest/[0.04]">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-2.5">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-lime text-brand-forest">
+                    <ShieldCheck className="size-4" />
                   </div>
 
-                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-brand-lime/70 px-3 py-1.5 text-[10px] font-bold text-brand-forest">
-                    <CheckCircle2 className="size-3" />
-                    Aktif
-                  </span>
+                  <div>
+                    <p className="text-xs font-bold text-brand-black">
+                      MURI Circular Protocol
+                    </p>
+                    <p className="mt-0.5 text-[10px] leading-4 text-muted-moss">
+                      Paspor material terverifikasi tiga lapis untuk transparansi.
+                    </p>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <IdentityCard icon={QrCode} label="SKU Produk" value={sku} />
-              <IdentityCard
-                icon={Factory}
-                label="ID Produksi"
-                value={productionId}
-                mono
-              />
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-brand-lime/70 px-2.5 py-1 text-[9px] font-bold text-brand-forest">
+                  <CheckCircle2 className="size-3" />
+                  Aktif
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Identity Grid */}
+          <div className="grid grid-cols-2 gap-2.5">
+            <IdentityCard icon={QrCode} label="SKU Produk" value={sku} />
+            <IdentityCard
+              icon={Factory}
+              label="ID Produksi"
+              value={productionId}
+              mono
+            />
+          </div>
+
+          {/* QR Code Section */}
+          <Card variant="warm">
+            <CardContent className="flex items-center gap-3.5 p-4">
+              <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line-trace bg-canvas-pure">
+                {qrCodeUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={qrCodeUrl}
+                    alt={`QR traceability ${sku}`}
+                    className="size-14 object-contain"
+                  />
+                ) : (
+                  <QrCode
+                    className="size-7 text-muted-moss/45"
+                    strokeWidth={1.4}
+                  />
+                )}
+              </div>
+
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-brand-black">
+                  QR Produk Terverifikasi
+                </p>
+                <p className="mt-0.5 text-[10px] leading-4 text-muted-moss">
+                  Pindai QR untuk membuka bukti digital perjalanan produk.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Separator className="bg-line-trace" />
+
+          {/* Progress Timeline Section */}
+          <section aria-labelledby="traceability-progress-title">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-moss">
+                  Status Verifikasi
+                </p>
+                <h3
+                  id="traceability-progress-title"
+                  className="mt-0.5 text-xs font-bold text-brand-black"
+                >
+                  Seluruh tahapan telah selesai
+                </h3>
+              </div>
+
+              <span className="inline-flex shrink-0 items-center rounded-full bg-brand-lime/55 px-2.5 py-1 text-[9px] font-bold text-brand-forest">
+                3/3 Tahap
+              </span>
             </div>
 
-            <Card variant="warm">
-              <CardContent className="flex items-center gap-4 p-5">
-                <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line-trace bg-canvas-pure">
-                  {qrCodeUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={qrCodeUrl}
-                      alt={`QR traceability ${sku}`}
-                      className="size-16 object-contain"
-                    />
-                  ) : (
-                    <QrCode
-                      className="size-8 text-muted-moss/45"
-                      strokeWidth={1.4}
-                    />
-                  )}
-                </div>
+            <div className="mt-4 space-y-3" role="list" aria-label="Tahapan traceability">
+              {steps.map((step, index) => {
+                const isSelected = activeStep === step.number;
+                const isLast = index === steps.length - 1;
 
-                <div className="min-w-0">
-                  <p className="text-xs font-bold text-brand-black">
-                    QR Produk Terverifikasi
-                  </p>
-                  <p className="mt-1 text-[10px] leading-4 text-muted-moss">
-                    Pindai QR untuk membuka identitas produk dan bukti digital
-                    yang tersimpan pada sistem MURI.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Separator className="bg-line-trace" />
-
-            <section aria-labelledby="traceability-progress-title">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
-                <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-moss">
-                    Status Verifikasi
-                  </p>
-                  <h3
-                    id="traceability-progress-title"
-                    className="mt-1 text-sm font-bold leading-5 text-brand-black"
+                return (
+                  <div
+                    key={step.number}
+                    role="listitem"
+                    className="relative pb-2 last:pb-0"
                   >
-                    Seluruh tahapan telah selesai
-                  </h3>
+                    {!isLast && (
+                      <span
+                        aria-hidden="true"
+                        className="absolute bottom-[-8px] left-4 top-8 w-px -translate-x-1/2 bg-brand-forest/30"
+                      />
+                    )}
+
+                    <button
+                      type="button"
+                      aria-pressed={isSelected}
+                      aria-current={isSelected ? "step" : undefined}
+                      onClick={() => setActiveStep(step.number)}
+                      className="group relative grid w-full grid-cols-[32px_minmax(0,1fr)] gap-3 text-left outline-none"
+                    >
+                      <span
+                        className={`
+                          relative z-10 flex size-8 items-center justify-center
+                          rounded-full border transition duration-200
+                          ${
+                            isSelected
+                              ? "border-brand-forest bg-brand-forest text-white ring-2 ring-brand-lime/40"
+                              : "border-brand-forest bg-brand-forest text-white"
+                          }
+                        `}
+                      >
+                        <Check className="size-3.5 stroke-[3]" />
+                      </span>
+
+                      <span
+                        className={`
+                          min-w-0 rounded-xl border p-3.5 transition duration-200
+                          ${
+                            isSelected
+                              ? "border-brand-forest bg-canvas-warm"
+                              : "border-line-trace bg-canvas-pure group-hover:border-brand-forest/35"
+                          }
+                        `}
+                      >
+                        <span className="flex items-start justify-between gap-2">
+                          <span className="min-w-0">
+                            <span className="block text-[10px] font-bold uppercase tracking-wide text-brand-emerald">
+                              {step.label}
+                            </span>
+
+                            <span className="mt-0.5 block truncate text-xs font-bold text-brand-black">
+                              {step.title}
+                            </span>
+                          </span>
+
+                          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-brand-lime/55 px-2 py-0.5 text-[8px] font-bold text-brand-forest">
+                            <CheckCircle2 className="size-2.5" />
+                            Verified
+                          </span>
+                        </span>
+
+                        <span className="mt-1 flex items-center gap-1 text-[10px] text-muted-moss">
+                          {step.number === 1 && (
+                            <MapPin className="size-3 shrink-0" />
+                          )}
+                          <span className="truncate">{step.meta}</span>
+                        </span>
+
+                        <span className="mt-1.5 block text-[10px] leading-relaxed text-muted-moss">
+                          {step.summary}
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Selected Step Detail Card */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-brand-emerald">
+                    Rincian Tahap
+                  </p>
+                  <p className="mt-0.5 text-xs font-bold text-brand-black">
+                    {selectedStep.label}
+                  </p>
                 </div>
 
-                <span className="inline-flex w-fit shrink-0 items-center rounded-full bg-brand-lime/55 px-3 py-1.5 text-[10px] font-bold text-brand-forest">
-                  3 dari 3 tahap
+                <span className="shrink-0 font-mono text-[9px] font-bold text-brand-forest">
+                  #{evidenceCode}
                 </span>
               </div>
 
-              <div className="mt-5" role="list" aria-label="Tahapan traceability produk">
-                {steps.map((step, index) => {
-                  const isSelected = activeStep === step.number;
-                  const isLast = index === steps.length - 1;
+              <p className="mt-2 text-[10px] leading-relaxed text-muted-moss">
+                {selectedStep.detail}
+              </p>
 
-                  return (
-                    <div
-                      key={step.number}
-                      role="listitem"
-                      className="relative pb-3 last:pb-0 sm:pb-4"
-                    >
-                      {!isLast && (
-                        <span
-                          aria-hidden="true"
-                          className="absolute bottom-[-12px] left-5 top-10 w-px -translate-x-1/2 bg-brand-forest/35 sm:bottom-[-16px] sm:left-6 sm:top-11"
-                        />
-                      )}
-
-                      <button
-                        type="button"
-                        aria-pressed={isSelected}
-                        aria-current={isSelected ? "step" : undefined}
-                        onClick={() => setActiveStep(step.number)}
-                        className="group relative grid w-full min-w-0 grid-cols-[40px_minmax(0,1fr)] gap-3 text-left outline-none sm:grid-cols-[48px_minmax(0,1fr)] sm:gap-4"
-                      >
-                        <span
-                          className={`
-                            relative z-10 flex size-10 items-center justify-center
-                            rounded-full border transition duration-200
-                            sm:size-12
-                            ${
-                              isSelected
-                                ? "border-brand-forest bg-brand-forest text-white ring-4 ring-brand-lime/35"
-                                : "border-brand-forest bg-brand-forest text-white group-hover:ring-4 group-hover:ring-brand-forest/10"
-                            }
-                          `}
-                        >
-                          <Check className="size-4 stroke-[3] sm:size-5" />
-                        </span>
-
-                        <span
-                          className={`
-                            min-w-0 rounded-xl border px-4 py-4 transition duration-200
-                            sm:px-5 sm:py-4.5
-                            ${
-                              isSelected
-                                ? "border-brand-forest bg-canvas-warm shadow-xs"
-                                : "border-line-trace bg-canvas-pure group-hover:border-brand-forest/35 group-hover:bg-canvas-warm/45"
-                            }
-                          `}
-                        >
-                          <span className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-                            <span className="min-w-0">
-                              <span className="block text-[10px] font-bold uppercase tracking-wide text-brand-emerald">
-                                {step.label}
-                              </span>
-
-                              <span className="mt-1.5 block break-words text-sm font-bold leading-5 text-brand-black">
-                                {step.title}
-                              </span>
-                            </span>
-
-                            <span className="inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full bg-brand-lime/55 px-2.5 py-1 text-[9px] font-bold text-brand-forest">
-                              <CheckCircle2 className="size-3" />
-                              Terverifikasi
-                            </span>
-                          </span>
-
-                          <span className="mt-2 flex min-w-0 items-start gap-1.5 text-[11px] leading-4 text-muted-moss">
-                            {step.number === 1 && (
-                              <MapPin className="mt-0.5 size-3.5 shrink-0" />
-                            )}
-                            <span className="min-w-0 break-words">{step.meta}</span>
-                          </span>
-
-                          <span className="mt-3 block break-words text-[11px] leading-5 text-muted-moss">
-                            {step.summary}
-                          </span>
-                        </span>
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-
-            <Card>
-              <CardContent className="p-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-brand-emerald">
-                      Rincian Tahap
-                    </p>
-                    <p className="mt-2 text-xs font-bold text-brand-black">
-                      {selectedStep.label}
-                    </p>
-                  </div>
-
-                  <span className="shrink-0 font-mono text-[9px] font-bold text-brand-forest">
-                    #{evidenceCode}
-                  </span>
+              {activeStep === 3 && (
+                <div className="mt-3.5 grid grid-cols-2 gap-2">
+                  <ImpactItem
+                    icon={Leaf}
+                    label="Karbon Dihemat"
+                    value={carbonSavedText}
+                  />
+                  <ImpactItem
+                    icon={Droplets}
+                    label="Air Dihemat"
+                    value={waterSavedText}
+                  />
                 </div>
-
-                <p className="mt-3 text-[10px] leading-5 text-muted-moss">
-                  {selectedStep.detail}
-                </p>
-
-                {activeStep === 3 && (
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                    <ImpactItem
-                      icon={Leaf}
-                      label="Karbon Dihemat"
-                      value={carbonSavedText}
-                    />
-                    <ImpactItem
-                      icon={Droplets}
-                      label="Air Dihemat"
-                      value={waterSavedText}
-                    />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
-
       </SheetContent>
     </Sheet>
   );
@@ -361,17 +357,17 @@ function IdentityCard({
 }) {
   return (
     <Card>
-      <CardContent className="flex items-center gap-3 p-4">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-lime/65 text-brand-forest">
-          <Icon className="size-4" strokeWidth={1.8} />
+      <CardContent className="flex items-center gap-2.5 p-3">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-lime/65 text-brand-forest">
+          <Icon className="size-3.5" strokeWidth={1.8} />
         </div>
 
         <div className="min-w-0">
-          <p className="text-[9px] uppercase tracking-wide text-muted-moss">
+          <p className="text-[8px] uppercase tracking-wide text-muted-moss">
             {label}
           </p>
           <p
-            className={`mt-1 truncate text-[11px] font-bold text-brand-black ${
+            className={`mt-0.5 truncate text-[10px] font-bold text-brand-black ${
               mono ? "font-mono" : ""
             }`}
             title={value}
@@ -394,12 +390,12 @@ function ImpactItem({
   value: string;
 }) {
   return (
-    <div className="rounded-xl bg-brand-lime/20 p-4">
-      <div className="flex items-center gap-2 text-brand-emerald">
-        <Icon className="size-4" strokeWidth={1.8} />
-        <p className="text-[9px] font-bold uppercase tracking-wide">{label}</p>
+    <div className="rounded-xl bg-brand-lime/20 p-3">
+      <div className="flex items-center gap-1.5 text-brand-emerald">
+        <Icon className="size-3.5" strokeWidth={1.8} />
+        <p className="text-[8px] font-bold uppercase tracking-wide">{label}</p>
       </div>
-      <p className="mt-2 text-xs font-bold text-brand-black">{value}</p>
+      <p className="mt-1 text-xs font-bold text-brand-black">{value}</p>
     </div>
   );
 }

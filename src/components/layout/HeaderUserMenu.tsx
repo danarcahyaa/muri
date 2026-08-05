@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Coins, LogOut } from "lucide-react";
+import { Coins, LogOut, ShoppingCart } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
+import { useCart } from "@/hooks/customer/useCart";
 
 interface HeaderUserMenuProps {
   isLoading: boolean;
@@ -37,6 +38,8 @@ export function HeaderUserMenu({
   isSigningOut,
   onSignOut,
 }: HeaderUserMenuProps) {
+  const { itemCount, openCart } = useCart();
+
   if (isLoading) {
     return <div className="h-12 w-44 animate-pulse rounded-md bg-brand-black/5" />;
   }
@@ -44,6 +47,25 @@ export function HeaderUserMenu({
   if (!user) {
     return (
       <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={openCart}
+          aria-label="Keranjang Belanja"
+          className="
+            relative flex size-10 items-center justify-center
+            rounded-full border border-brand-black/15
+            text-brand-black transition duration-200
+            hover:border-brand-emerald hover:text-brand-emerald
+          "
+        >
+          <ShoppingCart className="size-4" />
+          {itemCount > 0 && (
+            <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-brand-forest text-[10px] font-bold text-white">
+              {itemCount}
+            </span>
+          )}
+        </button>
+
         <Link
           href={loginHref}
           className="
@@ -83,15 +105,36 @@ export function HeaderUserMenu({
   }
 
   return (
-    <div ref={accountMenuRef} className="relative">
-      <div
+    <div className="flex items-center gap-3">
+      {/* Cart Button */}
+      <button
+        type="button"
+        onClick={openCart}
+        aria-label="Keranjang Belanja"
         className="
-          flex items-center
-          rounded-full border
-          border-brand-black/15
-          bg-canvas-pure p-1
+          relative flex size-10 items-center justify-center
+          rounded-full border border-brand-black/15 bg-canvas-pure
+          text-brand-black transition duration-200
+          hover:border-brand-emerald hover:text-brand-emerald
         "
       >
+        <ShoppingCart className="size-4.5" />
+        {itemCount > 0 && (
+          <span className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full bg-brand-forest text-[10px] font-bold text-white shadow-sm">
+            {itemCount}
+          </span>
+        )}
+      </button>
+
+      <div ref={accountMenuRef} className="relative">
+        <div
+          className="
+            flex items-center
+            rounded-full border
+            border-brand-black/15
+            bg-canvas-pure p-1
+          "
+        >
         {accountType === "customer" && (
           <div
             title={`${totalPoints} coin`}
@@ -225,6 +268,7 @@ export function HeaderUserMenu({
           </button>
         </div>
       )}
+    </div>
     </div>
   );
 }

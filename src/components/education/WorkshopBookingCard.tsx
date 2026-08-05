@@ -34,6 +34,13 @@ export default function WorkshopBookingCard({
     isSubmitting,
   } = useWorkshopBooking({ workshop, loginHref });
 
+  const isWorkshopStarted = new Date(workshop.heldAt).getTime() <= Date.now();
+  const isRegistrationClosed =
+    isWorkshopStarted ||
+    (feedback?.type === "error" &&
+      (feedback.message.includes("ditutup") ||
+        feedback.message.includes("dimulai")));
+
   return (
     <aside
       className="
@@ -128,6 +135,19 @@ export default function WorkshopBookingCard({
           <CheckCircle2 className="size-4" />
           Sudah Terdaftar
         </button>
+      ) : isRegistrationClosed ? (
+        <button
+          type="button"
+          disabled
+          className="
+      mt-7 flex w-full cursor-not-allowed
+      items-center justify-center rounded-sm
+      bg-muted-moss/25 px-6 py-4
+      text-xs font-bold text-muted-moss
+    "
+        >
+          Pendaftaran Ditutup
+        </button>
       ) : workshop.isFull ? (
         <button
           type="button"
@@ -191,7 +211,7 @@ export default function WorkshopBookingCard({
         </p>
       )}
 
-      {!feedback && !activeRegistration && !isCheckingRegistration && (
+      {!feedback && !activeRegistration && !isCheckingRegistration && !isRegistrationClosed && !workshop.isFull && (
         <p className="mt-4 text-center text-[10px] leading-relaxed text-muted-moss">
           Masuk atau buat akun untuk melanjutkan pendaftaran.
         </p>

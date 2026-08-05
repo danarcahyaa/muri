@@ -26,6 +26,12 @@ export default function WorkshopDetailContent({
   workshop,
   mapsUrl,
 }: WorkshopDetailContentProps) {
+  const effectiveMapsUrl =
+    mapsUrl ||
+    (workshop.location
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(workshop.location)}`
+      : null);
+
   return (
     <div className="min-w-0 space-y-8">
       <WorkshopVisual />
@@ -123,18 +129,18 @@ export default function WorkshopDetailContent({
                 sebelum workshop dimulai.
               </p>
 
-              {mapsUrl && (
+              {effectiveMapsUrl && (
                 <a
-                  href={mapsUrl}
+                  href={effectiveMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="
-                    mt-5 inline-flex items-center gap-2
+                    mt-4 inline-flex items-center gap-2
                     text-xs font-bold text-brand-emerald
                     transition-colors hover:text-brand-forest
                   "
                 >
-                  Buka Google Maps
+                  <span>Buka Lokasi di Google Maps</span>
                   <ExternalLink className="size-3.5" />
                 </a>
               )}

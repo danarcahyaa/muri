@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
+import { TableActionButton } from "@/components/ui/TableActionButton";
 import {
   Table,
   TableBody,
@@ -151,18 +152,15 @@ export function BrandMaterialPurchasesTable({
                       </span>
                     </TableCell>
 
-                    {/* Action: Icon-only button (NO text!) */}
+                    {/* Action: Standard TableActionButton */}
                     <TableCell className="py-4 pr-6 text-right sm:pr-8">
-                      <Button
-                        variant="outline"
-                        size="icon-sm"
+                      <TableActionButton
                         onClick={() => onSelectOrder(purchase)}
                         title="Lihat Detail Pesanan"
                         aria-label="Lihat Detail Pesanan"
-                        className="border-brand-black/15 text-brand-black hover:border-brand-forest hover:bg-canvas-warm rounded-sm cursor-pointer"
                       >
-                        <Eye className="size-3.5 text-brand-forest" />
-                      </Button>
+                        <Eye className="size-4 text-brand-forest" />
+                      </TableActionButton>
                     </TableCell>
                   </TableRow>
                 );

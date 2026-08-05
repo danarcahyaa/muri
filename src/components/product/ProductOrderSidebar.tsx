@@ -10,6 +10,7 @@ import type {
 import ProductTraceabilitySidebar from "./ProductTraceabilitySidebar";
 
 interface ProductOrderSidebarProps {
+  productId?: string;
   slug: string;
   productName: string;
 

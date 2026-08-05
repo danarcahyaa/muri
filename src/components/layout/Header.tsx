@@ -10,6 +10,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { HeaderDesktopNav } from "./HeaderDesktopNav";
 import { HeaderUserMenu } from "./HeaderUserMenu";
 import { HeaderMobileNav } from "./HeaderMobileNav";
+import { CartDrawer } from "@/components/cart/CartDrawer";
 
 export default function Header() {
   const pathname = usePathname();
@@ -227,6 +228,8 @@ export default function Header() {
         isSigningOut={isSigningOut}
         onSignOut={handleSignOut}
       />
+
+      <CartDrawer />
     </header>
   );
 }

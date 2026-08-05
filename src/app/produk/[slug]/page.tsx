@@ -102,6 +102,7 @@ export default async function ProductDetailPage({
             <ProductDetailContent product={product} />
 
             <ProductOrderSidebar
+              productId={product.id}
               slug={product.slug}
               productName={product.name}
               paymentOption={product.paymentOption}
