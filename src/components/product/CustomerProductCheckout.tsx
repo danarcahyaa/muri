@@ -43,7 +43,7 @@ export default function CustomerProductCheckout({
   const [checkout, setCheckout] = useState<CustomerCheckoutPreview | null>(null);
   const [step, setStep] = useState<CheckoutStep>("form");
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
-    useState<CustomerCheckoutPaymentMethod | null>(null);
+    useState<CustomerCheckoutPaymentMethod | null>("qris");
   const [receiverName, setReceiverName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [shippingAddress, setShippingAddress] = useState("");
@@ -55,10 +55,6 @@ export default function CustomerProductCheckout({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-
-  const checkoutPath = `/produk/${encodeURIComponent(
-    sku,
-  )}/checkout?quantity=${requestedQuantity}`;
 
   const loadCheckout = useCallback(async () => {
     setIsLoading(true);
@@ -73,10 +69,12 @@ export default function CustomerProductCheckout({
     if (!result.success || !result.data) {
       const errorCode = String(result.error ?? "");
 
-      if (errorCode.includes("UNAUTHENTICATED")) {
-        router.replace(
-          `/auth/login?redirect=${encodeURIComponent(checkoutPath)}`,
-        );
+      if (
+        errorCode === "PRODUCT_NOT_FOUND" ||
+        errorCode === "SKU_REQUIRED" ||
+        errorCode === "QUANTITY_MUST_BE_GREATER_THAN_ZERO"
+      ) {
+        router.replace("/404");
         return;
       }
 
@@ -85,16 +83,13 @@ export default function CustomerProductCheckout({
       return;
     }
 
-    const data = result.data;
-
-    setCheckout(data);
-    setReceiverName(data.profile.fullName);
-    setPhoneNumber(data.profile.phoneNumber ?? "");
-    setShippingAddress(data.profile.shippingAddress ?? "");
-    setSelectedPaymentMethod(data.availablePaymentMethods[0] ?? null);
-    setStep("form");
+    setCheckout(result.data);
+    setReceiverName(result.data.profile.fullName || "");
+    setPhoneNumber(result.data.profile.phoneNumber || "");
+    setShippingAddress(result.data.profile.shippingAddress || "");
+    setSelectedPaymentMethod(result.data.availablePaymentMethods[0] ?? "qris");
     setIsLoading(false);
-  }, [checkoutPath, requestedQuantity, router, sku]);
+  }, [requestedQuantity, router, sku]);
 
   useEffect(() => {
     void loadCheckout();

@@ -16,6 +16,8 @@ import {
   normalizeBatchId,
   type TraceabilityRecord,
 } from "@/data/traceability";
+import { getCustomerTraceabilityData } from "@/services/customer";
+import type { CustomerTraceabilityStep } from "@/services/customer/traceabilityService";
 
 type TraceStatus = "idle" | "processing" | "success" | "not-found";
 
@@ -49,7 +51,7 @@ export default function TraceabilitySection() {
     setStatus("idle");
   }
 
-  function handleTrace() {
+  async function handleTrace() {
     const normalizedBatch = normalizeBatchId(batchId);
 
     if (!normalizedBatch || status === "processing") {
@@ -60,21 +62,69 @@ export default function TraceabilitySection() {
       clearTimeout(processingTimeoutRef.current);
     }
 
-    const record = findTraceabilityRecord(normalizedBatch);
-
     setBatchId(normalizedBatch);
     setTrackedRecord(null);
     setStatus("processing");
 
-    processingTimeoutRef.current = setTimeout(() => {
-      if (!record) {
-        setStatus("not-found");
+    try {
+      const res = await getCustomerTraceabilityData({
+        sku: normalizedBatch,
+        productionId: normalizedBatch,
+      });
+
+      if (res.success && res.data) {
+        const supabaseData = res.data;
+        const convertedRecord: TraceabilityRecord = {
+          batchId: supabaseData.productionId || normalizedBatch,
+          product: {
+            name: supabaseData.productName,
+            image: "/product.png",
+            alt: supabaseData.productName,
+          },
+          resultTitle: `Paspor Sirkular: ${supabaseData.productName}`,
+          resultDescription: `Hasil verifikasi alur rantai pasok dari ${supabaseData.brandName} tersimpan secara sah di basis data Supabase MURI.`,
+          timeline: supabaseData.steps.map((step: CustomerTraceabilityStep) => ({
+            number: `0${step.number}`,
+            date: "Terverifikasi",
+            place: step.title,
+            description: `${step.summary} ${step.detail}`,
+          })),
+          impacts: [
+            {
+              target: supabaseData.carbonSavedKg,
+              suffix: " kg",
+              label: "Karbon CO₂e Diselamatkan",
+            },
+            {
+              target: supabaseData.waterSavedLiter,
+              suffix: " liter",
+              label: "Penghematan Air Bersih",
+            },
+          ],
+        };
+
+        setTrackedRecord(convertedRecord);
+        setStatus("success");
         return;
       }
 
-      setTrackedRecord(record);
-      setStatus("success");
-    }, 1400);
+      // Fallback to local demo records if not found in DB
+      const localRecord = findTraceabilityRecord(normalizedBatch);
+      if (localRecord) {
+        setTrackedRecord(localRecord);
+        setStatus("success");
+      } else {
+        setStatus("not-found");
+      }
+    } catch {
+      const localRecord = findTraceabilityRecord(normalizedBatch);
+      if (localRecord) {
+        setTrackedRecord(localRecord);
+        setStatus("success");
+      } else {
+        setStatus("not-found");
+      }
+    }
   }
 
   useEffect(() => {

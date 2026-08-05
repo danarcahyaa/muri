@@ -21,6 +21,8 @@ import {
 import { Input } from "@/components/ui/Input";
 import { LocationPicker, type AddressJSONB } from "@/components/shared/LocationPicker";
 import { formatCoin, formatIdr } from "@/lib/productDetail";
+import { addressJSONBToString, stringToAddressJSONB } from "@/lib/addressUtils";
+import { LocationPicker, type AddressJSONB } from "@/components/shared/LocationPicker";
 import type {
   CustomerCheckoutPaymentMethod,
   CustomerCheckoutPreview,
@@ -122,13 +124,15 @@ export default function ProductCheckoutForm({
 
         <div className="pt-2">
           <LocationPicker
-            value={locationValue}
-            onChange={handleLocationChange}
+            value={stringToAddressJSONB(shippingAddress)}
+            onChange={(newLocation) => {
+              onShippingAddressChange(addressJSONBToString(newLocation));
+            }}
             label="Cari Tujuan Pengiriman"
             detailLabel="Detail Alamat Lengkap & Catatan Pengiriman"
-            placeholder="Ketik wilayah/kota (misal: Denpasar Timur)..."
-            detailPlaceholder="Jl. Sukajadi No. 120, Kontak Penerima (0812345678)..."
-            required
+            placeholder="Ketik wilayah/kota (misal: Denpasar Barat, Bali)..."
+            detailPlaceholder="Jl. Imam Bonjol No. 45, Samping Apotek, Kontak Penerima (08123456789)..."
+            required={true}
           />
         </div>
       </FieldGroup>

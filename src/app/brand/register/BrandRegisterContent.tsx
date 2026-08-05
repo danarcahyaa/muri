@@ -38,12 +38,7 @@ export default function BrandRegisterContent() {
   const [email, setEmail] = useState("");
   const [activeNumber, setActiveNumber] = useState("");
   const [password, setPassword] = useState("");
-  const [links, setLinks] = useState<BrandLink[]>([
-    {
-      label: "",
-      url: "",
-    },
-  ]);
+  const [links, setLinks] = useState<BrandLink[]>([]);
   const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -85,13 +80,9 @@ export default function BrandRegisterContent() {
   };
 
   const handleRemoveLink = (index: number) => {
-    setLinks((currentLinks) => {
-      if (currentLinks.length <= 1) {
-        return currentLinks;
-      }
-
-      return currentLinks.filter((_, currentIndex) => currentIndex !== index);
-    });
+    setLinks((currentLinks) =>
+      currentLinks.filter((_, currentIndex) => currentIndex !== index),
+    );
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -134,15 +125,12 @@ export default function BrandRegisterContent() {
       return;
     }
 
-    const hasEmptyLink = links.some(
-      (link) => !link.label.trim() || !link.url.trim(),
-    );
-
-    if (hasEmptyLink) {
-      setError("Harap lengkapi semua label dan URL link pendukung.");
-      setIsLoading(false);
-      return;
-    }
+    const validLinks = links
+      .filter((link) => link.label.trim() && link.url.trim())
+      .map((link) => ({
+        label: link.label.trim(),
+        url: link.url.trim(),
+      }));
 
     try {
       const response = await registerBrand({
@@ -150,10 +138,7 @@ export default function BrandRegisterContent() {
         email: normalizedEmail,
         activeNumber: normalizedActiveNumber,
         password,
-        socialMediaLinks: links.map((link) => ({
-          label: link.label.trim(),
-          url: link.url.trim(),
-        })),
+        socialMediaLinks: validLinks,
         shortStory: description.trim() || undefined,
       });
 
@@ -349,55 +334,56 @@ export default function BrandRegisterContent() {
               />
             </div>
 
-            {/* Links */}
+            {/* Links (Opsional) */}
             <div className="space-y-4 pt-1">
               <div>
                 <p className="text-xs font-bold text-brand-black">
-                  Link Media Sosial / Portofolio / Web
+                  Link Media Sosial / Portofolio / Web{" "}
+                  <span className="font-normal text-muted-moss/70">
+                    (Opsional)
+                  </span>
                 </p>
 
                 <p className="mt-1 text-[11px] leading-relaxed text-muted-moss">
-                  Tambahkan website atau media sosial utama brand Anda.
+                  Tambahkan website atau media sosial utama brand Anda (opsional).
                 </p>
               </div>
 
-              <div className="space-y-3">
-                {links.map((link, index) => (
-                  <div
-                    key={index}
-                    className="space-y-2 rounded-sm border border-brand-black/15 bg-canvas-warm/30 p-3"
-                  >
-                    <Input
-                      type="text"
-                      variant="auth"
-                      size="auth"
-                      placeholder="Platform, contoh: Instagram"
-                      value={link.label}
-                      onChange={(event) =>
-                        handleLinkChange(index, "label", event.target.value)
-                      }
-                      required
-                      disabled={isLoading}
-                      endIcon={<Globe2 strokeWidth={1.7} />}
-                    />
-
-                    <div className="flex items-center gap-2">
+              {links.length > 0 && (
+                <div className="space-y-3">
+                  {links.map((link, index) => (
+                    <div
+                      key={index}
+                      className="space-y-2 rounded-sm border border-brand-black/15 bg-canvas-warm/30 p-3"
+                    >
                       <Input
-                        type="url"
+                        type="text"
                         variant="auth"
                         size="auth"
-                        inputMode="url"
-                        placeholder="https://..."
-                        value={link.url}
+                        placeholder="Platform, contoh: Instagram"
+                        value={link.label}
                         onChange={(event) =>
-                          handleLinkChange(index, "url", event.target.value)
+                          handleLinkChange(index, "label", event.target.value)
                         }
-                        required
                         disabled={isLoading}
-                        endIcon={<Link2 strokeWidth={1.7} />}
+                        endIcon={<Globe2 strokeWidth={1.7} />}
                       />
 
-                      {links.length > 1 && (
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="url"
+                          variant="auth"
+                          size="auth"
+                          inputMode="url"
+                          placeholder="https://..."
+                          value={link.url}
+                          onChange={(event) =>
+                            handleLinkChange(index, "url", event.target.value)
+                          }
+                          disabled={isLoading}
+                          endIcon={<Link2 strokeWidth={1.7} />}
+                        />
+
                         <Button
                           type="button"
                           variant="ghost"
@@ -415,11 +401,11 @@ export default function BrandRegisterContent() {
                         >
                           <Trash2 className="size-4" />
                         </Button>
-                      )}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
               <Button
                 type="button"
@@ -430,7 +416,7 @@ export default function BrandRegisterContent() {
                 className="w-full border-dashed text-muted-moss hover:text-brand-emerald"
               >
                 <Plus className="size-4" />
-                <span>Tambah Link</span>
+                <span>Tambah Link (Opsional)</span>
               </Button>
             </div>
 

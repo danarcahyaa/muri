@@ -25,6 +25,8 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { LocationPicker, type AddressJSONB } from "@/components/shared/LocationPicker";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { LocationPicker } from "@/components/shared/LocationPicker";
+import { addressJSONBToString, stringToAddressJSONB } from "@/lib/addressUtils";
 import {
   getCustomerDashboardSummary,
 } from "@/services/customer/dashboardService";
@@ -335,12 +337,14 @@ export default function CustomerProfileSection() {
             {/* Default Shipping Address */}
             <div className="pt-1">
               <LocationPicker
-                value={locationValue}
-                onChange={handleLocationChange}
-                label="Cari Tujuan Pengiriman Utama"
+                value={stringToAddressJSONB(shippingAddress)}
+                onChange={(newLocation) => {
+                  setShippingAddress(addressJSONBToString(newLocation));
+                }}
+                label="Cari Alamat Pengiriman Utama"
                 detailLabel="Detail Alamat Lengkap & Catatan Pengiriman"
-                placeholder="Ketik wilayah/kota (misal: Denpasar Timur)..."
-                detailPlaceholder="Jl. Sukajadi No. 120, Kontak Penerima (0812345678)..."
+                placeholder="Ketik wilayah/kota (misal: Denpasar Barat, Bali)..."
+                detailPlaceholder="Jl. Imam Bonjol No. 45, Samping Apotek, Kontak PJ (08123456789)..."
                 disabled={isSaving}
                 required={false}
               />
