@@ -9,6 +9,7 @@ interface SupabaseLikeError {
   status?: number;
   statusCode?: number;
   message?: string;
+  details?: string;
   code?: string;
 }
 
@@ -26,11 +27,11 @@ export function translateSupabaseError(error: unknown): string {
   const message = errObj.message || "";
   const code = errObj.code || "";
 
-  // Handle Postgres Database Errors (PostgrestError)
   if (code && typeof code === "string" && !isNaN(Number(code))) {
     switch (code) {
-      case "23505": // unique_violation
-        return "Data sudah terdaftar di dalam sistem.";
+      case "23505": {
+        return "Email atau nomer telephone sudah terdaftar";
+      }
       case "23503": // foreign_key_violation
         return "Data referensi tidak ditemukan atau tidak valid.";
       case "23502": // not_null_violation
@@ -49,10 +50,10 @@ export function translateSupabaseError(error: unknown): string {
     return "Email atau kata sandi Anda salah.";
   }
   if (msgLower.includes("already registered") || msgLower.includes("email already in use") || msgLower.includes("email_taken")) {
-    return "Email sudah terdaftar. Silakan gunakan email lain atau langsung masuk.";
+    return "Email atau nomer telephone sudah terdaftar";
   }
   if (msgLower.includes("user already exists") || msgLower.includes("user_already_exists")) {
-    return "Pengguna dengan identitas ini sudah terdaftar.";
+    return "Email atau nomer telephone sudah terdaftar";
   }
   if (msgLower.includes("email not confirmed") || msgLower.includes("email_not_confirmed")) {
     return "Email Anda belum dikonfirmasi. Silakan periksa kotak masuk email Anda.";

@@ -25,6 +25,20 @@ export async function registerBrand(
   }
 
   try {
+    // Check if phone number is already registered in brands table
+    const { data: existingPhone } = await supabase
+      .from("brands")
+      .select("id")
+      .eq("active_number", activeNumber.trim())
+      .maybeSingle();
+
+    if (existingPhone) {
+      return {
+        success: false,
+        error: "Email atau nomer telephone sudah terdaftar",
+      };
+    }
+
     // Sign up the user in Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: email.trim(),
@@ -49,6 +63,13 @@ export async function registerBrand(
       return {
         success: false,
         error: "Gagal membuat sesi autentikasi brand baru.",
+      };
+    }
+
+    if (authUser.identities && authUser.identities.length === 0) {
+      return {
+        success: false,
+        error: "Email atau nomer telephone sudah terdaftar",
       };
     }
 

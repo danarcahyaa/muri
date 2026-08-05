@@ -24,6 +24,20 @@ export async function registerWasteProvider(
   }
 
   try {
+    // Check if phone number is already registered in waste_providers table
+    const { data: existingPhone } = await supabase
+      .from("waste_providers")
+      .select("id")
+      .eq("active_number", activeNumber.trim())
+      .maybeSingle();
+
+    if (existingPhone) {
+      return {
+        success: false,
+        error: "Email atau nomer telephone sudah terdaftar",
+      };
+    }
+
     // Sign up the user in Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: email.trim(),
@@ -48,6 +62,13 @@ export async function registerWasteProvider(
       return {
         success: false,
         error: "Gagal membuat sesi autentikasi penyedia limbah baru.",
+      };
+    }
+
+    if (authUser.identities && authUser.identities.length === 0) {
+      return {
+        success: false,
+        error: "Email atau nomer telephone sudah terdaftar",
       };
     }
 

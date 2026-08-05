@@ -59,6 +59,13 @@ export async function signUpWithEmail(input: AuthInput): Promise<AuthResponse> {
       };
     }
 
+    if (authUser.identities && authUser.identities.length === 0) {
+      return {
+        success: false,
+        error: "Email atau nomer telephone sudah terdaftar",
+      };
+    }
+
     const { error: profileError } = await supabase.from("users").insert({
       id: authUser.id,
       full_name: normalizedName,
