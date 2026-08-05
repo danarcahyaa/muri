@@ -42,33 +42,44 @@ export default function ProductCard({ product }: ProductCardProps) {
         "
         aria-label={`Lihat ${product.name}`}
       >
-        <div
-          aria-hidden="true"
-          className="
-            absolute -right-12 -top-12
-            size-40 rounded-full
-            border border-brand-emerald/10
-          "
-        />
+        {product.imageUrl ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            className="size-full object-cover transition duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <>
+            <div
+              aria-hidden="true"
+              className="
+                absolute -right-12 -top-12
+                size-40 rounded-full
+                border border-brand-emerald/10
+              "
+            />
 
-        <div
-          aria-hidden="true"
-          className="
-            absolute -bottom-16 -left-10
-            size-44 rounded-full
-            border border-brand-emerald/10
-          "
-        />
+            <div
+              aria-hidden="true"
+              className="
+                absolute -bottom-16 -left-10
+                size-44 rounded-full
+                border border-brand-emerald/10
+              "
+            />
 
-        <Shirt
-          className="
-            relative z-10 size-20
-            text-brand-forest/75
-            transition duration-500
-            group-hover:scale-105
-          "
-          strokeWidth={1.25}
-        />
+            <Shirt
+              className="
+                relative z-10 size-20
+                text-brand-forest/75
+                transition duration-500
+                group-hover:scale-105
+              "
+              strokeWidth={1.25}
+            />
+          </>
+        )}
       </Link>
 
       <div

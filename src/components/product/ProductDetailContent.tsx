@@ -26,6 +26,7 @@ export default function ProductDetailContent({
         brandName={product.brand.name}
         categoryName={product.categoryName}
         bonusText={bonusText}
+        imageUrl={product.imageUrl}
       />
 
       <DetailCard

@@ -6,33 +6,34 @@ const IS_UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]
 /**
  * Resolves a dynamic product image based on DB media URL or matching product category & name.
  */
-function resolveProductImage(name: string, sku: string, mediaUrl?: string | null): string {
-  if (mediaUrl && mediaUrl !== "/product.png") {
-    return mediaUrl;
+export function resolveProductImage(name: string, sku: string, mediaUrl?: string | null): string {
+  if (mediaUrl && mediaUrl.trim() !== "" && mediaUrl !== "/product.png") {
+    return mediaUrl.trim();
   }
 
   const text = `${sku} ${name}`.toLowerCase();
 
-  if (text.includes("pouch") || text.includes("dompet") || text.includes("dry-fit")) {
-    return "/products/recycled-textile-pouch.png";
-  }
-  if (text.includes("bag") || text.includes("tote") || text.includes("canvas")) {
-    return "/products/natural-canvas-bag.png";
-  }
   if (text.includes("blouse") || text.includes("atasan") || text.includes("floral")) {
     return "/products/floral-upcycled-blouse.png";
   }
-  if (text.includes("jacket") || text.includes("jaket") || text.includes("outer")) {
-    return "/products/patchwork-denim-jacket.png";
-  }
-  if (text.includes("pants") || text.includes("cargo") || text.includes("bawahan")) {
-    return "/products/upcycled-cargo-pants.png";
-  }
-  if (text.includes("shirt") || text.includes("kemeja")) {
+  if (text.includes("shirt") || text.includes("kemeja") || text.includes("katun") || text.includes("denim") || text.includes("kaos")) {
     return "/products/upcycled-denim-shirt.png";
   }
+  if (
+    text.includes("bag") ||
+    text.includes("tote") ||
+    text.includes("canvas") ||
+    text.includes("pouch") ||
+    text.includes("dompet") ||
+    text.includes("dry-fit") ||
+    text.includes("bantal") ||
+    text.includes("linen") ||
+    text.includes("patchwork")
+  ) {
+    return "/products/natural-canvas-bag.png";
+  }
 
-  return "/products/recycled-textile-pouch.png";
+  return "/products/natural-canvas-bag.png";
 }
 
 /**
@@ -58,6 +59,7 @@ export async function fetchTraceabilityRecordFromDb(
         production_id,
         product_name,
         description,
+        image_url,
         carbon_saved_kg,
         water_saved_liter,
         created_at,
@@ -98,9 +100,12 @@ export async function fetchTraceabilityRecordFromDb(
           })
         : "05 Agustus 2026";
 
-      // Query media URL if present in waste_post_media
-      let mediaUrl: string | null = null;
-      if (prodData.production_id) {
+      // Query media URL if present in products table or waste_post_media
+      let mediaUrl: string | null = (prodData as Record<string, unknown>).image_url
+        ? String((prodData as Record<string, unknown>).image_url)
+        : null;
+
+      if (!mediaUrl && prodData.production_id) {
         const { data: mediaData } = await supabase
           .from("waste_post_media")
           .select("media_url")

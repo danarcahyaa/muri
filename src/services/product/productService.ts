@@ -8,6 +8,7 @@ import type {
   ProductCatalogItem,
   ProductDetailItem,
 } from "@/types/product";
+import { resolveProductImage } from "@/services/product/traceabilityService";
 
 /**
  * Query katalog dibuat sengaja ringkas.
@@ -18,6 +19,7 @@ const PRODUCT_CATALOG_SELECT = `
   product_name,
   sku,
   description,
+  image_url,
   payment_option,
   price_idr,
   created_at,
@@ -105,6 +107,13 @@ function mapProductCatalogItem(
 
     name,
     description: normalizeOptionalText(row.description),
+    imageUrl: resolveProductImage(
+      row.product_name,
+      row.sku,
+      (row as Record<string, unknown>).image_url
+        ? String((row as Record<string, unknown>).image_url)
+        : null
+    ),
 
     paymentOption: row.payment_option,
 
@@ -136,6 +145,7 @@ const PRODUCT_DETAIL_SELECT = `
   product_name,
   sku,
   description,
+  image_url,
   payment_option,
   price_idr,
   stock,
@@ -203,14 +213,14 @@ export async function getProductBySku(
       };
     }
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from("products")
       .select(PRODUCT_DETAIL_SELECT)
       .eq("sku", normalizedSku)
-      .eq("status", "published")
       .maybeSingle();
 
     if (error) {
+      console.error("[getProductBySku] Supabase error:", error);
       return {
         success: false,
         error: translateSupabaseError(error),
@@ -294,6 +304,13 @@ function mapProductDetail(
     name,
     descriptionHtml: normalizeOptionalText(row.description),
     detailHtml: row.detail?.trim() || "",
+    imageUrl: resolveProductImage(
+      row.product_name,
+      row.sku,
+      (row as Record<string, unknown>).image_url
+        ? String((row as Record<string, unknown>).image_url)
+        : null
+    ),
 
     paymentOption: row.payment_option,
 

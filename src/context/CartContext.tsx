@@ -46,7 +46,7 @@ interface CartProviderProps {
 }
 
 export function CartProvider({ children }: CartProviderProps) {
-  const { user } = useAuth();
+  const { user, accountType } = useAuth();
   const [cart, setCart] = useState<Cart | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
@@ -86,6 +86,15 @@ export function CartProvider({ children }: CartProviderProps) {
     async (productId: string, quantity = 1): Promise<boolean> => {
       if (!user) {
         toast.error("Silakan masuk terlebih dahulu untuk menambahkan produk ke keranjang.");
+        return false;
+      }
+
+      if (accountType === "brand" || accountType === "waste_provider") {
+        toast.error(
+          `Akun ${
+            accountType === "brand" ? "Brand" : "Waste Provider"
+          } tidak dapat membeli produk retail. Silakan gunakan akun Konsumen.`,
+        );
         return false;
       }
 

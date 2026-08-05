@@ -418,14 +418,14 @@ function TracingDoneState({ record }: { record: TraceabilityRecord }) {
   return (
     <div className="mt-10 animate-in fade-in slide-in-from-bottom-2 duration-500 space-y-6">
       {/* Scannable QR Passport Banner */}
-      <div className="rounded-2xl border border-white/15 bg-black/30 p-5 sm:p-6 backdrop-blur-md transition-all">
-        <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-4 min-w-0">
-            {/* Un-cropped QR container with rounded-lg and p-2.5 bg-white so corners are 100% visible */}
+      <div className="rounded-2xl border border-white/15 bg-black/30 p-4 sm:p-6 backdrop-blur-md transition-all">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3.5 min-w-0">
+            {/* Un-cropped QR container */}
             <button
               type="button"
               onClick={() => setModalOpen(true)}
-              className="group relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border-2 border-brand-lime bg-white p-2.5 shadow-md transition-all duration-200 hover:scale-110 hover:shadow-xl focus:outline-none"
+              className="group relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border-2 border-brand-lime bg-white p-2 shadow-md transition-all duration-200 hover:scale-105 cursor-pointer focus:outline-none"
               title="Klik untuk memperbesar QR Code"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -439,34 +439,35 @@ function TracingDoneState({ record }: { record: TraceabilityRecord }) {
               </span>
             </button>
 
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1 space-y-1">
               <div className="flex items-center gap-2 text-brand-lime">
-                <QrCode className="size-3.5" strokeWidth={2.2} />
+                <QrCode className="size-3.5 shrink-0" strokeWidth={2.2} />
                 <span className="text-[10px] font-bold uppercase tracking-wider">
                   QR Traceability HP
                 </span>
               </div>
-              <h4 className="mt-0.5 font-display text-lg font-medium text-white">
+              <h4 className="font-display text-base sm:text-lg font-medium text-white">
                 Scan via HP Anda
               </h4>
-              <p className="mt-1 text-xs leading-relaxed text-white/70 max-w-md">
-                Pindai QR code ini dengan kamera HP untuk langsung membuka paspor digital dan penelusuran batch <span className="font-mono font-bold text-brand-lime">#{record.batchId}</span>.{" "}
+              <p className="text-xs leading-relaxed text-white/70">
+                Pindai via kamera HP untuk membuka paspor digital batch{" "}
+                <span className="font-mono font-bold text-brand-lime">#{record.batchId}</span>.{" "}
                 <button
                   type="button"
                   onClick={() => setModalOpen(true)}
-                  className="text-brand-lime hover:underline font-semibold"
+                  className="text-brand-lime hover:underline font-semibold inline-block"
                 >
-                  (Klik QR untuk memperbesar)
+                  (Klik perbesar)
                 </button>
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 shrink-0">
+          <div className="flex items-center gap-2.5 shrink-0 pt-1 md:pt-0">
             <button
               type="button"
               onClick={handleCopy}
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl border border-white/20 bg-white/5 px-3.5 py-2.5 text-xs font-semibold text-white transition hover:bg-white/15"
+              className="inline-flex w-full md:w-auto items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-white/20 cursor-pointer"
             >
               {copied ? (
                 <>

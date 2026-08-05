@@ -20,6 +20,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import { BackLink } from "@/components/ui/BackLink";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { createMaterialOrder, getMaterialBatchByCode } from "@/services/material";
 import { supabase } from "@/lib/supabaseClient";
 import type { MaterialDetailItem } from "@/types/material";
@@ -37,12 +38,13 @@ export default function BrandMaterialCheckout({
   requestedWeightKg,
 }: BrandMaterialCheckoutProps) {
   const router = useRouter();
+  const { accountType } = useAuth();
+  const isNonBrand = accountType !== "brand";
 
   const [material, setMaterial] = useState<MaterialDetailItem | null>(null);
   const [step, setStep] = useState<CheckoutStep>("form");
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [isCustomer, setIsCustomer] = useState(false);
 
   const [weightKg, setWeightKg] = useState(requestedWeightKg);
   const [receiverName, setReceiverName] = useState("");
@@ -62,7 +64,6 @@ export default function BrandMaterialCheckout({
     setIsLoading(true);
     setLoadError(null);
     setFieldErrors({});
-    setIsCustomer(false);
 
     try {
       const { data: authData } = await supabase.auth.getUser();
@@ -74,9 +75,7 @@ export default function BrandMaterialCheckout({
           .eq("id", authData.user.id)
           .maybeSingle();
 
-        if (!brandData) {
-          setIsCustomer(true);
-        } else {
+        if (brandData) {
           const defaultName =
             brandData.brand_name ||
             authData.user.user_metadata?.full_name ||
@@ -261,7 +260,7 @@ export default function BrandMaterialCheckout({
     );
   }
 
-  if (isCustomer) {
+  if (isNonBrand) {
     return (
       <Card className="mx-auto max-w-xl rounded-2xl">
         <CardContent className="p-8 text-center">
@@ -274,9 +273,7 @@ export default function BrandMaterialCheckout({
           <Alert className="mt-5 border-amber-200 bg-amber-50 text-left text-amber-900">
             <AlertTitle>Akses checkout dibatasi</AlertTitle>
             <AlertDescription>
-              Pembelian material dari Waste Provider hanya diperuntukkan bagi
-              akun Brand Fashion. Akun Customer tetap dapat membeli produk
-              sirkular dan mendaftar workshop.
+              Pembelian material sisa kain dari Waste Provider hanya diperuntukkan bagi akun Brand Fashion sirkular. Akun {accountType === "waste_provider" ? "Waste Provider" : "Konsumen"} Anda tidak dapat membeli material mentah.
             </AlertDescription>
           </Alert>
 

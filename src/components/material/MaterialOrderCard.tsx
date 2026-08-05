@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Leaf, Minus, Plus, ShieldAlert } from "lucide-react";
 
 import { useMaterialOrder } from "@/hooks/material/useMaterialOrder";
-import { supabase } from "@/lib/supabaseClient";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 interface MaterialOrderCardProps {
   slug: string;
@@ -28,29 +28,8 @@ export default function MaterialOrderCard({
   minimumOrderKg,
   orderStepKg,
 }: MaterialOrderCardProps) {
-  const [isCustomer, setIsCustomer] = useState(false);
-
-  useEffect(() => {
-    async function checkRole() {
-      try {
-        const { data: authData } = await supabase.auth.getUser();
-        if (authData.user) {
-          const { data: brandData } = await supabase
-            .from("brands")
-            .select("id")
-            .eq("id", authData.user.id)
-            .maybeSingle();
-
-          if (!brandData) {
-            setIsCustomer(true);
-          }
-        }
-      } catch {
-        // Continue
-      }
-    }
-    void checkRole();
-  }, []);
+  const { accountType } = useAuth();
+  const isNonBrand = accountType !== "brand";
 
   const {
     quantity,
@@ -70,7 +49,7 @@ export default function MaterialOrderCard({
     orderStepKg,
   });
 
-  if (isCustomer) {
+  if (isNonBrand) {
     return (
       <aside className="rounded-2xl border border-amber-200 bg-amber-50 p-6 sm:p-7 text-center font-body">
         <div className="flex items-center justify-center gap-2 text-xs font-bold text-amber-800 uppercase tracking-tight">
@@ -78,7 +57,7 @@ export default function MaterialOrderCard({
           <span>Sourcing Material Sirkular</span>
         </div>
         <p className="mt-3 text-xs leading-relaxed text-amber-900/80">
-          Katalog material sisa kain ini disediakan khusus untuk produsen & Brand Fashion sirkular. Akun Customer Anda dapat digunakan untuk berbelanja produk sirkular dan mendaftar workshop.
+          Katalog material sisa kain ini disediakan khusus untuk produsen &amp; Brand Fashion sirkular. Akun {accountType === "waste_provider" ? "Waste Provider" : "Konsumen"} Anda tidak dapat membeli material mentah.
         </p>
         <Link
           href="/brand/register"

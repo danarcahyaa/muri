@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   Gift,
+  Info,
   LoaderCircle,
   Minus,
   Plus,
@@ -13,6 +14,7 @@ import {
   ShoppingCart,
 } from "lucide-react";
 
+import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/Button";
 import { useCart } from "@/hooks/customer/useCart";
 import { useProductOrder } from "@/hooks/product/useProductOrder";
@@ -47,6 +49,9 @@ export default function ProductOrderCard({
   bonusCoinCost,
   onOpenTraceability,
 }: ProductOrderCardProps) {
+  const { accountType } = useAuth();
+  const isNonCustomer = accountType === "brand" || accountType === "waste_provider";
+
   const {
     user,
     isAuthLoading,
@@ -190,7 +195,22 @@ export default function ProductOrderCard({
         </div>
       )}
 
-      {isSoldOut ? (
+      {isNonCustomer ? (
+        <div className="mt-7 space-y-3">
+          <div className="rounded-xl border border-brand-forest/20 bg-brand-forest/[0.04] p-4 text-xs">
+            <div className="flex items-start gap-2.5 text-brand-forest">
+              <Info className="mt-0.5 size-4 shrink-0" />
+              <p className="leading-relaxed font-semibold">
+                Akun {accountType === "brand" ? "Brand" : "Waste Provider"} ditujukan untuk pengolahan & pasokan material sirkular. Pembelian produk retail hanya tersedia untuk akun Konsumen.
+              </p>
+            </div>
+          </div>
+
+          <DisabledCheckoutButton>
+            Khusus Akun Konsumen
+          </DisabledCheckoutButton>
+        </div>
+      ) : isSoldOut ? (
         <DisabledCheckoutButton>Stok Habis</DisabledCheckoutButton>
       ) : (
         <div className="mt-7 flex flex-col gap-2.5">

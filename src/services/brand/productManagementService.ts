@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabaseClient";
 import { translateSupabaseError } from "@/lib/supabaseError";
 import type { BaseResponse } from "@/types/common";
+import { resolveProductImage } from "@/services/product/traceabilityService";
 
 export interface BrandProductItem {
   id: string;
@@ -13,6 +14,7 @@ export interface BrandProductItem {
   status: "published" | "draft" | string;
   description: string | null;
   productionId?: string | null;
+  imageUrl?: string | null;
   createdAt: string | null;
 }
 
@@ -26,6 +28,7 @@ export interface SaveBrandProductInput {
   description?: string;
   status: "published" | "draft";
   productionId?: string;
+  imageUrl?: string;
 }
 
 /**
@@ -59,6 +62,7 @@ export async function getMyBrandProducts(): Promise<
         status,
         description,
         production_id,
+        image_url,
         created_at,
         product_categories (
           id,
@@ -92,6 +96,13 @@ export async function getMyBrandProducts(): Promise<
         productionId: (row as Record<string, unknown>).production_id
           ? String((row as Record<string, unknown>).production_id)
           : null,
+        imageUrl: resolveProductImage(
+          row.product_name,
+          row.sku,
+          (row as Record<string, unknown>).image_url
+            ? String((row as Record<string, unknown>).image_url)
+            : null
+        ),
         createdAt: row.created_at ?? null,
       };
     });
@@ -176,6 +187,7 @@ export async function saveBrandProduct(
           description: input.description?.trim() || null,
           status: input.status,
           production_id: input.productionId ?? "",
+          image_url: input.imageUrl?.trim() || null,
           updated_at: new Date().toISOString(),
         })
         .eq("id", input.productId)
@@ -189,6 +201,7 @@ export async function saveBrandProduct(
           status,
           description,
           production_id,
+          image_url,
           created_at,
           product_categories (
             id,
@@ -223,6 +236,9 @@ export async function saveBrandProduct(
           productionId: (data as Record<string, unknown>).production_id
             ? String((data as Record<string, unknown>).production_id)
             : null,
+          imageUrl: (data as Record<string, unknown>).image_url
+            ? String((data as Record<string, unknown>).image_url)
+            : null,
           createdAt: data.created_at ?? null,
         },
       };
@@ -241,6 +257,7 @@ export async function saveBrandProduct(
           production_id: input.productionId ?? "",
           status: input.status,
           payment_option: "idr_or_coin",
+          image_url: input.imageUrl?.trim() || null,
         })
         .select(`
           id,
@@ -252,6 +269,7 @@ export async function saveBrandProduct(
           status,
           description,
           production_id,
+          image_url,
           created_at,
           product_categories (
             id,
@@ -286,6 +304,9 @@ export async function saveBrandProduct(
           productionId: (data as Record<string, unknown>).production_id
             ? String((data as Record<string, unknown>).production_id)
             : null,
+          imageUrl: (data as Record<string, unknown>).image_url
+            ? String((data as Record<string, unknown>).image_url)
+            : null,
           createdAt: data.created_at ?? null,
         },
       };
@@ -296,6 +317,48 @@ export async function saveBrandProduct(
       error: translateSupabaseError(error),
     };
   }
+}
+
+/**
+ * Uploads a product image file to Supabase storage.
+ * Stores under "{brandId}/products/{timestamp}_{random}_{sanitizedName}" in the "Muri" bucket.
+ */
+export async function uploadProductImage(
+  file: File,
+  brandId?: string
+): Promise<string> {
+  let activeBrandId = brandId;
+
+  if (!activeBrandId) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user?.id) {
+      throw new Error("Anda harus login sebagai brand untuk mengunggah foto produk.");
+    }
+
+    activeBrandId = user.id;
+  }
+
+  const sanitizedName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
+  const filePath = `${activeBrandId}/products/${Date.now()}_${Math.random()
+    .toString(36)
+    .substring(2, 9)}_${sanitizedName}`;
+
+  const { error } = await supabase.storage
+    .from("Muri")
+    .upload(filePath, file, {
+      cacheControl: "3600",
+      upsert: false,
+    });
+
+  if (error) {
+    throw new Error(`Gagal mengunggah foto produk ke storage: ${error.message}`);
+  }
+
+  const { data } = supabase.storage.from("Muri").getPublicUrl(filePath);
+  return data.publicUrl;
 }
 
 /**

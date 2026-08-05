@@ -12,6 +12,7 @@ export interface ProductCatalogItem {
 
   name: string;
   description: string | null;
+  imageUrl?: string | null;
 
   paymentOption: ProductPaymentOption;
   priceIdr: number;
@@ -52,6 +53,7 @@ export interface ProductDetailItem {
   name: string;
   descriptionHtml: string | null;
   detailHtml: string;
+  imageUrl?: string | null;
 
   paymentOption: ProductPaymentOption;
   priceIdr: number;

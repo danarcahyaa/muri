@@ -44,8 +44,8 @@ export function decodeProductSlug(value: string): string {
   }
 }
 
-export function buildTraceabilityHref(productionId: string): string {
-  return `/traceability?batch=${encodeURIComponent(productionId)}`;
+export function buildTraceabilityHref(batchOrSku: string): string {
+  return `/traceability?batch=${encodeURIComponent(batchOrSku)}`;
 }
 
 export function generateTraceabilityQrUrl(

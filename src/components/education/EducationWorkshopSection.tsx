@@ -121,16 +121,25 @@ function WorkshopCard({ workshop }: WorkshopCardProps) {
           bg-brand-forest
         "
       >
-        <div className="flex h-full w-full items-center justify-center">
-          <Presentation
-            className="
-              size-20 text-brand-lime
-              transition duration-500
-              group-hover:scale-105
-            "
-            strokeWidth={1.2}
+        {workshop.bannerUrl ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={workshop.bannerUrl}
+            alt={`Banner ${workshop.title}`}
+            className="size-full object-cover transition duration-500 group-hover:scale-105"
           />
-        </div>
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <Presentation
+              className="
+                size-20 text-brand-lime
+                transition duration-500
+                group-hover:scale-105
+              "
+              strokeWidth={1.2}
+            />
+          </div>
+        )}
 
         <span
           className="

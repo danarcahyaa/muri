@@ -5,10 +5,12 @@ import {
   ArrowRight,
   CheckCircle2,
   Coins,
+  Info,
   Leaf,
   LoaderCircle,
 } from "lucide-react";
 
+import { useAuth } from "@/components/auth/AuthProvider";
 import { useWorkshopBooking } from "@/hooks/education/useWorkshopBooking";
 import type { WorkshopCatalogItem } from "@/types/workshop";
 
@@ -22,6 +24,9 @@ export default function WorkshopBookingCard({
   workshop,
   loginHref,
 }: WorkshopBookingCardProps) {
+  const { accountType } = useAuth();
+  const isNonCustomer = accountType === "brand" || accountType === "waste_provider";
+
   const {
     activeRegistration,
     bookingPercentage,
@@ -120,6 +125,25 @@ export default function WorkshopBookingCard({
           <LoaderCircle className="size-4 animate-spin" />
           Memeriksa Pendaftaran...
         </button>
+      ) : isNonCustomer ? (
+        <div className="mt-7 space-y-3">
+          <div className="rounded-xl border border-brand-forest/20 bg-brand-forest/[0.04] p-4 text-xs">
+            <div className="flex items-start gap-2.5 text-brand-forest">
+              <Info className="mt-0.5 size-4 shrink-0" />
+              <p className="leading-relaxed font-semibold">
+                Pendaftaran workshop publik ditujukan untuk akun Konsumen. Akun {accountType === "brand" ? "Brand" : "Waste Provider"} dapat mengelola workshop via Dashboard.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            disabled
+            className="flex w-full cursor-not-allowed items-center justify-center rounded-sm bg-muted-moss/20 px-6 py-4 text-xs font-bold text-muted-moss"
+          >
+            Khusus Akun Konsumen
+          </button>
+        </div>
       ) : activeRegistration ? (
         <button
           type="button"

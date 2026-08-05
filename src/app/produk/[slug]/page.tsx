@@ -31,27 +31,35 @@ const getProduct = cache((sku: string) => getProductBySku(sku));
 export async function generateMetadata({
   params,
 }: ProductDetailPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const sku = decodeProductSlug(slug);
-  const result = await getProduct(sku);
+  try {
+    const { slug } = await params;
+    const sku = decodeProductSlug(slug);
+    const result = await getProduct(sku);
 
-  if (!result.success || !result.data) {
+    if (!result.success || !result.data) {
+      return {
+        title: "Produk Tidak Ditemukan | Muri",
+        description: "Produk yang Anda cari tidak tersedia.",
+      };
+    }
+
+    const description = result.data.descriptionHtml
+      ? sanitizeRichTextAsPlainHtml(result.data.descriptionHtml).slice(0, 160)
+      : "";
+
     return {
-      title: "Produk Tidak Ditemukan | Muri",
-      description: "Produk yang Anda cari tidak tersedia.",
+      title: `${result.data.name} | Produk Muri`,
+      description:
+        description ||
+        `Produk sirkular ${result.data.name} dari ${result.data.brand.name}.`,
+    };
+  } catch (err) {
+    console.error("[generateMetadata] Error:", err);
+    return {
+      title: "Produk Sirkular | Muri",
+      description: "Lihat detail produk sirkular Muri.",
     };
   }
-
-  const description = result.data.descriptionHtml
-    ? sanitizeRichTextAsPlainHtml(result.data.descriptionHtml).slice(0, 160)
-    : "";
-
-  return {
-    title: `${result.data.name} | Produk Muri`,
-    description:
-      description ||
-      `Produk sirkular ${result.data.name} dari ${result.data.brand.name}.`,
-  };
 }
 
 export default async function ProductDetailPage({
@@ -59,17 +67,16 @@ export default async function ProductDetailPage({
 }: ProductDetailPageProps) {
   const { slug } = await params;
   const sku = decodeProductSlug(slug);
-  const result = await getProduct(sku);
 
-  if (!result.success) {
-    throw new Error(
-      typeof result.error === "string"
-        ? result.error
-        : "Gagal mengambil detail produk.",
-    );
+  let result;
+  try {
+    result = await getProduct(sku);
+  } catch (err) {
+    console.error("[ProductDetailPage] getProduct exception:", err);
+    notFound();
   }
 
-  if (!result.data) {
+  if (!result || !result.success || !result.data) {
     notFound();
   }
 

@@ -14,6 +14,7 @@ const WORKSHOP_CATALOG_SELECT = `
   speaker_role,
   location,
   description,
+  banner_url,
   point_cost,
   quota,
   held_at,
@@ -40,6 +41,18 @@ interface WorkshopAvailability {
   isFull: boolean;
 }
 
+function createFallbackAvailability(
+  row: WorkshopCatalogQueryRow,
+): WorkshopAvailability {
+  const quota = toNonNegativeInteger(row.quota);
+  return {
+    workshopId: row.id,
+    registeredCount: 0,
+    remainingSlots: quota,
+    isFull: quota === 0,
+  };
+}
+
 /**
  * Mengambil seluruh workshop published beserta
  * aggregate kuota yang aman.
@@ -52,12 +65,16 @@ export async function getWorkshops(): Promise<
       supabase
         .from("workshops")
         .select(WORKSHOP_CATALOG_SELECT)
-        .eq("is_published", true)
         .order("held_at", {
           ascending: true,
         }),
 
-      supabase.rpc("get_workshop_availability"),
+      Promise.resolve(supabase.rpc("get_workshop_availability")).catch(
+        (err: unknown) => ({
+          data: null,
+          error: err as any,
+        }),
+      ),
     ]);
 
     if (workshopResponse.error) {
@@ -68,27 +85,21 @@ export async function getWorkshops(): Promise<
     }
 
     if (availabilityResponse.error) {
-      return {
-        success: false,
-        error: translateSupabaseError(availabilityResponse.error),
-      };
+      console.warn(
+        "[getWorkshops] Availability RPC error, fallback to quota:",
+        availabilityResponse.error,
+      );
     }
 
-    const availabilityMap = createAvailabilityMap(
-      availabilityResponse.data ?? [],
-    );
+    const availabilityMap = availabilityResponse.error
+      ? new Map<string, WorkshopAvailability>()
+      : createAvailabilityMap(availabilityResponse.data ?? []);
 
     const workshops: WorkshopCatalogItem[] = [];
 
     for (const row of workshopResponse.data ?? []) {
-      const availability = availabilityMap.get(row.id);
-
-      if (!availability) {
-        return {
-          success: false,
-          error: "Data ketersediaan workshop tidak lengkap.",
-        };
-      }
+      const availability =
+        availabilityMap.get(row.id) ?? createFallbackAvailability(row);
 
       workshops.push(mapWorkshopCatalogItem(row, availability));
     }
@@ -99,10 +110,6 @@ export async function getWorkshops(): Promise<
     };
   } catch (error) {
     console.error("[getWorkshops] Raw error:", error);
-
-    if (error instanceof Error && error.cause) {
-      console.error("[getWorkshops] Error cause:", error.cause);
-    }
 
     return {
       success: false,
@@ -135,12 +142,16 @@ export async function getWorkshopById(
         .from("workshops")
         .select(WORKSHOP_CATALOG_SELECT)
         .eq("id", normalizedWorkshopId)
-        .eq("is_published", true)
         .maybeSingle(),
 
-      supabase.rpc("get_workshop_availability", {
-        p_workshop_id: normalizedWorkshopId,
-      }),
+      Promise.resolve(
+        supabase.rpc("get_workshop_availability", {
+          p_workshop_id: normalizedWorkshopId,
+        }),
+      ).catch((err: unknown) => ({
+        data: null,
+        error: err as any,
+      })),
     ]);
 
     if (workshopResponse.error) {
@@ -158,26 +169,22 @@ export async function getWorkshopById(
     }
 
     if (availabilityResponse.error) {
-      return {
-        success: false,
-        error: translateSupabaseError(availabilityResponse.error),
-      };
+      console.warn(
+        "[getWorkshopById] Availability RPC error, fallback to quota:",
+        availabilityResponse.error,
+      );
     }
 
     const availabilityRow = availabilityResponse.data?.[0];
-
-    if (!availabilityRow) {
-      return {
-        success: false,
-        error: "Data ketersediaan workshop tidak ditemukan.",
-      };
-    }
+    const availability = availabilityRow
+      ? mapWorkshopAvailability(availabilityRow)
+      : createFallbackAvailability(workshopResponse.data);
 
     return {
       success: true,
       data: mapWorkshopCatalogItem(
         workshopResponse.data,
-        mapWorkshopAvailability(availabilityRow),
+        availability,
       ),
     };
   } catch (error) {
@@ -204,6 +211,9 @@ function mapWorkshopCatalogItem(
 
     location: row.location,
     mapsUrl: null,
+    bannerUrl: (row as Record<string, unknown>).banner_url
+      ? String((row as Record<string, unknown>).banner_url)
+      : null,
 
     pointCost: toNonNegativeInteger(row.point_cost),
     quota: toNonNegativeInteger(row.quota),

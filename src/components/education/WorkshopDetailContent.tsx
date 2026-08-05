@@ -34,7 +34,7 @@ export default function WorkshopDetailContent({
 
   return (
     <div className="min-w-0 space-y-8">
-      <WorkshopVisual />
+      <WorkshopVisual bannerUrl={workshop.bannerUrl} title={workshop.title} />
 
       <DetailCard
         eyebrow="Detail Workshop"
@@ -152,7 +152,13 @@ export default function WorkshopDetailContent({
   );
 }
 
-function WorkshopVisual() {
+function WorkshopVisual({
+  bannerUrl,
+  title,
+}: {
+  bannerUrl: string | null;
+  title: string;
+}) {
   return (
     <section className="rounded-2xl border border-brand-black/15 bg-canvas-pure p-4 sm:p-7">
       <div
@@ -162,23 +168,34 @@ function WorkshopVisual() {
           rounded-xl bg-brand-forest
         "
       >
-        <div
-          aria-hidden="true"
-          className="absolute -right-16 -top-16 size-72 rounded-full border border-brand-lime/15"
-        />
+        {bannerUrl ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={bannerUrl}
+            alt={`Banner ${title}`}
+            className="size-full object-cover"
+          />
+        ) : (
+          <>
+            <div
+              aria-hidden="true"
+              className="absolute -right-16 -top-16 size-72 rounded-full border border-brand-lime/15"
+            />
 
-        <div
-          aria-hidden="true"
-          className="absolute -bottom-24 -left-16 size-80 rounded-full border border-brand-lime/10"
-        />
+            <div
+              aria-hidden="true"
+              className="absolute -bottom-24 -left-16 size-80 rounded-full border border-brand-lime/10"
+            />
 
-        <div className="relative z-10 flex flex-col items-center text-brand-lime">
-          <Presentation className="size-24" strokeWidth={1.1} />
+            <div className="relative z-10 flex flex-col items-center text-brand-lime">
+              <Presentation className="size-24" strokeWidth={1.1} />
 
-          <p className="mt-5 text-xs font-bold uppercase tracking-[0.2em]">
-            Workshop Muri
-          </p>
-        </div>
+              <p className="mt-5 text-xs font-bold uppercase tracking-[0.2em]">
+                Workshop Muri
+              </p>
+            </div>
+          </>
+        )}
       </div>
     </section>
   );

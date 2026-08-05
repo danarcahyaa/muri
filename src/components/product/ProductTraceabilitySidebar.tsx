@@ -5,6 +5,7 @@ import type { ComponentType } from "react";
 import {
   Check,
   CheckCircle2,
+  Copy,
   Droplets,
   ExternalLink,
   Factory,
@@ -93,9 +94,9 @@ export default function ProductTraceabilitySidebar({
   const activeCarbon = realData?.carbonSavedKg ?? carbonSavedKg;
   const activeWater = realData?.waterSavedLiter ?? waterSavedLiter;
   const activeBrand = realData?.brandName ?? brandName;
-  const scannableQr = generateTraceabilityQrUrl(productionId || sku);
+  const scannableQr = generateTraceabilityQrUrl(sku || productionId);
   const activeQr = realData?.qrCodeUrl || qrCodeUrl || scannableQr;
-  const tracingHref = buildTraceabilityHref(productionId || sku);
+  const tracingHref = buildTraceabilityHref(sku || productionId);
 
   const carbonSavedText = `${formatDecimal(activeCarbon)} kg CO₂e`;
   const waterSavedText = `${formatDecimal(activeWater, 0)} liter`;
@@ -201,7 +202,7 @@ export default function ProductTraceabilitySidebar({
           </Card>
 
           {/* Identity Grid */}
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             <IdentityCard icon={QrCode} label="SKU Produk" value={sku} />
             <IdentityCard
               icon={Factory}
@@ -438,26 +439,51 @@ function IdentityCard({
   value: string;
   mono?: boolean;
 }) {
+  const [copied, setCopied] = useState(false);
+
+  function handleCopy() {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      void navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
+  }
+
   return (
-    <Card>
-      <CardContent className="flex items-center gap-2.5 p-3">
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-lime/65 text-brand-forest">
-          <Icon className="size-3.5" strokeWidth={1.8} />
+    <Card className="group relative overflow-hidden transition hover:border-brand-forest/30">
+      <CardContent className="flex items-center justify-between p-3 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-lime/65 text-brand-forest">
+            <Icon className="size-3.5" strokeWidth={1.8} />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <p className="text-[9px] uppercase tracking-wide text-muted-moss">
+              {label}
+            </p>
+            <p
+              className={`mt-0.5 truncate text-[11px] font-bold text-brand-black ${
+                mono ? "font-mono" : ""
+              }`}
+              title={value}
+            >
+              {value}
+            </p>
+          </div>
         </div>
 
-        <div className="min-w-0">
-          <p className="text-[8px] uppercase tracking-wide text-muted-moss">
-            {label}
-          </p>
-          <p
-            className={`mt-0.5 truncate text-[10px] font-bold text-brand-black ${
-              mono ? "font-mono" : ""
-            }`}
-            title={value}
-          >
-            {value}
-          </p>
-        </div>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="shrink-0 text-muted-moss hover:text-brand-forest p-1 transition"
+          title="Salin nilai"
+        >
+          {copied ? (
+            <Check className="size-3 text-brand-forest" strokeWidth={2.2} />
+          ) : (
+            <Copy className="size-3 opacity-60 group-hover:opacity-100" />
+          )}
+        </button>
       </CardContent>
     </Card>
   );

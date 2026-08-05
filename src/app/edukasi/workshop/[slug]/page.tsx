@@ -57,15 +57,7 @@ export default async function WorkshopDetailPage({
   const { slug: workshopId } = await params;
   const result = await getWorkshop(workshopId);
 
-  if (!result.success) {
-    throw new Error(
-      typeof result.error === "string"
-        ? result.error
-        : "Gagal mengambil detail workshop.",
-    );
-  }
-
-  if (!result.data) {
+  if (!result.success || !result.data) {
     notFound();
   }
 

@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -635,6 +635,7 @@ export type Database = {
           description: string | null
           detail: string
           id: string
+          image_url: string | null
           payment_option: Database["public"]["Enums"]["product_payment_option"]
           price_idr: number
           product_category_id: number
@@ -657,6 +658,7 @@ export type Database = {
           description?: string | null
           detail: string
           id?: string
+          image_url?: string | null
           payment_option?: Database["public"]["Enums"]["product_payment_option"]
           price_idr?: number
           product_category_id: number
@@ -679,6 +681,7 @@ export type Database = {
           description?: string | null
           detail?: string
           id?: string
+          image_url?: string | null
           payment_option?: Database["public"]["Enums"]["product_payment_option"]
           price_idr?: number
           product_category_id?: number

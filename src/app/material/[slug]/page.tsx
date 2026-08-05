@@ -51,17 +51,16 @@ export default async function MaterialDetailPage({
   params,
 }: MaterialDetailPageProps) {
   const { slug } = await params;
-  const result = await getMaterial(slug);
 
-  if (!result.success) {
-    throw new Error(
-      typeof result.error === "string"
-        ? result.error
-        : "Gagal mengambil detail material.",
-    );
+  let result;
+  try {
+    result = await getMaterial(slug);
+  } catch (err) {
+    console.error("[MaterialDetailPage] Exception:", err);
+    notFound();
   }
 
-  if (!result.data) {
+  if (!result || !result.success || !result.data) {
     notFound();
   }
 

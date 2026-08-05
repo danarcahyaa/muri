@@ -22,6 +22,8 @@ import {
   getBrandProductions,
   type BrandProductionItem as ProductionBatchItem,
 } from "@/services/brand-fashion/circularProductionService";
+import { ProductImageUpload } from "@/components/ui/ProductImageUpload";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 interface BrandProductModalProps {
   product: BrandProductItem | null;
@@ -44,8 +46,10 @@ export function BrandProductModal({
   onClose,
   onSaved,
 }: BrandProductModalProps) {
+  const { user } = useAuth();
   const [name, setName] = useState("");
   const [sku, setSku] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [categoryId, setCategoryId] = useState("1");
   const [priceIdr, setPriceIdr] = useState("");
   const [stock, setStock] = useState("10");
@@ -65,6 +69,7 @@ export function BrandProductModal({
       if (product) {
         setName(product.name);
         setSku(product.sku);
+        setImageUrl(product.imageUrl ?? "");
         setCategoryId(String(product.categoryId));
         setPriceIdr(String(product.priceIdr));
         setStock(String(product.stock));
@@ -74,6 +79,7 @@ export function BrandProductModal({
       } else {
         setName("");
         setSku("");
+        setImageUrl("");
         setCategoryId("1");
         setPriceIdr("");
         setStock("10");
@@ -159,6 +165,7 @@ export function BrandProductModal({
         description: description.trim() || undefined,
         status,
         productionId,
+        imageUrl: imageUrl.trim() || undefined,
       });
 
       if (!res.success) {
@@ -275,6 +282,13 @@ export function BrandProductModal({
                 placeholder="Contoh: Tote Bag Selvedge Denim"
               />
             </div>
+
+            {/* Foto / Gambar Produk */}
+            <ProductImageUpload
+              value={imageUrl}
+              onChange={setImageUrl}
+              brandId={user?.id}
+            />
 
             {/* SKU & Kategori */}
             <div className="grid gap-4 sm:grid-cols-2">
