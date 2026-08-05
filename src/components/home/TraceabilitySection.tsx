@@ -1,14 +1,20 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
+  Check,
+  Copy,
+  ExternalLink,
   Leaf,
   Loader2,
+  Maximize2,
   PackageSearch,
   PackageX,
+  QrCode,
   Search,
 } from "lucide-react";
 
@@ -17,12 +23,17 @@ import {
   normalizeBatchId,
   type TraceabilityRecord,
 } from "@/data/traceability";
+import { generateTraceabilityQrUrl } from "@/lib/productDetail";
 import { fetchTraceabilityRecordFromDb } from "@/services/product/traceabilityService";
+import { TraceabilityQrModal } from "@/components/product/TraceabilityQrModal";
 
 type TraceStatus = "idle" | "processing" | "success" | "not-found";
 
 export default function TraceabilitySection() {
-  const [batchId, setBatchId] = useState("PRD-4356");
+  const searchParams = useSearchParams();
+  const queryParam = searchParams?.get("batch") || searchParams?.get("production") || searchParams?.get("sku");
+
+  const [batchId, setBatchId] = useState(queryParam ? queryParam.trim().toUpperCase() : "PRD-4356");
   const [trackedRecord, setTrackedRecord] = useState<TraceabilityRecord | null>(
     null,
   );
@@ -33,6 +44,29 @@ export default function TraceabilitySection() {
   const [status, setStatus] = useState<TraceStatus>("idle");
 
   const normalizedBatch = normalizeBatchId(batchId);
+
+  // Auto trace if queryParam exists in URL search parameters
+  useEffect(() => {
+    if (!queryParam) return;
+    const cleanParam = queryParam.trim().replace(/^#/, "");
+    setBatchId(cleanParam);
+
+    let isCancelled = false;
+    setStatus("processing");
+    void fetchTraceabilityRecordFromDb(cleanParam).then((record) => {
+      if (!isCancelled) {
+        if (record) {
+          setTrackedRecord(record);
+          setStatus("success");
+        } else {
+          setStatus("not-found");
+        }
+      }
+    });
+    return () => {
+      isCancelled = true;
+    };
+  }, [queryParam]);
 
   // Fetch preview record dynamically from DB (or fallback)
   useEffect(() => {
@@ -365,8 +399,91 @@ function TracingProcessingState() {
 }
 
 function TracingDoneState({ record }: { record: TraceabilityRecord }) {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const qrUrl = generateTraceabilityQrUrl(record.batchId);
+  const redirectUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/traceability?batch=${encodeURIComponent(record.batchId)}`
+      : `/traceability?batch=${encodeURIComponent(record.batchId)}`;
+
+  function handleCopy() {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      void navigator.clipboard.writeText(redirectUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }
+
   return (
-    <div className="mt-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
+    <div className="mt-10 animate-in fade-in slide-in-from-bottom-2 duration-500 space-y-6">
+      {/* Scannable QR Passport Banner */}
+      <div className="rounded-2xl border border-white/15 bg-black/30 p-5 sm:p-6 backdrop-blur-md transition-all">
+        <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-4 min-w-0">
+            {/* Un-cropped QR container with rounded-lg and p-2.5 bg-white so corners are 100% visible */}
+            <button
+              type="button"
+              onClick={() => setModalOpen(true)}
+              className="group relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border-2 border-brand-lime bg-white p-2.5 shadow-md transition-all duration-200 hover:scale-110 hover:shadow-xl focus:outline-none"
+              title="Klik untuk memperbesar QR Code"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={qrUrl}
+                alt={`QR Code Traceability #${record.batchId}`}
+                className="size-full object-contain"
+              />
+              <span className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-md">
+                <Maximize2 className="size-5 text-brand-lime" />
+              </span>
+            </button>
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 text-brand-lime">
+                <QrCode className="size-3.5" strokeWidth={2.2} />
+                <span className="text-[10px] font-bold uppercase tracking-wider">
+                  QR Traceability HP
+                </span>
+              </div>
+              <h4 className="mt-0.5 font-display text-lg font-medium text-white">
+                Scan via HP Anda
+              </h4>
+              <p className="mt-1 text-xs leading-relaxed text-white/70 max-w-md">
+                Pindai QR code ini dengan kamera HP untuk langsung membuka paspor digital dan penelusuran batch <span className="font-mono font-bold text-brand-lime">#{record.batchId}</span>.{" "}
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(true)}
+                  className="text-brand-lime hover:underline font-semibold"
+                >
+                  (Klik QR untuk memperbesar)
+                </button>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 shrink-0">
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl border border-white/20 bg-white/5 px-3.5 py-2.5 text-xs font-semibold text-white transition hover:bg-white/15"
+            >
+              {copied ? (
+                <>
+                  <Check className="size-3.5 text-brand-lime" strokeWidth={2.2} />
+                  <span>Tersalin!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="size-3.5" strokeWidth={2} />
+                  <span>Salin Link</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div className="rounded-2xl border border-white/15 bg-white/[0.025] backdrop-blur-[2px] p-5 sm:p-6">
         <h4 className="font-display text-2xl font-medium tracking-tight">
           {record.resultTitle}
@@ -423,6 +540,14 @@ function TracingDoneState({ record }: { record: TraceabilityRecord }) {
           </div>
         </div>
       </div>
+
+      <TraceabilityQrModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        qrUrl={qrUrl}
+        batchOrSku={record.batchId}
+        redirectUrl={redirectUrl}
+      />
     </div>
   );
 }

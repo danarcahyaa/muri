@@ -45,7 +45,21 @@ export function decodeProductSlug(value: string): string {
 }
 
 export function buildTraceabilityHref(productionId: string): string {
-  return `/traceability?production=${encodeURIComponent(productionId)}`;
+  return `/traceability?batch=${encodeURIComponent(productionId)}`;
+}
+
+export function generateTraceabilityQrUrl(
+  batchOrProductionId: string,
+  origin?: string,
+): string {
+  const normalizedId = batchOrProductionId.trim().replace(/^#/, "");
+  const baseUrl =
+    origin ||
+    (typeof window !== "undefined" && window.location.origin
+      ? window.location.origin
+      : "https://muri.id");
+  const targetUrl = `${baseUrl}/traceability?batch=${encodeURIComponent(normalizedId)}`;
+  return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(targetUrl)}`;
 }
 
 export function formatCoin(value: number): string {

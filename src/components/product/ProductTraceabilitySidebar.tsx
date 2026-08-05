@@ -6,10 +6,12 @@ import {
   Check,
   CheckCircle2,
   Droplets,
+  ExternalLink,
   Factory,
   Leaf,
   Loader2,
   MapPin,
+  Maximize2,
   Package,
   QrCode,
   ScanLine,
@@ -27,11 +29,16 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/Sheet";
-import { buildTraceabilityHref, formatDecimal } from "@/lib/productDetail";
+import {
+  buildTraceabilityHref,
+  formatDecimal,
+  generateTraceabilityQrUrl,
+} from "@/lib/productDetail";
 import {
   getCustomerTraceabilityData,
   type CustomerTraceabilityData,
 } from "@/services/customer";
+import { TraceabilityQrModal } from "./TraceabilityQrModal";
 
 interface ProductTraceabilitySidebarProps {
   open: boolean;
@@ -67,6 +74,7 @@ export default function ProductTraceabilitySidebar({
   const [activeStep, setActiveStep] = useState(3);
   const [realData, setRealData] = useState<CustomerTraceabilityData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
 
   const fetchTraceability = useCallback(async () => {
     if (!open) return;
@@ -85,7 +93,9 @@ export default function ProductTraceabilitySidebar({
   const activeCarbon = realData?.carbonSavedKg ?? carbonSavedKg;
   const activeWater = realData?.waterSavedLiter ?? waterSavedLiter;
   const activeBrand = realData?.brandName ?? brandName;
-  const activeQr = realData?.qrCodeUrl ?? qrCodeUrl;
+  const scannableQr = generateTraceabilityQrUrl(productionId || sku);
+  const activeQr = realData?.qrCodeUrl || qrCodeUrl || scannableQr;
+  const tracingHref = buildTraceabilityHref(productionId || sku);
 
   const carbonSavedText = `${formatDecimal(activeCarbon)} kg CO₂e`;
   const waterSavedText = `${formatDecimal(activeWater, 0)} liter`;
@@ -202,34 +212,67 @@ export default function ProductTraceabilitySidebar({
           </div>
 
           {/* QR Code Section */}
-          <Card variant="warm">
-            <CardContent className="flex items-center gap-3.5 p-4">
-              <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line-trace bg-canvas-pure">
-                {qrCodeUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
+          <Card variant="warm" className="overflow-hidden border border-brand-forest/15 shadow-xs transition hover:border-brand-forest/30">
+            <CardContent className="flex items-center justify-between gap-3.5 p-4">
+              <div className="flex items-center gap-3.5 min-w-0">
+                {/* Un-cropped QR container with rounded-lg & generous white padding p-2 */}
+                <button
+                  type="button"
+                  onClick={() => setQrModalOpen(true)}
+                  className="group relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-line-trace bg-white p-2 shadow-xs transition duration-200 hover:scale-105 hover:shadow-md cursor-pointer focus:outline-none"
+                  title="Klik untuk memperbesar QR Code"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={qrCodeUrl}
+                    src={activeQr}
                     alt={`QR traceability ${sku}`}
-                    className="size-14 object-contain"
+                    className="size-full object-contain"
                   />
-                ) : (
-                  <QrCode
-                    className="size-7 text-muted-moss/45"
-                    strokeWidth={1.4}
-                  />
-                )}
+                  <span className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-md">
+                    <Maximize2 className="size-4 text-white" />
+                  </span>
+                </button>
+
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <QrCode className="size-3.5 text-brand-emerald shrink-0" strokeWidth={2} />
+                    <p className="text-xs font-bold text-brand-black truncate">
+                      QR Paspor Sirkular
+                    </p>
+                  </div>
+                  <p className="mt-1 text-[11px] leading-relaxed text-muted-moss">
+                    Pindai dengan kamera HP atau{" "}
+                    <button
+                      type="button"
+                      onClick={() => setQrModalOpen(true)}
+                      className="text-brand-forest font-semibold underline hover:text-brand-emerald"
+                    >
+                      klik untuk memperbesar
+                    </button>
+                    .
+                  </p>
+                </div>
               </div>
 
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-brand-black">
-                  QR Produk Terverifikasi
-                </p>
-                <p className="mt-0.5 text-[10px] leading-4 text-muted-moss">
-                  Pindai QR untuk membuka bukti digital perjalanan produk.
-                </p>
-              </div>
+              <a
+                href={tracingHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-brand-forest px-3.5 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-brand-emerald hover:shadow-sm"
+              >
+                <span>Buka</span>
+                <ExternalLink className="size-3" strokeWidth={2.2} />
+              </a>
             </CardContent>
           </Card>
+
+          <TraceabilityQrModal
+            open={qrModalOpen}
+            onOpenChange={setQrModalOpen}
+            qrUrl={activeQr}
+            batchOrSku={sku || productionId}
+            redirectUrl={tracingHref}
+          />
 
           <Separator className="bg-line-trace" />
 
