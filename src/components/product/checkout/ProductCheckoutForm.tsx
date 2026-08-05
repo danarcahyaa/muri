@@ -22,7 +22,6 @@ import { Input } from "@/components/ui/Input";
 import { LocationPicker, type AddressJSONB } from "@/components/shared/LocationPicker";
 import { formatCoin, formatIdr } from "@/lib/productDetail";
 import { addressJSONBToString, stringToAddressJSONB } from "@/lib/addressUtils";
-import { LocationPicker, type AddressJSONB } from "@/components/shared/LocationPicker";
 import type {
   CustomerCheckoutPaymentMethod,
   CustomerCheckoutPreview,

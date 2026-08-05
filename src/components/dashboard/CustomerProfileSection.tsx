@@ -25,7 +25,6 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { LocationPicker, type AddressJSONB } from "@/components/shared/LocationPicker";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { LocationPicker } from "@/components/shared/LocationPicker";
 import { addressJSONBToString, stringToAddressJSONB } from "@/lib/addressUtils";
 import {
   getCustomerDashboardSummary,
