@@ -26,6 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/Table";
+import { useDebounce } from "@/hooks/useDebounce";
 import { formatCoin, formatIdr } from "@/lib/productDetail";
 import {
   getMyBrandProducts,
@@ -43,6 +44,7 @@ export default function BrandProductsSection() {
   const [products, setProducts] = useState<BrandProductItem[]>([]);
   const [activeTab, setActiveTab] = useState<ProductFilterTab>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 300);
   const [currentPage, setCurrentPage] = useState(1);
 
   const [selectedProduct, setSelectedProduct] = useState<BrandProductItem | null>(null);
@@ -75,7 +77,7 @@ export default function BrandProductsSection() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, activeTab]);
+  }, [debouncedSearch, activeTab]);
 
   const filteredProducts = useMemo(() => {
     let result = products;
@@ -84,7 +86,7 @@ export default function BrandProductsSection() {
       result = result.filter((p) => p.status === activeTab);
     }
 
-    const q = searchQuery.trim().toLowerCase();
+    const q = debouncedSearch.trim().toLowerCase();
     if (q) {
       result = result.filter(
         (p) =>
@@ -95,7 +97,7 @@ export default function BrandProductsSection() {
     }
 
     return result;
-  }, [products, activeTab, searchQuery]);
+  }, [products, activeTab, debouncedSearch]);
 
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE) || 1;
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;

@@ -62,7 +62,7 @@ export function MediaUpload({
           describedBy={descriptionId}
           onFilesSelected={addFiles}
           ariaLabel="Unggah foto dan video limbah"
-          className="min-h-[150px] p-5 hover:border-brand-emerald/50 hover:bg-muted/10"
+          className="min-h-[90px] py-3.5 px-4 hover:border-brand-emerald/50 hover:bg-muted/10"
         >
           <span className="flex flex-col items-center justify-center gap-2">
             <UploadCloud className="size-6 text-muted-moss" />

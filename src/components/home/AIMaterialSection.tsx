@@ -14,10 +14,12 @@ import AIMaterialInputPanel from "./ai-material/AIMaterialInputPanel";
 import AIMaterialResult from "./ai-material/AIMaterialResult";
 
 import {
-  purchasedMaterials,
+  purchasedMaterials as fallbackMaterials,
   type AiStatus,
+  type PurchasedMaterial,
   type SourceMode,
 } from "@/data/aiMaterial";
+import { getWastePosts } from "@/services/sourcing.service";
 
 export default function AIMaterialSection() {
   const inputId = useId();
@@ -38,15 +40,46 @@ export default function AIMaterialSection() {
   const [uploadedPreviewUrl, setUploadedPreviewUrl] =
     useState<string | null>(null);
 
+  const [materialsList, setMaterialsList] =
+    useState<PurchasedMaterial[]>(fallbackMaterials);
+
   const [selectedPurchasedId, setSelectedPurchasedId] =
-    useState(purchasedMaterials[0].id);
+    useState(fallbackMaterials[0].id);
+
+  // Load real waste posts from database
+  useEffect(() => {
+    let active = true;
+    async function loadDbMaterials() {
+      try {
+        const res = await getWastePosts();
+        if (active && res.success && res.data && res.data.length > 0) {
+          const dbItems: PurchasedMaterial[] = res.data.map((item) => ({
+            id: item.id,
+            name: item.customFabricName || "Limbah Kain Perca",
+            batchId: `BATCH-${item.id.slice(0, 6).toUpperCase()}`,
+            description: `${item.categoryName} · ${item.providerName}`,
+            image: item.imageUrl || "/product.png",
+            alt: item.customFabricName || "Limbah kain",
+          }));
+          setMaterialsList(dbItems);
+          setSelectedPurchasedId(dbItems[0].id);
+        }
+      } catch (err) {
+        console.error("Gagal memuat waste posts real untuk AI material:", err);
+      }
+    }
+    void loadDbMaterials();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const selectedPurchasedMaterial = useMemo(
     () =>
-      purchasedMaterials.find(
+      materialsList.find(
         (material) => material.id === selectedPurchasedId,
-      ) ?? purchasedMaterials[0],
-    [selectedPurchasedId],
+      ) ?? materialsList[0] ?? fallbackMaterials[0],
+    [selectedPurchasedId, materialsList],
   );
 
   const activePreview =
@@ -151,7 +184,7 @@ export default function AIMaterialSection() {
             uploadedPreviewUrl={uploadedPreviewUrl}
             selectedPurchasedId={selectedPurchasedId}
             selectedPurchasedMaterial={selectedPurchasedMaterial}
-            materials={purchasedMaterials}
+            materials={materialsList}
             buttonDisabled={buttonDisabled}
             onModeChange={handleModeChange}
             onFileChange={handleFileChange}

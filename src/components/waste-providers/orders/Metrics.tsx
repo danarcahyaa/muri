@@ -1,6 +1,7 @@
 import { useState, useEffect, type ReactElement } from "react";
 import { Clock, CheckCircle2, XCircle, Ban } from "lucide-react";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { Card } from "@/components/ui/Card";
 import { getPurchaseMetrics } from "@/services/waste-providers/purchaseService";
 
 interface PurchaseSummaryMetricsProps {
@@ -43,102 +44,103 @@ export function PurchaseSummaryMetrics({
   }, [providerId, refreshTrigger]);
 
   return (
-    <div className="grid gap-5 grid-cols-1 sm:grid-cols-4 font-body">
+    <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 font-body">
       {/* Menunggu Konfirmasi */}
-      <article className="flex min-h-32 flex-col rounded-xl border border-brand-black/15 bg-canvas-pure p-6">
+      <Card className="flex min-h-40 flex-col p-6">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[11px] font-semibold uppercase text-muted-moss">
+          <p className="text-[11px] font-medium uppercase text-muted-moss">
             Menunggu Konfirmasi
           </p>
-          <div className="p-1 rounded-full bg-line-trace/20">
-            <Clock className="h-4 w-4 text-muted-moss/80" />
+          <div className="p-1.5 rounded-full bg-line-trace/40 text-muted-moss">
+            <Clock className="size-4" />
           </div>
         </div>
-        <div className="mt-auto pt-4">
-          <div className="font-display text-3xl font-bold tracking-tight text-brand-black">
+        <div className="mt-auto pt-6">
+          <div className="font-display text-3xl font-medium tracking-tight text-brand-black">
             {isLoading ? (
               <Skeleton className="h-9 w-16" />
             ) : (
-              `${waitingCount} Pesanan`
+              `${waitingCount} pesanan`
             )}
           </div>
-          <p className="mt-2 text-xs text-muted-moss">
+          <p className="mt-3 text-xs text-muted-moss">
             Pesanan baru yang perlu segera Anda konfirmasi.
           </p>
         </div>
-      </article>
+      </Card>
 
       {/* Complete */}
-      <article className="flex min-h-32 flex-col rounded-xl border border-brand-black/15 bg-canvas-pure p-6">
+      <Card className="flex min-h-40 flex-col p-6">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[11px] font-semibold uppercase text-muted-moss">
+          <p className="text-[11px] font-medium uppercase text-muted-moss">
             Selesai
           </p>
-          <div className="p-1 rounded-full bg-brand-emerald/10">
-            <CheckCircle2 className="h-4 w-4 text-brand-emerald/70" />
+          <div className="p-1.5 rounded-full bg-brand-emerald/10 text-brand-emerald">
+            <CheckCircle2 className="size-4" />
           </div>
         </div>
-        <div className="mt-auto pt-4">
-          <div className="font-display text-3xl font-bold tracking-tight text-brand-black">
+        <div className="mt-auto pt-6">
+          <div className="font-display text-3xl font-medium tracking-tight text-brand-black">
             {isLoading ? (
               <Skeleton className="h-9 w-16" />
             ) : (
-              `${completedCount} Pesanan`
+              `${completedCount} pesanan`
             )}
           </div>
-          <p className="mt-2 text-xs text-muted-moss">
+          <p className="mt-3 text-xs text-muted-moss">
             Akumulasi transaksi order kain yang berhasil dituntaskan.
           </p>
         </div>
-      </article>
+      </Card>
 
       {/* Cancelled */}
-      <article className="flex min-h-32 flex-col rounded-xl border border-brand-black/15 bg-canvas-pure p-6">
+      <Card className="flex min-h-40 flex-col p-6">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[11px] font-semibold uppercase text-muted-moss">
+          <p className="text-[11px] font-medium uppercase text-muted-moss">
             Dibatalkan
           </p>
-          <div className="p-1 rounded-full bg-error-rust/10">
-            <XCircle className="h-4 w-4 text-error-rust/70" />
+          <div className="p-1.5 rounded-full bg-error-rust/10 text-error-rust">
+            <XCircle className="size-4" />
           </div>
         </div>
-        <div className="mt-auto pt-4">
-          <div className="font-display text-3xl font-bold tracking-tight text-brand-black">
+        <div className="mt-auto pt-6">
+          <div className="font-display text-3xl font-medium tracking-tight text-brand-black">
             {isLoading ? (
               <Skeleton className="h-9 w-16" />
             ) : (
-              `${cancelledCount} Pesanan`
+              `${cancelledCount} pesanan`
             )}
           </div>
-          <p className="mt-2 text-xs text-muted-moss">
+          <p className="mt-3 text-xs text-muted-moss">
             Order limbah yang telah dibatalkan oleh kustomer.
           </p>
         </div>
-      </article>
-          
+      </Card>
+
       {/* Rejected */}
-      <article className="flex min-h-32 flex-col rounded-xl border border-brand-black/15 bg-canvas-pure p-6">
+      <Card className="flex min-h-40 flex-col p-6">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[11px] font-semibold uppercase text-muted-moss">
+          <p className="text-[11px] font-medium uppercase text-muted-moss">
             Ditolak
           </p>
-          <div className="p-1 rounded-full bg-error-rust/10">
-            <Ban className="h-4 w-4 text-error-rust/70" />
+          <div className="p-1.5 rounded-full bg-error-rust/10 text-error-rust">
+            <Ban className="size-4" />
           </div>
         </div>
-        <div className="mt-auto pt-4">
-          <div className="font-display text-3xl font-bold tracking-tight text-brand-black">
+        <div className="mt-auto pt-6">
+          <div className="font-display text-3xl font-medium tracking-tight text-brand-black">
             {isLoading ? (
               <Skeleton className="h-9 w-16" />
             ) : (
-              `${rejectedCount} Pesanan`
+              `${rejectedCount} pesanan`
             )}
           </div>
-          <p className="mt-2 text-xs text-muted-moss">
+          <p className="mt-3 text-xs text-muted-moss">
             Order limbah yang telah ditolak oleh Anda.
           </p>
         </div>
-      </article>
+      </Card>
     </div>
   );
 }
+

@@ -1,4 +1,5 @@
 import { useState, useEffect, type ReactElement } from "react";
+import { createPortal } from "react-dom";
 import {
   Table,
   TableBody,
@@ -50,6 +51,12 @@ export function WasteDataTable({
     null,
   );
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Reset page to 1 when posts list change (e.g. on new filter or search query)
   useEffect(() => {
     setCurrentPage(1);
@@ -77,15 +84,17 @@ export function WasteDataTable({
   return (
     <>
       {/* Confirmation Modal */}
-      {pendingAction && (
-        <div
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setPendingAction(null);
-            }
-          }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in-0 cursor-pointer"
-        >
+      {mounted &&
+        pendingAction &&
+        createPortal(
+          <div
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setPendingAction(null);
+              }
+            }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in-0 cursor-pointer"
+          >
           <div
             onClick={(e) => e.stopPropagation()}
             className="relative flex w-full max-w-md flex-col overflow-hidden rounded-xl border border-line-trace bg-canvas-pure cursor-default shadow-xl"
@@ -191,7 +200,8 @@ export function WasteDataTable({
               </Button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
 
       {/* Table */}

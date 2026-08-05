@@ -16,6 +16,7 @@ import {
   normalizeBatchId,
   type TraceabilityRecord,
 } from "@/data/traceability";
+import { fetchTraceabilityRecordFromDb } from "@/services/product/traceabilityService";
 
 type TraceStatus = "idle" | "processing" | "success" | "not-found";
 
@@ -24,11 +25,28 @@ export default function TraceabilitySection() {
   const [trackedRecord, setTrackedRecord] = useState<TraceabilityRecord | null>(
     null,
   );
+  const [previewRecord, setPreviewRecord] = useState<TraceabilityRecord | null>(
+    null,
+  );
 
   const [status, setStatus] = useState<TraceStatus>("idle");
 
   const normalizedBatch = normalizeBatchId(batchId);
-  const previewRecord = findTraceabilityRecord(batchId);
+
+  // Fetch preview record dynamically from DB (or fallback)
+  useEffect(() => {
+    let isCancelled = false;
+    async function loadPreview() {
+      const record = await fetchTraceabilityRecordFromDb(batchId);
+      if (!isCancelled) {
+        setPreviewRecord(record);
+      }
+    }
+    void loadPreview();
+    return () => {
+      isCancelled = true;
+    };
+  }, [batchId]);
 
   const hasCompleteBatchFormat = /^BATCH-[A-Z0-9-]{4,}$/.test(normalizedBatch);
 
@@ -49,10 +67,10 @@ export default function TraceabilitySection() {
     setStatus("idle");
   }
 
-  function handleTrace() {
-    const normalizedBatch = normalizeBatchId(batchId);
+  async function handleTrace() {
+    const targetBatch = normalizeBatchId(batchId);
 
-    if (!normalizedBatch || status === "processing") {
+    if (!targetBatch || status === "processing") {
       return;
     }
 
@@ -60,11 +78,12 @@ export default function TraceabilitySection() {
       clearTimeout(processingTimeoutRef.current);
     }
 
-    const record = findTraceabilityRecord(normalizedBatch);
-
-    setBatchId(normalizedBatch);
+    setBatchId(targetBatch);
     setTrackedRecord(null);
     setStatus("processing");
+
+    // Fetch real DB record
+    const record = await fetchTraceabilityRecordFromDb(targetBatch);
 
     processingTimeoutRef.current = setTimeout(() => {
       if (!record) {
@@ -74,7 +93,7 @@ export default function TraceabilitySection() {
 
       setTrackedRecord(record);
       setStatus("success");
-    }, 1400);
+    }, 1200);
   }
 
   useEffect(() => {
@@ -436,7 +455,7 @@ function ImpactMetric({
         if (start === null) start = timestamp;
         const progress = Math.min((timestamp - start) / duration, 1);
         const eased = 1 - Math.pow(1 - progress, 3);
-        setValue(Math.round(eased * target));
+        setValue(eased * target);
 
         if (progress < 1) {
           raf = requestAnimationFrame(tick);
@@ -451,10 +470,15 @@ function ImpactMetric({
     };
   }, [active, target, delayMs]);
 
+  const displayVal =
+    target < 10 && target % 1 !== 0
+      ? value.toFixed(1).replace(".", ",")
+      : Math.round(value).toLocaleString("id-ID");
+
   return (
     <div>
       <p className="font-display text-5xl font-normal leading-none tracking-tight text-brand-lime sm:text-6xl">
-        {value.toLocaleString("id-ID")}
+        {displayVal}
         {suffix}
       </p>
 

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { LoaderCircle, Package, X } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import {
@@ -242,9 +243,9 @@ export function BrandProductModal({
                 </SelectTrigger>
                 <SelectContent>
                   {isLoadingProductions ? (
-                    <div className="flex items-center gap-2 p-3 text-xs text-muted-moss">
-                      <LoaderCircle className="size-4 animate-spin text-brand-forest" />
-                      <span>Memuat data produksi...</span>
+                    <div className="p-3 space-y-2">
+                      <Skeleton className="h-4 w-full rounded-md" />
+                      <Skeleton className="h-4 w-3/4 rounded-md" />
                     </div>
                   ) : productionsList.length === 0 ? (
                     <div className="p-3 text-xs text-muted-moss">

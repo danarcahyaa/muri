@@ -37,6 +37,7 @@ import {
 } from "@/services/brand";
 import type { BrandFulfillmentOrder } from "@/types/brandOrderFulfillment";
 
+import { useDebounce } from "@/hooks/useDebounce";
 import { FulfillmentActionModal } from "./fulfillment/FulfillmentActionModal";
 import { BrandOrderDetailModal } from "./fulfillment/BrandOrderDetailModal";
 import { formatOrderCode, FulfillmentUiAction } from "./fulfillment/FulfillmentOrderCard";
@@ -49,6 +50,7 @@ export default function BrandOrderFulfillmentSection() {
   const [orders, setOrders] = useState<BrandFulfillmentOrder[]>([]);
   const [activeTab, setActiveTab] = useState<FulfillmentFilterTab>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 300);
   const [currentPage, setCurrentPage] = useState(1);
 
   const [selectedModalOrder, setSelectedModalOrder] = useState<BrandFulfillmentOrder | null>(null);
@@ -91,7 +93,7 @@ export default function BrandOrderFulfillmentSection() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, activeTab]);
+  }, [debouncedSearch, activeTab]);
 
   const filteredOrders = useMemo(() => {
     let result = orders;
@@ -108,7 +110,7 @@ export default function BrandOrderFulfillmentSection() {
     }
 
     // Filter by search query
-    const q = searchQuery.trim().toLowerCase();
+    const q = debouncedSearch.trim().toLowerCase();
     if (q) {
       result = result.filter((order) => {
         const orderCode = formatOrderCode(order.orderId).toLowerCase();

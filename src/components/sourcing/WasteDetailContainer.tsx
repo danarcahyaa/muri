@@ -3,7 +3,7 @@
 import { useState, useEffect, type ReactElement } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronRight, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useSavedMaterials } from "@/hooks/useSavedMaterials";
 import type { SourcingWastePostDetailItem } from "@/types/sourcing";
@@ -66,7 +66,23 @@ export function WasteDetailContainer({
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1320px] px-5 py-6 sm:px-6 lg:px-8 lg:py-8 space-y-6 animate-in fade-in duration-300">
+    <div className="mx-auto w-full max-w-[1320px] px-5 py-10 sm:px-6 lg:px-8 lg:py-14 space-y-8 animate-in fade-in duration-300">
+      {/* Canonical Brand Dashboard Header */}
+      <div className="mb-8">
+        <div className="mb-4 flex items-center gap-3 text-brand-emerald">
+          <Leaf className="size-4" strokeWidth={2} />
+          <span className="text-xs font-bold uppercase tracking-tight">
+            Brand Sourcing
+          </span>
+        </div>
+        <h1 className="font-display text-5xl font-medium leading-none tracking-[-0.04em] text-brand-black sm:text-6xl">
+          Detail Material Limbah
+        </h1>
+        <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-moss">
+          Informasi lengkap spesifikasi material kain perca, estimasi dampak ekologis, dan pemesanan bahan baku sirkular.
+        </p>
+      </div>
+
       {/* Top Back Button & Navigation Bar */}
       <div className="flex items-center justify-between gap-4 border-b border-brand-black/10 pb-4">
         <Button

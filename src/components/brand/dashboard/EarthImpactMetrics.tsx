@@ -38,9 +38,9 @@ export function EarthImpactMetrics({ stats, showSkeleton }: EarthImpactMetricsPr
                 <Leaf className="size-3" />
               </div>
             </div>
-            <p className="font-display text-3xl font-medium tracking-tight text-brand-black mt-3 sm:text-4xl">
+            <div className="font-display text-3xl font-medium tracking-tight text-brand-black mt-3 sm:text-4xl">
               {showSkeleton ? <Skeleton className="h-7 w-24" /> : formatWeightKg(carbonSaved)}
-            </p>
+            </div>
           </div>
           <p className="text-[10px] text-muted-moss mt-3">Mengurangi emisi karbon gas rumah kaca global.</p>
         </div>
@@ -54,9 +54,9 @@ export function EarthImpactMetrics({ stats, showSkeleton }: EarthImpactMetricsPr
                 <Droplets className="size-3" />
               </div>
             </div>
-            <p className="font-display text-3xl font-medium tracking-tight text-brand-black mt-3 sm:text-4xl">
+            <div className="font-display text-3xl font-medium tracking-tight text-brand-black mt-3 sm:text-4xl">
               {showSkeleton ? <Skeleton className="h-7 w-24" /> : `${waterSaved.toLocaleString("id-ID")} Liter`}
-            </p>
+            </div>
           </div>
           <p className="text-[10px] text-muted-moss mt-3">Menghemat konsumsi air bersih industri pakaian.</p>
         </div>

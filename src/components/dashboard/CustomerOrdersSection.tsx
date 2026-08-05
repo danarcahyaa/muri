@@ -27,6 +27,7 @@ import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import { StatusBadge, type BadgeVariant } from "@/components/ui/StatusBadge";
 import { TableActionButton } from "@/components/ui/TableActionButton";
 import { Button } from "@/components/ui/Button";
+import { useDebounce } from "@/hooks/useDebounce";
 import { getMyOrders } from "@/services/customer";
 import type { CustomerOrder, CustomerOrderStatus } from "@/types/customerOrder";
 import CustomerOrderDetailModal from "./orders/CustomerOrderDetailModal";
@@ -50,6 +51,7 @@ export default function CustomerOrdersSection() {
 
   // Search, Filter & Pagination states
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 300);
   const [statusFilter, setStatusFilter] = useState<OrderStatusFilter>("all");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -84,7 +86,7 @@ export default function CustomerOrdersSection() {
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
       const orderCode = formatOrderCode(order.id).toLowerCase();
-      const query = searchQuery.trim().toLowerCase();
+      const query = debouncedSearch.trim().toLowerCase();
 
       const matchesSearch =
         !query ||

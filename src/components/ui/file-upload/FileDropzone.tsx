@@ -94,9 +94,8 @@ const FileDropzone = React.forwardRef<FilePickerHandle, FileDropzoneProps>(
           onFilesSelected={onFilesSelected}
         />
 
-        <Button
+        <button
           type="button"
-          variant="outline"
           disabled={disabled}
           aria-label={ariaLabel}
           aria-describedby={describedBy}
@@ -111,19 +110,24 @@ const FileDropzone = React.forwardRef<FilePickerHandle, FileDropzoneProps>(
           onDrop={handleDrop}
           className={cn(
             `
-              h-auto w-full whitespace-normal
-              border-dashed p-0 font-normal
+              group/button inline-flex shrink-0 items-center justify-center
+              box-border rounded-sm border border-dashed border-line-trace
+              bg-transparent text-brand-black outline-none select-none cursor-pointer
+              h-auto w-full whitespace-normal font-normal text-xs
+              transition-[background-color,border-color,color] duration-200
+              hover:border-brand-emerald hover:bg-canvas-warm
 
               data-[dragging=true]:border-brand-emerald
               data-[dragging=true]:bg-brand-emerald/[0.05]
               data-[dragging=true]:ring-2
               data-[dragging=true]:ring-brand-emerald/10
+              disabled:pointer-events-none disabled:opacity-50
             `,
             className,
           )}
         >
           {children}
-        </Button>
+        </button>
       </>
     );
   },

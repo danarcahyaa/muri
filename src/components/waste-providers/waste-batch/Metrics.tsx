@@ -1,5 +1,6 @@
 import { useState, useEffect, type ReactElement } from "react";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { Card } from "@/components/ui/Card";
 import { formatWeightKg } from "@/lib/formatter";
 import { getTotalBatchWeight, getTotalBatchCount } from "@/services/waste-providers/wasteBatchService";
 
@@ -40,41 +41,42 @@ export function WasteBatchMetrics({ providerId }: BatchMetricsProps): ReactEleme
 
   return (
     <div className="grid gap-5 sm:grid-cols-2">
-      <article className="flex min-h-32 flex-col rounded-xl border border-brand-black/15 bg-canvas-pure p-6">
+      <Card className="flex min-h-40 flex-col p-6">
         <p className="text-[11px] font-medium uppercase text-muted-moss">
           Total Jejak
         </p>
-        <div className="mt-auto pt-4">
-          <div className="font-display text-3xl font-bold tracking-tight text-brand-black">
+        <div className="mt-auto pt-6">
+          <div className="font-display text-3xl font-medium tracking-tight text-brand-black">
             {isLoading ? (
               <Skeleton className="h-9 w-20" />
             ) : (
-              `${totalBatches} Batch`
+              `${totalBatches} batch`
             )}
           </div>
-          <p className="mt-2 text-xs text-muted-moss">
+          <p className="mt-3 text-xs text-muted-moss">
             Jumlah total jejak limbah yang telah tercatat.
           </p>
         </div>
-      </article>
+      </Card>
 
-      <article className="flex min-h-32 flex-col rounded-xl border border-brand-black/15 bg-canvas-pure p-6">
+      <Card className="flex min-h-40 flex-col p-6">
         <p className="text-[11px] font-medium uppercase text-muted-moss">
           Total Berat Tercatat
         </p>
-        <div className="mt-auto pt-4">
-          <div className="font-display text-3xl font-bold tracking-tight text-brand-black">
+        <div className="mt-auto pt-6">
+          <div className="font-display text-3xl font-medium tracking-tight text-brand-black">
             {isLoading ? (
               <Skeleton className="h-9 w-28" />
             ) : (
               formatWeightKg(totalWeight)
             )}
           </div>
-          <p className="mt-2 text-xs text-muted-moss">
+          <p className="mt-3 text-xs text-muted-moss">
             Akumulasi berat awal seluruh limbah dari awal.
           </p>
         </div>
-      </article>
+      </Card>
     </div>
   );
 }
+
