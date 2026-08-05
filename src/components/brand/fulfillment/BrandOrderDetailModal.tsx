@@ -25,6 +25,7 @@ import {
 } from "./FulfillmentOrderCard";
 
 import { Button } from "@/components/ui/Button";
+import { StatusBadge, type BadgeVariant } from "@/components/ui/StatusBadge";
 import { OrderProgressBar } from "@/components/ui/OrderProgressBar";
 
 interface BrandOrderDetailModalProps {
@@ -79,11 +80,9 @@ export function BrandOrderDetailModal({
                 <span className="font-display text-lg font-bold text-brand-black">
                   {formatOrderCode(order.orderId)}
                 </span>
-                <span
-                  className={`inline-flex rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide ${statusMeta.className}`}
-                >
+                <StatusBadge variant={statusMeta.variant}>
                   {statusMeta.label}
-                </span>
+                </StatusBadge>
               </div>
               <p className="text-xs text-muted-moss">
                 Pesanan masuk {formatDate(order.orderCreatedAt)}
@@ -341,34 +340,34 @@ function DetailRow({
   );
 }
 
-function getFulfillmentStatusMeta(status: string) {
+function getFulfillmentStatusMeta(status: string): { label: string; variant: BadgeVariant } {
   switch (status) {
     case "complete":
       return {
         label: "Selesai",
-        className: "bg-brand-lime/50 text-brand-forest",
+        variant: "success",
       };
     case "shipped":
       return {
         label: "Dikirim",
-        className: "bg-blue-50 text-blue-700 border border-blue-200",
+        variant: "info",
       };
     case "processing":
       return {
         label: "Diproses",
-        className: "bg-amber-50 text-amber-800 border border-amber-200",
+        variant: "warning",
       };
     case "cancelled":
     case "rejected":
       return {
         label: "Dibatalkan",
-        className: "bg-red-50 text-red-700",
+        variant: "danger",
       };
     case "pending":
     default:
       return {
         label: "Menunggu",
-        className: "bg-brand-emerald/10 text-brand-emerald",
+        variant: "neutral",
       };
   }
 }

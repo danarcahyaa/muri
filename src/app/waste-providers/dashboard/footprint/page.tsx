@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactElement } from "react";
+import { Leaf } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import { WasteBatchMetrics } from "@/components/waste-providers/waste-batch/Metrics";
 import { WasteBatchToolbar } from "@/components/waste-providers/waste-batch/Toolbar";
@@ -35,7 +36,13 @@ export default function WasteFootprintPage(): ReactElement {
     <div className="mx-auto w-full max-w-[1320px] px-5 py-10 sm:px-6 lg:px-8 lg:py-14">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="font-display text-5xl font-medium leading-none tracking-[-0.05em] text-brand-black sm:text-6xl">
+        <div className="mb-4 flex items-center gap-3 text-brand-emerald">
+          <Leaf className="size-4" strokeWidth={2} />
+          <span className="text-xs font-bold uppercase tracking-tight">
+            Dashboard Waste Provider
+          </span>
+        </div>
+        <h1 className="font-display text-5xl font-medium leading-none tracking-[-0.04em] text-brand-black sm:text-6xl">
           Jejak Limbah
         </h1>
         <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-moss">

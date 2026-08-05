@@ -15,6 +15,7 @@ import { WorkshopRegistrationStatus } from "@/enums/enums";
 import { formatWorkshopDate, formatWorkshopTime } from "@/lib/workshop";
 import type { CustomerWorkshopHistoryItem } from "@/types/customerWorkshop";
 import { Button } from "@/components/ui/Button";
+import { StatusBadge, type BadgeVariant } from "@/components/ui/StatusBadge";
 
 interface CustomerWorkshopDetailModalProps {
   item: CustomerWorkshopHistoryItem | null;
@@ -55,11 +56,9 @@ export default function CustomerWorkshopDetailModal({
                 <span className="font-display text-lg font-bold text-brand-black">
                   Detail Workshop
                 </span>
-                <span
-                  className={`inline-flex rounded-full px-2.5 py-1 text-[9px] font-bold uppercase ${statusMeta.className}`}
-                >
+                <StatusBadge variant={statusMeta.variant}>
                   {statusMeta.label}
-                </span>
+                </StatusBadge>
               </div>
               <p className="text-xs text-muted-moss">
                 Terdaftar pada {formatRegistrationDate(item.createdAt)}
@@ -193,23 +192,23 @@ function DetailFactCard({
   );
 }
 
-function getStatusMeta(status: WorkshopRegistrationStatus) {
+function getStatusMeta(status: WorkshopRegistrationStatus): { label: string; variant: BadgeVariant } {
   switch (status) {
     case WorkshopRegistrationStatus.ATTENDED:
       return {
         label: "Sudah Hadir",
-        className: "bg-brand-lime/50 text-brand-forest",
+        variant: "success",
       };
     case WorkshopRegistrationStatus.CANCELLED:
       return {
         label: "Dibatalkan",
-        className: "bg-red-50 text-red-700",
+        variant: "danger",
       };
     case WorkshopRegistrationStatus.REGISTERED:
     default:
       return {
         label: "Terdaftar",
-        className: "bg-brand-emerald/10 text-brand-emerald",
+        variant: "info",
       };
   }
 }

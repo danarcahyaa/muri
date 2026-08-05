@@ -11,16 +11,6 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import { TableActionButton } from "@/components/ui/TableActionButton";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/AlertDialog";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -244,13 +234,6 @@ export function WasteDataTable({
                     : post.status === "sold_out"
                       ? "Terjual"
                       : "Diarsipkan";
-
-                const statusColor =
-                  post.status === "active"
-                    ? "bg-[#D2E7D6] text-brand-forest"
-                    : post.status === "sold_out"
-                      ? "bg-[#FFE8CC] text-[#B05B00]"
-                      : "bg-canvas-warm text-muted-moss";
 
                 return (
                   <TableRow

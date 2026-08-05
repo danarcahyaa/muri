@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import {
   Table,
@@ -264,15 +265,9 @@ export default function CustomerPointsSection() {
 
                         {/* Type */}
                         <TableCell className="py-4">
-                          <span
-                            className={`inline-flex rounded-full px-3 py-1 text-[9px] font-bold uppercase tracking-wide ${
-                              item.type === "earned"
-                                ? "bg-brand-lime/50 text-brand-forest"
-                                : "bg-canvas-warm text-muted-moss"
-                            }`}
-                          >
+                          <StatusBadge variant={item.type === "earned" ? "success" : "neutral"}>
                             {item.type === "earned" ? "Dapat Poin" : "Pakai Poin"}
-                          </span>
+                          </StatusBadge>
                         </TableCell>
 
                         {/* Change Amount */}

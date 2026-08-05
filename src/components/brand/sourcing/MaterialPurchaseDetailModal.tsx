@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { OrderProgressBar } from "@/components/ui/OrderProgressBar";
+import { StatusBadge, type BadgeVariant } from "@/components/ui/StatusBadge";
 import { formatIdr } from "@/lib/productDetail";
 import type { MaterialOrder, MaterialOrderStatus } from "@/types/materialOrder";
 
@@ -54,11 +55,9 @@ export default function MaterialPurchaseDetailModal({
                 <span className="font-display text-lg font-bold text-brand-black">
                   {order.orderCode}
                 </span>
-                <span
-                  className={`inline-flex rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide ${statusMeta.className}`}
-                >
+                <StatusBadge variant={statusMeta.variant}>
                   {statusMeta.label}
-                </span>
+                </StatusBadge>
               </div>
               <p className="text-xs text-muted-moss">
                 Pembelian dibuat pada {formatDate(order.createdAt)}
@@ -205,21 +204,21 @@ function DetailRow({
   );
 }
 
-function getMaterialStatusMeta(status: MaterialOrderStatus) {
+function getMaterialStatusMeta(status: MaterialOrderStatus): { label: string; variant: BadgeVariant } {
   switch (status) {
     case "completed":
-      return { label: "Selesai", className: "bg-brand-lime/50 text-brand-forest" };
+      return { label: "Selesai", variant: "success" };
     case "shipped":
-      return { label: "Dikirim", className: "bg-blue-50 text-blue-700 border border-blue-200" };
+      return { label: "Dikirim", variant: "info" };
     case "processing":
-      return { label: "Diproses", className: "bg-amber-50 text-amber-800 border border-amber-200" };
+      return { label: "Diproses", variant: "warning" };
     case "paid_waiting_verification":
-      return { label: "Menunggu Verifikasi", className: "bg-purple-50 text-purple-700 border border-purple-200" };
+      return { label: "Menunggu Verifikasi", variant: "neutral" };
     case "cancelled":
-      return { label: "Dibatalkan", className: "bg-red-50 text-red-700" };
+      return { label: "Dibatalkan", variant: "danger" };
     case "pending_payment":
     default:
-      return { label: "Menunggu Pembayaran", className: "bg-brand-emerald/10 text-brand-emerald" };
+      return { label: "Menunggu Pembayaran", variant: "warning" };
   }
 }
 

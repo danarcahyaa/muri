@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import { TableActionButton } from "@/components/ui/TableActionButton";
+import { StatusBadge, type BadgeVariant } from "@/components/ui/StatusBadge";
 import {
   Table,
   TableBody,
@@ -142,14 +143,13 @@ export function BrandMaterialPurchasesTable({
                       </span>
                     </TableCell>
 
-                    {/* Status Pesanan */}
                     <TableCell className="py-4">
-                      <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${statusMeta.badgeClass}`}
-                      >
-                        <statusMeta.icon className="size-3" />
-                        {statusMeta.label}
-                      </span>
+                      <StatusBadge variant={statusMeta.variant}>
+                        <span className="inline-flex items-center gap-1">
+                          <statusMeta.icon className="size-3" />
+                          {statusMeta.label}
+                        </span>
+                      </StatusBadge>
                     </TableCell>
 
                     {/* Action: Standard TableActionButton */}
@@ -173,32 +173,32 @@ export function BrandMaterialPurchasesTable({
   );
 }
 
-function getStatusMeta(status: string) {
+function getStatusMeta(status: string): { label: string; variant: BadgeVariant; icon: typeof CheckCircle2 } {
   switch (status) {
     case "completed":
     case "complete":
       return {
         label: "Selesai",
-        badgeClass: "bg-brand-forest/10 text-brand-forest border border-brand-forest/20",
+        variant: "success",
         icon: CheckCircle2,
       };
     case "shipped":
       return {
         label: "Dikirim",
-        badgeClass: "bg-indigo-50 text-indigo-700 border border-indigo-200",
+        variant: "info",
         icon: Truck,
       };
     case "processing":
       return {
         label: "Diproses",
-        badgeClass: "bg-blue-50 text-blue-700 border border-blue-200",
+        variant: "warning",
         icon: Clock,
       };
     case "pending":
     default:
       return {
         label: "Menunggu Konfirmasi",
-        badgeClass: "bg-amber-50 text-amber-800 border border-amber-200",
+        variant: "neutral",
         icon: Clock,
       };
   }

@@ -24,6 +24,7 @@ import type { CustomerOrder, CustomerOrderStatus } from "@/types/customerOrder";
 import type { CustomerOrderLifecycle } from "@/types/customerOrderLifecycle";
 
 import { Button } from "@/components/ui/Button";
+import { StatusBadge, type BadgeVariant } from "@/components/ui/StatusBadge";
 import { OrderProgressBar } from "@/components/ui/OrderProgressBar";
 
 interface CustomerOrderDetailModalProps {
@@ -136,11 +137,9 @@ export default function CustomerOrderDetailModal({
                 <span className="font-display text-lg font-bold text-brand-black">
                   {formatOrderCode(order.id)}
                 </span>
-                <span
-                  className={`inline-flex rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide ${statusMeta.className}`}
-                >
+                <StatusBadge variant={statusMeta.variant}>
                   {statusMeta.label}
-                </span>
+                </StatusBadge>
               </div>
               <p className="text-xs text-muted-moss">
                 Dibuat pada {formatDate(order.createdAt)}
@@ -401,33 +400,33 @@ function DetailRow({
   );
 }
 
-function getOrderStatusMeta(status: CustomerOrderStatus) {
+function getOrderStatusMeta(status: CustomerOrderStatus): { label: string; variant: BadgeVariant } {
   switch (status) {
     case "complete":
       return {
         label: "Selesai",
-        className: "bg-brand-lime/50 text-brand-forest",
+        variant: "success",
       };
     case "shipped":
       return {
         label: "Dikirim",
-        className: "bg-blue-50 text-blue-700 border border-blue-200",
+        variant: "info",
       };
     case "cancelled":
       return {
         label: "Dibatalkan",
-        className: "bg-red-50 text-red-700",
+        variant: "danger",
       };
     case "rejected":
       return {
         label: "Ditolak",
-        className: "bg-orange-50 text-orange-700",
+        variant: "danger",
       };
     case "pending":
     default:
       return {
         label: "Diproses",
-        className: "bg-brand-emerald/10 text-brand-emerald",
+        variant: "warning",
       };
   }
 }

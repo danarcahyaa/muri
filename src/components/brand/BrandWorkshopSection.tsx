@@ -17,6 +17,8 @@ import {
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { TableActionButton } from "@/components/ui/TableActionButton";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import {
   Table,
@@ -249,37 +251,30 @@ export default function BrandWorkshopSection() {
 
                           {/* Status */}
                           <TableCell className="py-4">
-                            <span
-                              className={`inline-flex rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide ${
-                                item.isPublished
-                                  ? "bg-brand-lime/50 text-brand-forest"
-                                  : "bg-canvas-warm text-muted-moss"
-                              }`}
-                            >
+                            <StatusBadge variant={item.isPublished ? "success" : "neutral"}>
                               {item.isPublished ? "Dipublikasi" : "Draft"}
-                            </span>
+                            </StatusBadge>
                           </TableCell>
 
                           {/* Actions */}
                           <TableCell className="py-4 pr-6 text-right sm:pr-8">
                             <div className="flex items-center justify-end gap-2">
-                              <Button
-                                variant="outline"
-                                size="icon-sm"
+                              <TableActionButton
                                 onClick={() => handleViewDetail(item)}
                                 title="Lihat & Edit Detail Workshop"
+                                aria-label="Lihat & Edit Detail Workshop"
                               >
-                                <Edit2 className="size-3.5 text-brand-emerald" />
-                              </Button>
+                                <Edit2 className="size-4 text-brand-emerald" />
+                              </TableActionButton>
 
-                              <Button
-                                variant="outline-destructive"
-                                size="icon-sm"
+                              <TableActionButton
+                                variant="destructive"
                                 onClick={() => handleDeleteClick(item)}
                                 title="Hapus Workshop"
+                                aria-label="Hapus Workshop"
                               >
-                                <Trash2 className="size-3.5" />
-                              </Button>
+                                <Trash2 className="size-4" />
+                              </TableActionButton>
                             </div>
                           </TableCell>
                         </TableRow>

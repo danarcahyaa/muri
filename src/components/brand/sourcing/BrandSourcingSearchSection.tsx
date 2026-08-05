@@ -6,6 +6,7 @@ import {
   Search,
   SlidersHorizontal,
   RotateCcw,
+  Leaf,
   MapPin,
   ChevronLeft,
   ChevronRight,
@@ -275,22 +276,30 @@ export default function BrandSourcingSearchSection() {
 
   return (
     <div className="space-y-8 font-body">
-      {/* Header Title Section */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-brand-black/15 pb-5">
-        <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-brand-black sm:text-3xl">
-            Cari Material Limbah
-          </h1>
-          <p className="mt-1 text-xs text-muted-moss sm:text-sm">
-            Temukan dan sumberi bahan sisa kain terverifikasi langsung dari penyedia limbah terpercaya.
-          </p>
+      {/* Standard full-page header */}
+      <div className="mb-8">
+        <div className="mb-4 flex items-center gap-3 text-brand-emerald">
+          <Leaf className="size-4" strokeWidth={2} />
+          <span className="text-xs font-bold uppercase tracking-tight">
+            Brand Sourcing
+          </span>
         </div>
-
-        {totalItems > 0 && !isLoading && (
-          <div className="shrink-0 text-xs font-medium text-muted-moss bg-canvas-warm px-3 py-1.5 rounded-full border border-brand-black/10">
-            Menampilkan <span className="font-bold text-brand-black">{totalItems}</span> material
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="font-display text-5xl font-medium leading-none tracking-[-0.04em] text-brand-black sm:text-6xl">
+              Cari Material Limbah
+            </h1>
+            <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-moss">
+              Temukan dan sumberi bahan sisa kain terverifikasi langsung dari penyedia limbah terpercaya.
+            </p>
           </div>
-        )}
+
+          {totalItems > 0 && !isLoading && (
+            <div className="shrink-0 text-xs font-medium text-muted-moss bg-canvas-warm px-3 py-1.5 rounded-full border border-brand-black/10">
+              Menampilkan <span className="font-bold text-brand-black">{totalItems}</span> material
+            </div>
+          )}
+        </div>
       </div>
 
       {/* SEARCH & FILTER BAR COMPONENT

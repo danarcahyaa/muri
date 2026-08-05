@@ -24,6 +24,8 @@ import {
 } from "@/components/ui/Table";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { StatusBadge, type BadgeVariant } from "@/components/ui/StatusBadge";
+import { TableActionButton } from "@/components/ui/TableActionButton";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import { WorkshopRegistrationStatus } from "@/enums/enums";
@@ -296,23 +298,22 @@ export default function CustomerWorkshopHistorySection() {
 
                           {/* Status */}
                           <TableCell className="py-4">
-                            <span
-                              className={`inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase ${statusMeta.className}`}
-                            >
+                            <StatusBadge variant={statusMeta.variant}>
                               {statusMeta.label}
-                            </span>
+                            </StatusBadge>
                           </TableCell>
 
                           {/* Actions */}
                           <TableCell className="py-4 pr-6 text-right sm:pr-8">
-                            <Button
-                              variant="outline"
-                              size="icon-sm"
-                              onClick={() => setSelectedItem(item)}
-                              title="Lihat Detail Workshop"
-                            >
-                              <Eye className="size-3.5 text-brand-emerald" />
-                            </Button>
+                            <div className="flex justify-end">
+                              <TableActionButton
+                                onClick={() => setSelectedItem(item)}
+                                title="Lihat Detail Workshop"
+                                aria-label="Lihat Detail Workshop"
+                              >
+                                <Eye className="size-4 text-brand-forest" />
+                              </TableActionButton>
+                            </div>
                           </TableCell>
                         </TableRow>
                       );
@@ -385,23 +386,23 @@ export default function CustomerWorkshopHistorySection() {
   );
 }
 
-function getStatusMeta(status: WorkshopRegistrationStatus) {
+function getStatusMeta(status: WorkshopRegistrationStatus): { label: string; variant: BadgeVariant } {
   switch (status) {
     case WorkshopRegistrationStatus.ATTENDED:
       return {
         label: "Sudah Hadir",
-        className: "bg-brand-lime/50 text-brand-forest",
+        variant: "success",
       };
     case WorkshopRegistrationStatus.CANCELLED:
       return {
         label: "Dibatalkan",
-        className: "bg-red-50 text-red-700",
+        variant: "danger",
       };
     case WorkshopRegistrationStatus.REGISTERED:
     default:
       return {
         label: "Terdaftar",
-        className: "bg-brand-emerald/10 text-brand-emerald",
+        variant: "info",
       };
   }
 }
