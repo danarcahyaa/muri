@@ -176,13 +176,33 @@ export default function ProductTraceabilityCard({
           />
         </div>
 
-        <div className="mt-4 flex items-center justify-between gap-3.5 rounded-2xl border border-brand-forest/15 bg-canvas-warm/60 p-4 shadow-xs transition hover:border-brand-forest/30">
-          <div className="flex items-center gap-3.5 min-w-0">
-            {/* Un-cropped QR container with rounded-lg & generous white padding p-2 */}
+        <div className="mt-4 rounded-2xl border border-brand-forest/15 bg-canvas-warm/60 p-4.5 shadow-xs transition duration-200 hover:border-brand-forest/30">
+          <div className="flex items-center justify-between gap-3 border-b border-brand-forest/10 pb-3">
+            <div className="flex items-center gap-2">
+              <div className="flex size-7 items-center justify-center rounded-lg bg-brand-lime/80 text-brand-forest">
+                <QrCode className="size-4" strokeWidth={2} />
+              </div>
+              <p className="text-xs font-bold text-brand-black tracking-tight">
+                QR Traceability
+              </p>
+            </div>
+
+            <a
+              href={tracingHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-brand-forest px-3 py-1.5 text-xs font-bold text-white shadow-xs transition hover:bg-brand-emerald hover:shadow-sm"
+            >
+              <span>Buka Link</span>
+              <ExternalLink className="size-3" strokeWidth={2.2} />
+            </a>
+          </div>
+
+          <div className="mt-3.5 flex items-center gap-3.5">
             <button
               type="button"
               onClick={() => setQrModalOpen(true)}
-              className="group relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-line-trace bg-white p-2 shadow-xs transition duration-200 hover:scale-105 hover:shadow-md cursor-pointer focus:outline-none"
+              className="group relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line-trace bg-white p-2 shadow-xs transition duration-200 hover:scale-105 hover:border-brand-forest hover:shadow-md cursor-pointer focus:outline-none"
               title="Klik untuk memperbesar QR Code"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -191,41 +211,24 @@ export default function ProductTraceabilityCard({
                 alt={`QR traceability ${sku}`}
                 className="size-full object-contain"
               />
-              <span className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-md">
+              <span className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
                 <Maximize2 className="size-4 text-white" />
               </span>
             </button>
 
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <QrCode className="size-3.5 text-brand-emerald shrink-0" strokeWidth={2} />
-                <p className="text-xs font-bold text-brand-black truncate">
-                  QR Paspor Sirkular
-                </p>
-              </div>
-              <p className="mt-1 text-[11px] leading-relaxed text-muted-moss">
-                Pindai dengan kamera HP atau{" "}
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] leading-relaxed text-muted-moss">
+                Pindai dengan kamera HP Anda, atau{" "}
                 <button
                   type="button"
                   onClick={() => setQrModalOpen(true)}
-                  className="text-brand-forest font-semibold underline hover:text-brand-emerald"
+                  className="font-bold text-brand-forest underline hover:text-brand-emerald"
                 >
-                  klik untuk memperbesar
+                  klik QR untuk memperbesar.
                 </button>
-                .
               </p>
             </div>
           </div>
-
-          <a
-            href={tracingHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-brand-forest px-3.5 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-brand-emerald hover:shadow-sm"
-          >
-            <span>Buka</span>
-            <ExternalLink className="size-3" strokeWidth={2.2} />
-          </a>
         </div>
 
         <TraceabilityQrModal
