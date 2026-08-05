@@ -99,7 +99,7 @@ export default function CustomerPointsSection() {
     return filteredLedger.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   }, [filteredLedger, startIndex]);
 
-  const totalCoins = summary?.totalPoints ?? 145;
+  const totalCoins = summary?.totalPoints ?? 0;
 
   return (
     <section className="mt-8 font-body">
