@@ -99,6 +99,13 @@ export function LocationPicker({
   const currentLongitude = value?.longitude ?? 0;
   const currentDetail = value?.address_detail || "";
 
+  // Keep search query input in sync with value.formatted_address
+  useEffect(() => {
+    if (value?.formatted_address !== undefined && !isSelectingRef.current) {
+      setSearchQuery(value.formatted_address);
+    }
+  }, [value?.formatted_address]);
+
   // Debounced search logic (400ms)
   useEffect(() => {
     if (isSelectingRef.current) {
@@ -247,7 +254,7 @@ export function LocationPicker({
 
   const handleDetailChange = (text: string) => {
     const updated: AddressJSONB = {
-      formatted_address: currentFormattedAddress || "Lokasi Penjemputan / Pengiriman",
+      formatted_address: currentFormattedAddress,
       latitude: currentLatitude,
       longitude: currentLongitude,
       address_detail: text,

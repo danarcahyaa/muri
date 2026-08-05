@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { ComponentType } from "react";
 import {
   Check,
@@ -8,6 +8,7 @@ import {
   Droplets,
   Factory,
   Leaf,
+  Loader2,
   MapPin,
   Package,
   QrCode,
@@ -18,6 +19,7 @@ import {
 
 import { Card, CardContent } from "@/components/ui/Card";
 import { Separator } from "@/components/ui/Separator";
+import { Skeleton } from "@/components/ui/Skeleton";
 import {
   Sheet,
   SheetContent,
@@ -25,7 +27,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/Sheet";
-import { formatDecimal } from "@/lib/productDetail";
+import { buildTraceabilityHref, formatDecimal } from "@/lib/productDetail";
+import {
+  getCustomerTraceabilityData,
+  type CustomerTraceabilityData,
+} from "@/services/customer";
 
 interface ProductTraceabilitySidebarProps {
   open: boolean;
@@ -59,42 +65,73 @@ export default function ProductTraceabilitySidebar({
   waterSavedLiter,
 }: ProductTraceabilitySidebarProps) {
   const [activeStep, setActiveStep] = useState(3);
+  const [realData, setRealData] = useState<CustomerTraceabilityData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const carbonSavedText = `${formatDecimal(carbonSavedKg)} kg CO₂e`;
-  const waterSavedText = `${formatDecimal(waterSavedLiter, 0)} liter`;
+  const fetchTraceability = useCallback(async () => {
+    if (!open) return;
+    setIsLoading(true);
+    const res = await getCustomerTraceabilityData({ sku, productionId });
+    if (res.success && res.data) {
+      setRealData(res.data);
+    }
+    setIsLoading(false);
+  }, [open, productionId, sku]);
+
+  useEffect(() => {
+    void fetchTraceability();
+  }, [fetchTraceability]);
+
+  const activeCarbon = realData?.carbonSavedKg ?? carbonSavedKg;
+  const activeWater = realData?.waterSavedLiter ?? waterSavedLiter;
+  const activeBrand = realData?.brandName ?? brandName;
+  const activeQr = realData?.qrCodeUrl ?? qrCodeUrl;
+
+  const carbonSavedText = `${formatDecimal(activeCarbon)} kg CO₂e`;
+  const waterSavedText = `${formatDecimal(activeWater, 0)} liter`;
   const evidenceCode = productionId.slice(0, 8) || "MURI";
 
-  const steps: TraceabilityStep[] = [
-    {
-      number: 1,
-      label: "Asal Limbah",
-      title: "PT Tekstil Jaya Limbah",
-      meta: "Bandung, Jawa Barat",
-      summary: "Bahan baku dan batch asal telah dicatat pada paspor digital.",
-      detail:
-        "Bahan baku denim dan cotton deadstock diperoleh dari sisa potongan pabrik yang telah melalui verifikasi berat dan kualitas fisik oleh MURI.",
-      icon: Package,
-    },
-    {
-      number: 2,
-      label: "Pengolahan Brand",
-      title: brandName,
-      meta: "Studio crafting sirkular",
-      summary: "Tahap produksi terhubung dengan identitas produksi produk.",
-      detail: `${brandName} mengolah material dengan proses pemotongan yang tercatat sehingga alur produksi dapat ditelusuri kembali.`,
-      icon: Scissors,
-    },
-    {
-      number: 3,
-      label: "Dampak Verified",
-      title: "Dampak sirkular terukur",
-      meta: "Audit MURI selesai",
-      summary: `${carbonSavedText} karbon dan ${waterSavedText} air dihemat.`,
-      detail:
-        "Data dampak lingkungan tersimpan sebagai hasil akhir perjalanan bahan baku dan verifikasi anti-greenwashing produk.",
-      icon: ShieldCheck,
-    },
-  ];
+  const steps: TraceabilityStep[] = realData?.steps
+    ? realData.steps.map((s) => ({
+        number: s.number,
+        label: s.label,
+        title: s.title,
+        meta: s.meta,
+        summary: s.summary,
+        detail: s.detail,
+        icon: s.iconType === "package" ? Package : s.iconType === "scissors" ? Scissors : ShieldCheck,
+      }))
+    : [
+        {
+          number: 1,
+          label: "Asal Limbah",
+          title: "PT Tekstil Jaya Limbah",
+          meta: "Bandung, Jawa Barat",
+          summary: "Bahan baku dan batch asal telah dicatat pada paspor digital.",
+          detail:
+            "Bahan baku denim dan cotton deadstock diperoleh dari sisa potongan pabrik yang telah melalui verifikasi berat dan kualitas fisik oleh MURI.",
+          icon: Package,
+        },
+        {
+          number: 2,
+          label: "Pengolahan Brand",
+          title: activeBrand,
+          meta: "Studio crafting sirkular",
+          summary: "Tahap produksi terhubung dengan identitas produksi produk.",
+          detail: `${activeBrand} mengolah material dengan proses pemotongan yang tercatat sehingga alur produksi dapat ditelusuri kembali.`,
+          icon: Scissors,
+        },
+        {
+          number: 3,
+          label: "Dampak Verified",
+          title: "Dampak sirkular terukur",
+          meta: "Audit MURI selesai",
+          summary: `${carbonSavedText} karbon dan ${waterSavedText} air dihemat.`,
+          detail:
+            "Data dampak lingkungan tersimpan sebagai hasil akhir perjalanan bahan baku dan verifikasi anti-greenwashing produk.",
+          icon: ShieldCheck,
+        },
+      ];
 
   const selectedStep =
     steps.find((step) => step.number === activeStep) ?? steps[2];

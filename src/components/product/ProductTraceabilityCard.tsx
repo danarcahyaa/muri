@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import type { ComponentType } from "react";
 import {
@@ -21,6 +21,10 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Separator } from "@/components/ui/Separator";
 import { buildTraceabilityHref, formatDecimal } from "@/lib/productDetail";
+import {
+  getCustomerTraceabilityData,
+  type CustomerTraceabilityData,
+} from "@/services/customer";
 
 interface ProductTraceabilityCardProps {
   sku: string;
@@ -49,39 +53,64 @@ export default function ProductTraceabilityCard({
   waterSavedLiter,
 }: ProductTraceabilityCardProps) {
   const [activeStep, setActiveStep] = useState(3);
+  const [realData, setRealData] = useState<CustomerTraceabilityData | null>(null);
 
-  const carbonSavedText = `${formatDecimal(carbonSavedKg)} kg CO₂e`;
-  const waterSavedText = `${formatDecimal(waterSavedLiter, 0)} liter`;
+  useEffect(() => {
+    async function load() {
+      const res = await getCustomerTraceabilityData({ sku, productionId });
+      if (res.success && res.data) {
+        setRealData(res.data);
+      }
+    }
+    void load();
+  }, [sku, productionId]);
+
+  const activeCarbon = realData?.carbonSavedKg ?? carbonSavedKg;
+  const activeWater = realData?.waterSavedLiter ?? waterSavedLiter;
+  const activeBrand = realData?.brandName ?? brandName;
+  const activeQr = realData?.qrCodeUrl ?? qrCodeUrl;
+
+  const carbonSavedText = `${formatDecimal(activeCarbon)} kg CO₂e`;
+  const waterSavedText = `${formatDecimal(activeWater, 0)} liter`;
   const evidenceCode = productionId.slice(0, 8) || "MURI";
 
-  const steps: TraceabilityStep[] = [
-    {
-      number: 1,
-      label: "Asal Bahan",
-      title: "Sumber material tercatat",
-      summary: "Dokumen asal bahan baku telah ditautkan ke paspor digital MURI.",
-      detail:
-        "Identitas sumber dan batch bahan baku tersimpan sebagai bagian dari bukti traceability produk.",
-      icon: PackageCheck,
-    },
-    {
-      number: 2,
-      label: "Pengolahan",
-      title: brandName,
-      summary: "Proses pengolahan brand tercatat pada ID produksi produk.",
-      detail: `Tahap produksi oleh ${brandName} terhubung dengan identitas produksi sehingga alurnya dapat ditelusuri kembali.`,
-      icon: Scissors,
-    },
-    {
-      number: 3,
-      label: "Dampak Verified",
-      title: "Dampak sirkular terukur",
-      summary: `${carbonSavedText} karbon dan ${waterSavedText} air dihemat.`,
-      detail:
-        "Data dampak lingkungan tercatat sebagai hasil akhir perjalanan bahan baku dan verifikasi produk.",
-      icon: ShieldCheck,
-    },
-  ];
+  const steps: TraceabilityStep[] = realData?.steps
+    ? realData.steps.map((s) => ({
+        number: s.number,
+        label: s.label,
+        title: s.title,
+        summary: s.summary,
+        detail: s.detail,
+        icon: s.iconType === "package" ? PackageCheck : s.iconType === "scissors" ? Scissors : ShieldCheck,
+      }))
+    : [
+        {
+          number: 1,
+          label: "Asal Bahan",
+          title: "Sumber material tercatat",
+          summary: "Dokumen asal bahan baku telah ditautkan ke paspor digital MURI.",
+          detail:
+            "Identitas sumber dan batch bahan baku tersimpan sebagai bagian dari bukti traceability produk.",
+          icon: PackageCheck,
+        },
+        {
+          number: 2,
+          label: "Pengolahan",
+          title: activeBrand,
+          summary: "Proses pengolahan brand tercatat pada ID produksi produk.",
+          detail: `Tahap produksi oleh ${activeBrand} terhubung dengan identitas produksi sehingga alurnya dapat ditelusuri kembali.`,
+          icon: Scissors,
+        },
+        {
+          number: 3,
+          label: "Dampak Verified",
+          title: "Dampak sirkular terukur",
+          summary: `${carbonSavedText} karbon dan ${waterSavedText} air dihemat.`,
+          detail:
+            "Data dampak lingkungan tercatat sebagai hasil akhir perjalanan bahan baku dan verifikasi produk.",
+          icon: ShieldCheck,
+        },
+      ];
 
   const selectedStep =
     steps.find((step) => step.number === activeStep) ?? steps[2];

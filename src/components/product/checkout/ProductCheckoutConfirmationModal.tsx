@@ -1,5 +1,7 @@
 "use client";
 
+
+
 import { Coins, QrCode } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/Alert";

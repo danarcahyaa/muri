@@ -482,22 +482,12 @@ export function getSecureCheckoutErrorMessage(
 }
 
 function getAvailablePaymentMethods(
-  option:
+  _option:
     Database["public"]["Enums"]["product_payment_option"],
 ): CustomerCheckoutPaymentMethod[] {
-  switch (option) {
-    case "idr":
-      return ["qris"];
-
-    case "coin":
-      return ["coin"];
-
-    case "idr_or_coin":
-      return ["qris", "coin"];
-
-    default:
-      return [];
-  }
+  // MURI Rule: Coin is exclusively reserved for Workshop registrations (if not free).
+  // Product purchases must strictly use QRIS (IDR).
+  return ["qris"];
 }
 
 function buildCheckoutReward({
@@ -667,10 +657,7 @@ function validateCheckoutInput(
     return "SHIPPING_ADDRESS_TOO_LONG";
   }
 
-  if (
-    input.paymentMethod !== "qris" &&
-    input.paymentMethod !== "coin"
-  ) {
+  if (input.paymentMethod !== "qris") {
     return "INVALID_PAYMENT_METHOD";
   }
 
